@@ -386,7 +386,66 @@ function toggle(el){
   el.querySelector('.hint').textContent=body.classList.contains('open')?'▲ collapse':'▼ expand';
 }
 
+// ── GSM PROFIT BREAKDOWN (W603 + W784 only) ─────────────────────────────────
+if(repId==='W603'||repId==='W784'){
+  const collByRep={};
+  D.monthly.forEach(r=>{collByRep[r.rep_id]=(collByRep[r.rep_id]||0)+(r.collections||0);});
+  let ptGross=0,ptCogs=0,ptComm=0,ptBonus=0;
+  let rowsHtml='';
+  D.ranked.forEach(rid=>{
+    const r=D.roster[rid];
+    const y=D.ytd[rid]||{};
+    const c=D.comm_ytd[rid]||0;
+    const bon=D.bonus_ytd&&D.bonus_ytd[rid]!=null?D.bonus_ytd[rid]:null;
+    const gross=(y.sales||0),cogs=(y.cogs||0);
+    const grossP=gross-cogs;
+    const netP=gross-cogs-c-(bon||0);
+    ptGross+=gross;ptCogs+=cogs;ptComm+=c;ptBonus+=(bon||0);
+    const isMe=rid===repId;
+    rowsHtml+=`<tr style="${isMe?'background:#1a2a1a;outline:1px solid #4caf7d':''}">
+      <td style="text-align:left;font-weight:${isMe?900:600};color:${isMe?'#f5a623':'#e8eaf0'}">${r.name}${isMe?' ◀ YOU':''}</td>
+      <td>${fmt$(gross)}</td>
+      <td>${fmt$(cogs)}</td>
+      <td style="color:#4caf7d">${fmt$(grossP)}</td>
+      <td style="color:#4caf7d">${fmt$(c)}</td>
+      <td style="color:#f5a623">${bon!=null?fmt$(bon):'<span style="color:#5a6375;font-size:11px">TBD</span>'}</td>
+      <td style="color:#4caf7d;font-weight:800">${fmt$(netP)}</td>
+    </tr>`;
+  });
+  const ptGrossP=ptGross-ptCogs;
+  const ptNetP=ptGross-ptCogs-ptComm-ptBonus;
+  rowsHtml+=`<tr style="background:#0d1117;border-top:2px solid #4caf7d;font-weight:900">
+    <td style="text-align:left;color:#f5a623">OFFICE TOTAL</td>
+    <td>${fmt$(ptGross)}</td><td>${fmt$(ptCogs)}</td>
+    <td style="color:#4caf7d">${fmt$(ptGrossP)}</td>
+    <td style="color:#4caf7d">${fmt$(ptComm)}</td>
+    <td style="color:#f5a623">${ptBonus>0?fmt$(ptBonus):'<span style="color:#5a6375;font-size:11px">TBD</span>'}</td>
+    <td style="color:#4caf7d;font-size:16px">${fmt$(ptNetP)}</td>
+  </tr>`;
+  document.getElementById('gsm-section').innerHTML=`
+    <div style="margin-top:40px;padding-top:24px;border-top:1px solid #2a3040">
+      <div style="font-size:11px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px">🔒 GSM VIEW — OFFICE PROFIT BREAKDOWN</div>
+      <div style="font-size:10px;color:#5a6375;margin-bottom:14px">Visible to GSM only &nbsp;|&nbsp; Net Profit = Gross Sales − COGS − Commission − Bonus</div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:#0d1117">
+          <th style="text-align:left;padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">Rep</th>
+          <th style="padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">Gross Sales</th>
+          <th style="padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">COGS</th>
+          <th style="padding:8px 10px;color:#4caf7d;font-size:10px;text-transform:uppercase">Gross Profit</th>
+          <th style="padding:8px 10px;color:#4caf7d;font-size:10px;text-transform:uppercase">Commission</th>
+          <th style="padding:8px 10px;color:#f5a623;font-size:10px;text-transform:uppercase">Bonus</th>
+          <th style="padding:8px 10px;color:#4caf7d;font-size:10px;text-transform:uppercase;font-weight:900">Net Profit*</th>
+        </tr></thead>
+        <tbody style="font-size:13px">${rowsHtml}</tbody>
+      </table>
+      </div>
+      <div style="font-size:10px;color:#5a6375;margin-top:8px">* Bonus TBD = submitted by GSM after month end closes</div>
+    </div>`;
+}
+
 renderDailyMsg(repId);
 </script>
+<div id="gsm-section"></div>
 </body>
 </html>
