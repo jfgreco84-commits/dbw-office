@@ -386,8 +386,146 @@ function toggle(el){
   el.querySelector('.hint').textContent=body.classList.contains('open')?'▲ collapse':'▼ expand';
 }
 
-// ── GSM PROFIT BREAKDOWN (W603 + W784 only) ─────────────────────────────────
+// ── GSM EARNINGS + PACE + PROFIT BREAKDOWN ──────────────────────────────────
 if(repId==='W603'||repId==='W784'){
+  // ── CONFIG ──────────────────────────────────────────────────────────────────
+  const SAL_PER_CHECK=3350, GUAR_PER_CHECK=1350, PP_TOTAL=26;
+  const DBW_DAYS_ELAPSED=85, DBW_DAYS_TOTAL=253;
+  const Q_LOW=1250000, Q_LOW_BONUS=9000, Q_HIGH=1500000, Q_HIGH_BONUS=14000;
+  const ppElapsed=D.pay_periods.length||9;
+  const myComm=D.comm_ytd[repId]||0;
+  const myIndivBonus=D.bonus_ytd&&D.bonus_ytd[repId]!=null?D.bonus_ytd[repId]:null;
+
+  // ── QUARTERLY OFFICE NETS ────────────────────────────────────────────────────
+  let q1Net=0,q2Net=0;
+  D.monthly.forEach(r=>{
+    if([1,2,3].includes(r.month))q1Net+=(r.net_sales||0);
+    if([4,5,6].includes(r.month))q2Net+=(r.net_sales||0);
+  });
+  const q1Bonus=q1Net>=Q_LOW?(q1Net>=Q_HIGH?Q_HIGH_BONUS:Q_LOW_BONUS):0;
+  const q1Done=true;
+  const qEarned=q1Bonus;
+
+  // ── PACE HELPERS ─────────────────────────────────────────────────────────────
+  const paceEOY=(val,days)=>days>0?(val/days)*DBW_DAYS_TOTAL:0;
+  const paceEOYpp=(val,pp)=>pp>0?(val/pp)*PP_TOTAL:0;
+  const salesPaced=paceEOY(netSales,DBW_DAYS_ELAPSED);
+  const commPaced=paceEOYpp(myComm,ppElapsed);
+
+  function paceBar(label,current,paced,barColor){
+    const yearPct=Math.round((DBW_DAYS_ELAPSED/DBW_DAYS_TOTAL)*100);
+    const valPct=paced>0?Math.min(Math.round((current/paced)*100),100):0;
+    const ahead=current/paced>=DBW_DAYS_ELAPSED/DBW_DAYS_TOTAL;
+    const status=ahead?'▲ AHEAD OF PACE':'▼ BEHIND PACE';
+    const sc=ahead?'#4caf7d':'#f5a623';
+    return '<div style="margin-bottom:16px">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
+        '<span style="font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">'+label+'</span>'+
+        '<span style="font-size:11px;color:'+sc+';font-weight:700">'+status+' | Proj EOY: '+fmt$(paced)+'</span>'+
+      '</div>'+
+      '<div style="position:relative;background:#1a2030;border-radius:4px;height:10px">'+
+        '<div style="background:'+barColor+';width:'+valPct+'%;height:100%;border-radius:4px"></div>'+
+        '<div style="position:absolute;top:-3px;left:'+yearPct+'%;width:2px;height:16px;background:#ffffff33;border-radius:1px"></div>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;margin-top:3px">'+
+        '<span style="font-size:10px;color:#5a6375">YTD: '+fmt$(current)+' ('+valPct+'% of EOY pace)</span>'+
+        '<span style="font-size:10px;color:#5a6375">Year: '+yearPct+'% done</span>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // ── QUARTERLY BONUS CARDS ────────────────────────────────────────────────────
+  const quarters=[
+    {q:'Q1',net:q1Net,bonus:q1Bonus,done:true},
+    {q:'Q2',net:q2Net,bonus:null,done:false},
+    {q:'Q3',net:null,bonus:null,done:false},
+    {q:'Q4',net:null,bonus:null,done:false},
+  ];
+  const qCardsHtml=quarters.map(q=>{
+    if(q.done){
+      return '<div style="background:#1a2a1a;border:1px solid #2a4a2a;border-radius:8px;padding:12px;text-align:center">'+
+        '<div style="font-size:10px;color:#4caf7d;font-weight:700;text-transform:uppercase;letter-spacing:1px">'+q.q+' ✓ EARNED</div>'+
+        '<div style="font-size:22px;font-weight:900;color:#4caf7d;margin:4px 0">'+fmt$(q.bonus)+'</div>'+
+        '<div style="font-size:10px;color:#5a6375">Office: '+fmt$(q.net)+'</div>'+
+      '</div>';
+    }
+    const pct=q.net&&q.net>0?Math.min(Math.round((q.net/Q_LOW)*100),100):0;
+    const toLow=q.net&&q.net>0?Math.max(0,Q_LOW-q.net):null;
+    const toHigh=q.net&&q.net>0?Math.max(0,Q_HIGH-q.net):null;
+    const inProg=q.q==='Q2'&&q.net>0;
+    return '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
+      '<div style="font-size:10px;color:#8892a4;font-weight:700;text-transform:uppercase;letter-spacing:1px">'+q.q+(inProg?' IN PROGRESS':' UPCOMING')+'</div>'+
+      (inProg?
+        '<div style="font-size:16px;font-weight:800;color:#f5a623;margin:4px 0">'+fmt$(q.net)+'</div>'+
+        '<div style="background:#1a2030;border-radius:3px;height:5px;margin:6px 0;overflow:hidden"><div style="background:#f5a623;width:'+pct+'%;height:100%;border-radius:3px"></div></div>'+
+        '<div style="font-size:10px;color:#5a6375">Need '+fmt$(toLow)+' more for +$9K | '+fmt$(toHigh)+' for +$14K</div>'
+      :
+        '<div style="font-size:13px;font-weight:700;color:#3a4255;margin:8px 0">TBD</div>'+
+        '<div style="font-size:10px;color:#3a4255">+$9K at $1.25M | +$14K at $1.5M</div>'
+      )+
+    '</div>';
+  }).join('');
+
+  // ── MY PERSONAL INCOME CARDS ─────────────────────────────────────────────────
+  const myPersonalHtml=
+    '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
+      '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Commission YTD</div>'+
+      '<div style="font-size:20px;font-weight:900;color:#4caf7d;margin:4px 0">'+fmt$(myComm)+'</div>'+
+      '<div style="font-size:10px;color:#5a6375">Proj EOY: '+fmt$(commPaced)+'</div>'+
+    '</div>'+
+    '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
+      '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Indiv Sales Bonus YTD</div>'+
+      '<div style="font-size:20px;font-weight:900;color:'+( myIndivBonus!=null?'#4caf7d':'#3a4255')+';margin:4px 0">'+( myIndivBonus!=null?fmt$(myIndivBonus):'TBD')+'</div>'+
+      '<div style="font-size:10px;color:#5a6375">Submitted after month end</div>'+
+    '</div>';
+
+  // ── W784-ONLY: GUARANTEED INCOME ─────────────────────────────────────────────
+  const salYTD=ppElapsed*SAL_PER_CHECK, guarYTD=ppElapsed*GUAR_PER_CHECK;
+  const salEOY=PP_TOTAL*SAL_PER_CHECK, guarEOY=PP_TOTAL*GUAR_PER_CHECK;
+  const guarHtml=repId==='W784'?
+    '<div style="margin-bottom:20px">'+
+      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">📋 Guaranteed Income</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px">'+
+        '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
+          '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Salary YTD</div>'+
+          '<div style="font-size:20px;font-weight:900;color:#f5a623;margin:4px 0">'+fmt$(salYTD)+'</div>'+
+          '<div style="font-size:10px;color:#5a6375">'+ppElapsed+' checks × $3,350 | EOY: '+fmt$(salEOY)+'</div>'+
+        '</div>'+
+        '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
+          '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Guar. Bonus YTD</div>'+
+          '<div style="font-size:20px;font-weight:900;color:#f5a623;margin:4px 0">'+fmt$(guarYTD)+'</div>'+
+          '<div style="font-size:10px;color:#5a6375">'+ppElapsed+' checks × $1,350 | EOY: '+fmt$(guarEOY)+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  :'';
+
+  // ── PROJECTED TOTALS ─────────────────────────────────────────────────────────
+  const qBonusProjected=Q_LOW_BONUS*4;
+  const totalYTD=(repId==='W784'?salYTD+guarYTD:0)+qEarned+myComm+(myIndivBonus||0);
+  const totalEOY=(repId==='W784'?salEOY+guarEOY:0)+qBonusProjected+commPaced+(myIndivBonus||0);
+  const totalPacePct=totalEOY>0?Math.min(Math.round((totalYTD/totalEOY)*100),100):0;
+  const yearPctNum=Math.round((DBW_DAYS_ELAPSED/DBW_DAYS_TOTAL)*100);
+  const totalAhead=totalYTD/totalEOY>=DBW_DAYS_ELAPSED/DBW_DAYS_TOTAL;
+
+  const projHtml=
+    '<div style="background:#0d1117;border:2px solid #4caf7d;border-radius:10px;padding:16px;text-align:center;margin-top:16px">'+
+      '<div style="font-size:10px;color:#4caf7d;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">🎯 Projected 2026 Total Earnings</div>'+
+      '<div style="font-size:36px;font-weight:900;color:#4caf7d">'+fmt$(totalEOY)+'</div>'+
+      '<div style="font-size:11px;color:#5a6375;margin-top:4px">'+
+        (repId==='W784'?'Salary $'+salEOY.toLocaleString()+' + Guar Bonus $'+guarEOY.toLocaleString()+' + ':'')+
+        'Q Bonuses $'+qBonusProjected.toLocaleString()+' (4×low) + Comm $'+Math.round(commPaced).toLocaleString()+
+      '</div>'+
+      '<div style="margin-top:12px;background:#1a2030;border-radius:4px;height:10px">'+
+        '<div style="background:#4caf7d;width:'+totalPacePct+'%;height:100%;border-radius:4px"></div>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;margin-top:4px">'+
+        '<span style="font-size:10px;color:#5a6375">YTD: '+fmt$(totalYTD)+' ('+totalPacePct+'%)</span>'+
+        '<span style="font-size:10px;color:'+(totalAhead?'#4caf7d':'#f5a623')+'">'+( totalAhead?'▲ AHEAD':'▼ BEHIND')+' | Year '+yearPctNum+'% done</span>'+
+      '</div>'+
+    '</div>';
+
+  // ── OFFICE PROFIT TABLE ───────────────────────────────────────────────────────
   const collByRep={};
   D.monthly.forEach(r=>{collByRep[r.rep_id]=(collByRep[r.rep_id]||0)+(r.collections||0);});
   let ptGross=0,ptCogs=0,ptComm=0,ptBonus=0;
@@ -398,52 +536,61 @@ if(repId==='W603'||repId==='W784'){
     const c=D.comm_ytd[rid]||0;
     const bon=D.bonus_ytd&&D.bonus_ytd[rid]!=null?D.bonus_ytd[rid]:null;
     const gross=(y.sales||0),cogs=(y.cogs||0);
-    const grossP=gross-cogs;
-    const netP=gross-cogs-c-(bon||0);
+    const grossP=gross-cogs, netP=gross-cogs-c-(bon||0);
     ptGross+=gross;ptCogs+=cogs;ptComm+=c;ptBonus+=(bon||0);
     const isMe=rid===repId;
-    rowsHtml+=`<tr style="${isMe?'background:#1a2a1a;outline:1px solid #4caf7d':''}">
-      <td style="text-align:left;font-weight:${isMe?900:600};color:${isMe?'#f5a623':'#e8eaf0'}">${r.name}${isMe?' ◀ YOU':''}</td>
-      <td>${fmt$(gross)}</td>
-      <td>${fmt$(cogs)}</td>
-      <td style="color:#4caf7d">${fmt$(grossP)}</td>
-      <td style="color:#4caf7d">${fmt$(c)}</td>
-      <td style="color:#f5a623">${bon!=null?fmt$(bon):'<span style="color:#5a6375;font-size:11px">TBD</span>'}</td>
-      <td style="color:#4caf7d;font-weight:800">${fmt$(netP)}</td>
-    </tr>`;
+    rowsHtml+='<tr style="'+(isMe?'background:#1a2a1a;outline:1px solid #4caf7d;':'')+'">'  +
+      '<td style="text-align:left;font-weight:'+(isMe?900:600)+';color:'+(isMe?'#f5a623':'#e8eaf0')+'">'+r.name+(isMe?' ◀ YOU':'')+'</td>'+
+      '<td>'+fmt$(gross)+'</td><td>'+fmt$(cogs)+'</td>'+
+      '<td style="color:#4caf7d">'+fmt$(grossP)+'</td>'+
+      '<td style="color:#4caf7d">'+fmt$(c)+'</td>'+
+      '<td style="color:#f5a623">'+(bon!=null?fmt$(bon):'<span style="color:#5a6375;font-size:11px">TBD</span>')+'</td>'+
+      '<td style="color:#4caf7d;font-weight:800">'+fmt$(netP)+'</td>'+
+    '</tr>';
   });
-  const ptGrossP=ptGross-ptCogs;
   const ptNetP=ptGross-ptCogs-ptComm-ptBonus;
-  rowsHtml+=`<tr style="background:#0d1117;border-top:2px solid #4caf7d;font-weight:900">
-    <td style="text-align:left;color:#f5a623">OFFICE TOTAL</td>
-    <td>${fmt$(ptGross)}</td><td>${fmt$(ptCogs)}</td>
-    <td style="color:#4caf7d">${fmt$(ptGrossP)}</td>
-    <td style="color:#4caf7d">${fmt$(ptComm)}</td>
-    <td style="color:#f5a623">${ptBonus>0?fmt$(ptBonus):'<span style="color:#5a6375;font-size:11px">TBD</span>'}</td>
-    <td style="color:#4caf7d;font-size:16px">${fmt$(ptNetP)}</td>
-  </tr>`;
-  document.getElementById('gsm-section').innerHTML=`
-    <div style="margin-top:40px;padding-top:24px;border-top:1px solid #2a3040">
-      <div style="font-size:11px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px">🔒 GSM VIEW — OFFICE PROFIT BREAKDOWN</div>
-      <div style="font-size:10px;color:#5a6375;margin-bottom:14px">Visible to GSM only &nbsp;|&nbsp; Net Profit = Gross Sales − COGS − Commission − Bonus</div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-      <table style="width:100%;border-collapse:collapse">
-        <thead><tr style="background:#0d1117">
-          <th style="text-align:left;padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">Rep</th>
-          <th style="padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">Gross Sales</th>
-          <th style="padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">COGS</th>
-          <th style="padding:8px 10px;color:#4caf7d;font-size:10px;text-transform:uppercase">Gross Profit</th>
-          <th style="padding:8px 10px;color:#4caf7d;font-size:10px;text-transform:uppercase">Commission</th>
-          <th style="padding:8px 10px;color:#f5a623;font-size:10px;text-transform:uppercase">Bonus</th>
-          <th style="padding:8px 10px;color:#4caf7d;font-size:10px;text-transform:uppercase;font-weight:900">Net Profit*</th>
-        </tr></thead>
-        <tbody style="font-size:13px">${rowsHtml}</tbody>
-      </table>
-      </div>
-      <div style="font-size:10px;color:#5a6375;margin-top:8px">* Bonus TBD = submitted by GSM after month end closes</div>
-    </div>`;
-}
+  rowsHtml+='<tr style="background:#0d1117;border-top:2px solid #4caf7d;font-weight:900">'+
+    '<td style="text-align:left;color:#f5a623">OFFICE TOTAL</td>'+
+    '<td>'+fmt$(ptGross)+'</td><td>'+fmt$(ptCogs)+'</td>'+
+    '<td style="color:#4caf7d">'+fmt$(ptGross-ptCogs)+'</td>'+
+    '<td style="color:#4caf7d">'+fmt$(ptComm)+'</td>'+
+    '<td style="color:#f5a623">'+(ptBonus>0?fmt$(ptBonus):'<span style="color:#5a6375;font-size:11px">TBD</span>')+'</td>'+
+    '<td style="color:#4caf7d;font-size:16px">'+fmt$(ptNetP)+'</td>'+
+  '</tr>';
 
+  // ── INJECT ───────────────────────────────────────────────────────────────────
+  document.getElementById('gsm-section').innerHTML=
+    '<div style="margin-top:40px;padding-top:24px;border-top:1px solid #2a3040">'+
+      '<div style="font-size:11px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px">🔒 MY 2026 EARNINGS — GSM VIEW</div>'+
+      guarHtml+
+      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">🏆 Quarterly Manager Bonuses</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">'+qCardsHtml+'</div>'+
+      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">💰 My Personal Income</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">'+myPersonalHtml+'</div>'+
+      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">📈 Pace to End of Year</div>'+
+      paceBar('YTD Net Sales Volume',netSales,salesPaced,'#f5a623')+
+      paceBar('YTD Commission',myComm,commPaced,'#4caf7d')+
+      projHtml+
+      '<div style="margin-top:32px;padding-top:20px;border-top:1px solid #2a3040">'+
+        '<div style="font-size:11px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px">📊 Office Profit Breakdown — All Reps</div>'+
+        '<div style="font-size:10px;color:#5a6375;margin-bottom:12px">Gross Sales − COGS − Commission − Bonus = Net Profit</div>'+
+        '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'+
+        '<table style="width:100%;border-collapse:collapse;font-size:13px">'+
+          '<thead><tr style="background:#0d1117">'+
+            '<th style="text-align:left;padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">Rep</th>'+
+            '<th style="padding:8px;color:#8892a4;font-size:10px;text-transform:uppercase">Gross Sales</th>'+
+            '<th style="padding:8px;color:#8892a4;font-size:10px;text-transform:uppercase">COGS</th>'+
+            '<th style="padding:8px;color:#4caf7d;font-size:10px;text-transform:uppercase">Gross Profit</th>'+
+            '<th style="padding:8px;color:#4caf7d;font-size:10px;text-transform:uppercase">Commission</th>'+
+            '<th style="padding:8px;color:#f5a623;font-size:10px;text-transform:uppercase">Bonus</th>'+
+            '<th style="padding:8px;color:#4caf7d;font-size:10px;text-transform:uppercase;font-weight:900">Net Profit*</th>'+
+          '</tr></thead>'+
+          '<tbody>'+rowsHtml+'</tbody>'+
+        '</table></div>'+
+        '<div style="font-size:10px;color:#5a6375;margin-top:8px">* Bonus TBD = submitted after month end closes</div>'+
+      '</div>'+
+    '</div>';
+}
 renderDailyMsg(repId);
 </script>
 <div id="gsm-section"></div>
