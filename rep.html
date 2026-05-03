@@ -205,7 +205,6 @@ const rep=D.roster[repId];
 if(!rep){document.body.innerHTML='<div style="padding:40px;text-align:center;color:#e05555;font-size:20px">Rep not found.</div>';throw new Error('no rep');}
 
 renderBonus(repId);
-renderDailyMsg(repId);
 document.getElementById('rep-name').textContent=rep.name+(rep.nick?' "'+rep.nick+'"':'');
 document.getElementById('rep-meta').textContent=repId+' · '+(rep.scale==='veteran'?'Veteran Rep':'New Rep')+' · Data through Apr 2026 (MTD)';
 document.title=rep.name+' — DBW';
@@ -373,6 +372,8 @@ function toggle(el){
   body.classList.toggle('open');
   el.querySelector('.hint').textContent=body.classList.contains('open')?'▲ collapse':'▼ expand';
 }
+
+renderDailyMsg(repId);
 </script>
 </body>
 </html>
