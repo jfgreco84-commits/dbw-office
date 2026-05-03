@@ -270,13 +270,13 @@ document.getElementById('monthly-body').innerHTML=mHtml;
 const payroll={};
 (D.payroll||[]).filter(r=>r.rep_id===repId).forEach(r=>{payroll[r.payday]=r;});
 let html='';
-D.pay_periods.forEach(pd=>{
+[...D.pay_periods].slice().reverse().forEach(pd=>{
   const pr=payroll[pd];
   const gt=pr?pr.grand_total:null;
   html+=`<div class="period-card">
   <div class="period-header" onclick="toggle(this)">
     <div><span class="period-payday">📅 Payday: ${pd}</span><span class="hint" style="font-size:11px;color:#5a6375;margin-left:10px">▼ show detail</span></div>
-    <div class="period-earned">${gt!=null?fmt$(gt):'—'}</div>
+    <div class="period-earned" style="color:${gt==null?'#4caf7d':gt<0?'#e05555':gt===0?'#8892a4':'#4caf7d'}">${gt!=null?fmt$(gt):'—'}</div>
   </div>
   <div class="period-body">`;
   if(!pr||!pr.daily){html+='<p class="no-data">No data for this period.</p>';}
@@ -316,7 +316,7 @@ D.pay_periods.forEach(pd=>{
     html+=`<div class="summary-row"><span>Gross Commission</span><span>${fmt$(pr.gross_commission)}</span></div>`;
     const retAmt=(pr.line_items||[]).filter(x=>x.section==='Return').reduce((a,x)=>a+x.amount,0);
     if(retAmt) html+=`<div class="summary-row"><span style="color:#e05555">Returns</span><span style="color:#e05555">${fmt$(retAmt)}</span></div>`;
-    html+=`<div class="summary-row"><span style="font-size:14px">💵 Total Earned This Period</span><span style="color:#4caf7d;font-size:16px">${fmt$(pr.grand_total)}</span></div>`;
+    html+=`<div class="summary-row"><span style="font-size:14px">💵 Total Earned This Period</span><span style="color:${pr.grand_total<0?'#e05555':pr.grand_total===0?'#8892a4':'#4caf7d'};font-size:16px">${fmt$(pr.grand_total)}</span></div>`;
     html+='</div>';
   }
   html+='</div></div>';
