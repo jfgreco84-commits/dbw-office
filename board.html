@@ -6,205 +6,242 @@
 <title>DBW Wisconsin — Sales Board</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:#080c14;color:#e0e6f0;font-family:'Segoe UI',Arial,sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#080c14;color:#e0e6f0;font-family:'Segoe UI',Arial,sans-serif;user-select:none}
 
-/* ── HEADER ── */
-#hdr{height:76px;background:linear-gradient(135deg,#0d1520,#1a2035);border-bottom:3px solid #f5a623;display:flex;align-items:center;padding:0 32px;gap:0;position:relative;z-index:10}
-.hdr-logo{font-size:28px;font-weight:900;color:#f5a623;letter-spacing:3px;margin-right:24px;white-space:nowrap}
-.hdr-div{width:2px;height:36px;background:#2a3550;margin:0 20px;flex-shrink:0}
+/* HEADER */
+#hdr{height:80px;background:linear-gradient(135deg,#0d1520,#1a2035);border-bottom:3px solid #f5a623;display:flex;align-items:center;padding:0 28px;gap:0}
+.hdr-logo{font-size:26px;font-weight:900;color:#f5a623;letter-spacing:3px;white-space:nowrap}
+.hdr-sep{width:2px;height:40px;background:#2a3550;margin:0 22px;flex-shrink:0}
 .hdr-month{font-size:22px;font-weight:800;color:#fff;letter-spacing:1px}
-.hdr-days{background:#f5a62322;border:1px solid #f5a623;border-radius:20px;padding:4px 16px;font-size:15px;color:#f5a623;font-weight:700;margin-left:14px}
-.hdr-spacer{flex:1}
-.hdr-mode{display:flex;gap:8px;margin-right:18px}
-.mode-btn{background:#1e2840;border:1px solid #2a3550;border-radius:20px;color:#8892a4;font-size:13px;font-weight:700;padding:6px 16px;cursor:pointer;transition:.2s;letter-spacing:.5px}
-.mode-btn.active{background:#f5a62322;border-color:#f5a623;color:#f5a623}
-.mode-btn:hover{border-color:#f5a623;color:#f5a623}
-.hdr-edit{background:#1e2840;border:1px solid #2a3550;border-radius:8px;color:#8892a4;font-size:18px;padding:6px 14px;cursor:pointer;transition:.2s}
-.hdr-edit:hover{border-color:#f5a623;color:#f5a623}
-#clock{font-size:22px;font-weight:700;color:#fff;min-width:100px;text-align:right;margin-left:18px}
+.hdr-days{background:#f5a62333;border:1px solid #f5a623;border-radius:20px;padding:5px 16px;font-size:15px;color:#f5a623;font-weight:800;margin-left:14px}
+.hdr-space{flex:1}
+.sort-btn{background:#141c2e;border:1px solid #2a3550;border-radius:20px;color:#5a6580;font-size:13px;font-weight:800;padding:7px 18px;cursor:pointer;letter-spacing:.5px;transition:.15s}
+.sort-btn.on{background:#f5a62333;border-color:#f5a623;color:#f5a623}
+.sort-btn:hover{border-color:#f5a623;color:#f5a623}
+.hdr-btns{display:flex;gap:10px;margin-right:20px}
+.icon-btn{background:#141c2e;border:1px solid #2a3550;border-radius:8px;color:#5a6580;font-size:15px;padding:7px 14px;cursor:pointer;transition:.15s;font-weight:700}
+.icon-btn:hover{border-color:#f5a623;color:#f5a623}
+#clock{font-size:24px;font-weight:700;color:#fff;min-width:90px;text-align:right}
 
-/* ── MAIN BOARD ── */
-#board{height:calc(100vh - 76px - 48px);overflow:hidden;padding:10px 24px 0}
-.rep-row{display:grid;grid-template-columns:64px 1fr 200px 180px 90px;align-items:center;gap:0 16px;height:calc((100vh - 76px - 48px - 20px) / 17);padding:0 16px;border-radius:10px;margin-bottom:4px;position:relative;transition:background .3s}
-.rep-row:hover{background:#1a2035}
-.rep-row.rank1{background:linear-gradient(90deg,#2a1f0022,transparent);border-left:4px solid #FFD700}
-.rep-row.rank2{background:linear-gradient(90deg,#2a252522,transparent);border-left:4px solid #C0C0C0}
-.rep-row.rank3{background:linear-gradient(90deg,#1a120022,transparent);border-left:4px solid #CD7F32}
-.rep-row.rank1:hover,.rep-row.rank2:hover,.rep-row.rank3:hover{background:#1a2035}
+/* BOARD */
+#board{height:calc(100vh - 80px - 46px);padding:8px 20px 0;display:flex;flex-direction:column;gap:0}
+.rep-row{display:grid;grid-template-columns:60px minmax(130px,1fr) 220px 280px 180px;align-items:center;gap:0 14px;padding:0 14px;border-radius:10px;cursor:pointer;transition:background .15s;flex:1;min-height:0}
+.rep-row:hover{background:#131b2e}
+.rep-row.r1{border-left:4px solid gold}
+.rep-row.r2{border-left:4px solid silver}
+.rep-row.r3{border-left:4px solid #CD7F32}
+.rep-row:not(.r1):not(.r2):not(.r3){border-left:4px solid transparent}
 
-/* rank badge */
-.rank-badge{font-size:22px;font-weight:900;text-align:center;line-height:1}
-.rank-badge.r1{color:#FFD700}
-.rank-badge.r2{color:#C0C0C0}
-.rank-badge.r3{color:#CD7F32}
-.rank-badge.rn{color:#3a4560}
+.rank{font-size:clamp(16px,1.4vw,24px);font-weight:900;text-align:center}
+.rank.r1c{color:gold}.rank.r2c{color:silver}.rank.r3c{color:#CD7F32}.rank.rnc{color:#2a3550}
 
-/* nick */
-.rep-nick{font-size:clamp(16px,1.6vw,26px);font-weight:800;color:#fff;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rep-full{font-size:11px;color:#4a5575;font-weight:400;letter-spacing:.5px;margin-top:1px}
+.rep-name{overflow:hidden}
+.nick{font-size:clamp(16px,1.5vw,26px);font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.full{font-size:10px;color:#3a4560;letter-spacing:.5px;margin-top:1px}
 
-/* written amount */
-.rep-written{text-align:right}
-.written-amt{font-size:clamp(22px,2.2vw,36px);font-weight:900;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
-.written-lbl{font-size:10px;color:#5a6580;text-transform:uppercase;letter-spacing:1px;margin-top:1px;text-align:right}
+.col-written{text-align:right}
+.amt-written{font-size:clamp(22px,2vw,34px);font-weight:900;color:#fff;font-variant-numeric:tabular-nums;line-height:1}
+.lbl{font-size:9px;color:#3a4560;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 
-/* tier progress */
-.tier-wrap{position:relative}
-.tier-bar-bg{height:8px;background:#1e2840;border-radius:4px;overflow:hidden}
-.tier-bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
-.tier-markers{display:flex;justify-content:space-between;margin-top:3px}
-.tier-marker{font-size:9px;color:#3a4560;font-weight:700}
-.tier-marker.hit{color:#4caf7d}
-.tier-badge-row{display:flex;gap:4px;margin-top:4px}
-.tier-pip{font-size:9px;padding:1px 6px;border-radius:8px;font-weight:800;letter-spacing:.5px}
+.col-tier{}
+.tier-bar-bg{height:9px;background:#141c2e;border-radius:5px;overflow:hidden;margin-bottom:5px}
+.tier-bar-fill{height:100%;border-radius:5px;transition:width .5s ease}
+.tier-pips{display:flex;gap:5px}
+.pip{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:800;letter-spacing:.3px}
 .pip-hit{background:#1a3a2a;color:#4caf7d;border:1px solid #4caf7d55}
-.pip-next{background:#1a2535;color:#f5a623;border:1px solid #f5a62355}
-.pip-far{background:#151a28;color:#3a4560;border:1px solid #2a3040}
-.pip-none{background:#151a28;color:#3a4560;font-size:9px;padding:1px 6px;border-radius:8px}
+.pip-next{background:#2a1a00;color:#f5a623;border:1px solid #f5a62355}
+.pip-off{background:#111827;color:#2a3550;border:1px solid #1e2535}
 
-/* shipped */
-.rep-shipped{text-align:right}
-.shipped-amt{font-size:clamp(16px,1.6vw,26px);font-weight:700;color:#4a9eff;line-height:1;font-variant-numeric:tabular-nums}
-.shipped-lbl{font-size:10px;color:#5a6580;text-transform:uppercase;letter-spacing:1px;margin-top:1px}
-.gap-amt{font-size:11px;margin-top:3px;font-weight:600}
+.col-shipped{text-align:right}
+.amt-shipped{font-size:clamp(16px,1.5vw,26px);font-weight:700;color:#4a9eff;font-variant-numeric:tabular-nums;line-height:1}
+.gap{font-size:11px;font-weight:700;margin-top:3px}
 
-/* ── FOOTER / TOTALS ── */
-#footer{height:48px;background:#0a0f1c;border-top:2px solid #1e2840;display:flex;align-items:center;padding:0 32px;gap:24px}
-.ft-label{font-size:11px;color:#4a5575;text-transform:uppercase;letter-spacing:1px}
-.ft-written{font-size:20px;font-weight:900;color:#fff;margin-left:6px}
-.ft-shipped{font-size:20px;font-weight:700;color:#4a9eff;margin-left:6px}
-.ft-bar-wrap{flex:1;height:12px;background:#1e2840;border-radius:6px;overflow:hidden;max-width:600px;position:relative}
-.ft-bar-fill{height:100%;border-radius:6px;transition:width .6s}
-.ft-bar-text{position:absolute;right:8px;top:0;font-size:9px;line-height:12px;color:#8892a4;font-weight:700}
-.ft-goal{font-size:13px;color:#8892a4}
-#last-updated{font-size:11px;color:#2a3550;margin-left:auto}
+/* FOOTER */
+#footer{height:46px;background:#0a0f1c;border-top:2px solid #1e2840;display:flex;align-items:center;padding:0 28px;gap:20px}
+.ft-stat{display:flex;align-items:baseline;gap:6px}
+.ft-lbl{font-size:10px;color:#3a4560;text-transform:uppercase;letter-spacing:1px}
+.ft-val{font-size:19px;font-weight:900;font-variant-numeric:tabular-nums}
+.ft-bar-wrap{flex:1;max-width:700px;height:10px;background:#1a2035;border-radius:5px;overflow:hidden;position:relative}
+.ft-bar{height:100%;border-radius:5px;transition:width .5s}
+.ft-goal-txt{font-size:12px;color:#3a4560}
+#ft-updated{font-size:11px;color:#252f45;margin-left:auto}
 
-/* ── EDIT OVERLAY ── */
-#edit-overlay{display:none;position:fixed;inset:0;background:#000000cc;z-index:100;align-items:center;justify-content:center}
-#edit-overlay.show{display:flex}
-#edit-panel{background:#0f1520;border:2px solid #f5a623;border-radius:16px;padding:28px 32px;width:820px;max-height:90vh;overflow-y:auto}
-.ep-title{font-size:18px;font-weight:900;color:#f5a623;letter-spacing:2px;margin-bottom:4px}
-.ep-sub{font-size:12px;color:#4a5575;margin-bottom:18px}
-.ep-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
-.ep-col-hdr{font-size:10px;color:#f5a623;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:6px 8px;background:#1a2035;border-radius:6px;text-align:center}
-.ep-row{display:contents}
-.ep-nick{font-size:14px;font-weight:700;color:#fff;padding:8px;background:#141c2e;border-radius:6px;display:flex;align-items:center}
-.ep-input{background:#141c2e;border:1px solid #2a3550;border-radius:6px;color:#fff;font-size:16px;font-weight:700;padding:8px 10px;text-align:right;width:100%;outline:none;font-variant-numeric:tabular-nums}
-.ep-input:focus{border-color:#f5a623}
-.ep-actions{display:flex;gap:10px;margin-top:4px}
-.ep-save{flex:1;background:#f5a623;color:#000;font-size:16px;font-weight:900;border:none;border-radius:10px;padding:12px;cursor:pointer;letter-spacing:1px}
-.ep-save:hover{background:#ffb733}
-.ep-cancel{background:#1e2840;color:#8892a4;font-size:14px;font-weight:700;border:1px solid #2a3550;border-radius:10px;padding:12px 24px;cursor:pointer}
-.ep-cancel:hover{border-color:#e05555;color:#e05555}
-.ep-month-row{display:flex;gap:10px;margin-bottom:16px;align-items:center}
-.ep-month-sel{background:#141c2e;border:1px solid #2a3550;border-radius:8px;color:#fff;font-size:14px;font-weight:700;padding:8px 12px;cursor:pointer;outline:none}
-.ep-month-sel:focus{border-color:#f5a623}
-.ep-reset{background:#3a1a1a;border:1px solid #e0555544;color:#e05555;font-size:12px;font-weight:700;border-radius:8px;padding:8px 14px;cursor:pointer}
-.ep-reset:hover{background:#e05555;color:#fff}
-.ep-pw{display:none;position:fixed;inset:0;background:#000000ee;z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px}
-.ep-pw.show{display:flex}
-.ep-pw input{background:#141c2e;border:2px solid #f5a623;border-radius:10px;color:#fff;font-size:24px;font-weight:700;padding:14px 20px;text-align:center;outline:none;letter-spacing:4px;width:260px}
-.ep-pw-btn{background:#f5a623;color:#000;font-size:16px;font-weight:900;border:none;border-radius:10px;padding:12px 32px;cursor:pointer}
-.ep-pw-err{color:#e05555;font-size:14px;font-weight:700;display:none}
+/* ── REP CLICK MODAL ── */
+#rep-modal{display:none;position:fixed;inset:0;background:#000000bb;z-index:50;align-items:center;justify-content:center}
+#rep-modal.show{display:flex}
+.rm-box{background:#0f1520;border:2px solid #f5a623;border-radius:16px;padding:32px 36px;min-width:380px;text-align:center}
+.rm-nick{font-size:32px;font-weight:900;color:#fff;margin-bottom:4px}
+.rm-id{font-size:12px;color:#3a4560;margin-bottom:20px;letter-spacing:1px}
+.rm-input{background:#141c2e;border:2px solid #2a3550;border-radius:10px;color:#fff;font-size:28px;font-weight:900;padding:14px 18px;text-align:center;width:100%;outline:none;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.rm-input:focus{border-color:#f5a623}
+.rm-hint{font-size:12px;color:#3a4560;margin-bottom:20px}
+.rm-save{width:100%;background:#f5a623;color:#000;font-size:17px;font-weight:900;border:none;border-radius:10px;padding:13px;cursor:pointer;letter-spacing:1px}
+.rm-save:hover{background:#ffb733}
+.rm-cancel{background:none;border:none;color:#3a4560;font-size:13px;cursor:pointer;margin-top:12px;display:block;width:100%}
+
+/* ── IMPORT MODAL ── */
+#imp-modal{display:none;position:fixed;inset:0;background:#000000bb;z-index:50;align-items:center;justify-content:center}
+#imp-modal.show{display:flex}
+.imp-box{background:#0f1520;border:2px solid #4a9eff;border-radius:16px;padding:28px 32px;width:560px}
+.imp-title{font-size:16px;font-weight:900;color:#4a9eff;letter-spacing:1px;margin-bottom:4px}
+.imp-sub{font-size:12px;color:#3a4560;margin-bottom:14px}
+.imp-ta{width:100%;background:#080c14;border:1px solid #1e2840;border-radius:8px;color:#4caf7d;font-size:13px;font-family:monospace;padding:12px;min-height:110px;resize:vertical;outline:none}
+.imp-ta:focus{border-color:#4a9eff}
+.imp-actions{display:flex;gap:10px;margin-top:12px}
+.imp-go{flex:1;background:#4a9eff;color:#000;font-size:15px;font-weight:900;border:none;border-radius:10px;padding:12px;cursor:pointer}
+.imp-go:hover{background:#6ab4ff}
+.imp-cancel{background:#141c2e;border:1px solid #2a3550;color:#8892a4;font-size:14px;font-weight:700;border-radius:10px;padding:12px 22px;cursor:pointer}
+.imp-err{color:#e05555;font-size:12px;font-weight:700;margin-top:8px;display:none}
+
+/* ── ADMIN PANEL ── */
+#admin-modal{display:none;position:fixed;inset:0;background:#000000cc;z-index:80;align-items:center;justify-content:center}
+#admin-modal.show{display:flex}
+.adm-box{background:#0f1520;border:2px solid #f5a623;border-radius:16px;padding:24px 28px;width:800px;max-height:88vh;overflow-y:auto}
+.adm-title{font-size:16px;font-weight:900;color:#f5a623;letter-spacing:2px;margin-bottom:14px}
+.adm-month-row{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.adm-sel{background:#141c2e;border:1px solid #2a3550;border-radius:8px;color:#fff;font-size:14px;font-weight:700;padding:8px 12px;outline:none;cursor:pointer}
+.adm-sel:focus{border-color:#f5a623}
+.adm-reset{background:#1a0808;border:1px solid #e0555544;color:#e05555;font-size:12px;font-weight:700;border-radius:8px;padding:8px 14px;cursor:pointer}
+.adm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px}
+.adm-hdr{font-size:10px;color:#f5a623;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:6px 8px;background:#1a2035;border-radius:6px;text-align:center}
+.adm-nick-cell{font-size:14px;font-weight:700;color:#fff;padding:7px 10px;background:#141c2e;border-radius:6px;display:flex;align-items:center;gap:6px}
+.adm-nick-cell span{font-size:10px;color:#2a3550}
+.adm-inp{background:#141c2e;border:1px solid #1e2840;border-radius:6px;color:#fff;font-size:15px;font-weight:700;padding:7px 10px;text-align:right;width:100%;outline:none}
+.adm-inp:focus{border-color:#f5a623}
+.adm-actions{display:flex;gap:10px}
+.adm-save{flex:1;background:#f5a623;color:#000;font-size:16px;font-weight:900;border:none;border-radius:10px;padding:11px;cursor:pointer}
+.adm-cancel{background:#141c2e;border:1px solid #2a3550;color:#8892a4;font-size:14px;font-weight:700;border-radius:10px;padding:11px 22px;cursor:pointer}
+
+/* ── PW SCREEN ── */
+#pw-screen{display:none;position:fixed;inset:0;background:#000000ee;z-index:90;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#pw-screen.show{display:flex}
+.pw-lbl{font-size:20px;font-weight:900;color:#f5a623;letter-spacing:2px}
+.pw-inp{background:#141c2e;border:2px solid #f5a623;border-radius:10px;color:#fff;font-size:28px;font-weight:900;padding:13px 20px;text-align:center;outline:none;letter-spacing:6px;width:240px}
+.pw-btn{background:#f5a623;color:#000;font-size:15px;font-weight:900;border:none;border-radius:10px;padding:12px 32px;cursor:pointer}
+.pw-err{color:#e05555;font-size:13px;font-weight:700;display:none}
+.pw-cancel{background:none;border:none;color:#3a4560;font-size:13px;cursor:pointer}
 </style>
 </head>
 <body>
 
-<!-- ── HEADER ── -->
+<!-- HEADER -->
 <div id="hdr">
-  <div class="hdr-logo">💎 DBW WI</div>
-  <div class="hdr-div"></div>
-  <div class="hdr-month" id="hdr-month">—</div>
-  <div class="hdr-days" id="hdr-days">—</div>
-  <div class="hdr-spacer"></div>
-  <div class="hdr-mode">
-    <button class="mode-btn active" id="btn-written" onclick="setSort('written')">WRITTEN</button>
-    <button class="mode-btn" id="btn-shipped" onclick="setSort('shipped')">SHIPPED</button>
+  <div class="hdr-logo">💎 DBW</div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-month" id="hdr-month"></div>
+  <div class="hdr-days" id="hdr-days"></div>
+  <div class="hdr-space"></div>
+  <div class="hdr-btns">
+    <button class="sort-btn on" id="btn-w" onclick="setSort('written')">WRITTEN</button>
+    <button class="sort-btn"    id="btn-s" onclick="setSort('shipped')">SHIPPED</button>
+    <button class="icon-btn" onclick="openImport()" title="Paste import code from Claude (I)">📋 Import</button>
+    <button class="icon-btn" onclick="openAdmin()" title="Admin edit (A)">⚙️</button>
   </div>
-  <button class="hdr-edit" onclick="openEdit()" title="Edit numbers (E)">⚙️</button>
-  <div id="clock">—</div>
+  <div id="clock"></div>
 </div>
 
-<!-- ── BOARD ── -->
+<!-- BOARD -->
 <div id="board"></div>
 
-<!-- ── FOOTER ── -->
+<!-- FOOTER -->
 <div id="footer">
-  <span class="ft-label">OFFICE WRITTEN</span><span class="ft-written" id="ft-written">$0</span>
-  <span class="ft-label" style="margin-left:12px">SHIPPED</span><span class="ft-shipped" id="ft-shipped">$0</span>
-  <div class="ft-bar-wrap" id="ft-bar-wrap">
-    <div class="ft-bar-fill" id="ft-bar-fill" style="width:0%"></div>
-    <div class="ft-bar-text" id="ft-bar-text"></div>
+  <div class="ft-stat"><span class="ft-lbl">Written</span><span class="ft-val" id="ft-w" style="color:#fff">$0</span></div>
+  <div class="ft-stat"><span class="ft-lbl">Shipped</span><span class="ft-val" id="ft-s" style="color:#4a9eff">$0</span></div>
+  <div class="ft-bar-wrap"><div class="ft-bar" id="ft-bar" style="width:0%"></div></div>
+  <span class="ft-goal-txt" id="ft-goal-txt"></span>
+  <span id="ft-updated"></span>
+</div>
+
+<!-- REP SELF-UPDATE MODAL -->
+<div id="rep-modal">
+  <div class="rm-box">
+    <div class="rm-nick" id="rm-nick"></div>
+    <div class="rm-id" id="rm-id"></div>
+    <input class="rm-input" id="rm-input" type="number" min="0" placeholder="0"
+      onkeydown="if(event.key==='Enter')saveRep()">
+    <div class="rm-hint">Type your current WRITTEN total and hit Save</div>
+    <button class="rm-save" onclick="saveRep()">SAVE MY NUMBER</button>
+    <button class="rm-cancel" onclick="closeRep()">Cancel</button>
   </div>
-  <span class="ft-goal" id="ft-goal"></span>
-  <span id="last-updated"></span>
 </div>
 
-<!-- ── PASSWORD PROMPT ── -->
-<div class="ep-pw" id="pw-overlay">
-  <div style="font-size:22px;font-weight:900;color:#f5a623;letter-spacing:2px">ENTER ADMIN CODE</div>
-  <input type="password" id="pw-input" placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()" autofocus>
-  <div class="ep-pw-err" id="pw-err">Wrong code. Try again.</div>
-  <button class="ep-pw-btn" onclick="checkPw()">UNLOCK</button>
-  <button style="background:none;border:none;color:#4a5575;font-size:13px;cursor:pointer;margin-top:8px" onclick="closePw()">Cancel</button>
+<!-- IMPORT MODAL -->
+<div id="imp-modal">
+  <div class="imp-box">
+    <div class="imp-title">📋 PASTE IMPORT CODE</div>
+    <div class="imp-sub">Claude will give you a code — paste it here to update all numbers at once.</div>
+    <textarea class="imp-ta" id="imp-ta" placeholder='Paste the code from Claude here...'></textarea>
+    <div class="imp-err" id="imp-err">Invalid code. Copy it again from Claude exactly as given.</div>
+    <div class="imp-actions">
+      <button class="imp-go" onclick="doImport()">UPDATE BOARD</button>
+      <button class="imp-cancel" onclick="closeImport()">Cancel</button>
+    </div>
+  </div>
 </div>
 
-<!-- ── EDIT OVERLAY ── -->
-<div id="edit-overlay">
-  <div id="edit-panel">
-    <div class="ep-title">⚙️ UPDATE BOARD</div>
-    <div class="ep-sub">Enter each rep's current written and shipped totals. Press SAVE to push to the board.</div>
-    <div class="ep-month-row">
-      <span style="font-size:13px;color:#8892a4;font-weight:700">MONTH:</span>
-      <select class="ep-month-sel" id="ep-month-sel" onchange="setMonth(this.value)">
-        <option>JANUARY</option><option>FEBRUARY</option><option>MARCH</option><option>APRIL</option>
-        <option selected>MAY</option><option>JUNE</option><option>JULY</option><option>AUGUST</option>
-        <option>SEPTEMBER</option><option>OCTOBER</option><option>NOVEMBER</option><option>DECEMBER</option>
+<!-- PW SCREEN -->
+<div id="pw-screen">
+  <div class="pw-lbl">ADMIN CODE</div>
+  <input class="pw-inp" id="pw-inp" type="password" placeholder="••••"
+    onkeydown="if(event.key==='Enter')checkPw()">
+  <div class="pw-err" id="pw-err">Wrong code.</div>
+  <button class="pw-btn" onclick="checkPw()">UNLOCK</button>
+  <button class="pw-cancel" onclick="closePw()">Cancel</button>
+</div>
+
+<!-- ADMIN MODAL -->
+<div id="admin-modal">
+  <div class="adm-box">
+    <div class="adm-title">⚙️ ADMIN — FULL BOARD EDIT</div>
+    <div class="adm-month-row">
+      <span style="font-size:12px;color:#5a6580;font-weight:700">MONTH:</span>
+      <select class="adm-sel" id="adm-month" onchange="setMonth(this.value)">
+        <option>JANUARY</option><option>FEBRUARY</option><option>MARCH</option>
+        <option>APRIL</option><option selected>MAY</option><option>JUNE</option>
+        <option>JULY</option><option>AUGUST</option><option>SEPTEMBER</option>
+        <option>OCTOBER</option><option>NOVEMBER</option><option>DECEMBER</option>
       </select>
-      <button class="ep-reset" onclick="resetMonth()">🔄 RESET MONTH TO ZERO</button>
-      <span style="font-size:11px;color:#3a4560;margin-left:auto">Press ESC to close</span>
+      <button class="adm-reset" onclick="resetMonth()">🔄 NEW MONTH — RESET ALL TO ZERO</button>
     </div>
-    <div class="ep-grid" id="ep-grid">
-      <div class="ep-col-hdr">REP</div>
-      <div class="ep-col-hdr">WRITTEN ($)</div>
-      <div class="ep-col-hdr">SHIPPED ($)</div>
+    <div class="adm-grid" id="adm-grid">
+      <div class="adm-hdr">REP</div>
+      <div class="adm-hdr">WRITTEN ($)</div>
+      <div class="adm-hdr">SHIPPED ($)</div>
     </div>
-    <div class="ep-actions">
-      <button class="ep-save" onclick="saveEdit()">💾 SAVE &amp; UPDATE BOARD</button>
-      <button class="ep-cancel" onclick="closeEdit()">CANCEL</button>
+    <div class="adm-actions">
+      <button class="adm-save" onclick="saveAdmin()">💾 SAVE &amp; UPDATE BOARD</button>
+      <button class="adm-cancel" onclick="closeAdmin()">Cancel (ESC)</button>
     </div>
   </div>
 </div>
 
 <script>
 // ── ROSTER ────────────────────────────────────────────────────────────────────
-const ROSTER = [
-  {id:'W603',nick:'Batman',   name:'Adam West'},
-  {id:'W762',nick:'Kerry',    name:'Kerry Smith'},
-  {id:'W784',nick:'Froggy',   name:'Frank Greco'},
-  {id:'W839',nick:'Ronny B',  name:'Ronald Bonich'},
-  {id:'W849',nick:'JB',       name:'John Baemmert'},
-  {id:'W909',nick:'Luis',     name:'Luis Millan'},
-  {id:'W930',nick:'Miz',      name:'Adam Misurek'},
-  {id:'W934',nick:'Les',      name:'Leslie Kubeny'},
-  {id:'W938',nick:"Jeff w/G", name:'Geoff Nurse'},
-  {id:'W948',nick:'Paul Z',   name:'Paul Zillette'},
-  {id:'W953',nick:'Noodle',   name:'Jamel Lee'},
-  {id:'W959',nick:'Cassie',   name:'Cassie Kolhouse'},
-  {id:'W962',nick:'Cutty',    name:'Chris Kussrow'},
-  {id:'W963',nick:'Nico',     name:'Nico Topors'},
-  {id:'W973',nick:'TJ',       name:'Anthony Sutton'},
-  {id:'W983',nick:'Rep 16',   name:'Rep W983'},
-  {id:'W961',nick:'Rep 17',   name:'Rep W961'},
+const ROSTER=[
+  {id:'W603',nick:'Batman',  name:'Adam West'},
+  {id:'W762',nick:'Kerry',   name:'Kerry Smith'},
+  {id:'W784',nick:'Froggy',  name:'Frank Greco'},
+  {id:'W839',nick:'Ronny B', name:'Ronald Bonich'},
+  {id:'W849',nick:'JB',      name:'John Baemmert'},
+  {id:'W909',nick:'Luis',    name:'Luis Millan'},
+  {id:'W930',nick:'Miz',     name:'Adam Misurek'},
+  {id:'W934',nick:'Les',     name:'Leslie Kubeny'},
+  {id:'W938',nick:'Jeff G',  name:'Geoff Nurse'},
+  {id:'W948',nick:'Paul Z',  name:'Paul Zillette'},
+  {id:'W953',nick:'Noodle',  name:'Jamel Lee'},
+  {id:'W959',nick:'Cassie',  name:'Cassie Kolhouse'},
+  {id:'W962',nick:'Cutty',   name:'Chris Kussrow'},
+  {id:'W963',nick:'Nico',    name:'Nico Topors'},
+  {id:'W973',nick:'TJ',      name:'Anthony Sutton'},
+  {id:'W983',nick:'W983',    name:'Rep W983'},
+  {id:'W961',nick:'W961',    name:'Rep W961'},
 ];
 
 // ── BONUS TIERS ───────────────────────────────────────────────────────────────
-const BONUS = {
-  W603:{tiers:[85000,95000,105000]},
-  W762:{tiers:[35000,45000,55000]},
-  W784:{tiers:[85000,95000,105000]},
-  W839:{tiers:[135000,155000,175000]},
-  W849:{tiers:[30000,40000,50000]},
+const BONUS={
+  W603:[85000,95000,105000], W762:[35000,45000,55000],
+  W784:[85000,95000,105000], W839:[135000,155000,175000],
+  W849:[30000,40000,50000],
 };
 
 // ── DBW CALENDAR ─────────────────────────────────────────────────────────────
@@ -216,254 +253,227 @@ const CAL={
   SEPTEMBER:{s:'2026-09-07',e:'2026-10-02',d:19},OCTOBER:{s:'2026-10-05',e:'2026-11-06',d:25},
   NOVEMBER:{s:'2026-11-09',e:'2026-12-04',d:18},DECEMBER:{s:'2026-12-07',e:'2026-12-31',d:18},
 };
+const Q_LO=1250000,Q_HI=1500000;
+let sortBy='written',editRepId=null;
 
-// ── QUARTERLY GOALS (office) ──────────────────────────────────────────────────
-const Q_GOAL_LO = 1250000, Q_GOAL_HI = 1500000;
-
-// ── SORT STATE ────────────────────────────────────────────────────────────────
-let sortBy = 'written';
-
-function setSort(s){
-  sortBy=s;
-  document.getElementById('btn-written').classList.toggle('active',s==='written');
-  document.getElementById('btn-shipped').classList.toggle('active',s==='shipped');
-  render();
+// ── DATA ──────────────────────────────────────────────────────────────────────
+function load(){
+  try{const d=JSON.parse(localStorage.getItem('dbw_board')||'{}');
+    if(!d.month)d.month='MAY';
+    if(!d.reps)d.reps={};
+    if(!d.updated)d.updated=null;
+    ROSTER.forEach(r=>{if(!d.reps[r.id])d.reps[r.id]={written:0,shipped:0};});
+    return d;}catch(e){return{month:'MAY',reps:{},updated:null};}
 }
-
-// ── DATA (localStorage) ───────────────────────────────────────────────────────
-function loadData(){
-  try{ return JSON.parse(localStorage.getItem('dbw_board')||'{}'); }catch(e){ return {}; }
-}
-function saveData(d){ localStorage.setItem('dbw_board',JSON.stringify(d)); }
-
-function getData(){
-  const d = loadData();
-  if(!d.month) d.month='MAY';
-  if(!d.reps) d.reps={};
-  ROSTER.forEach(r=>{ if(!d.reps[r.id]) d.reps[r.id]={written:0,shipped:0}; });
-  if(!d.updated) d.updated=null;
-  return d;
-}
+function save(d){localStorage.setItem('dbw_board',JSON.stringify(d));}
 
 // ── FORMATTERS ────────────────────────────────────────────────────────────────
-function fmt$(n){
-  if(!n||n===0) return '$0';
-  if(n>=1000000) return '$'+(n/1000000).toFixed(2)+'M';
-  if(n>=1000) return '$'+(n/1000).toFixed(1)+'K';
-  return '$'+Math.round(n).toLocaleString();
+function f$(n){
+  if(!n)return'—';
+  if(n>=1000000)return'$'+(n/1000000).toFixed(3).replace(/\.?0+$/,'')+'M';
+  return'$'+Math.round(n).toLocaleString();
 }
-function fmtFull$(n){
-  return '$'+(n||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
-}
+function fFull$(n){return'$'+(n||0).toLocaleString('en-US');}
 
-// ── TIER LOGIC ────────────────────────────────────────────────────────────────
-function tierHTML(id, written){
-  const b = BONUS[id];
-  if(!b||!b.tiers.length) return '<div class="pip-none">—</div>';
-  const t = b.tiers; // [t1,t2,t3]
-  const max = t[t.length-1];
-  const pct = Math.min(100, (written/max)*100);
-  // Determine color based on which tier they're at
-  const hit2 = written>=t[1], hit3 = written>=t[2], hit1 = written>=t[0];
-  const color = hit3?'#4caf7d':hit2?'#4a9eff':hit1?'#f5a623':'#e05555';
-  // Tier pips
-  const pips = t.map((v,i)=>{
-    const label = `T${i+1}: ${fmt$(v)}`;
-    const cls = written>=v?'pip-hit':written>=(i>0?t[i-1]:0)&&!written>=v?'pip-next':'pip-far';
-    const actualCls = written>=v?'pip-hit':(i===0&&!hit1||i===1&&hit1&&!hit2||i===2&&hit2&&!hit3)?'pip-next':'pip-far';
-    return `<span class="tier-pip ${actualCls}">${label}</span>`;
+// ── TIER BAR ──────────────────────────────────────────────────────────────────
+function tierHTML(id,w){
+  const t=BONUS[id];
+  if(!t)return'<div style="font-size:10px;color:#1e2535">—</div>';
+  const max=t[2],pct=Math.min(100,(w/max)*100);
+  const c=w>=t[2]?'#4caf7d':w>=t[1]?'#4a9eff':w>=t[0]?'#f5a623':'#e05555';
+  const pips=t.map((v,i)=>{
+    const cls=w>=v?'pip-hit':i>0&&w>=t[i-1]&&w<v?'pip-next':'pip-off';
+    return`<span class="pip ${cls}">T${i+1}: ${f$(v)}</span>`;
   }).join('');
-  return `<div class="tier-bar-bg"><div class="tier-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-  <div class="tier-badge-row">${pips}</div>`;
+  return`<div class="tier-bar-bg"><div class="tier-bar-fill" style="width:${pct.toFixed(1)}%;background:${c}"></div></div>
+  <div class="tier-pips">${pips}</div>`;
 }
 
-// ── HEADER DAYS REMAINING ─────────────────────────────────────────────────────
-function updateHeader(month){
-  document.getElementById('hdr-month').textContent = month + ' 2026';
-  const cal = CAL[month];
-  if(!cal){ document.getElementById('hdr-days').textContent='—'; return; }
-  const today=new Date(); today.setHours(0,0,0,0);
-  const s=new Date(cal.s),e=new Date(cal.e); s.setHours(0,0,0,0); e.setHours(0,0,0,0);
-  let rem;
-  if(today<s) rem=cal.d;
-  else if(today>e) rem=0;
-  else{
-    const frac=(today-s)/(e-s);
-    const el=Math.round(frac*cal.d);
-    rem=cal.d-el;
-  }
-  document.getElementById('hdr-days').textContent = rem>0 ? rem+' days left' : 'MONTH COMPLETE';
+// ── HEADER ────────────────────────────────────────────────────────────────────
+function updateHdr(month){
+  document.getElementById('hdr-month').textContent=month+' 2026';
+  const c=CAL[month];if(!c){document.getElementById('hdr-days').textContent='';return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  const s=new Date(c.s),e=new Date(c.e);s.setHours(0,0,0,0);e.setHours(0,0,0,0);
+  let rem=today<s?c.d:today>e?0:c.d-Math.round(((today-s)/(e-s))*c.d);
+  document.getElementById('hdr-days').textContent=rem>0?rem+' days left':'MONTH DONE';
 }
 
-// ── MAIN RENDER ───────────────────────────────────────────────────────────────
+// ── RENDER ────────────────────────────────────────────────────────────────────
 function render(){
-  const d = getData();
-  updateHeader(d.month);
-
-  // Sort roster
-  const sorted = [...ROSTER].sort((a,b)=>{
-    const av = d.reps[a.id]?.[sortBy]||0;
-    const bv = d.reps[b.id]?.[sortBy]||0;
-    return bv-av;
-  });
-
-  let totWritten=0, totShipped=0;
-  sorted.forEach(r=>{ totWritten+=d.reps[r.id]?.written||0; totShipped+=d.reps[r.id]?.shipped||0; });
-
+  const d=load();
+  updateHdr(d.month);
+  const sorted=[...ROSTER].sort((a,b)=>(d.reps[b.id]?.[sortBy]||0)-(d.reps[a.id]?.[sortBy]||0));
+  let totW=0,totS=0;
+  sorted.forEach(r=>{totW+=d.reps[r.id]?.written||0;totS+=d.reps[r.id]?.shipped||0;});
+  const rowCount=ROSTER.length;
   let html='';
   sorted.forEach((r,i)=>{
     const rank=i+1;
     const rep=d.reps[r.id]||{written:0,shipped:0};
-    const wr=rep.written||0, sh=rep.shipped||0;
-    const gap=wr-sh;
-    const rankCls=rank===1?'rank1':rank===2?'rank2':rank===3?'rank3':'';
-    const rankBadgeCls=rank===1?'r1':rank===2?'r2':rank===3?'r3':'rn';
-    const rankLabel=rank<=3?['🥇','🥈','🥉'][rank-1]:'#'+rank;
-    const gapColor=gap>0?'color:#4a9eff':gap<0?'color:#e05555':'color:#3a4560';
-    const gapStr=gap!==0?(gap>0?'+':'')+fmt$(gap):'—';
-
-    html+=`<div class="rep-row ${rankCls}">
-      <div class="rank-badge ${rankBadgeCls}">${rankLabel}</div>
-      <div>
-        <div class="rep-nick">${r.nick}</div>
-        <div class="rep-full">${r.name} · ${r.id}</div>
-      </div>
-      <div class="rep-written">
-        <div class="written-amt">${wr>0?fmtFull$(wr):'—'}</div>
-        <div class="written-lbl">written</div>
-      </div>
-      <div class="tier-wrap">${tierHTML(r.id,wr)}</div>
-      <div class="rep-shipped">
-        <div class="shipped-amt">${sh>0?fmtFull$(sh):'—'}</div>
-        <div class="shipped-lbl">shipped</div>
-        ${gap!==0?`<div class="gap-amt" style="${gapColor}">${gapStr} gap</div>`:''}
-      </div>
+    const w=rep.written||0,s=rep.shipped||0,gap=w-s;
+    const rc=rank===1?'r1':rank===2?'r2':rank===3?'r3':'';
+    const lbl=rank<=3?['🥇','🥈','🥉'][rank-1]:`#${rank}`;
+    const lc=rank===1?'r1c':rank===2?'r2c':rank===3?'r3c':'rnc';
+    const gapHtml=gap>0?`<div class="gap" style="color:#4a9eff">+${f$(gap)}</div>`:
+                  gap<0?`<div class="gap" style="color:#e05555">${f$(gap)}</div>`:'';
+    html+=`<div class="rep-row ${rc}" onclick="openRep('${r.id}')">
+      <div class="rank ${lc}">${lbl}</div>
+      <div class="rep-name"><div class="nick">${r.nick}</div><div class="full">${r.name} · ${r.id}</div></div>
+      <div class="col-written"><div class="amt-written">${w?fFull$(w):'—'}</div><div class="lbl">written</div></div>
+      <div class="col-tier">${tierHTML(r.id,w)}</div>
+      <div class="col-shipped"><div class="amt-shipped">${s?fFull$(s):'—'}</div><div class="lbl">shipped</div>${gapHtml}</div>
     </div>`;
   });
   document.getElementById('board').innerHTML=html;
+  // footer
+  document.getElementById('ft-w').textContent=fFull$(totW);
+  document.getElementById('ft-s').textContent=fFull$(totS);
+  const pct=Math.min(100,(totW/Q_LO)*100);
+  const bc=totW>=Q_HI?'#4caf7d':totW>=Q_LO?'#f5a623':'#4a9eff';
+  document.getElementById('ft-bar').style.cssText=`width:${pct.toFixed(1)}%;background:${bc}`;
+  document.getElementById('ft-goal-txt').textContent=`vs $${(Q_LO/1000).toFixed(0)}K–$${(Q_HI/1000).toFixed(0)}K monthly goal`;
+  if(d.updated)document.getElementById('ft-updated').textContent='Updated: '+d.updated;
+}
 
-  // Footer totals
-  document.getElementById('ft-written').textContent=fmtFull$(totWritten);
-  document.getElementById('ft-shipped').textContent=fmtFull$(totShipped);
+// ── SORT ──────────────────────────────────────────────────────────────────────
+function setSort(s){
+  sortBy=s;
+  document.getElementById('btn-w').classList.toggle('on',s==='written');
+  document.getElementById('btn-s').classList.toggle('on',s==='shipped');
+  render();
+}
 
-  // Office goal bar (vs quarterly low goal / 3 months)
-  const monthGoal = Q_GOAL_LO; // use quarterly low as monthly office target reference
-  const barPct = Math.min(100, (totWritten/monthGoal)*100).toFixed(1);
-  document.getElementById('ft-bar-fill').style.width=barPct+'%';
-  document.getElementById('ft-bar-fill').style.background=
-    totWritten>=Q_GOAL_HI?'#4caf7d':totWritten>=Q_GOAL_LO?'#f5a623':'#4a9eff';
-  document.getElementById('ft-bar-text').textContent=barPct+'%';
-  document.getElementById('ft-goal').textContent=
-    `vs $${(Q_GOAL_LO/1000).toFixed(0)}K–$${(Q_GOAL_HI/1000).toFixed(0)}K monthly goal`;
+// ── REP SELF-UPDATE ───────────────────────────────────────────────────────────
+function openRep(id){
+  const r=ROSTER.find(x=>x.id===id);if(!r)return;
+  const d=load();
+  editRepId=id;
+  document.getElementById('rm-nick').textContent=r.nick;
+  document.getElementById('rm-id').textContent=r.name+' · '+id;
+  document.getElementById('rm-input').value=d.reps[id]?.written||'';
+  document.getElementById('rep-modal').classList.add('show');
+  setTimeout(()=>{
+    const el=document.getElementById('rm-input');
+    el.focus();el.select();
+  },80);
+}
+function saveRep(){
+  if(!editRepId)return;
+  const val=parseFloat(document.getElementById('rm-input').value)||0;
+  const d=load();
+  if(!d.reps[editRepId])d.reps[editRepId]={written:0,shipped:0};
+  d.reps[editRepId].written=val;
+  const now=new Date();
+  d.updated=now.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+
+    now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  save(d);closeRep();render();
+}
+function closeRep(){document.getElementById('rep-modal').classList.remove('show');editRepId=null;}
 
-  if(d.updated){
-    document.getElementById('last-updated').textContent='Last updated: '+d.updated;
+// ── IMPORT (paste code from Claude) ──────────────────────────────────────────
+function openImport(){
+  document.getElementById('imp-ta').value='';
+  document.getElementById('imp-err').style.display='none';
+  document.getElementById('imp-modal').classList.add('show');
+  setTimeout(()=>document.getElementById('imp-ta').focus(),80);
+}
+function closeImport(){document.getElementById('imp-modal').classList.remove('show');}
+function doImport(){
+  const raw=document.getElementById('imp-ta').value.trim();
+  const errEl=document.getElementById('imp-err');
+  errEl.style.display='none';
+  try{
+    const obj=JSON.parse(raw);
+    if(!obj.type||!['written','shipped','both'].includes(obj.type))throw new Error('bad type');
+    const d=load();
+    ROSTER.forEach(r=>{
+      if(!d.reps[r.id])d.reps[r.id]={written:0,shipped:0};
+      if((obj.type==='written'||obj.type==='both')&&obj[r.id]!==undefined)
+        d.reps[r.id].written=obj[r.id];
+      if((obj.type==='shipped'||obj.type==='both')&&obj['s_'+r.id]!==undefined)
+        d.reps[r.id].shipped=obj['s_'+r.id];
+    });
+    if(obj.month)d.month=obj.month;
+    const now=new Date();
+    d.updated='JJ/Colin update — '+now.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+
+      now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    save(d);closeImport();render();
+  }catch(e){errEl.style.display='block';}
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+function openAdmin(){
+  document.getElementById('pw-inp').value='';
+  document.getElementById('pw-err').style.display='none';
+  document.getElementById('pw-screen').classList.add('show');
+  setTimeout(()=>document.getElementById('pw-inp').focus(),80);
+}
+function closePw(){document.getElementById('pw-screen').classList.remove('show');}
+function checkPw(){
+  if(document.getElementById('pw-inp').value.toUpperCase().trim()==='DBW'){
+    closePw();showAdmin();
+  } else {
+    document.getElementById('pw-err').style.display='block';
+    document.getElementById('pw-inp').value='';
   }
+}
+function showAdmin(){
+  const d=load();
+  document.getElementById('adm-month').value=d.month;
+  const g=document.getElementById('adm-grid');
+  while(g.children.length>3)g.removeChild(g.lastChild);
+  ROSTER.forEach(r=>{
+    const rep=d.reps[r.id]||{written:0,shipped:0};
+    g.insertAdjacentHTML('beforeend',
+      `<div class="adm-nick-cell">${r.nick}<span>${r.id}</span></div>
+       <input class="adm-inp" id="aw-${r.id}" type="number" value="${rep.written||0}" min="0">
+       <input class="adm-inp" id="as-${r.id}" type="number" value="${rep.shipped||0}" min="0">`);
+  });
+  document.getElementById('admin-modal').classList.add('show');
+}
+function closeAdmin(){document.getElementById('admin-modal').classList.remove('show');}
+function setMonth(m){const d=load();d.month=m;save(d);render();}
+function resetMonth(){
+  if(!confirm('Zero out ALL totals for the new month?'))return;
+  const d=load();
+  ROSTER.forEach(r=>{d.reps[r.id]={written:0,shipped:0};});
+  d.updated=null;save(d);showAdmin();render();
+}
+function saveAdmin(){
+  const d=load();
+  d.month=document.getElementById('adm-month').value;
+  ROSTER.forEach(r=>{
+    d.reps[r.id]={
+      written:parseFloat(document.getElementById('aw-'+r.id)?.value)||0,
+      shipped:parseFloat(document.getElementById('as-'+r.id)?.value)||0,
+    };
+  });
+  const now=new Date();
+  d.updated=now.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+
+    now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  save(d);closeAdmin();render();
 }
 
 // ── CLOCK ─────────────────────────────────────────────────────────────────────
-function tickClock(){
-  const now=new Date();
-  const h=now.getHours(),m=now.getMinutes();
-  const ampm=h>=12?'PM':'AM';
-  const hh=h%12||12;
-  document.getElementById('clock').textContent=hh+':'+(m<10?'0':'')+m+' '+ampm;
+function tick(){
+  const n=new Date(),h=n.getHours()%12||12,m=n.getMinutes(),ap=n.getHours()>=12?'PM':'AM';
+  document.getElementById('clock').textContent=h+':'+(m<10?'0':'')+m+' '+ap;
 }
 
-// ── EDIT FUNCTIONS ────────────────────────────────────────────────────────────
-const ADMIN_CODE = 'DBW';
-
-function openEdit(){
-  document.getElementById('pw-overlay').classList.add('show');
-  setTimeout(()=>document.getElementById('pw-input').focus(),100);
-}
-function closePw(){
-  document.getElementById('pw-overlay').classList.remove('show');
-  document.getElementById('pw-input').value='';
-  document.getElementById('pw-err').style.display='none';
-}
-function checkPw(){
-  const v=document.getElementById('pw-input').value.toUpperCase().trim();
-  if(v===ADMIN_CODE){
-    closePw();
-    showEdit();
-  } else {
-    document.getElementById('pw-err').style.display='block';
-    document.getElementById('pw-input').value='';
-    document.getElementById('pw-input').focus();
-  }
-}
-
-function showEdit(){
-  const d=getData();
-  // set month selector
-  document.getElementById('ep-month-sel').value=d.month;
-  // build grid rows
-  const grid=document.getElementById('ep-grid');
-  // Remove old rows (keep 3 headers)
-  while(grid.children.length>3) grid.removeChild(grid.lastChild);
-  ROSTER.forEach(r=>{
-    const rep=d.reps[r.id]||{written:0,shipped:0};
-    grid.innerHTML+=`
-      <div class="ep-nick">${r.nick}<span style="font-size:10px;color:#3a4560;margin-left:6px">${r.id}</span></div>
-      <input class="ep-input" id="ep-w-${r.id}" type="number" value="${rep.written||0}" min="0" step="100">
-      <input class="ep-input" id="ep-s-${r.id}" type="number" value="${rep.shipped||0}" min="0" step="100">
-    `;
-  });
-  document.getElementById('edit-overlay').classList.add('show');
-}
-
-function closeEdit(){
-  document.getElementById('edit-overlay').classList.remove('show');
-}
-
-function setMonth(m){
-  const d=getData(); d.month=m; saveData(d); render();
-}
-
-function resetMonth(){
-  if(!confirm('Zero out ALL rep totals for the new month?')) return;
-  const d=getData();
-  ROSTER.forEach(r=>{ d.reps[r.id]={written:0,shipped:0}; });
-  d.updated=null;
-  saveData(d);
-  showEdit();
-  render();
-}
-
-function saveEdit(){
-  const d=getData();
-  d.month=document.getElementById('ep-month-sel').value;
-  ROSTER.forEach(r=>{
-    const w=parseFloat(document.getElementById('ep-w-'+r.id)?.value||0)||0;
-    const s=parseFloat(document.getElementById('ep-s-'+r.id)?.value||0)||0;
-    d.reps[r.id]={written:w,shipped:s};
-  });
-  const now=new Date();
-  d.updated=now.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' at '
-    +now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
-  saveData(d);
-  closeEdit();
-  render();
-}
-
-// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeEdit();
-    closePw();
+  const anyOpen=document.querySelector('.show');
+  if(e.key==='Escape'){closeRep();closeImport();closePw();closeAdmin();}
+  if(!anyOpen){
+    if(e.key.toLowerCase()==='a')openAdmin();
+    if(e.key.toLowerCase()==='i')openImport();
+    if(e.key.toLowerCase()==='w')setSort('written');
+    if(e.key.toLowerCase()==='s')setSort('shipped');
   }
-  if(e.key.toLowerCase()==='e' && !document.getElementById('edit-overlay').classList.contains('show')){
-    openEdit();
-  }
-  if(e.key.toLowerCase()==='w') setSort('written');
-  if(e.key.toLowerCase()==='s') setSort('shipped');
 });
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-render();
-tickClock();
-setInterval(tickClock,30000);
+render();tick();setInterval(tick,15000);
 </script>
 </body>
 </html>
