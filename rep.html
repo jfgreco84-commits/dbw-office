@@ -28,7 +28,7 @@ header{background:linear-gradient(135deg,#1a1f2e,#0d1520);border-bottom:2px soli
 .hero-card.secondary .label{font-size:10px}
 .hero-card.secondary .sub{font-size:10px}
 @media(max-width:600px){.hero{grid-template-columns:repeat(2,1fr)}.hero-card.primary{grid-column:span 2}.hero-card.secondary{grid-column:span 1}}
-.section-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#f5a623;padding:10px 0 8px;margin:24px 0 14px;border-bottom:2px solid #f5a62333;font-size:13px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin:24px 0 12px;padding-bottom:6px;border-bottom:1px solid #2a3040}
+.section-title{font-size:13px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid #2a3040}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{background:#1a1f2e;color:#8892a4;text-align:right;padding:8px 10px;font-size:11px;text-transform:uppercase;letter-spacing:1px}
 th:first-child{text-align:left}
@@ -83,6 +83,44 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
 .bonus-atr{font-size:12px;color:#8892a4;margin-top:2px}
 .bonus-atr strong{color:#f5a623}
 
+.gsm-section{margin-top:40px;padding-top:24px;border-top:1px solid #2a3040}
+.gsm-title{font-size:12px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.gsm-main-title{font-size:13px;font-weight:800;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:16px}
+.gsm-card{background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center}
+.gsm-card .gc-label{font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.gsm-card .gc-value{font-size:19px;font-weight:900;margin:4px 0}
+.gsm-card .gc-sub{font-size:10px;color:#5a6375;margin-top:2px}
+.gsm-card.gc-green .gc-value{color:#4caf7d}
+.gsm-card.gc-orange .gc-value{color:#f5a623}
+.gsm-card.gc-earned{background:#1a2a1a;border-color:#2a4a2a}
+.gsm-card.gc-earned .gc-value{color:#4caf7d}
+.gsm-card2{display:grid;gap:10px;margin-bottom:20px}
+.gsm-card2.cols2{grid-template-columns:repeat(2,1fr)}
+.gsm-card2.cols4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:600px){.gsm-card2.cols4{grid-template-columns:repeat(2,1fr)}}
+.gsm-bar-wrap{margin-bottom:16px}
+.gsm-bar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.gsm-bar-label{font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px}
+.gsm-bar-status{font-size:11px;font-weight:700}
+.gsm-bar-track{background:#1a2030;border-radius:4px;height:10px;position:relative}
+.gsm-bar-fill{height:100%;border-radius:4px}
+.gsm-bar-marker{position:absolute;top:-3px;width:2px;height:16px;background:#ffffff33;border-radius:1px}
+.gsm-bar-foot{display:flex;justify-content:space-between;margin-top:3px}
+.gsm-bar-foot span{font-size:10px;color:#5a6375}
+.gsm-proj{background:#0d1117;border:2px solid #4caf7d;border-radius:10px;padding:18px;text-align:center;margin-top:16px;margin-bottom:28px}
+.gsm-proj .gp-label{font-size:10px;color:#4caf7d;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px}
+.gsm-proj .gp-value{font-size:38px;font-weight:900;color:#4caf7d}
+.gsm-proj .gp-sub{font-size:11px;color:#5a6375;margin-top:4px}
+.gsm-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.gsm-table{width:100%;border-collapse:collapse;font-size:13px}
+.gsm-table th{background:#0d1117;color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:9px 10px;text-align:right;font-weight:600}
+.gsm-table th:first-child{text-align:left}
+.gsm-table td{padding:9px 10px;text-align:right;border-bottom:1px solid #181e2c}
+.gsm-table td:first-child{text-align:left}
+.gsm-table tr:hover td{background:#1a2030}
+.gsm-table .gsm-me td{background:#1a2a1a;outline:1px solid #4caf7d}
+.gsm-table .gsm-total td{background:#0d1117;border-top:2px solid #4caf7d;font-weight:900}
+.gsm-note{font-size:10px;color:#5a6375;margin-top:8px}
 #daily-msg{background:#12172a;border:1px solid #2a3040;border-left:4px solid #f5a623;border-radius:10px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px}
 .dm-icon{font-size:22px;line-height:1;flex-shrink:0;margin-top:2px}
 .dm-text{font-size:14px;color:#c8d0e0;line-height:1.6;font-style:italic}
@@ -105,7 +143,7 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
   <div class="section-title">Monthly Breakdown — 2026 YTD</div>
   <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="monthly-table">
     <thead><tr>
-      <th>Month</th><th>Gross Sales</th><th>Returns</th><th>Collections</th><th>Net Sales</th><th>COGS</th><th>Net Profit</th><th>M/U</th>
+      <th>Month</th><th>Gross Sales</th><th>Returns</th><th>Collections</th><th>Net Sales</th><th>COGS</th><th>Gross Profit</th><th>M/U</th>
     </tr></thead>
     <tbody id="monthly-body"></tbody>
   </table></div>
@@ -205,7 +243,7 @@ function renderBonus(repId){
 }
 
 function fmt$(n){return n==null||isNaN(n)?'—':'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
-function muClass(mu){return mu>=1.8?'mu-hi':mu>=1.6?'mu-mid':'mu-lo'}
+function muClass(mu){return mu>=1.75?'mu-hi':mu>=1.60?'mu-mid':'mu-lo'}
 
 const params=new URLSearchParams(location.search);
 const repId=params.get('id')||params.get('rep');
@@ -223,7 +261,6 @@ const mu=ytd.mu||0;
 const netSales=ytd.net_sales||0;
 const grossSales=ytd.sales||0;
 const cogs=ytd.cogs||0;
-const netProfit=netSales-cogs;
 const totalRet=grossSales-netSales-(ytd.collections||0);
 
 // Monthly totals for collections
@@ -232,16 +269,18 @@ let totCollections=0;
 
 const ytdNetProfit=grossSales-cogs-comm;
 const ytdBonus=D.bonus_ytd&&D.bonus_ytd[repId]!=null?D.bonus_ytd[repId]:null;
-document.getElementById('hero').innerHTML=[
+const isGSM=(repId==='W603'||repId==='W784');
+const heroCards=[
   {label:'YTD Net Sales',value:fmt$(netSales),sub:'Gross: '+fmt$(grossSales),cls:'primary'},
-  {label:'Avg M/U',value:mu.toFixed(3),sub:'From source files',cls:'primary blue'},
+  {label:'Avg M/U',value:mu.toFixed(3),sub:mu>=1.75?'▲ Above bonus threshold':mu>=1.60?'Watch markup trend':'▼ Below target',cls:('primary '+(mu>=1.75?'green':mu>=1.60?'':'red')).trim()},
   {label:'YTD COGS',value:fmt$(cogs),sub:'Cost of goods sold',cls:'secondary'},
   {label:'YTD Returns',value:fmt$(totalRet),sub:'Returns & credits',cls:'secondary red'},
   {label:'YTD Collections',value:fmt$(totCollections),sub:'Collected on old invoices',cls:'secondary red'},
   {label:'YTD Commission',value:fmt$(comm),sub:'Sum of payroll checks',cls:'secondary green'},
   {label:'YTD Bonus',value:ytdBonus!=null?fmt$(ytdBonus):'—',sub:ytdBonus!=null?'Submitted by GSM':'Pending — submit after month end',cls:'secondary green'},
-  {label:'YTD Net Profit*',value:ytdBonus!=null?fmt$(ytdNetProfit-ytdBonus):fmt$(ytdNetProfit),sub:ytdBonus!=null?'Gross − COGS − Comm − Bonus':'Gross − COGS − Commission | Bonus pending',cls:'secondary green'},
-].map(h=>`<div class="hero-card ${h.cls}"><div class="label">${h.label}</div><div class="value">${h.value}</div>${h.sub?'<div class="sub">'+h.sub+'</div>':''}</div>`).join('');
+];
+if(isGSM){heroCards.push({label:'YTD Net Profit*',value:ytdBonus!=null?fmt$(ytdNetProfit-ytdBonus):fmt$(ytdNetProfit),sub:ytdBonus!=null?'Gross − COGS − Comm − Bonus':'Gross − COGS − Commission | Bonus pending',cls:'secondary green'});}
+document.getElementById('hero').innerHTML=heroCards.map(h=>`<div class="hero-card ${h.cls}"><div class="label">${h.label}</div><div class="value">${h.value}</div>${h.sub?'<div class="sub">'+h.sub+'</div>':''}</div>`).join('');
 
 // Monthly table
 const monthData={};
@@ -252,9 +291,9 @@ D.months.forEach(m=>{
   const mn=D.month_names[m];
   if(!r){mHtml+=`<tr><td>${mn}</td><td colspan="7" class="no-data" style="text-align:center">—</td></tr>`;return;}
   const ret=r.returns||0, coll=r.collections||0, net=r.net_sales||0, gross=r.sales||0, c=r.cogs||0;
-  const np=net-c;
+  const grossP=net-c; // gross profit per month (net_sales − cogs)
   const rawMu=r.mu||0;
-  totGross+=gross;totRets+=ret;totColls+=coll;totNet+=net;totCogs+=c;totNetP+=np;
+  totGross+=gross;totRets+=ret;totColls+=coll;totNet+=net;totCogs+=c;totNetP+=grossP;
   mHtml+=`<tr>
     <td>${mn}</td>
     <td>${fmt$(gross)}</td>
@@ -262,7 +301,7 @@ D.months.forEach(m=>{
     <td style="color:#e05555">${coll?fmt$(coll):'—'}</td>
     <td style="font-weight:600">${fmt$(net)}</td>
     <td>${fmt$(c)}</td>
-    <td style="color:#4caf7d">${fmt$(np)}</td>
+    <td style="color:#4caf7d">${fmt$(grossP)}</td>
     <td><span class="mu-chip ${muClass(rawMu)}">${rawMu.toFixed(3)}</span></td>
   </tr>`;
 });
@@ -289,7 +328,7 @@ let html='';
   html+=`<div class="period-card">
   <div class="period-header" onclick="toggle(this)">
     <div><span class="period-payday">📅 Payday: ${pd}</span><span class="hint" style="font-size:11px;color:#5a6375;margin-left:10px">▼ show detail</span></div>
-    <div class="period-earned" style="color:${gt==null?'#4caf7d':gt<0?'#e05555':gt===0?'#8892a4':'#4caf7d'}">${gt!=null?fmt$(gt):'—'}</div>
+    <div class="period-earned" style="color:${gt==null?'#5a6375':gt<0?'#e05555':gt===0?'#8892a4':'#4caf7d'}">${gt!=null?fmt$(gt):'—'}</div>
   </div>
   <div class="period-body">`;
   if(!pr||!pr.daily){html+='<p class="no-data">No data for this period.</p>';}
@@ -329,7 +368,7 @@ let html='';
     html+=`<div class="summary-row"><span>Gross Commission</span><span>${fmt$(pr.gross_commission)}</span></div>`;
     const retAmt=(pr.line_items||[]).filter(x=>x.section==='Return').reduce((a,x)=>a+x.amount,0);
     if(retAmt) html+=`<div class="summary-row"><span style="color:#e05555">Returns</span><span style="color:#e05555">${fmt$(retAmt)}</span></div>`;
-    html+=`<div class="summary-row"><span style="font-size:14px">💵 Total Earned This Period</span><span style="color:${pr.grand_total<0?'#e05555':pr.grand_total===0?'#8892a4':'#4caf7d'};font-size:16px">${fmt$(pr.grand_total)}</span></div>`;
+    html+=`<div class="summary-row"><span style="font-size:14px">💵 Total Earned This Period</span><span style="color:${pr.grand_total<0?'#e05555':pr.grand_total===0?'#8892a4':'#4caf7d'};font-size:15px;font-weight:900">${fmt$(pr.grand_total)}</span></div>`;
     html+='</div>';
   }
   html+='</div></div>';
@@ -418,18 +457,18 @@ if(repId==='W603'||repId==='W784'){
     const ahead=current/paced>=DBW_DAYS_ELAPSED/DBW_DAYS_TOTAL;
     const status=ahead?'▲ AHEAD OF PACE':'▼ BEHIND PACE';
     const sc=ahead?'#4caf7d':'#f5a623';
-    return '<div style="margin-bottom:16px">'+
-      '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
-        '<span style="font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">'+label+'</span>'+
-        '<span style="font-size:11px;color:'+sc+';font-weight:700">'+status+' | Proj EOY: '+fmt$(paced)+'</span>'+
+    return '<div class="gsm-bar-wrap">'+
+      '<div class="gsm-bar-row">'+
+        '<span class="gsm-bar-label">'+label+'</span>'+
+        '<span class="gsm-bar-status" style="color:'+sc+'">'+status+' | Proj EOY: '+fmt$(paced)+'</span>'+
       '</div>'+
-      '<div style="position:relative;background:#1a2030;border-radius:4px;height:10px">'+
-        '<div style="background:'+barColor+';width:'+valPct+'%;height:100%;border-radius:4px"></div>'+
-        '<div style="position:absolute;top:-3px;left:'+yearPct+'%;width:2px;height:16px;background:#ffffff33;border-radius:1px"></div>'+
+      '<div class="gsm-bar-track">'+
+        '<div class="gsm-bar-fill" style="background:'+barColor+';width:'+valPct+'%"></div>'+
+        '<div class="gsm-bar-marker" style="left:'+yearPct+'%"></div>'+
       '</div>'+
-      '<div style="display:flex;justify-content:space-between;margin-top:3px">'+
-        '<span style="font-size:10px;color:#5a6375">YTD: '+fmt$(current)+' ('+valPct+'% of EOY pace)</span>'+
-        '<span style="font-size:10px;color:#5a6375">Year: '+yearPct+'% done</span>'+
+      '<div class="gsm-bar-foot">'+
+        '<span>YTD: '+fmt$(current)+' ('+valPct+'% of EOY pace)</span>'+
+        '<span>Year: '+yearPct+'% done</span>'+
       '</div>'+
     '</div>';
   }
@@ -443,40 +482,40 @@ if(repId==='W603'||repId==='W784'){
   ];
   const qCardsHtml=quarters.map(q=>{
     if(q.done){
-      return '<div style="background:#1a2a1a;border:1px solid #2a4a2a;border-radius:8px;padding:12px;text-align:center">'+
-        '<div style="font-size:10px;color:#4caf7d;font-weight:700;text-transform:uppercase;letter-spacing:1px">'+q.q+' ✓ EARNED</div>'+
-        '<div style="font-size:22px;font-weight:900;color:#4caf7d;margin:4px 0">'+fmt$(q.bonus)+'</div>'+
-        '<div style="font-size:10px;color:#5a6375">Office: '+fmt$(q.net)+'</div>'+
+      return '<div class="gsm-card gc-earned">'+
+        '<div class="gc-label">'+q.q+' ✓ Earned</div>'+
+        '<div class="gc-value">'+fmt$(q.bonus)+'</div>'+
+        '<div class="gc-sub">Office: '+fmt$(q.net)+'</div>'+
       '</div>';
     }
     const pct=q.net&&q.net>0?Math.min(Math.round((q.net/Q_LOW)*100),100):0;
     const toLow=q.net&&q.net>0?Math.max(0,Q_LOW-q.net):null;
     const toHigh=q.net&&q.net>0?Math.max(0,Q_HIGH-q.net):null;
     const inProg=q.q==='Q2'&&q.net>0;
-    return '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
-      '<div style="font-size:10px;color:#8892a4;font-weight:700;text-transform:uppercase;letter-spacing:1px">'+q.q+(inProg?' IN PROGRESS':' UPCOMING')+'</div>'+
+    return '<div class="gsm-card">'+
+      '<div class="gc-label">'+q.q+(inProg?' In Progress':' Upcoming')+'</div>'+
       (inProg?
-        '<div style="font-size:16px;font-weight:800;color:#f5a623;margin:4px 0">'+fmt$(q.net)+'</div>'+
+        '<div class="gc-value" style="color:#f5a623">'+fmt$(q.net)+'</div>'+
         '<div style="background:#1a2030;border-radius:3px;height:5px;margin:6px 0;overflow:hidden"><div style="background:#f5a623;width:'+pct+'%;height:100%;border-radius:3px"></div></div>'+
-        '<div style="font-size:10px;color:#5a6375">Need '+fmt$(toLow)+' more for +$9K | '+fmt$(toHigh)+' for +$14K</div>'
+        '<div class="gc-sub">Need '+fmt$(toLow)+' for +$9K | '+fmt$(toHigh)+' for +$14K</div>'
       :
-        '<div style="font-size:13px;font-weight:700;color:#3a4255;margin:8px 0">TBD</div>'+
-        '<div style="font-size:10px;color:#3a4255">+$9K at $1.25M | +$14K at $1.5M</div>'
+        '<div class="gc-value" style="color:#3a4255;font-size:16px">—</div>'+
+        '<div class="gc-sub" style="color:#3a4255">+$9K at $1.25M | +$14K at $1.5M</div>'
       )+
     '</div>';
   }).join('');
 
   // ── MY PERSONAL INCOME CARDS ─────────────────────────────────────────────────
   const myPersonalHtml=
-    '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
-      '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Commission YTD</div>'+
-      '<div style="font-size:20px;font-weight:900;color:#4caf7d;margin:4px 0">'+fmt$(myComm)+'</div>'+
-      '<div style="font-size:10px;color:#5a6375">Proj EOY: '+fmt$(commPaced)+'</div>'+
+    '<div class="gsm-card gc-green">'+
+      '<div class="gc-label">Commission YTD</div>'+
+      '<div class="gc-value">'+fmt$(myComm)+'</div>'+
+      '<div class="gc-sub">Proj EOY: '+fmt$(commPaced)+'</div>'+
     '</div>'+
-    '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
-      '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Indiv Sales Bonus YTD</div>'+
-      '<div style="font-size:20px;font-weight:900;color:'+( myIndivBonus!=null?'#4caf7d':'#3a4255')+';margin:4px 0">'+( myIndivBonus!=null?fmt$(myIndivBonus):'TBD')+'</div>'+
-      '<div style="font-size:10px;color:#5a6375">Submitted after month end</div>'+
+    '<div class="gsm-card '+(myIndivBonus!=null?'gc-green':'')+'">'+
+      '<div class="gc-label">Indiv Sales Bonus YTD</div>'+
+      '<div class="gc-value" style="color:'+(myIndivBonus!=null?'#4caf7d':'#3a4255')+'">'+( myIndivBonus!=null?fmt$(myIndivBonus):'TBD')+'</div>'+
+      '<div class="gc-sub">Submitted after month end</div>'+
     '</div>';
 
   // ── W784-ONLY: GUARANTEED INCOME ─────────────────────────────────────────────
@@ -484,17 +523,17 @@ if(repId==='W603'||repId==='W784'){
   const salEOY=PP_TOTAL*SAL_PER_CHECK, guarEOY=PP_TOTAL*GUAR_PER_CHECK;
   const guarHtml=repId==='W784'?
     '<div style="margin-bottom:20px">'+
-      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">📋 Guaranteed Income</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:10px">'+
-        '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
-          '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Salary YTD</div>'+
-          '<div style="font-size:20px;font-weight:900;color:#f5a623;margin:4px 0">'+fmt$(salYTD)+'</div>'+
-          '<div style="font-size:10px;color:#5a6375">'+ppElapsed+' checks × $3,350 | EOY: '+fmt$(salEOY)+'</div>'+
+      '<div class="gsm-title">📋 Guaranteed Income</div>'+
+      '<div class="gsm-card2 cols2">'+
+        '<div class="gsm-card gc-orange">'+
+          '<div class="gc-label">Salary YTD</div>'+
+          '<div class="gc-value">'+fmt$(salYTD)+'</div>'+
+          '<div class="gc-sub">'+ppElapsed+' checks × $3,350 | EOY: '+fmt$(salEOY)+'</div>'+
         '</div>'+
-        '<div style="background:#1a1f2e;border:1px solid #2a3040;border-radius:8px;padding:12px;text-align:center">'+
-          '<div style="font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px">Guar. Bonus YTD</div>'+
-          '<div style="font-size:20px;font-weight:900;color:#f5a623;margin:4px 0">'+fmt$(guarYTD)+'</div>'+
-          '<div style="font-size:10px;color:#5a6375">'+ppElapsed+' checks × $1,350 | EOY: '+fmt$(guarEOY)+'</div>'+
+        '<div class="gsm-card gc-orange">'+
+          '<div class="gc-label">Guar. Bonus YTD</div>'+
+          '<div class="gc-value">'+fmt$(guarYTD)+'</div>'+
+          '<div class="gc-sub">'+ppElapsed+' checks × $1,350 | EOY: '+fmt$(guarEOY)+'</div>'+
         '</div>'+
       '</div>'+
     '</div>'
@@ -509,19 +548,19 @@ if(repId==='W603'||repId==='W784'){
   const totalAhead=totalYTD/totalEOY>=DBW_DAYS_ELAPSED/DBW_DAYS_TOTAL;
 
   const projHtml=
-    '<div style="background:#0d1117;border:2px solid #4caf7d;border-radius:10px;padding:16px;text-align:center;margin-top:16px">'+
-      '<div style="font-size:10px;color:#4caf7d;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">🎯 Projected 2026 Total Earnings</div>'+
-      '<div style="font-size:36px;font-weight:900;color:#4caf7d">'+fmt$(totalEOY)+'</div>'+
-      '<div style="font-size:11px;color:#5a6375;margin-top:4px">'+
-        (repId==='W784'?'Salary $'+salEOY.toLocaleString()+' + Guar Bonus $'+guarEOY.toLocaleString()+' + ':'')+
-        'Q Bonuses $'+qBonusProjected.toLocaleString()+' (4×low) + Comm $'+Math.round(commPaced).toLocaleString()+
+    '<div class="gsm-proj">'+
+      '<div class="gp-label">🎯 Projected 2026 Total Earnings</div>'+
+      '<div class="gp-value">'+fmt$(totalEOY)+'</div>'+
+      '<div class="gp-sub">'+
+        (repId==='W784'?'Salary $'+salEOY.toLocaleString()+' + Guar $'+guarEOY.toLocaleString()+' + ':'')+
+        'Q Bonuses $'+qBonusProjected.toLocaleString()+' (conservative 4×low) + Commission $'+Math.round(commPaced).toLocaleString()+
       '</div>'+
-      '<div style="margin-top:12px;background:#1a2030;border-radius:4px;height:10px">'+
+      '<div style="margin-top:12px;background:#1a2030;border-radius:4px;height:8px">'+
         '<div style="background:#4caf7d;width:'+totalPacePct+'%;height:100%;border-radius:4px"></div>'+
       '</div>'+
-      '<div style="display:flex;justify-content:space-between;margin-top:4px">'+
-        '<span style="font-size:10px;color:#5a6375">YTD: '+fmt$(totalYTD)+' ('+totalPacePct+'%)</span>'+
-        '<span style="font-size:10px;color:'+(totalAhead?'#4caf7d':'#f5a623')+'">'+( totalAhead?'▲ AHEAD':'▼ BEHIND')+' | Year '+yearPctNum+'% done</span>'+
+      '<div class="gsm-bar-foot" style="margin-top:4px">'+
+        '<span>YTD: '+fmt$(totalYTD)+' ('+totalPacePct+'%)</span>'+
+        '<span style="color:'+(totalAhead?'#4caf7d':'#f5a623')+'">'+(totalAhead?'▲ AHEAD':'▼ BEHIND')+' | Year '+yearPctNum+'% done</span>'+
       '</div>'+
     '</div>';
 
@@ -539,55 +578,53 @@ if(repId==='W603'||repId==='W784'){
     const grossP=gross-cogs, netP=gross-cogs-c-(bon||0);
     ptGross+=gross;ptCogs+=cogs;ptComm+=c;ptBonus+=(bon||0);
     const isMe=rid===repId;
-    rowsHtml+='<tr style="'+(isMe?'background:#1a2a1a;outline:1px solid #4caf7d;':'')+'">'  +
-      '<td style="text-align:left;font-weight:'+(isMe?900:600)+';color:'+(isMe?'#f5a623':'#e8eaf0')+'">'+r.name+(isMe?' ◀ YOU':'')+'</td>'+
+    rowsHtml+='<tr class="'+(isMe?'gsm-me':'')+'">'  +
+      '<td style="font-weight:'+(isMe?900:600)+';color:'+(isMe?'#f5a623':'#e8eaf0')+'">'+r.name+(isMe?' ◀':'')+'</td>'+
       '<td>'+fmt$(gross)+'</td><td>'+fmt$(cogs)+'</td>'+
       '<td style="color:#4caf7d">'+fmt$(grossP)+'</td>'+
       '<td style="color:#4caf7d">'+fmt$(c)+'</td>'+
-      '<td style="color:#f5a623">'+(bon!=null?fmt$(bon):'<span style="color:#5a6375;font-size:11px">TBD</span>')+'</td>'+
+      '<td style="color:#f5a623">'+(bon!=null?fmt$(bon):'<span style="color:#5a6375">TBD</span>')+'</td>'+
       '<td style="color:#4caf7d;font-weight:800">'+fmt$(netP)+'</td>'+
     '</tr>';
   });
   const ptNetP=ptGross-ptCogs-ptComm-ptBonus;
-  rowsHtml+='<tr style="background:#0d1117;border-top:2px solid #4caf7d;font-weight:900">'+
-    '<td style="text-align:left;color:#f5a623">OFFICE TOTAL</td>'+
+  rowsHtml+='<tr class="gsm-total">'+
+    '<td style="color:#f5a623">OFFICE TOTAL</td>'+
     '<td>'+fmt$(ptGross)+'</td><td>'+fmt$(ptCogs)+'</td>'+
     '<td style="color:#4caf7d">'+fmt$(ptGross-ptCogs)+'</td>'+
     '<td style="color:#4caf7d">'+fmt$(ptComm)+'</td>'+
-    '<td style="color:#f5a623">'+(ptBonus>0?fmt$(ptBonus):'<span style="color:#5a6375;font-size:11px">TBD</span>')+'</td>'+
-    '<td style="color:#4caf7d;font-size:16px">'+fmt$(ptNetP)+'</td>'+
+    '<td style="color:#f5a623">'+(ptBonus>0?fmt$(ptBonus):'<span style="color:#5a6375">TBD</span>')+'</td>'+
+    '<td style="color:#4caf7d;font-size:15px">'+fmt$(ptNetP)+'</td>'+
   '</tr>';
 
   // ── INJECT ───────────────────────────────────────────────────────────────────
   document.getElementById('gsm-section').innerHTML=
-    '<div style="margin-top:40px;padding-top:24px;border-top:1px solid #2a3040">'+
-      '<div style="font-size:11px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:14px">🔒 MY 2026 EARNINGS — GSM VIEW</div>'+
+    '<div class="gsm-section">'+
+      '<div class="gsm-main-title">🔒 My 2026 Earnings — GSM View</div>'+
       guarHtml+
-      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">🏆 Quarterly Manager Bonuses</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">'+qCardsHtml+'</div>'+
-      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">💰 My Personal Income</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px">'+myPersonalHtml+'</div>'+
-      '<div style="font-size:11px;font-weight:700;color:#8892a4;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">📈 Pace to End of Year</div>'+
+      '<div class="gsm-title">🏆 Quarterly Manager Bonuses</div>'+
+      '<div class="gsm-card2 cols4">'+qCardsHtml+'</div>'+
+      '<div class="gsm-title">💰 My Personal Income</div>'+
+      '<div class="gsm-card2 cols2">'+myPersonalHtml+'</div>'+
+      '<div class="gsm-title">📈 Pace to End of Year</div>'+
       paceBar('YTD Net Sales Volume',netSales,salesPaced,'#f5a623')+
       paceBar('YTD Commission',myComm,commPaced,'#4caf7d')+
       projHtml+
-      '<div style="margin-top:32px;padding-top:20px;border-top:1px solid #2a3040">'+
-        '<div style="font-size:11px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px">📊 Office Profit Breakdown — All Reps</div>'+
-        '<div style="font-size:10px;color:#5a6375;margin-bottom:12px">Gross Sales − COGS − Commission − Bonus = Net Profit</div>'+
-        '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'+
-        '<table style="width:100%;border-collapse:collapse;font-size:13px">'+
-          '<thead><tr style="background:#0d1117">'+
-            '<th style="text-align:left;padding:8px 10px;color:#8892a4;font-size:10px;text-transform:uppercase">Rep</th>'+
-            '<th style="padding:8px;color:#8892a4;font-size:10px;text-transform:uppercase">Gross Sales</th>'+
-            '<th style="padding:8px;color:#8892a4;font-size:10px;text-transform:uppercase">COGS</th>'+
-            '<th style="padding:8px;color:#4caf7d;font-size:10px;text-transform:uppercase">Gross Profit</th>'+
-            '<th style="padding:8px;color:#4caf7d;font-size:10px;text-transform:uppercase">Commission</th>'+
-            '<th style="padding:8px;color:#f5a623;font-size:10px;text-transform:uppercase">Bonus</th>'+
-            '<th style="padding:8px;color:#4caf7d;font-size:10px;text-transform:uppercase;font-weight:900">Net Profit*</th>'+
+      '<div style="padding-top:20px;border-top:1px solid #2a3040">'+
+        '<div class="gsm-main-title">📊 Office Profit Breakdown — All Reps</div>'+
+        '<div class="gsm-note" style="margin-bottom:12px">Gross Sales − COGS − Commission − Bonus = Net Profit</div>'+
+        '<div class="gsm-table-wrap">'+
+        '<table class="gsm-table">'+
+          '<thead><tr>'+
+            '<th>Rep</th><th>Gross Sales</th><th>COGS</th>'+
+            '<th style="color:#4caf7d">Gross Profit</th>'+
+            '<th style="color:#4caf7d">Commission</th>'+
+            '<th style="color:#f5a623">Bonus</th>'+
+            '<th style="color:#4caf7d;font-weight:900">Net Profit*</th>'+
           '</tr></thead>'+
           '<tbody>'+rowsHtml+'</tbody>'+
         '</table></div>'+
-        '<div style="font-size:10px;color:#5a6375;margin-top:8px">* Bonus TBD = submitted after month end closes</div>'+
+        '<div class="gsm-note">* Bonus TBD = submitted after month end closes</div>'+
       '</div>'+
     '</div>';
 }
