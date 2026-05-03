@@ -254,15 +254,16 @@ D.months.forEach(m=>{
     <td><span class="mu-chip ${muClass(rawMu)}">${rawMu.toFixed(3)}</span></td>
   </tr>`;
 });
+const totMU = totCogs > 0 ? totNet / totCogs : 0;
 mHtml+=`<tr class="total-tr">
-  <td>TOTAL</td>
+  <td>YTD TOTAL</td>
   <td>${fmt$(totGross)}</td>
-  <td style="color:#e05555">${fmt$(totRets)}</td>
+  <td style="color:#e05555">${totRets?fmt$(totRets):'—'}</td>
   <td style="color:#4a9eff">${totColls?fmt$(totColls):'—'}</td>
   <td>${fmt$(totNet)}</td>
   <td>${fmt$(totCogs)}</td>
   <td style="color:#4caf7d">${fmt$(totNetP)}</td>
-  <td>—</td>
+  <td><span class="mu-chip ${muClass(totMU)}">${totMU.toFixed(3)}</span></td>
 </tr>`;
 document.getElementById('monthly-body').innerHTML=mHtml;
 
