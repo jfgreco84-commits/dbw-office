@@ -285,10 +285,10 @@ document.title=rep.name+' — DBW';
 
 const ytd=D.ytd[repId]||{};
 const comm=D.comm_ytd[repId]||0;
-const mu=cogs>0?netSales/cogs:(ytd.mu||0);
 const netSales=ytd.net_sales||0;
 const grossSales=ytd.sales||0;
 const cogs=ytd.cogs||0;
+const mu=cogs>0?netSales/cogs:(ytd.mu||0);
 const totalRet=grossSales-netSales-(ytd.collections||0);
 
 // Monthly totals for collections
