@@ -154,13 +154,6 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
 <div class="section-title">2026 YTD Snapshot</div>
   <div id="daily-msg"></div>
   <div class="hero" id="hero"></div>
-  <div class="section-title">Monthly Breakdown — 2026 YTD</div>
-  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table id="monthly-table">
-    <thead><tr>
-      <th>Month</th><th>Gross Sales</th><th>Returns</th><th>Collections</th><th>Net Sales</th><th>COGS</th><th>Gross Profit</th><th>M/U</th>
-    </tr></thead>
-    <tbody id="monthly-body"></tbody>
-  </table></div>
   <div class="section-title">Pay Periods — Shipped &amp; Commission Paid</div>
   <div id="periods"></div>
 </div>
@@ -189,6 +182,7 @@ const BONUS_DATA={
   "W962":{tiers:[{t:15000,p:2},{t:25000,p:3},{t:35000,p:4}],atr:null,pending:true},
   "W963":{tiers:[{t:10000,p:2},{t:18000,p:3},{t:25000,p:4}],atr:null,pending:true},
   "W973":{tiers:[{t:25000,p:2},{t:40000,p:3},{t:55000,p:4}],atr:null,pending:true},
+  "W961":{tiers:[{t:10000,p:2},{t:18000,p:3},{t:25000,p:4}],atr:null,pending:true},
   "W983":{tiers:[{t:25000,p:2},{t:40000,p:3},{t:55000,p:4}],atr:null,pending:true},
 };
 
@@ -371,42 +365,6 @@ if(mayMtdEl){
   </div>`;
 }
 
-
-// Monthly table
-const monthData={};
-(D.monthly||[]).filter(r=>r.rep_id===repId).forEach(r=>{monthData[r.month]=r;});
-let mHtml='',totGross=0,totRets=0,totColls=0,totNet=0,totCogs=0,totNetP=0;
-D.months.forEach(m=>{
-  const r=monthData[m];
-  const mn=D.month_names[m];
-  if(!r){mHtml+=`<tr><td>${mn}</td><td colspan="7" class="no-data" style="text-align:center">—</td></tr>`;return;}
-  const ret=r.returns||0, coll=r.collections||0, net=r.net_sales||0, gross=r.sales||0, c=r.cogs||0;
-  const grossP=net-c; // gross profit per month (net_sales − cogs)
-  const rawMu=r.mu||0;
-  totGross+=gross;totRets+=ret;totColls+=coll;totNet+=net;totCogs+=c;totNetP+=grossP;
-  mHtml+=`<tr>
-    <td>${mn}</td>
-    <td>${fmt$(gross)}</td>
-    <td style="color:#e05555">${ret?fmt$(ret):'—'}</td>
-    <td style="color:#e05555">${coll?fmt$(coll):'—'}</td>
-    <td style="font-weight:600">${fmt$(net)}</td>
-    <td>${fmt$(c)}</td>
-    <td style="color:#4caf7d">${fmt$(grossP)}</td>
-    <td><span class="mu-chip ${muClass(rawMu)}">${rawMu.toFixed(3)}</span></td>
-  </tr>`;
-});
-const totMU = totCogs > 0 ? totGross / totCogs : 0;
-mHtml+=`<tr class="total-tr">
-  <td>YTD TOTAL</td>
-  <td>${fmt$(totGross)}</td>
-  <td style="color:#e05555">${totRets?fmt$(totRets):'—'}</td>
-  <td style="color:#e05555">${totColls?fmt$(totColls):'—'}</td>
-  <td>${fmt$(totNet)}</td>
-  <td>${fmt$(totCogs)}</td>
-  <td style="color:#4caf7d">${fmt$(totNetP)}</td>
-  <td><span class="mu-chip ${muClass(totMU)}">${totMU.toFixed(3)}</span></td>
-</tr>`;
-document.getElementById('monthly-body').innerHTML=mHtml;
 
 // Pay periods
 const payroll={};
