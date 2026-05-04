@@ -161,7 +161,7 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
     </tr></thead>
     <tbody id="monthly-body"></tbody>
   </table></div>
-  <div class="section-title">Pay Periods — Commission Detail</div>
+  <div class="section-title">Pay Periods — Shipped &amp; Commission Paid</div>
   <div id="periods"></div>
 </div>
 <div style="text-align:center;padding:24px 0 40px;font-size:11px;color:#3a4255;letter-spacing:1px">DIAMOND BLADE WAREHOUSE &nbsp;·&nbsp; WISCONSIN OFFICE &nbsp;·&nbsp; 2026</div>
@@ -485,7 +485,7 @@ let html='';
 
   // ── LINE ITEMS (returns/holds/adj) ──
   if(pr&&pr.line_items&&pr.line_items.length){
-    html+=`<div class="sec-label" style="margin-top:14px">⚠️ Adjustments / Returns / Holds</div>`;
+    html+=`<div class="sec-label" style="margin-top:14px">📋 Payroll Adjustments (Returns / Holds)</div>`;
     html+=`<table class="inner"><thead><tr><th style="text-align:left">Cust#</th><th style="text-align:left">Inv#</th><th style="text-align:left">Type</th><th style="text-align:left">Note</th><th>Amount</th></tr></thead><tbody>`;
     pr.line_items.forEach(it=>{
       const tagCls=it.section==='Return'?'tag-ret':it.section==='Adjustment'?'tag-adj':it.section==='Hold'?'tag-hold':'tag-chew';
@@ -505,7 +505,7 @@ let html='';
   if(pr){
     const retAmt=(pr.line_items||[]).filter(x=>x.section==='Return').reduce((a,x)=>a+x.amount,0);
     html+=`<div style="margin-top:14px;padding-top:10px;border-top:1px solid #1e2435">`;
-    html+=`<div class="summary-row"><span>Gross Commission (from ship sheets)</span><span>${fmt$(pr.gross_commission)}</span></div>`;
+    html+=`<div class="summary-row"><span>Gross Commission (payroll recap)</span><span>${fmt$(pr.gross_commission)}</span></div>`;
     if(retAmt) html+=`<div class="summary-row"><span style="color:#e05555">Returns / Adjustments</span><span style="color:#e05555">${fmt$(retAmt)}</span></div>`;
     html+=`<div class="summary-row"><span style="font-size:14px">💵 Total Earned This Period</span><span style="color:${pr.grand_total<0?'#e05555':pr.grand_total===0?'#8892a4':'#4caf7d'};font-size:15px;font-weight:900">${fmt$(pr.grand_total)}</span></div>`;
     html+=`</div>`;
