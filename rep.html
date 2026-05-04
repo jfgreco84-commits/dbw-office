@@ -240,14 +240,11 @@ function renderBonus(repId){
   const s=new Date(cur.s),e=new Date(cur.e);
   s.setHours(0,0,0,0);e.setHours(0,0,0,0);
   const total=cur.d;
+  // Use server-supplied day number to avoid UTC timezone edge cases
   let elapsed,remaining;
   if(today<s){elapsed=0;remaining=total;}
   else if(today>=e){elapsed=total;remaining=0;}
-  else{
-    const frac=(today-s)/(e-s);
-    elapsed=Math.min(total-1,Math.round(frac*total));
-    remaining=total-elapsed;
-  }
+  else{elapsed=MAY_DAY;remaining=total-elapsed;}
   const pct=Math.min(100,Math.round((elapsed/total)*100));
   const colors=['#f5a623','#4caf7d','#4a9eff'];
   const labels=['LEVEL 1','LEVEL 2','TOP TIER'];
@@ -359,8 +356,9 @@ if(mayMtdEl){
         <div style="color:${mayMu>=1.75?'#4caf7d':mayMu>=1.60?'#f5a623':mayMu>0?'#e05555':'#5a6375'};font-size:20px;font-weight:900">${mayMu>0?mayMu.toFixed(3):'—'}</div>
       </div>
       <div style="background:#1a2535;border-radius:8px;padding:12px;text-align:center">
-        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Pace</div>
-        <div style="color:${maySell/Math.max(MAY_DAY,1)*(MAY_TOTAL_DAYS)>=(grossSales/86*MAY_TOTAL_DAYS*0.9)?'#4caf7d':'#f5a623'};font-size:14px;font-weight:900;padding-top:4px">${mayProjMonth>0?fmt$(maySell/MAY_DAY)+'/day':'Day 1 — No data yet'}</div>
+        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Monthly Goal</div>
+        <div style="color:#4caf7d;font-size:15px;font-weight:900;padding-top:2px">${(()=>{const bd=BONUS_DATA[repId];return bd&&bd.tiers&&bd.tiers.length?fmt$(bd.tiers[bd.tiers.length-1].t):'—';})()}</div>
+        <div style="color:#5a6375;font-size:10px;margin-top:2px">Top-tier target</div>
       </div>
     </div>
     <div style="background:#1a2535;border-radius:6px;height:10px;overflow:hidden;margin-bottom:6px">
@@ -368,7 +366,7 @@ if(mayMtdEl){
     </div>
     <div style="display:flex;justify-content:space-between;font-size:10px;color:#5a6375">
       <span>MTD: ${fmt$(maySell)} (${mayShipPct}% of projected)</span>
-      <span>Proj EOY rate: ${fmt$(mayProjMonth)} shipped this month</span>
+      <span>Goal: ${(()=>{const bd=BONUS_DATA[repId];return bd&&bd.tiers&&bd.tiers.length?fmt$(bd.tiers[bd.tiers.length-1].t)+' (top tier)':'See GSM for targets';})()}</span>
     </div>
   </div>`;
 }
