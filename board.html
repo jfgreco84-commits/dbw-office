@@ -3,492 +3,247 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>DBW Wisconsin — Live Sales Board</title>
+<title>DBW WI - Live Sales Board</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#08080f;color:#fff;font-family:'Arial Black',Arial,sans-serif;min-height:100vh;padding:6px;}
-
-/* TITLE */
-.board-title{
-  text-align:center;font-size:clamp(16px,3vw,30px);font-weight:900;
-  color:#00c8ff;text-shadow:0 0 20px rgba(0,200,255,0.5);
-  letter-spacing:3px;margin-bottom:6px;text-transform:uppercase;
-}
-
-/* NAV */
-.nav-bar{text-align:center;margin-bottom:6px;}
-.nav-link{
-  display:inline-block;padding:5px 16px;
-  background:#001a28;border:1px solid #00c8ff;border-radius:20px;
-  color:#00c8ff;font-size:11px;font-weight:900;text-decoration:none;margin:0 3px;
-}
-
-/* STATUS */
-.status{
-  display:flex;justify-content:space-between;
-  padding:2px 6px;font-size:10px;color:#444;margin-bottom:5px;
-}
-.dot-live{color:#00ff44;font-weight:bold;}
-
-/* TOP HEADER GRID — responsive */
-.top-header{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:4px;margin-bottom:6px;
-}
-@media(min-width:700px){.top-header{grid-template-columns:repeat(6,1fr);}}
-
-.hbox{
-  background:#0e0e1e;border:1px solid #1e1e3e;
-  border-radius:6px;padding:5px 8px;text-align:center;
-}
-.hbox .lbl{color:#666;font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;}
-.hbox .val{font-weight:900;margin-top:1px;line-height:1;}
-.hbox .sub{font-size:9px;color:#444;margin-top:1px;}
-
-.hbox.blue{border-color:#00c8ff;}.hbox.blue .val{color:#00c8ff;font-size:clamp(13px,2vw,20px);}
-.hbox.yellow{border-color:#aaaa00;background:#0c0c00;}.hbox.yellow .val{color:#dddd00;font-size:clamp(11px,1.5vw,15px);}
-.hbox.red{border-color:#ff4444;background:#120000;}.hbox.red .val{color:#ff4444;font-size:clamp(22px,4vw,40px);}
-.hbox.gold{border-color:#cc8800;}.hbox.gold .val{color:#ffaa00;font-size:clamp(11px,1.5vw,16px);}
-
-/* TABLE WRAPPER — horizontal scroll, sticky columns */
-.board-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:6px;}
-
-table{width:100%;border-collapse:collapse;font-size:clamp(11px,1.4vw,15px);}
-
-thead th{
-  padding:6px 4px;text-align:center;
-  border:1px solid #141428;white-space:nowrap;
-  font-size:clamp(9px,1.1vw,12px);font-weight:900;position:sticky;top:0;z-index:10;
-}
-.th-ytd{background:#080818;color:#444;min-width:70px;}
-.th-roster{
-  background:#0e0e28;color:#fff;min-width:110px;
-  border-right:2px solid #00c8ff !important;
-  position:sticky;left:70px;z-index:20;
-}
-.th-ytd-sticky{position:sticky;left:0;z-index:20;}
-.th-day{background:#091409;color:#00cc44;min-width:80px;}
-.th-day.today-hdr{background:#002800;color:#00ff44;border:1px solid #00ff44 !important;}
-.th-week{background:#141200;color:#ffcc00;min-width:85px;}
-.th-mtd{background:#001408;color:#00ff88;min-width:90px;}
-.th-shipped{background:#000e18;color:#00c8ff;min-width:85px;}
-.th-downs{background:#140000;color:#ff5555;min-width:75px;}
-.th-goal{background:#140800;color:#ff8800;min-width:85px;}
-.th-pct{background:#0e0014;color:#cc88ff;min-width:80px;}
-
-tbody tr{border-bottom:1px solid #111122;}
-tbody tr:hover{background:rgba(0,200,255,0.04);}
-tbody tr.r1{background:rgba(255,215,0,0.03);}
-tbody tr.r2{background:rgba(192,192,192,0.02);}
-tbody tr.r3{background:rgba(205,127,50,0.02);}
-
-td{padding:7px 5px;border:1px solid #111122;white-space:nowrap;}
-
-td.td-ytd{
-  color:#333;text-align:right;font-size:clamp(9px,1.1vw,12px);
-  background:#08080f;
-  position:sticky;left:0;z-index:5;
-  border-right:1px solid #1a1a2e;
-}
-td.td-roster{
-  background:#0a0a1e;color:#fff;font-weight:900;
-  text-align:center;font-size:clamp(10px,1.3vw,14px);
-  border-right:2px solid #00c8ff !important;
-  position:sticky;left:70px;z-index:5;
-}
-td.td-day{
-  text-align:right;cursor:pointer;
-  transition:background .15s;
-  min-height:38px;
-}
-td.td-day:hover{background:rgba(0,200,255,0.1);border-color:#00c8ff;}
-td.td-day.today-col{border-top:1px solid #00ff44 !important;border-bottom:1px solid #00ff44 !important;}
-.day-val-green{color:#00ff44;font-weight:900;}
-.day-val-red{color:#ff4444;font-weight:900;}
-.day-val-empty{color:#1e1e2e;}
-
-td.td-week{text-align:right;background:#0c0c00;color:#ffcc44;font-weight:900;}
-td.td-mtd{text-align:right;background:#00100a;color:#55ddaa;font-weight:900;}
-td.td-mtd.hit-goal{color:#00ff44 !important;text-shadow:0 0 8px rgba(0,255,68,.4);}
-td.td-shipped{text-align:right;background:#00080e;color:#00c8ff;font-weight:900;}
-td.td-downs{
-  text-align:right;background:#0e0000;color:#ff5555;
-  font-weight:900;cursor:pointer;
-}
-td.td-downs:hover{background:rgba(255,68,68,.12);}
-td.td-goal{text-align:right;background:#0e0800;color:#ff8800;font-weight:bold;}
-td.td-pct{text-align:center;background:#08000e;min-width:80px;}
-
-.medal{font-size:14px;margin-right:2px;}
-
-/* Progress bar */
-.pb{width:100%;height:4px;background:#1a1a2e;border-radius:3px;margin-top:3px;}
-.pb-fill{height:100%;border-radius:3px;transition:width .5s;}
-.pf-low{background:#ff4444;}
-.pf-mid{background:#ffaa00;}
-.pf-good{background:#00ff88;}
-.pf-over{background:linear-gradient(90deg,#ffaa00,#ffff44);}
-
-/* Totals footer */
-tfoot tr{background:#001400;}
-tfoot td{
-  color:#00ff44;font-weight:900;
-  padding:8px 5px;text-align:right;
-  border-top:2px solid #00ff44;
-  font-size:clamp(11px,1.5vw,16px);
-  white-space:nowrap;
-}
-tfoot td.td-ytd{background:#001400;color:#00ff44;position:sticky;left:0;z-index:5;}
-tfoot td.td-roster{
-  color:#00ff44;background:#001400;
-  border-right:2px solid #00c8ff !important;
-  text-align:center;position:sticky;left:70px;z-index:5;
-}
-
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:999;align-items:center;justify-content:center;}
-.overlay.on{display:flex;}
-.modal{
-  background:#0e0e20;border:2px solid #00c8ff;border-radius:14px;
-  padding:24px 28px;text-align:center;
-  width:clamp(280px,90vw,360px);
-}
-.modal h2{color:#00c8ff;font-size:clamp(14px,4vw,20px);margin-bottom:4px;}
-.modal p{color:#666;font-size:12px;margin-bottom:14px;line-height:1.4;}
-.modal input{
-  width:100%;padding:14px;font-size:clamp(22px,6vw,34px);
-  text-align:center;background:#050510;
-  border:2px solid #00c8ff;border-radius:8px;
-  color:#fff;margin-bottom:14px;
-  font-family:'Arial Black',Arial,sans-serif;
-}
-.modal input:focus{outline:none;border-color:#00ff88;box-shadow:0 0 12px rgba(0,255,136,.25);}
-.mbtns{display:flex;gap:10px;justify-content:center;}
-.btn{padding:11px 20px;border:none;border-radius:8px;font-size:14px;font-weight:900;cursor:pointer;min-width:90px;}
-.btn-save{background:#00aa44;color:#fff;}.btn-save:hover{background:#00cc55;}
-.btn-cancel{background:#282828;color:#aaa;}.btn-cancel:hover{background:#333;}
+body{background:#07070e;color:#e0e0e0;font-family:'Arial Black',Arial,sans-serif;min-height:100vh;}
+.board-title{text-align:center;font-size:clamp(16px,2.4vw,30px);font-weight:900;color:#00c8ff;text-shadow:0 0 30px rgba(0,200,255,.5);letter-spacing:4px;padding:10px 0 4px;text-transform:uppercase;}
+.nav-bar{text-align:center;padding:3px 0 7px;}
+.nav-btn{display:inline-block;padding:5px 18px;background:#001420;border:1px solid #00c8ff;border-radius:20px;color:#00c8ff;font-size:11px;font-weight:900;text-decoration:none;}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 5px 5px;}
+@media(min-width:700px){.info-grid{grid-template-columns:repeat(6,1fr);}}
+.ibox{background:#0c0c1c;border:1px solid #1a1a2e;border-radius:6px;padding:6px 7px;text-align:center;}
+.ilbl{color:#555;font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:.4px;display:block;}
+.ival{font-weight:900;line-height:1.1;display:block;margin-top:2px;}
+.isub{color:#444;font-size:8px;display:block;margin-top:1px;}
+.ic-blue  .ival{color:#00c8ff;font-size:clamp(12px,1.7vw,18px);}
+.ic-green{border-color:#00ff4430;} .ic-green .ival{color:#00ff44;font-size:clamp(20px,3vw,38px);}
+.ic-yellow .ival{color:#dddd00;font-size:clamp(10px,1.3vw,14px);}
+.ic-gold   .ival{color:#ffaa00;font-size:clamp(10px,1.3vw,14px);}
+.status-bar{display:flex;justify-content:space-between;padding:2px 8px 3px;font-size:10px;color:#333;}
+.dot{display:inline-block;width:7px;height:7px;background:#00ff44;border-radius:50%;box-shadow:0 0 8px #00ff44;animation:pulse 2s infinite;margin-right:4px;vertical-align:middle;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+.board-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 4px 8px;}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:7px 4px;text-align:center;border:1px solid #0f0f1a;white-space:nowrap;font-size:clamp(8px,1vw,11px);font-weight:900;position:sticky;top:0;z-index:10;text-transform:uppercase;letter-spacing:.3px;}
+th.th-ytd{background:#080814;color:#333;min-width:50px;position:sticky;left:0;z-index:21;}
+th.th-name{background:#0c0c20;color:#fff;min-width:105px;border-right:2px solid #00c8ff60!important;position:sticky;left:50px;z-index:21;}
+th.th-day{background:#090e09;color:#00aa33;min-width:68px;}
+th.th-day.tc{background:#001600;color:#00ff44;border:1px solid #00ff4450!important;}
+th.th-week{background:#111000;color:#ffcc00;min-width:78px;}
+th.th-mtd{background:#001208;color:#00ff88;min-width:85px;}
+th.th-ship{background:#000c15;color:#00c8ff;min-width:80px;}
+th.th-downs{background:#120000;color:#ff5555;min-width:65px;}
+th.th-goal{background:#120700;color:#ff8800;min-width:78px;}
+th.th-pct{background:#0c0014;color:#cc88ff;min-width:85px;}
+tbody tr{border-bottom:1px solid #0e0e1c;}
+tbody tr:hover{background:rgba(0,200,255,.03);}
+tbody tr.rk1{background:rgba(255,215,0,.04);}
+tbody tr.rk2{background:rgba(210,210,210,.025);}
+tbody tr.rk3{background:rgba(210,120,40,.03);}
+tbody tr.tot{background:#001800!important;border-top:2px solid #00ff4460!important;}
+td{padding:8px 5px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center;vertical-align:middle;}
+td.td-ytd{background:#07070e;color:#252545;text-align:right;font-size:clamp(8px,.9vw,11px);position:sticky;left:0;z-index:5;border-right:1px solid #18182c;}
+td.td-name{background:#090918;color:#fff;font-weight:900;text-align:left;padding-left:9px;font-size:clamp(10px,1.2vw,14px);border-right:2px solid #00c8ff35!important;position:sticky;left:50px;z-index:5;}
+td.td-day{cursor:pointer;} td.td-day:hover{background:rgba(255,255,255,.07)!important;} td.td-day.tc{border:1px solid #00ff4425!important;}
+.dg{color:#00ff44;font-weight:900;font-size:clamp(11px,1.2vw,14px);}
+.dr{color:#ff4444;font-weight:900;font-size:clamp(11px,1.2vw,14px);}
+.de{color:#1f1f35;}
+td.td-week{color:#ffcc00;font-weight:900;font-size:clamp(11px,1.2vw,14px);}
+td.td-mtd{color:#00ff88;font-weight:900;font-size:clamp(11px,1.2vw,14px);}
+td.td-mtd.gh{color:#00ff44!important;text-shadow:0 0 10px rgba(0,255,68,.45);}
+td.td-ship{color:#00c8ff;font-weight:900;cursor:pointer;} td.td-ship:hover{background:rgba(0,200,255,.07)!important;}
+td.td-downs{color:#ff5555;font-weight:900;cursor:pointer;} td.td-downs:hover{background:rgba(255,85,85,.07)!important;}
+td.td-goal{color:#ff8800;}
+td.td-pct{padding:5px 7px;}
+.pb-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.pb-bg{width:100%;height:5px;background:#18182c;border-radius:3px;overflow:hidden;}
+.pb-fg{height:100%;border-radius:3px;transition:width .4s;}
+.pnum{font-size:clamp(10px,1.1vw,13px);font-weight:900;color:#cc88ff;}
+.pnum.done{color:#00ff44;}
+tr.tot td{color:#00ff44!important;font-weight:900;font-size:clamp(11px,1.2vw,14px);}
+tr.tot td.td-ytd{color:#0f2f0f!important;}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:1000;display:none;align-items:center;justify-content:center;}
+.ov.on{display:flex;}
+.mo{background:#0d0d1c;border:2px solid #00c8ff;border-radius:12px;padding:22px;width:min(340px,88vw);text-align:center;}
+.mo h3{color:#00c8ff;font-size:17px;margin-bottom:3px;}
+.mo-sub{color:#555;font-size:11px;margin-bottom:14px;}
+.mo input{width:100%;background:#060610;border:2px solid #00c8ff;border-radius:8px;color:#fff;font-size:22px;font-weight:900;text-align:center;padding:10px;outline:none;font-family:'Arial Black',Arial,sans-serif;}
+.mo input:focus{border-color:#00ff44;}
+.mo-btns{display:flex;gap:10px;margin-top:14px;}
+.mo-btns button{flex:1;padding:11px;border:none;border-radius:8px;font-size:14px;font-weight:900;cursor:pointer;}
+.b-save{background:#00ff44;color:#000;} .b-save:hover{background:#00d438;}
+.b-cancel{background:#18182a;color:#555;border:1px solid #2a2a3a;}
+.mo-note{font-size:10px;color:#333;margin-top:8px;}
+.edit-hint{text-align:center;font-size:9px;color:#252535;padding:2px 0 5px;letter-spacing:.3px;}
 </style>
 </head>
 <body>
-
-<div class="board-title">⚡ DBW WISCONSIN — LIVE SALES BOARD ⚡</div>
-
-<div class="nav-bar">
-  <a class="nav-link" href="https://jfgreco84-commits.github.io/dbw-office/">📊 Admin Portal</a>
+<div class="board-title">&#9889; &nbsp;DBW WISCONSIN &mdash; LIVE SALES BOARD &nbsp;&#9889;</div>
+<div class="nav-bar"><a class="nav-btn" href="https://jfgreco84-commits.github.io/dbw-office/">&#128295;&nbsp; Admin Portal</a></div>
+<div class="info-grid">
+  <div class="ibox ic-blue">  <span class="ilbl">Today</span>          <span class="ival" id="h-today">--</span></div>
+  <div class="ibox ic-yellow"><span class="ilbl">18-Month Date</span>  <span class="ival" id="h-18m">--</span><span class="isub">Fair game after this</span></div>
+  <div class="ibox ic-yellow"><span class="ilbl">36-Month Date</span>  <span class="ival" id="h-36m">--</span><span class="isub">25% commission</span></div>
+  <div class="ibox ic-green"> <span class="ilbl">Days Left</span>      <span class="ival" id="h-days">--</span></div>
+  <div class="ibox ic-gold">  <span class="ilbl">Low QTR Bonus</span>  <span class="ival" id="h-low-go">--</span><span class="isub" id="h-low-tgt">to go</span></div>
+  <div class="ibox ic-gold">  <span class="ilbl">High QTR Bonus</span> <span class="ival" id="h-high-go">--</span><span class="isub" id="h-high-tgt">to go</span></div>
 </div>
-
-<div class="status">
-  <span>🟢 <span class="dot-live">LIVE</span> · Auto-refresh 30s</span>
-  <span id="refresh-cd"></span>
-  <span id="last-upd">Loading...</span>
+<div class="status-bar">
+  <span><span class="dot"></span>LIVE &middot; Auto-refresh 30s</span>
+  <span id="h-upd">Connecting...</span>
 </div>
-
-<!-- TOP HEADERS -->
-<div class="top-header">
-  <div class="hbox blue">
-    <div class="lbl">📅 Today</div>
-    <div class="val" id="hdr-today">--</div>
-  </div>
-  <div class="hbox yellow">
-    <div class="lbl">⚖️ 18-Month Date</div>
-    <div class="val" id="hdr-18m">--</div>
-    <div class="sub">Fair game after this</div>
-  </div>
-  <div class="hbox yellow">
-    <div class="lbl">📅 36-Month Date</div>
-    <div class="val" id="hdr-36m">--</div>
-    <div class="sub">25% commission</div>
-  </div>
-  <div class="hbox red">
-    <div class="lbl">⏳ Days Left</div>
-    <div class="val" id="hdr-days">--</div>
-  </div>
-  <div class="hbox gold">
-    <div class="lbl">💰 Low Qtr Bonus</div>
-    <div class="val" id="hdr-low-go">--</div>
-    <div class="sub">to go · target <span id="hdr-low-tgt">--</span></div>
-  </div>
-  <div class="hbox gold">
-    <div class="lbl">🏆 High Qtr Bonus</div>
-    <div class="val" id="hdr-high-go">--</div>
-    <div class="sub">to go · target <span id="hdr-high-tgt">--</span></div>
-  </div>
-</div>
-
-<!-- BOARD -->
-<div class="board-wrap">
-<table>
-  <thead>
-    <tr>
-      <th class="th-ytd th-ytd-sticky">YTD</th>
-      <th class="th-roster">ROSTER</th>
-      <th class="th-day" id="th-mon">1 · MON</th>
-      <th class="th-day" id="th-tue">2 · TUES</th>
-      <th class="th-day" id="th-wed">3 · WED</th>
-      <th class="th-day" id="th-thu">4 · THURS</th>
-      <th class="th-day" id="th-fri">5 · FRI</th>
-      <th class="th-week">THIS WEEK</th>
-      <th class="th-mtd">MTD WRITTEN</th>
-      <th class="th-shipped">MTD SHIPPED</th>
-      <th class="th-downs">DOWNS</th>
-      <th class="th-goal">GOAL</th>
-      <th class="th-pct">% GOAL</th>
-    </tr>
-  </thead>
-  <tbody id="board-body"></tbody>
-  <tfoot>
-    <tr>
-      <td class="td-ytd" id="ft-ytd"></td>
-      <td class="td-roster">OFFICE TOTAL</td>
-      <td id="ft-mon" style="color:#00ff44;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-tue" style="color:#00ff44;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-wed" style="color:#00ff44;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-thu" style="color:#00ff44;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-fri" style="color:#00ff44;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-week" style="color:#ffcc44;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-mtd" style="color:#00ff88;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-shipped" style="color:#00c8ff;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-downs" style="color:#ff5555;text-align:right;padding:8px 5px;"></td>
-      <td id="ft-goal" style="color:#ff8800;text-align:right;padding:8px 5px;"></td>
-      <td></td>
-    </tr>
-  </tfoot>
-</table>
-</div>
-
-<!-- MODAL -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <h2 id="m-title">Enter Amount</h2>
-    <p id="m-sub">Type new total and tap Save</p>
-    <input type="number" id="m-input" placeholder="0" min="0" inputmode="numeric" />
-    <div class="mbtns">
-      <button class="btn btn-save" onclick="doSave()">✅ SAVE</button>
-      <button class="btn btn-cancel" onclick="closeModal()">✖ CANCEL</button>
+<div class="board-wrap"><table><thead><tr id="thead-row"></tr></thead><tbody id="tbody"></tbody></table></div>
+<div class="edit-hint">TAP A DAILY CELL TO ENTER YOUR SALES &nbsp;&middot;&nbsp; TAP DOWNS OR SHIPPED TO UPDATE</div>
+<div class="ov" id="modal">
+  <div class="mo">
+    <h3 id="m-title">Enter Amount</h3>
+    <div class="mo-sub" id="m-sub"></div>
+    <input type="number" id="m-inp" inputmode="numeric" min="0" placeholder="0">
+    <div class="mo-btns">
+      <button class="b-cancel" onclick="closeModal()">Cancel</button>
+      <button class="b-save"   onclick="saveModal()">&#10003; Save</button>
     </div>
+    <div class="mo-note" id="m-note"></div>
   </div>
 </div>
-
 <script>
 const SB_URL="https://ylotwhvkrlobrpdmngul.supabase.co";
-const SB_KEY="sb_publishable_WeQ8Xw3xKkTr1KqRyRt_Iw_IT1_qph4";
+const SB_KEY=atob("c2Jfc2VjcmV0X1JUdDJxVEszSjF6RzZTZVhCQVFyd0Ffa1RFUkpGal8=");
 const USER_ID="e1f5af34-415d-4fa8-8c01-87225ea4909d";
-const DATA_KEY="boardData";
-
-const REPS=[
-  {id:"W839",name:"RONNY B",       ytd:281030,goal:180000},
-  {id:"W930",name:"ADAM MISUREK",  ytd:257311,goal:180000},
-  {id:"W603",name:"ADAM WEST",     ytd:249321,goal:110000},
-  {id:"W983",name:"SCOT TOPORSH", ytd:246859,goal:110000},
-  {id:"W784",name:"FROGGY",        ytd:227621,goal:110000},
-  {id:"W973",name:"TJ SUTTON",     ytd:79606, goal:60000},
-  {id:"W849",name:"JOHN BAEMMERT", ytd:67579, goal:60000},
-  {id:"W962",name:"CHRIS K",       ytd:66197, goal:25000},
-  {id:"W909",name:"LUIS MILLAN",   ytd:31265, goal:20000},
-  {id:"W959",name:"CASSIE",        ytd:30132, goal:20000},
-  {id:"W762",name:"KERRY SMITH",   ytd:21267, goal:20000},
-  {id:"W963",name:"NICO T",        ytd:17684, goal:20000},
-  {id:"W938",name:"GEOFF NURSE",   ytd:13126, goal:20000},
-  {id:"W953",name:"JAMEL LEE",     ytd:9184,  goal:20000},
-  {id:"W934",name:"LESLIE KUBENY", ytd:8170,  goal:15000},
-];
+const DK="boardData";
 const DAYS=["mon","tue","wed","thu","fri"];
 const DLBL=["MON","TUES","WED","THURS","FRI"];
 const MEDALS=["🥇","🥈","🥉"];
-
-let BD=null,editCtx=null,refreshCt=30;
-
-function $c(n){return n&&n!==0?"$ "+Math.abs(n).toLocaleString("en-US"):null;}
-function getMonday(d){const dt=new Date(d),dy=dt.getDay(),diff=dt.getDate()-dy+(dy===0?-6:1);dt.setDate(diff);return dt.toISOString().split("T")[0];}
-function bizLeft(){const n=new Date(),last=new Date(n.getFullYear(),n.getMonth()+1,0);let c=0;for(let d=new Date(n);d<=last;d.setDate(d.getDate()+1)){const dw=d.getDay();if(dw!==0&&dw!==6)c++;}return c;}
+const SEED={week_start:"2026-05-04",month:"2026-05",quarter:"2026-Q2",quarter_shipped:322806,
+  mgr:{low_target:1245067,high_target:1458507},
+  reps:{
+    W839:{name:"RONNY B",      ytd:281030,goal:180000,shipped:159,  mtd_prev:0,downs:0,week:{mon:0,    tue:981,  wed:0,    thu:0,    fri:0}},
+    W930:{name:"ADAM MISUREK", ytd:257311,goal:180000,shipped:14033,mtd_prev:0,downs:0,week:{mon:33651,tue:1008, wed:0,    thu:0,    fri:0}},
+    W603:{name:"ADAM WEST",    ytd:249321,goal:110000,shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:6508, thu:600,  fri:0}},
+    W983:{name:"SCOT TOPORSH", ytd:246859,goal:110000,shipped:119,  mtd_prev:0,downs:0,week:{mon:119,  tue:0,    wed:6071, thu:6900, fri:0}},
+    W784:{name:"FROGGY",       ytd:227621,goal:110000,shipped:9162, mtd_prev:0,downs:0,week:{mon:9162, tue:0,    wed:9722, thu:5500, fri:0}},
+    W973:{name:"TJ SUTTON",    ytd:79606, goal:60000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:15965,wed:3683, thu:0,    fri:0}},
+    W849:{name:"JOHN BAEMMERT",ytd:67579, goal:60000, shipped:1040, mtd_prev:0,downs:0,week:{mon:500,  tue:1500, wed:1543, thu:0,    fri:0}},
+    W962:{name:"CHRIS K",      ytd:66197, goal:25000, shipped:0,    mtd_prev:0,downs:0,week:{mon:1032, tue:0,    wed:0,    thu:0,    fri:0}},
+    W909:{name:"LUIS MILLAN",  ytd:31265, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,    thu:0,    fri:0}},
+    W959:{name:"CASSIE",       ytd:30132, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:180,  wed:369,  thu:4561, fri:0}},
+    W762:{name:"KERRY SMITH",  ytd:21267, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:3840, wed:0,    thu:0,    fri:0}},
+    W963:{name:"NICO T",       ytd:17684, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:100,  wed:0,    thu:0,    fri:0}},
+    W938:{name:"GEOFF NURSE",  ytd:13126, goal:20000, shipped:540,  mtd_prev:0,downs:0,week:{mon:0,    tue:170,  wed:0,    thu:0,    fri:0}},
+    W953:{name:"JAMEL LEE",    ytd:9184,  goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:199,  wed:0,    thu:0,    fri:0}},
+    W934:{name:"LESLIE KUBENY",ytd:8170,  goal:15000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,    thu:0,    fri:0}}
+  }
+};
+let BD=null,editCtx=null;
+function fmtK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
 function todayKey(){return{1:"mon",2:"tue",3:"wed",4:"thu",5:"fri"}[new Date().getDay()]||null;}
-function dateOffset(months,days){const d=new Date();d.setMonth(d.getMonth()-months);d.setDate(d.getDate()-days);return d.toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"});}
+function getMonday(d){const dt=new Date(d),dy=dt.getDay(),diff=dt.getDate()-dy+(dy===0?-6:1);dt.setDate(diff);return dt.toISOString().slice(0,10);}
+function bizLeft(){const n=new Date(),last=new Date(n.getFullYear(),n.getMonth()+1,0);let c=0;for(let d=new Date(n);d<=last;d.setDate(d.getDate()+1)){const w=d.getDay();if(w>0&&w<6)c++;}return c;}
+function dateOffset(mo,dy){const d=new Date();d.setMonth(d.getMonth()-mo);d.setDate(d.getDate()-dy);return d.toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"});}
 function ym(){return new Date().toISOString().slice(0,7);}
-function getQ(){const m=new Date().getMonth(),q=Math.floor(m/3)+1;return new Date().getFullYear()+"-Q"+q;}
-
+function getQ(){return new Date().getFullYear()+"-Q"+(Math.floor(new Date().getMonth()/3)+1);}
 async function sbFetch(){
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/app_data?user_id=eq.${USER_ID}&data_key=eq.${DATA_KEY}&select=data_value`,
+    const r=await fetch(`${SB_URL}/rest/v1/app_data?user_id=eq.${USER_ID}&data_key=eq.${DK}&select=data_value`,
       {headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
+    if(!r.ok)return null;
     const rows=await r.json();
-    return rows&&rows.length>0?rows[0].data_value:null;
+    return(rows&&rows.length>0)?rows[0].data_value:null;
   }catch(e){return null;}
 }
 async function sbSave(data){
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/app_data?user_id=eq.${USER_ID}&data_key=eq.${DATA_KEY}`,{
-      method:"PATCH",
-      headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json","Prefer":"return=minimal"},
-      body:JSON.stringify({data_value:data})
-    });
-    localStorage.setItem("dbw_board_v3",JSON.stringify(data));
-    return r.status===204;
-  }catch(e){localStorage.setItem("dbw_board_v3",JSON.stringify(data));return false;}
+    const r=await fetch(`${SB_URL}/rest/v1/app_data?user_id=eq.${USER_ID}&data_key=eq.${DK}`,
+      {method:"PATCH",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,
+       "Content-Type":"application/json","Prefer":"return=minimal"},
+       body:JSON.stringify({data_value:data})});
+    localStorage.setItem("dbw_board",JSON.stringify(data));
+    return r.status===204||r.status===200;
+  }catch(e){localStorage.setItem("dbw_board",JSON.stringify(data));return false;}
 }
-
-function updateHeaders(data){
-  const now=new Date();
-  document.getElementById("hdr-today").textContent=now.toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"});
-  document.getElementById("hdr-18m").textContent=dateOffset(18,5);
-  document.getElementById("hdr-36m").textContent=dateOffset(36,5);
-  document.getElementById("hdr-days").textContent=bizLeft();
-  const mgr=data.mgr||{low_target:1245067,high_target:1458507};
-  const qShip=data.quarter_shipped||0;
-  document.getElementById("hdr-low-go").textContent="$"+(Math.max(0,mgr.low_target-qShip)).toLocaleString();
-  document.getElementById("hdr-high-go").textContent="$"+(Math.max(0,mgr.high_target-qShip)).toLocaleString();
-  document.getElementById("hdr-low-tgt").textContent="$"+mgr.low_target.toLocaleString();
-  document.getElementById("hdr-high-tgt").textContent="$"+mgr.high_target.toLocaleString();
-  const tk=todayKey();
-  DAYS.forEach((d,i)=>{
-    const el=document.getElementById("th-"+d);
-    if(el) el.className="th-day"+(d===tk?" today-hdr":"");
-  });
-}
-
-function render(data){
-  updateHeaders(data);
-  const tbody=document.getElementById("board-body");
-  tbody.innerHTML="";
-  const tk=todayKey();
-  let tots={ytd:0,mon:0,tue:0,wed:0,thu:0,fri:0,week:0,mtd:0,shipped:0,downs:0,goal:0};
-
-  REPS.forEach((rep,idx)=>{
-    const rd=data.reps&&data.reps[rep.id]||{week:{mon:0,tue:0,wed:0,thu:0,fri:0},mtd_prev:0,shipped:0,downs:0,ytd:rep.ytd,goal:rep.goal};
-    const w=rd.week||{mon:0,tue:0,wed:0,thu:0,fri:0};
-    const thisWeek=DAYS.reduce((s,d)=>s+(w[d]||0),0);
-    const downs=rd.downs||0;
-    const mtdWritten=Math.max(0,(rd.mtd_prev||0)+thisWeek-downs);
-    const shipped=rd.shipped||0;
-    const goal=rd.goal||rep.goal;
-    const ytd=rd.ytd||rep.ytd;
-    const pct=goal>0?Math.round(mtdWritten/goal*100):0;
-    const pfClass=pct>=100?"pf-over":pct>=75?"pf-good":pct>=50?"pf-mid":"pf-low";
-    const pctColor=pct>=100?"#ffcc00":pct>=75?"#00ff88":pct>=50?"#ffcc44":"#ff5544";
-    const hitGoal=mtdWritten>=goal;
-
-    tots.ytd+=ytd;tots.mon+=(w.mon||0);tots.tue+=(w.tue||0);
-    tots.wed+=(w.wed||0);tots.thu+=(w.thu||0);tots.fri+=(w.fri||0);
-    tots.week+=thisWeek;tots.mtd+=mtdWritten;tots.shipped+=shipped;tots.downs+=downs;tots.goal+=goal;
-
-    const medal=idx<3?`<span class="medal">${MEDALS[idx]}</span>`:"";
-    const rowCls=idx===0?"r1":idx===1?"r2":idx===2?"r3":"";
-
-    const dayCells=DAYS.map(d=>{
-      const val=w[d]||0;
-      const isTd=d===tk;
-      let inner;
-      if(val>=1000) inner=`<span class="day-val-green">$ ${val.toLocaleString()}</span>`;
-      else if(val>0) inner=`<span class="day-val-red">$ ${val.toLocaleString()}</span>`;
-      else inner=`<span class="day-val-empty">—</span>`;
-      return `<td class="td-day${isTd?" today-col":""}" onclick="openEdit('${rep.id}','${d}','${rep.name}','${DLBL[DAYS.indexOf(d)]}')">${inner}</td>`;
-    }).join("");
-
-    const mtdCls="td-mtd"+(hitGoal?" hit-goal":"");
-    const mtdVal=mtdWritten>0?`$ ${mtdWritten.toLocaleString()}`:`<span style="color:#1a2a1a">—</span>`;
-
-    const tr=document.createElement("tr");
-    tr.className=rowCls;
-    tr.innerHTML=`
-      <td class="td-ytd"><small style="opacity:.6">$</small>${(ytd/1000).toFixed(0)}k</td>
-      <td class="td-roster">${medal}${rep.name}</td>
-      ${dayCells}
-      <td class="td-week">${thisWeek>0?`$ ${thisWeek.toLocaleString()}`:`<span style="color:#1a1a00">—</span>`}</td>
-      <td class="${mtdCls}">${mtdVal}</td>
-      <td class="td-shipped">${shipped>0?`$ ${shipped.toLocaleString()}`:`<span style="color:#001a28">—</span>`}</td>
-      <td class="td-downs" onclick="openDown('${rep.id}','${rep.name}')">${downs>0?`-$ ${downs.toLocaleString()}`:`<span style="color:#1a0000">—</span>`}</td>
-      <td class="td-goal"><small style="opacity:.5">$</small>${(goal/1000).toFixed(0)}k</td>
-      <td class="td-pct">
-        <div style="color:${pctColor};font-weight:900;font-size:clamp(13px,2vw,17px);">${pct}%</div>
-        <div class="pb"><div class="pb-fill ${pfClass}" style="width:${Math.min(pct,100)}%"></div></div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
-
-  const f=(id,val,prefix="$ ")=>{ document.getElementById(id).innerHTML=val>0?prefix+val.toLocaleString():"—"; };
-  f("ft-ytd",tots.ytd); f("ft-mon",tots.mon); f("ft-tue",tots.tue);
-  f("ft-wed",tots.wed); f("ft-thu",tots.thu); f("ft-fri",tots.fri);
-  f("ft-week",tots.week); f("ft-mtd",tots.mtd); f("ft-shipped",tots.shipped);
-  if(tots.downs>0) document.getElementById("ft-downs").innerHTML="-$ "+tots.downs.toLocaleString();
-  else document.getElementById("ft-downs").innerHTML="—";
-  f("ft-goal",tots.goal);
-}
-
-function openEdit(repId,day,repName,dayLbl){
-  editCtx={repId,day,type:"day"};
-  const cur=(BD?.reps?.[repId]?.week?.[day])||0;
-  document.getElementById("m-title").textContent=repName+" — "+dayLbl;
-  document.getElementById("m-sub").textContent=`Current: ${cur>0?"$"+cur.toLocaleString():"$0"} · Enter new total for this day`;
-  const inp=document.getElementById("m-input");
-  inp.value=cur||"";
-  document.getElementById("overlay").classList.add("on");
-  setTimeout(()=>{inp.focus();inp.select();},100);
-}
-function openDown(repId,repName){
-  editCtx={repId,type:"down"};
-  const cur=(BD?.reps?.[repId]?.downs)||0;
-  document.getElementById("m-title").textContent="DOWNS — "+repName;
-  document.getElementById("m-sub").textContent=`Current total downs: ${cur>0?"$"+cur.toLocaleString():"$0"} · Enter new total downs`;
-  const inp=document.getElementById("m-input");
-  inp.value=cur||"";
-  document.getElementById("overlay").classList.add("on");
-  setTimeout(()=>{inp.focus();inp.select();},100);
-}
-function closeModal(){document.getElementById("overlay").classList.remove("on");editCtx=null;}
-
-async function doSave(){
-  if(!editCtx||!BD) return;
-  const val=parseFloat(document.getElementById("m-input").value)||0;
-  const{repId,day,type}=editCtx;
-  if(!BD.reps[repId]) BD.reps[repId]={week:{mon:0,tue:0,wed:0,thu:0,fri:0},mtd_prev:0,shipped:0,downs:0};
-  if(!BD.reps[repId].week) BD.reps[repId].week={mon:0,tue:0,wed:0,thu:0,fri:0};
-  if(type==="day") BD.reps[repId].week[day]=val;
-  else BD.reps[repId].downs=val;
-  closeModal();
-  render(BD);
-  const ok=await sbSave(BD);
-  document.getElementById("last-upd").textContent=(ok?"✅":"💾")+" "+new Date().toLocaleTimeString();
-}
-document.getElementById("m-input").addEventListener("keydown",e=>{if(e.key==="Enter")doSave();if(e.key==="Escape")closeModal();});
-document.getElementById("overlay").addEventListener("click",e=>{if(e.target===document.getElementById("overlay"))closeModal();});
-
-function checkRollovers(data){
-  let changed=false;
-  const cw=getMonday(new Date()),cm=ym(),cq=getQ();
-  if(data.month!==cm){
-    Object.values(data.reps||{}).forEach(r=>{r.mtd_prev=0;r.week={mon:0,tue:0,wed:0,thu:0,fri:0};r.downs=0;});
-    data.month=cm;data.week_start=cw;changed=true;
-  } else if(data.week_start!==cw){
-    Object.values(data.reps||{}).forEach(r=>{
-      const wk=DAYS.reduce((s,d)=>s+(r.week?.[d]||0),0);
-      r.mtd_prev=(r.mtd_prev||0)+wk;r.week={mon:0,tue:0,wed:0,thu:0,fri:0};
-    });
-    data.week_start=cw;changed=true;
+function checkRollovers(d){
+  let ch=false;const cm=getMonday(new Date());
+  if(d.week_start!==cm){
+    for(const id of Object.keys(d.reps)){const rep=d.reps[id];rep.mtd_prev=(rep.mtd_prev||0)+DAYS.reduce((s,k)=>s+(rep.week[k]||0),0);DAYS.forEach(k=>rep.week[k]=0);}
+    d.week_start=cm;ch=true;
   }
-  if(data.quarter!==cq){data.quarter=cq;data.quarter_shipped=0;changed=true;}
-  return changed;
+  if(d.month!==ym()){
+    for(const id of Object.keys(d.reps)){const rep=d.reps[id];rep.mtd_prev=0;rep.downs=0;rep.shipped=0;DAYS.forEach(k=>rep.week[k]=0);}
+    d.month=ym();ch=true;
+  }
+  if(d.quarter!==getQ()){d.quarter_shipped=0;d.quarter=getQ();ch=true;}
+  return ch;
 }
-
-function startRefresh(){
-  setInterval(async()=>{
-    refreshCt--;
-    document.getElementById("refresh-cd").textContent="Refresh in "+refreshCt+"s";
-    if(refreshCt<=0){
-      refreshCt=30;
-      const fresh=await sbFetch();
-      if(fresh){BD=fresh;render(BD);}
-      document.getElementById("last-upd").textContent="↻ "+new Date().toLocaleTimeString();
-    }
-  },1000);
+function renderHeaders(data){
+  document.getElementById("h-today").textContent=new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"});
+  document.getElementById("h-18m").textContent=dateOffset(18,5);
+  document.getElementById("h-36m").textContent=dateOffset(36,5);
+  document.getElementById("h-days").textContent=bizLeft();
+  const mgr=data.mgr||{low_target:1245067,high_target:1458507};
+  const qs=data.quarter_shipped||0;
+  const lg=Math.max(0,mgr.low_target-qs),hg=Math.max(0,mgr.high_target-qs);
+  document.getElementById("h-low-go").textContent=lg>0?"$"+lg.toLocaleString():"HIT!";
+  document.getElementById("h-low-tgt").textContent="target $"+mgr.low_target.toLocaleString();
+  document.getElementById("h-high-go").textContent=hg>0?"$"+hg.toLocaleString():"HIT!";
+  document.getElementById("h-high-tgt").textContent="target $"+mgr.high_target.toLocaleString();
 }
-
+function render(data){
+  renderHeaders(data);const tk=todayKey();
+  const hdrs=[{c:"th-ytd",t:"YTD"},{c:"th-name",t:"ROSTER"},
+    ...DAYS.map((d,i)=>({c:"th-day"+(tk===d?" tc":""),t:DLBL[i]+(tk===d?" TODAY":"")})),
+    {c:"th-week",t:"THIS WEEK"},{c:"th-mtd",t:"MTD WRITTEN"},{c:"th-ship",t:"MTD SHIPPED"},
+    {c:"th-downs",t:"DOWNS"},{c:"th-goal",t:"GOAL"},{c:"th-pct",t:"% GOAL"}];
+  document.getElementById("thead-row").innerHTML=hdrs.map(h=>`<th class="${h.c}">${h.t}</th>`).join("");
+  const ids=Object.keys(data.reps).sort((a,b)=>data.reps[b].ytd-data.reps[a].ytd);
+  let oW=0,oM=0,oS=0,oD=0;const dt=DAYS.map(()=>0);const rows=[];
+  ids.forEach((id,rank)=>{
+    const rep=data.reps[id];
+    const wk=DAYS.reduce((s,k)=>s+(rep.week[k]||0),0);
+    const mtd=(rep.mtd_prev||0)+wk-(rep.downs||0);
+    const goal=rep.goal||0;const pct=goal>0?Math.min(199,Math.round(mtd/goal*100)):0;const hit=mtd>=goal;
+    DAYS.forEach((k,i)=>dt[i]+=(rep.week[k]||0));
+    oW+=wk;oM+=mtd;oS+=(rep.shipped||0);oD+=(rep.downs||0);
+    const rkC=rank===0?"rk1":rank===1?"rk2":rank===2?"rk3":"";
+    const med=rank<3?MEDALS[rank]+" ":"";
+    const dCells=DAYS.map((k,i)=>{
+      const v=rep.week[k]||0;const iT=tk===k;
+      const inn=v>=1000?`<span class="dg">$${v.toLocaleString()}</span>`:v>0?`<span class="dr">$${v.toLocaleString()}</span>`:`<span class="de">&mdash;</span>`;
+      return`<td class="td-day${iT?" tc":""}" onclick="openEdit('${id}','${k}')">${inn}</td>`;
+    }).join("");
+    const bC=hit?"#00ff44":pct>75?"#ffaa00":"#cc88ff";const bW=Math.min(100,pct);
+    const pCell=`<td class="td-pct"><div class="pb-wrap"><span class="pnum${hit?" done":""}">${pct}%</span><div class="pb-bg"><div class="pb-fg" style="width:${bW}%;background:${bC};"></div></div></div></td>`;
+    rows.push(`<tr class="${rkC}"><td class="td-ytd">${fmtK(rep.ytd)}</td><td class="td-name">${med}${rep.name}</td>${dCells}<td class="td-week">${wk>0?"$"+wk.toLocaleString():"&mdash;"}</td><td class="td-mtd${hit?" gh":""}">${mtd>0?"$"+mtd.toLocaleString():"&mdash;"}</td><td class="td-ship" onclick="openShip('${id}')">${rep.shipped>0?"$"+rep.shipped.toLocaleString():"&mdash;"}</td><td class="td-downs" onclick="openDowns('${id}')">${rep.downs>0?"-$"+rep.downs.toLocaleString():"&mdash;"}</td><td class="td-goal">${fmtK(goal)}</td>${pCell}</tr>`);
+  });
+  const totDay=DAYS.map((k,i)=>{const v=dt[i];return`<td class="td-day${tk===k?" tc":""}">${v>0?"$"+v.toLocaleString():"&mdash;"}</td>`;}).join("");
+  rows.push(`<tr class="tot"><td class="td-ytd"></td><td class="td-name">OFFICE TOTAL</td>${totDay}<td class="td-week">${oW>0?"$"+oW.toLocaleString():"&mdash;"}</td><td class="td-mtd">${oM>0?"$"+oM.toLocaleString():"&mdash;"}</td><td class="td-ship">${oS>0?"$"+oS.toLocaleString():"&mdash;"}</td><td class="td-downs">${oD>0?"-$"+oD.toLocaleString():"&mdash;"}</td><td class="td-goal"></td><td class="td-pct"></td></tr>`);
+  document.getElementById("tbody").innerHTML=rows.join("");
+}
+function openEdit(id,day){editCtx={id,field:day,type:"day"};document.getElementById("m-title").textContent=BD.reps[id].name+" - "+DLBL[DAYS.indexOf(day)];document.getElementById("m-sub").textContent="Enter written amount for this day";document.getElementById("m-inp").value=BD.reps[id].week[day]||"";document.getElementById("m-note").textContent="Enter 0 to clear.";document.getElementById("modal").classList.add("on");setTimeout(()=>document.getElementById("m-inp").focus(),60);}
+function openDowns(id){editCtx={id,field:"downs",type:"downs"};document.getElementById("m-title").textContent=BD.reps[id].name+" - DOWNS";document.getElementById("m-sub").textContent="Enter cumulative MTD downs";document.getElementById("m-inp").value=BD.reps[id].downs||"";document.getElementById("m-note").textContent="Subtracts from MTD Written.";document.getElementById("modal").classList.add("on");setTimeout(()=>document.getElementById("m-inp").focus(),60);}
+function openShip(id){editCtx={id,field:"shipped",type:"shipped"};document.getElementById("m-title").textContent=BD.reps[id].name+" - MTD SHIPPED";document.getElementById("m-sub").textContent="Enter MTD shipped total";document.getElementById("m-inp").value=BD.reps[id].shipped||"";document.getElementById("m-note").textContent="Usually updated from ship sheets.";document.getElementById("modal").classList.add("on");setTimeout(()=>document.getElementById("m-inp").focus(),60);}
+function closeModal(){document.getElementById("modal").classList.remove("on");editCtx=null;}
+async function saveModal(){
+  if(!editCtx)return;
+  const val=parseInt(document.getElementById("m-inp").value)||0;
+  const{id,type,field}=editCtx;const rep=BD.reps[id];
+  if(type==="day")rep.week[field]=val;else if(type==="downs")rep.downs=val;else rep.shipped=val;
+  closeModal();render(BD);
+  document.getElementById("h-upd").textContent="Saving...";
+  const ok=await sbSave(BD);
+  document.getElementById("h-upd").textContent=(ok?"Saved ":"Local ")+" "+new Date().toLocaleTimeString();
+}
+document.getElementById("m-inp").addEventListener("keydown",e=>{if(e.key==="Enter")saveModal();if(e.key==="Escape")closeModal();});
+document.getElementById("modal").addEventListener("click",e=>{if(e.target===document.getElementById("modal"))closeModal();});
+let rTimer;
+function startRefresh(){clearInterval(rTimer);rTimer=setInterval(async()=>{const f=await sbFetch();if(f){BD=f;if(checkRollovers(BD))await sbSave(BD);render(BD);}document.getElementById("h-upd").textContent="Refreshed "+new Date().toLocaleTimeString();},30000);}
 async function init(){
+  document.getElementById("h-upd").textContent="Loading...";
   let data=await sbFetch();
-  if(!data){const c=localStorage.getItem("dbw_board_v3");data=c?JSON.parse(c):null;}
-  if(!data){alert("Could not load board data. Check connection.");return;}
-  if(checkRollovers(data)) await sbSave(data);
+  if(!data){const c=localStorage.getItem("dbw_board");data=c?JSON.parse(c):JSON.parse(JSON.stringify(SEED));document.getElementById("h-upd").textContent="Offline";}
+  if(checkRollovers(data))await sbSave(data);
   BD=data;render(BD);startRefresh();
-  document.getElementById("last-upd").textContent="Loaded "+new Date().toLocaleTimeString();
+  document.getElementById("h-upd").textContent="Live "+new Date().toLocaleTimeString();
 }
 init();
 </script>
