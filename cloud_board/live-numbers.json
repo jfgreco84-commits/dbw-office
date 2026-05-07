@@ -1,0 +1,44 @@
+{
+  "week": {
+    "RONNY B":     {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "ADAM MISUREK":{"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "ADAM WEST":   {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "SCOT TOPORSH":{"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "FROGGY":      {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "TJ SUTTON":   {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "JOHN BAEMMERT":{"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "CHRIS K":     {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "LUIS MILLAN": {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "CASSIE":      {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "KERRY SMITH": {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "NICO T":      {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "GEOFF NURSE": {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "JAMEL LEE":   {"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null},
+    "LESLIE KUBENY":{"mon": null, "tues": null, "wed": null, "thurs": null, "fri": null}
+  },
+  "mtd_prior": {
+    "RONNY B": 0, "ADAM MISUREK": 0, "ADAM WEST": 0, "SCOT TOPORSH": 0,
+    "FROGGY": 0, "TJ SUTTON": 0, "JOHN BAEMMERT": 0, "CHRIS K": 0,
+    "LUIS MILLAN": 0, "CASSIE": 0, "KERRY SMITH": 0, "NICO T": 0,
+    "GEOFF NURSE": 0, "JAMEL LEE": 0, "LESLIE KUBENY": 0
+  },
+  "shipped": {
+    "RONNY B":     {"sell": 0, "cogs": 0},
+    "ADAM MISUREK":{"sell": 0, "cogs": 0},
+    "ADAM WEST":   {"sell": 0, "cogs": 0},
+    "SCOT TOPORSH":{"sell": 0, "cogs": 0},
+    "FROGGY":      {"sell": 0, "cogs": 0},
+    "TJ SUTTON":   {"sell": 0, "cogs": 0},
+    "JOHN BAEMMERT":{"sell": 0, "cogs": 0},
+    "CHRIS K":     {"sell": 0, "cogs": 0},
+    "LUIS MILLAN": {"sell": 0, "cogs": 0},
+    "CASSIE":      {"sell": 0, "cogs": 0},
+    "KERRY SMITH": {"sell": 0, "cogs": 0},
+    "NICO T":      {"sell": 0, "cogs": 0},
+    "GEOFF NURSE": {"sell": 0, "cogs": 0},
+    "JAMEL LEE":   {"sell": 0, "cogs": 0},
+    "LESLIE KUBENY":{"sell": 0, "cogs": 0}
+  },
+  "day_nums": [16, 17, 18, 19, 20],
+  "updated": "2026-05-07"
+}
