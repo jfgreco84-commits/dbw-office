@@ -86,11 +86,12 @@ a.rep-link:hover{text-decoration:underline}
 <div class="section-title">Monthly Office Summary</div>
   <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="main" id="monthly-office">
     <thead><tr>
-      <th style="text-align:left">Month</th><th>Gross Sales</th><th>Returns</th><th>Collections</th><th>Net Sales</th><th>COGS</th><th>Net Profit</th><th>Avg M/U</th>
+      <th style="text-align:left">Month</th><th>Gross Sales</th><th>Returns</th><th>Collections</th><th>Net Sales</th><th>COGS</th><th>Net Profit</th><th style="color:#f5a623;white-space:nowrap">Adj Net Profit</th><th>Avg M/U</th>
     </tr></thead>
     <tbody id="monthly-office-body"></tbody>
   </table></div>
 
+  <div style="font-size:10px;color:#8892a4;margin-top:6px;padding:0 4px">* <strong style="color:#f5a623">Adj Net Profit</strong> = Net Sales − COGS − Commission − Hourly Pay (W953/W959/W962 @ $15/hr). Source: bi-weekly payroll recaps. May TBD pending 5/15 payday recap.</div>
   <div class="section-title">YTD Leaderboard — Net Sales</div>
   <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="main" id="leaderboard">
     <thead><tr>
@@ -180,11 +181,24 @@ D.monthly.forEach(r=>{
   x.net+=(r.net_sales||0);x.cogs+=(r.cogs||0);
   if(r.cogs>0){x.mu_n+=(r.net_sales||0);x.mu_d+=r.cogs;}
 });
+// Payroll costs by month (commission + hourly guarantee for W953/W959/W962)
+// Source: bi-weekly payroll recaps, assigned by pay-period-end date
+// May = 0 because next recap covers through ~5/12 (payday ~5/15)
+const PAYROLL_COST={
+  1:18567.64,  // Jan: comm $13,374 + hrly $5,194 (2 periods)
+  2:25022.99,  // Feb: comm $20,073 + hrly $4,950 (2 periods)
+  3:41212.79,  // Mar: comm $34,170 + hrly $7,043 (3 periods: PPE 3/3,3/17,3/31)
+  4:15917.44,  // Apr: comm $11,076 + hrly $4,841 (2 periods: PPE 4/14,4/28)
+  5:0          // May: payroll TBD — next recap payday ~5/15
+};
 let moHtml='';
 D.months.forEach(m=>{
   const x=mt[m];
   const avgMU=x.mu_d>0?x.mu_n/x.mu_d:0;
   const np=x.net-x.cogs;
+  const pc=PAYROLL_COST[m]||0;
+  const adj_np=np-pc;
+  const adjCell=pc===0?'<span style="color:#8892a4;font-size:11px">TBD*</span>':fmt$(adj_np);
   moHtml+=`<tr>
     <td>${D.month_names[m]}</td>
     <td>${fmt$(x.gross)}</td>
@@ -193,6 +207,7 @@ D.months.forEach(m=>{
     <td style="font-weight:600">${fmt$(x.net)}</td>
     <td>${fmt$(x.cogs)}</td>
     <td style="color:#4caf7d">${fmt$(np)}</td>
+    <td style="color:#f5a623;font-weight:700">${adjCell}</td>
     <td><span class="mu-chip ${muClass(avgMU)}">${avgMU.toFixed(3)}</span></td>
   </tr>`;
 });
@@ -202,6 +217,8 @@ const tRet=Object.values(mt).reduce((a,x)=>a+x.ret,0);
 const tColl=Object.values(mt).reduce((a,x)=>a+x.coll,0);
 const tCogs=Object.values(mt).reduce((a,x)=>a+x.cogs,0);
 const tMU=tCogs>0?tNet/tCogs:0;
+const tPayroll=Object.values(PAYROLL_COST).reduce((a,v)=>a+v,0);
+const tAdjNP=(tNet-tCogs)-tPayroll;
 moHtml+=`<tr class="total-tr">
   <td>TOTAL</td>
   <td>${fmt$(tGross)}</td>
@@ -210,6 +227,7 @@ moHtml+=`<tr class="total-tr">
   <td>${fmt$(tNet)}</td>
   <td>${fmt$(tCogs)}</td>
   <td style="color:#4caf7d">${fmt$(tNet-tCogs)}</td>
+  <td style="color:#f5a623;font-weight:900">${fmt$(tAdjNP)}<span style="font-size:10px;color:#8892a4"> +May</span></td>
   <td><span class="mu-chip ${muClass(tMU)}">${tMU.toFixed(3)}</span></td>
 </tr>`;
 document.getElementById('monthly-office-body').innerHTML=moHtml;
