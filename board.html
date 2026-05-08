@@ -8,8 +8,6 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#07070e;color:#e0e0e0;font-family:'Arial Black',Arial,sans-serif;min-height:100vh;}
 .title{text-align:center;font-size:clamp(18px,3.5vw,120px);font-weight:900;color:#00c8ff;text-shadow:0 0 30px rgba(0,200,255,.5);letter-spacing:4px;padding:10px 0 4px;text-transform:uppercase;}
-.nav{text-align:center;padding:3px 0 7px;}
-.nav a{display:inline-block;padding:5px 18px;background:#001420;border:1px solid #00c8ff;border-radius:20px;color:#00c8ff;font-size:11px;font-weight:900;text-decoration:none;}
 .igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 5px 5px;}
 @media(min-width:700px){.igrid{grid-template-columns:repeat(6,1fr);}}
 .ib{background:#0c0c1c;border:1px solid #1a1a2e;border-radius:6px;padding:4px 6px;text-align:center;}
@@ -64,18 +62,110 @@ td{padding:5px 4px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
 .pn.done{color:#00ff44;}
 .tot td{color:#00ff44!important;font-weight:900;font-size:clamp(12px,2.2vw,70px);}
 .tot .cY{color:#0f2f0f!important;}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:1000;display:none;align-items:center;justify-content:center;}
+
+/* ===== MODAL — PROFESSIONAL TV-SCALE ===== */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;display:none;align-items:center;justify-content:center;}
 .ov.on{display:flex;}
-.mo{background:#0d0d1c;border:2px solid #00c8ff;border-radius:12px;padding:22px;width:min(340px,88vw);text-align:center;}
-.mo h3{color:#00c8ff;font-size:17px;margin-bottom:3px;}
-.ms{color:#555;font-size:11px;margin-bottom:14px;}
-.mo input{width:100%;background:#060610;border:2px solid #00c8ff;border-radius:8px;color:#fff;font-size:22px;font-weight:900;text-align:center;padding:10px;outline:none;font-family:'Arial Black',Arial,sans-serif;}
-.mo input:focus{border-color:#00ff44;}
-.mb{display:flex;gap:10px;margin-top:14px;}
-.mb button{flex:1;padding:11px;border:none;border-radius:8px;font-size:14px;font-weight:900;cursor:pointer;}
-.bs{background:#00ff44;color:#000;}.bs:hover{background:#00d438;}
-.bc{background:#18182a;color:#555;border:1px solid #2a2a3a;}
-.mn{font-size:10px;color:#333;margin-top:8px;}
+.mo{
+  background:linear-gradient(160deg,#0d0d20 0%,#080814 100%);
+  border:2px solid #00c8ff;
+  border-radius:18px;
+  padding:clamp(24px,3vw,60px) clamp(24px,4vw,72px);
+  width:min(680px,92vw);
+  text-align:center;
+  box-shadow:0 0 60px rgba(0,200,255,.15), 0 30px 80px rgba(0,0,0,.8);
+  position:relative;
+}
+.mo::before{
+  content:'';
+  position:absolute;inset:0;
+  border-radius:18px;
+  background:linear-gradient(160deg,rgba(0,200,255,.04),transparent);
+  pointer-events:none;
+}
+.mh{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  border-bottom:1px solid #1a1a30;
+  padding-bottom:clamp(12px,1.5vw,28px);
+  margin-bottom:clamp(12px,1.5vw,28px);
+}
+.mi{
+  width:clamp(40px,4vw,72px);
+  height:clamp(40px,4vw,72px);
+  background:#00c8ff15;
+  border:1px solid #00c8ff40;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(20px,2.2vw,40px);
+}
+.mo h3{
+  color:#fff;
+  font-size:clamp(18px,2.4vw,52px);
+  font-weight:900;
+  margin:0;
+  text-shadow:0 0 20px rgba(0,200,255,.3);
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.ms{
+  color:#00c8ff;
+  font-size:clamp(12px,1.4vw,28px);
+  margin-bottom:clamp(14px,2vw,38px);
+  font-weight:700;
+  letter-spacing:.5px;
+}
+.mv{
+  color:#444;
+  font-size:clamp(10px,1vw,20px);
+  margin-bottom:clamp(8px,1vw,18px);
+}
+.mo input{
+  width:100%;
+  background:#06060f;
+  border:2px solid #00c8ff60;
+  border-radius:12px;
+  color:#00ff44;
+  font-size:clamp(32px,4.5vw,96px);
+  font-weight:900;
+  text-align:center;
+  padding:clamp(12px,1.8vw,36px) 16px;
+  outline:none;
+  font-family:'Arial Black',Arial,sans-serif;
+  letter-spacing:2px;
+  transition:border-color .15s, box-shadow .15s;
+}
+.mo input:focus{
+  border-color:#00ff44;
+  box-shadow:0 0 0 3px rgba(0,255,68,.12), inset 0 0 20px rgba(0,255,68,.04);
+}
+.mo input::placeholder{color:#1a1a2a;}
+.mb{display:flex;gap:clamp(10px,1.5vw,24px);margin-top:clamp(16px,2vw,36px);}
+.mb button{
+  flex:1;
+  padding:clamp(14px,1.8vw,34px) 16px;
+  border:none;
+  border-radius:12px;
+  font-size:clamp(14px,1.6vw,32px);
+  font-weight:900;
+  cursor:pointer;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  transition:transform .1s, box-shadow .1s;
+}
+.mb button:active{transform:scale(.97);}
+.bs{
+  background:linear-gradient(135deg,#00ff44,#00cc35);
+  color:#000;
+  box-shadow:0 4px 20px rgba(0,255,68,.25);
+}
+.bs:hover{box-shadow:0 6px 28px rgba(0,255,68,.4);}
+.bc{
+  background:#0f0f1e;
+  color:#555;
+  border:1px solid #2a2a3a;
+}
+.bc:hover{color:#888;border-color:#444;}
+.mn{font-size:clamp(9px,.8vw,16px);color:#333;margin-top:clamp(8px,1vw,18px);}
 .hint{text-align:center;font-size:8px;color:#1f1f2f;padding:1px 0 3px;letter-spacing:.3px;}
 </style>
 </head>
@@ -94,34 +184,42 @@ td{padding:5px 4px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
 <div class="hint">TAP A DAILY CELL TO ENTER YOUR SALES &nbsp;&middot;&nbsp; TAP DOWNS OR SHIPPED TO UPDATE</div>
 <div class="ov" id="modal">
   <div class="mo">
-    <h3 id="mT">Enter Amount</h3><div class="ms" id="mS"></div>
+    <div class="mh">
+      <div class="mi" id="mIco">💰</div>
+      <h3 id="mT">Enter Amount</h3>
+    </div>
+    <div class="ms" id="mS"></div>
+    <div class="mv" id="mV"></div>
     <input type="number" id="mI" inputmode="numeric" min="0" placeholder="0">
-    <div class="mb"><button class="bc" onclick="closeM()">Cancel</button><button class="bs" onclick="saveM()">&#10003; Save</button></div>
+    <div class="mb">
+      <button class="bc" onclick="closeM()">✕ &nbsp;Cancel</button>
+      <button class="bs" onclick="saveM()">&#10003; &nbsp;Save</button>
+    </div>
     <div class="mn" id="mN"></div>
   </div>
 </div>
 <script>
 var _k=atob("c2Jfc2VjcmV0X1JUdDJxVEszSjF6RzZTZVhCQVFyd0Ffa1RFUkpGal8=");
 var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-87225ea4909d",DK="boardData";
-var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"],MD=["#1F947","#1F948","#1F949"];
+var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
 var SEED={week_start:"2026-05-04",month:"2026-05",quarter:"2026-Q2",quarter_shipped:322806,
-  mgr:{low_target:1245067,high_target:1458507},
+  mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.7956,ytd_mu:0},
   reps:{
-    W839:{name:"RONNY B",     ytd:281030,goal:180000,shipped:159,  mtd_prev:0,downs:0,week:{mon:0,    tue:981,  wed:0,    thu:0,    fri:0}},
-    W930:{name:"ADAM MISUREK",ytd:257311,goal:180000,shipped:22408,mtd_prev:0,downs:0,week:{mon:33651,tue:1008, wed:0,    thu:0,    fri:0}},
-    W603:{name:"ADAM WEST",   ytd:249321,goal:110000,shipped:5834, mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:6508, thu:600,  fri:0}},
-    W983:{name:"SCOT TOPORSH",ytd:246859,goal:110000,shipped:5790, mtd_prev:0,downs:0,week:{mon:119,  tue:0,    wed:6071, thu:6900, fri:0}},
-    W784:{name:"FROGGY",      ytd:227621,goal:110000,shipped:15274,mtd_prev:0,downs:0,week:{mon:9162, tue:0,    wed:9722, thu:5500, fri:0}},
-    W973:{name:"TJ SUTTON",   ytd:79606, goal:60000, shipped:3684, mtd_prev:0,downs:0,week:{mon:0,    tue:15965,wed:3683, thu:0,    fri:0}},
-    W849:{name:"JOHN BAEMMERT",ytd:67579,goal:60000, shipped:2514, mtd_prev:0,downs:0,week:{mon:500,  tue:1500, wed:1543, thu:0,    fri:0}},
-    W962:{name:"CHRIS K",     ytd:66197, goal:25000, shipped:1032, mtd_prev:0,downs:0,week:{mon:1032, tue:0,    wed:0,    thu:0,    fri:0}},
-    W909:{name:"LUIS MILLAN", ytd:31265, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,    thu:0,    fri:0}},
-    W959:{name:"CASSIE",      ytd:30132, goal:20000, shipped:549,  mtd_prev:0,downs:0,week:{mon:0,    tue:180,  wed:369,  thu:4561, fri:0}},
-    W762:{name:"KERRY SMITH", ytd:21267, goal:20000, shipped:3840, mtd_prev:0,downs:0,week:{mon:0,    tue:3840, wed:0,    thu:0,    fri:0}},
-    W963:{name:"NICO T",      ytd:17684, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:100,  wed:0,    thu:0,    fri:0}},
-    W938:{name:"GEOFF NURSE", ytd:13126, goal:20000, shipped:710,  mtd_prev:0,downs:0,week:{mon:0,    tue:170,  wed:0,    thu:0,    fri:0}},
-    W953:{name:"JAMEL LEE",   ytd:9184,  goal:20000, shipped:100,  mtd_prev:0,downs:0,week:{mon:0,    tue:199,  wed:0,    thu:0,    fri:0}},
-    W934:{name:"LESLIE KUBENY",ytd:8170, goal:15000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,    thu:0,    fri:0}}
+    W839:{name:"RONNY B",      ytd:281030,goal:180000,shipped:159,  mtd_prev:0,downs:0,week:{mon:0,    tue:981,  wed:0,   thu:0,   fri:0}},
+    W930:{name:"ADAM MISUREK", ytd:257311,goal:180000,shipped:22408,mtd_prev:0,downs:0,week:{mon:33651,tue:9383, wed:0,   thu:0,   fri:0}},
+    W603:{name:"ADAM WEST",    ytd:249321,goal:110000,shipped:5834, mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:6508,thu:0,   fri:0}},
+    W983:{name:"SCOT TOPORSH", ytd:246859,goal:110000,shipped:5790, mtd_prev:0,downs:0,week:{mon:119,  tue:1416, wed:6071,thu:0,   fri:0}},
+    W784:{name:"FROGGY",       ytd:227621,goal:110000,shipped:15274,mtd_prev:0,downs:0,week:{mon:9162, tue:0,    wed:9722,thu:0,   fri:0}},
+    W973:{name:"TJ SUTTON",    ytd:79606, goal:60000, shipped:3684, mtd_prev:0,downs:0,week:{mon:0,    tue:15965,wed:3683,thu:0,   fri:0}},
+    W849:{name:"JOHN BAEMMERT",ytd:67579, goal:60000, shipped:2514, mtd_prev:0,downs:0,week:{mon:500,  tue:1496, wed:1543,thu:0,   fri:0}},
+    W962:{name:"CHRIS K",      ytd:66197, goal:25000, shipped:1032, mtd_prev:0,downs:0,week:{mon:1032, tue:1416, wed:0,   thu:0,   fri:0}},
+    W909:{name:"LUIS MILLAN",  ytd:31265, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,   thu:0,   fri:0}},
+    W959:{name:"CASSIE",       ytd:30132, goal:20000, shipped:549,  mtd_prev:0,downs:0,week:{mon:0,    tue:180,  wed:369, thu:0,   fri:0}},
+    W762:{name:"KERRY SMITH",  ytd:21267, goal:20000, shipped:3840, mtd_prev:0,downs:0,week:{mon:0,    tue:3840, wed:0,   thu:0,   fri:0}},
+    W963:{name:"NICO T",       ytd:17684, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:99,   wed:0,   thu:0,   fri:0}},
+    W938:{name:"GEOFF NURSE",  ytd:13126, goal:20000, shipped:710,  mtd_prev:0,downs:0,week:{mon:0,    tue:170,  wed:0,   thu:0,   fri:0}},
+    W953:{name:"JAMEL LEE",    ytd:9184,  goal:20000, shipped:100,  mtd_prev:0,downs:0,week:{mon:0,    tue:199,  wed:0,   thu:0,   fri:0}},
+    W934:{name:"LESLIE KUBENY",ytd:8170,  goal:15000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,   thu:0,   fri:0}}
   }
 };
 var BD=null,EC=null;
@@ -145,7 +243,6 @@ function fiscalDL(){
   while(d<=end){var w=d.getDay();if(w>0&&w<6)c++;d.setDate(d.getDate()+1);}
   return c;
 }
-function dOff(mo,dy){var d=new Date();d.setMonth(d.getMonth()-mo);d.setDate(d.getDate()-dy);return d.toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"});}
 function ym(){return new Date().toISOString().slice(0,7);}
 function getQ(){return new Date().getFullYear()+"-Q"+(Math.floor(new Date().getMonth()/3)+1);}
 function hdr(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
@@ -209,7 +306,7 @@ function render(data){
   renderH(data);
   var tk=tKey();
   var hcols=["<th class='hY'>YTD</th>","<th class='hN'>ROSTER</th>"];
-  DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" TODAY":"")+"</th>");});
+  DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" &#9670;":"")+"</th>");});
   hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hDo'>DOWNS</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
   gel("thr").innerHTML=hcols.join("");
 
@@ -228,7 +325,7 @@ function render(data){
     var dc=DAYS.map(function(k,i){
       var v=rep.week[k]||0,iT=tk===k;
       var inn=v>=1000?"<span class='dg'>$"+v.toLocaleString()+"</span>":v>0?"<span class='dr'>$"+v.toLocaleString()+"</span>":"<span class='de'>&mdash;</span>";
-      return"<td class='cD"+(iT?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>"+inn+"</td>";
+      return"<td class='cD"+(iT?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>" +inn+"</td>";
     }).join("");
     var bc=hit?"#00ff44":pct>75?"#ffaa00":"#cc88ff";
     var pc="<td class='cP'><div class='pb'><span class='pn"+(hit?" done":"")+"'>"+pct+"%</span><div class='pbb'><div class='pbf' style='width:"+Math.min(100,pct)+"%;background:"+bc+";'></div></div></div></td>";
@@ -240,16 +337,23 @@ function render(data){
   gel("tbod").innerHTML=rows.join("");
 }
 
+function icoFor(type){return type==="day"?"📝":type==="ship"?"📦":"⬇️";}
+function subFor(type){return type==="day"?"Written sales for this day":type==="ship"?"MTD shipped total (from Colin's sheet)":"Cumulative MTD downs — subtracts from written";}
+
 function openM(id,lbl,cur,sub,note,type,field){
   EC={id:id,type:type,field:field};
-  hdr("mT",lbl);hdr("mS",sub);hdr("mN",note);
+  gel("mIco").textContent=icoFor(type);
+  hdr("mT",lbl);
+  hdr("mS",subFor(type));
+  hdr("mV",cur>0?"Current: $"+cur.toLocaleString():"No entry yet");
+  hdr("mN",note);
   gel("mI").value=cur||"";
   gel("modal").classList.add("on");
-  setTimeout(function(){gel("mI").focus();},60);
+  setTimeout(function(){gel("mI").select();gel("mI").focus();},80);
 }
-function openD(id,day){openM(id,BD.reps[id].name+" - "+DL[DAYS.indexOf(day)],BD.reps[id].week[day],"Enter written amount for this day","Enter 0 to clear.","day",day);}
-function openDo(id){openM(id,BD.reps[id].name+" - DOWNS",BD.reps[id].downs,"Enter cumulative MTD downs (subtracts from MTD Written)","Enter 0 to clear.","downs","downs");}
-function openS(id){openM(id,BD.reps[id].name+" - MTD SHIPPED",BD.reps[id].shipped,"Enter MTD shipped total","Usually updated from ship sheets.","ship","shipped");}
+function openD(id,day){openM(id,BD.reps[id].name+" — "+DL[DAYS.indexOf(day)],BD.reps[id].week[day],"","Enter 0 to clear.","day",day);}
+function openDo(id){openM(id,BD.reps[id].name+" — DOWNS",BD.reps[id].downs,"","Enter 0 to clear.","downs","downs");}
+function openS(id){openM(id,BD.reps[id].name+" — SHIPPED",BD.reps[id].shipped,"","Usually updated from ship sheets.","ship","shipped");}
 function closeM(){gel("modal").classList.remove("on");EC=null;}
 async function saveM(){
   if(!EC)return;
@@ -260,7 +364,7 @@ async function saveM(){
   closeM();render(BD);
   hdr("hU","Saving...");
   var ok=await sbSet(BD);
-  hdr("hU",(ok?"Saved ":"Local ")+(new Date().toLocaleTimeString()));
+  hdr("hU",(ok?"✓ Saved ":"Local ")+(new Date().toLocaleTimeString()));
 }
 gel("mI").addEventListener("keydown",function(e){if(e.key==="Enter")saveM();if(e.key==="Escape")closeM();});
 gel("modal").addEventListener("click",function(e){if(e.target===gel("modal"))closeM();});
@@ -271,7 +375,7 @@ function startR(){
   rt=setInterval(async function(){
     var f=await sbGet();
     if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);}
-    hdr("hU","Refreshed "+new Date().toLocaleTimeString());
+    hdr("hU","↻ "+new Date().toLocaleTimeString());
   },30000);
 }
 
@@ -281,15 +385,14 @@ async function init(){
   localStorage.removeItem("dbw_b");
   try{data=await sbGet();}catch(e){}
   if(!data){
-    var c=localStorage.getItem("dbw_b");
-    data=c?JSON.parse(c):JSON.parse(JSON.stringify(SEED));
-    hdr("hU","Offline");
+    data=JSON.parse(JSON.stringify(SEED));
+    hdr("hU","Using local data");
   }
   try{if(rollover(data))await sbSet(data);}catch(e){}
   BD=data;
   try{render(BD);}catch(e){hdr("hU","Render error: "+e.message);console.error(e);return;}
   startR();
-  hdr("hU","Live "+new Date().toLocaleTimeString());
+  hdr("hU","✓ Live "+new Date().toLocaleTimeString());
 }
 init();
 </script>
