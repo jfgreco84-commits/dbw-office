@@ -20,7 +20,7 @@ body{background:#07070e;color:#e0e0e0;font-family:'Arial Black',Arial,sans-serif
 .c2{border-color:#dddd0030;}.c2 .iv{color:#dddd00;font-size:clamp(10px,1.8vw,52px);}
 .c3{border-color:#00ff4430;}.c3 .iv{color:#00ff44;font-size:clamp(24px,6vw,150px);}
 .c4 .iv{color:#ffaa00;font-size:clamp(10px,1.8vw,52px);}
-.c5{border-color:#00ff4430;}.c5 .iv{color:#00ff44;font-size:clamp(10px,1.8vw,52px);}
+.c5{border-color:#00c8ff30;}.c5 .iv{color:#00c8ff;font-size:clamp(10px,1.8vw,52px);}
 .sbar{display:flex;justify-content:space-between;padding:2px 8px 3px;font-size:10px;color:#333;}
 .dot{display:inline-block;width:7px;height:7px;background:#00ff44;border-radius:50%;box-shadow:0 0 8px #00ff44;animation:p 2s infinite;margin-right:4px;vertical-align:middle;}
 @keyframes p{0%,100%{opacity:1;}50%{opacity:.3;}}
@@ -83,8 +83,8 @@ td{padding:5px 4px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
 <div class="title">&#9889; &nbsp;DBW WISCONSIN &mdash; LIVE SALES BOARD &nbsp;&#9889;</div>
 <div class="igrid">
   <div class="ib c1"><span class="il">Today</span><span class="iv" id="hT">--</span></div>
-  <div class="ib c2"><span class="il">Office MTD Written</span><span class="iv" id="hOW">--</span></div>
-  <div class="ib c5"><span class="il">Office MTD Shipped</span><span class="iv" id="hOS">--</span></div>
+  <div class="ib c2"><span class="il">MTD M/U</span><span class="iv" id="hMU">--</span></div>
+  <div class="ib c5"><span class="il">YTD M/U</span><span class="iv" id="hYMU">--</span></div>
   <div class="ib c3"><span class="il">Days Left</span><span class="iv" id="hDL">--</span></div>
   <div class="ib c4"><span class="il">Low QTR Bonus</span><span class="iv" id="hLG">--</span><span class="is" id="hLT">to go</span></div>
   <div class="ib c4"><span class="il">High QTR Bonus</span><span class="iv" id="hHG">--</span><span class="is" id="hHT">to go</span></div>
@@ -196,9 +196,11 @@ function rollover(d){
 function renderH(data){
   hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
   hdr("hDL",fiscalDL());
-  var mgr=data.mgr||{low_target:1245067,high_target:1458507},qs=data.quarter_shipped||0;
+  var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:0,ytd_mu:0},qs=data.quarter_shipped||0;
+  var mu=mgr.mtd_mu||0,ymu=mgr.ytd_mu||0;
+  hdr("hMU",mu>0?mu.toFixed(2)+"x":"--");
+  hdr("hYMU",ymu>0?ymu.toFixed(2)+"x":"--");
   var lg=Math.max(0,mgr.low_target-qs),hg=Math.max(0,mgr.high_target-qs);
-  hdr("hOW",oM>0?"$"+oM.toLocaleString():"--");hdr("hOS",oS>0?"$"+oS.toLocaleString():"--");
   hdr("hLG",lg>0?"$"+lg.toLocaleString():"HIT!");hdr("hLT","target $"+mgr.low_target.toLocaleString());
   hdr("hHG",hg>0?"$"+hg.toLocaleString():"HIT!");hdr("hHT","target $"+mgr.high_target.toLocaleString());
 }
