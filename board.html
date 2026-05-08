@@ -7,93 +7,126 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#07070e;color:#e0e0e0;font-family:'Arial Black',Arial,sans-serif;min-height:100vh;}
-.title{text-align:center;font-size:clamp(18px,3.5vw,120px);font-weight:900;color:#00c8ff;text-shadow:0 0 30px rgba(0,200,255,.5);letter-spacing:4px;padding:10px 0 4px;text-transform:uppercase;}
+.title{text-align:center;font-size:clamp(22px,4vw,140px);font-weight:900;color:#00c8ff;text-shadow:0 0 30px rgba(0,200,255,.5);letter-spacing:4px;padding:10px 0 4px;text-transform:uppercase;}
 .igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 5px 5px;}
 @media(min-width:700px){.igrid{grid-template-columns:repeat(6,1fr);}}
-.ib{background:#0c0c1c;border:1px solid #1a1a2e;border-radius:6px;padding:4px 6px;text-align:center;}
-.il{color:#888;font-size:clamp(9px,.8vw,20px);font-weight:bold;text-transform:uppercase;letter-spacing:.4px;display:block;}
+.ib{background:#0c0c1c;border:1px solid #1a1a2e;border-radius:6px;padding:5px 8px;text-align:center;}
+.il{color:#888;font-size:clamp(10px,1.1vw,28px);font-weight:bold;text-transform:uppercase;letter-spacing:.4px;display:block;}
 .iv{font-weight:900;line-height:1.1;display:block;margin-top:2px;}
-.is{color:#444;font-size:8px;display:block;margin-top:1px;}
-.c1 .iv{color:#00c8ff;font-size:clamp(12px,2.2vw,72px);}
-.c2{border-color:#dddd0030;}.c2 .iv{color:#dddd00;font-size:clamp(10px,1.8vw,52px);}
-.c3{border-color:#00ff4430;}.c3 .iv{color:#00ff44;font-size:clamp(24px,6vw,150px);}
-.c4 .iv{color:#ffaa00;font-size:clamp(10px,1.8vw,52px);}
-.c5{border-color:#00c8ff30;}.c5 .iv{color:#00c8ff;font-size:clamp(10px,1.8vw,52px);}
-.sbar{display:flex;justify-content:space-between;padding:2px 8px 3px;font-size:10px;color:#333;}
-.dot{display:inline-block;width:7px;height:7px;background:#00ff44;border-radius:50%;box-shadow:0 0 8px #00ff44;animation:p 2s infinite;margin-right:4px;vertical-align:middle;}
+.is{color:#444;font-size:clamp(8px,.7vw,18px);display:block;margin-top:1px;}
+.c1 .iv{color:#00c8ff;font-size:clamp(14px,2.6vw,90px);}
+.c2{border-color:#dddd0030;}.c2 .iv{color:#dddd00;font-size:clamp(12px,2.2vw,70px);}
+.c3{border-color:#00ff4430;}.c3 .iv{color:#00ff44;font-size:clamp(28px,7vw,180px);}
+.c4 .iv{color:#ffaa00;font-size:clamp(12px,2.2vw,70px);}
+.c5{border-color:#00c8ff30;}.c5 .iv{color:#00c8ff;font-size:clamp(12px,2.2vw,70px);}
+.sbar{display:flex;justify-content:space-between;padding:2px 8px 4px;font-size:clamp(9px,.7vw,18px);color:#333;}
+.dot{display:inline-block;width:8px;height:8px;background:#00ff44;border-radius:50%;box-shadow:0 0 8px #00ff44;animation:p 2s infinite;margin-right:5px;vertical-align:middle;}
 @keyframes p{0%,100%{opacity:1;}50%{opacity:.3;}}
 .wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 4px 8px;}
 table{width:100%;border-collapse:collapse;}
-thead th{padding:6px 4px;text-align:center;border:1px solid #0f0f1a;white-space:nowrap;font-size:clamp(10px,1.5vw,40px);font-weight:900;position:sticky;top:0;z-index:10;text-transform:uppercase;}
-.hY{background:#080814;color:#ffd700;min-width:90px;position:sticky;left:0;z-index:21;}
-.hN{background:#0c0c20;color:#fff;min-width:130px;border-right:2px solid #00c8ff60!important;position:sticky;left:90px;z-index:21;}
-.hD{background:#090e09;color:#00aa33;min-width:110px;}
+
+/* ---- HEADER ROW ---- */
+thead th{
+  padding:8px 5px;text-align:center;border:1px solid #0f0f1a;
+  white-space:nowrap;
+  font-size:clamp(11px,1.8vw,52px);
+  font-weight:900;position:sticky;top:0;z-index:10;text-transform:uppercase;
+}
+.hY{background:#080814;color:#ffd700;min-width:100px;position:sticky;left:0;z-index:21;}
+.hN{background:#0c0c20;color:#fff;min-width:150px;border-right:2px solid #00c8ff60!important;position:sticky;left:100px;z-index:21;}
+.hD{background:#090e09;color:#00aa33;min-width:120px;}
 .hD.tc{background:#001600;color:#00ff44;border:1px solid #00ff4450!important;}
-.hW{background:#111000;color:#ffcc00;min-width:100px;}
-.hM{background:#000c20;color:#4499ff;min-width:110px;}
-.hS{background:#001600;color:#00ff44;min-width:100px;}
-.hDo{background:#120000;color:#ff5555;min-width:80px;}
-.hG{background:#120700;color:#ff8800;min-width:90px;font-weight:900;text-shadow:0 0 6px rgba(255,136,0,.4);}
-.hP{background:#0c0014;color:#cc88ff;min-width:90px;}
+.hW{background:#111000;color:#ffcc00;min-width:120px;}
+.hM{background:#000c20;color:#4499ff;min-width:130px;}
+.hS{background:#001600;color:#00ff44;min-width:120px;}
+.hMU{background:#0e0800;color:#ffaa00;min-width:90px;font-weight:900;text-shadow:0 0 6px rgba(255,170,0,.3);}
+.hG{background:#120700;color:#ff8800;min-width:100px;font-weight:900;text-shadow:0 0 6px rgba(255,136,0,.4);}
+.hP{background:#0c0014;color:#cc88ff;min-width:100px;}
+
+/* ---- DATA ROWS ---- */
 tbody tr{border-bottom:1px solid #0e0e1c;}
 tbody tr:hover{background:rgba(0,200,255,.03);}
 .r1{background:rgba(255,215,0,.04);}
 .r2{background:rgba(210,210,210,.025);}
 .r3{background:rgba(210,120,40,.03);}
 .tot{background:#001800!important;border-top:2px solid #00ff4460!important;}
-td{padding:6px 5px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center;vertical-align:middle;}
-.cY{background:#07070e;color:#ffd700;text-align:right;font-size:clamp(14px,2.8vw,90px);font-weight:900;text-shadow:0 0 10px rgba(255,215,0,.5);position:sticky;left:0;z-index:5;border-right:1px solid #18182c;min-width:90px;}
-.cN{background:#090918;color:#fff;font-weight:900;text-align:left;padding-left:9px;font-size:clamp(11px,2.2vw,70px);border-right:2px solid #00c8ff35!important;position:sticky;left:90px;z-index:5;}
-.cD{cursor:pointer;min-width:110px;}.cD:hover{background:rgba(255,255,255,.07)!important;}.cD.tc{border:1px solid #00ff4425!important;}
-.dg{color:#00ff44;font-weight:900;font-size:clamp(13px,2.2vw,70px);}
-.dr{color:#ff9900;font-weight:900;font-size:clamp(13px,2.2vw,70px);}
-.de{color:#252535;font-size:clamp(13px,2.2vw,70px);}
-.cW{color:#ffcc00;font-weight:900;font-size:clamp(13px,2.2vw,70px);}
-.cM{color:#4499ff;font-weight:900;font-size:clamp(13px,2.2vw,70px);}
+td{padding:7px 5px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center;vertical-align:middle;}
+
+/* ---- STICKY COLUMNS ---- */
+.cY{
+  background:#07070e;color:#ffd700;text-align:right;
+  font-size:clamp(16px,3.2vw,110px);
+  font-weight:900;text-shadow:0 0 10px rgba(255,215,0,.5);
+  position:sticky;left:0;z-index:5;border-right:1px solid #18182c;min-width:100px;
+}
+.cN{
+  background:#090918;color:#fff;font-weight:900;text-align:left;padding-left:10px;
+  font-size:clamp(13px,2.6vw,88px);
+  border-right:2px solid #00c8ff35!important;position:sticky;left:100px;z-index:5;
+}
+
+/* ---- DAILY CELLS ---- */
+.cD{cursor:pointer;min-width:120px;}
+.cD:hover{background:rgba(255,255,255,.07)!important;}
+.cD.tc{border:1px solid #00ff4425!important;}
+.dg{color:#00ff44;font-weight:900;font-size:clamp(14px,3vw,100px);}
+.dr{color:#ff9900;font-weight:900;font-size:clamp(14px,3vw,100px);}
+.de{color:#252535;font-size:clamp(14px,3vw,100px);}
+
+/* ---- SUMMARY CELLS ---- */
+.cW{color:#ffcc00;font-weight:900;font-size:clamp(14px,3vw,100px);}
+.cM{color:#4499ff;font-weight:900;font-size:clamp(14px,3vw,100px);}
 .cM.gh{color:#00ff44!important;text-shadow:0 0 10px rgba(0,255,68,.45);}
-.cS{color:#00ff44;font-weight:900;cursor:pointer;font-size:clamp(13px,2.2vw,70px);}.cS:hover{background:rgba(0,255,68,.07)!important;}
-.cDo{color:#ff5555;font-weight:900;cursor:pointer;}.cDo:hover{background:rgba(255,85,85,.07)!important;}
-.cG{color:#ff8800;font-size:clamp(13px,2.2vw,70px);font-weight:900;text-shadow:0 0 8px rgba(255,136,0,.5);}
-.cP{padding:5px 7px;}
-.pb{display:flex;flex-direction:column;align-items:center;gap:2px;}
-.pbb{width:100%;height:5px;background:#18182c;border-radius:3px;overflow:hidden;}
+.cS{color:#00ff44;font-weight:900;cursor:pointer;font-size:clamp(14px,3vw,100px);}
+.cS:hover{background:rgba(0,255,68,.07)!important;}
+.cMU{color:#ffaa00;font-weight:900;cursor:pointer;font-size:clamp(14px,2.8vw,92px);}
+.cMU:hover{background:rgba(255,170,0,.07)!important;}
+.cMU.hot{color:#00ff44;text-shadow:0 0 10px rgba(0,255,68,.35);}
+.cG{color:#ff8800;font-size:clamp(14px,3vw,100px);font-weight:900;text-shadow:0 0 8px rgba(255,136,0,.5);}
+.cP{padding:6px 8px;}
+.pb{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.pbb{width:100%;height:6px;background:#18182c;border-radius:3px;overflow:hidden;}
 .pbf{height:100%;border-radius:3px;}
-.pn{font-size:clamp(11px,2.0vw,62px);font-weight:900;color:#cc88ff;}
+.pn{font-size:clamp(12px,2.4vw,80px);font-weight:900;color:#cc88ff;}
 .pn.done{color:#00ff44;}
-.tot td{color:#00ff44!important;font-weight:900;font-size:clamp(13px,2.2vw,70px);}
+.tot td{color:#00ff44!important;font-weight:900;font-size:clamp(14px,3vw,100px);}
 .tot .cY{color:#0f2f0f!important;}
 
-/* ===== MODAL — PROFESSIONAL TV-SCALE ===== */
+/* ===== MODAL ===== */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;display:none;align-items:center;justify-content:center;}
 .ov.on{display:flex;}
 .mo{
   background:linear-gradient(160deg,#0d0d20 0%,#080814 100%);
-  border:2px solid #00c8ff;
-  border-radius:18px;
-  padding:clamp(24px,3vw,60px) clamp(24px,4vw,72px);
-  width:min(700px,92vw);
-  text-align:center;
+  border:2px solid #00c8ff;border-radius:18px;
+  padding:clamp(26px,3.5vw,70px) clamp(28px,4.5vw,80px);
+  width:min(740px,92vw);text-align:center;
   box-shadow:0 0 60px rgba(0,200,255,.15),0 30px 80px rgba(0,0,0,.8);
   position:relative;
 }
 .mo::before{content:'';position:absolute;inset:0;border-radius:18px;background:linear-gradient(160deg,rgba(0,200,255,.04),transparent);pointer-events:none;}
-.mh{display:flex;align-items:center;justify-content:center;gap:clamp(8px,1vw,18px);border-bottom:1px solid #1a1a30;padding-bottom:clamp(12px,1.5vw,28px);margin-bottom:clamp(12px,1.5vw,28px);}
-.mi{width:clamp(44px,4vw,80px);height:clamp(44px,4vw,80px);background:#00c8ff15;border:1px solid #00c8ff40;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:clamp(22px,2.5vw,48px);}
-.mo h3{color:#fff;font-size:clamp(18px,2.4vw,54px);font-weight:900;margin:0;text-shadow:0 0 20px rgba(0,200,255,.3);letter-spacing:1px;text-transform:uppercase;}
-.ms{color:#00c8ff;font-size:clamp(12px,1.4vw,30px);margin-bottom:clamp(6px,1vw,18px);font-weight:700;letter-spacing:.5px;}
-.mv{color:#555;font-size:clamp(11px,1vw,22px);margin-bottom:clamp(10px,1.2vw,22px);}
-.mo input{width:100%;background:#06060f;border:2px solid #00c8ff60;border-radius:12px;color:#00ff44;font-size:clamp(36px,5vw,100px);font-weight:900;text-align:center;padding:clamp(14px,2vw,40px) 16px;outline:none;font-family:'Arial Black',Arial,sans-serif;letter-spacing:2px;transition:border-color .15s,box-shadow .15s;}
-.mo input:focus{border-color:#00ff44;box-shadow:0 0 0 3px rgba(0,255,68,.12),inset 0 0 20px rgba(0,255,68,.04);}
+.mh{display:flex;align-items:center;justify-content:center;gap:clamp(10px,1.2vw,22px);border-bottom:1px solid #1a1a30;padding-bottom:clamp(14px,1.8vw,32px);margin-bottom:clamp(14px,1.8vw,32px);}
+.mi{width:clamp(48px,5vw,90px);height:clamp(48px,5vw,90px);background:#00c8ff15;border:1px solid #00c8ff40;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,3vw,56px);}
+.mo h3{color:#fff;font-size:clamp(20px,2.8vw,60px);font-weight:900;margin:0;text-shadow:0 0 20px rgba(0,200,255,.3);letter-spacing:1px;text-transform:uppercase;}
+.ms{color:#00c8ff;font-size:clamp(13px,1.6vw,34px);margin-bottom:clamp(8px,1.2vw,22px);font-weight:700;letter-spacing:.5px;}
+.mv{color:#555;font-size:clamp(12px,1.2vw,26px);margin-bottom:clamp(12px,1.4vw,26px);}
+.mo input{
+  width:100%;background:#06060f;border:2px solid #00c8ff60;border-radius:12px;
+  color:#00ff44;font-size:clamp(40px,5.5vw,110px);font-weight:900;text-align:center;
+  padding:clamp(16px,2.2vw,44px) 18px;outline:none;
+  font-family:'Arial Black',Arial,sans-serif;letter-spacing:2px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.mo input:focus{border-color:#00ff44;box-shadow:0 0 0 4px rgba(0,255,68,.12),inset 0 0 20px rgba(0,255,68,.04);}
 .mo input::placeholder{color:#1a1a2a;}
-.mb{display:flex;gap:clamp(10px,1.5vw,24px);margin-top:clamp(18px,2.2vw,40px);}
-.mb button{flex:1;padding:clamp(16px,2vw,38px) 16px;border:none;border-radius:12px;font-size:clamp(15px,1.8vw,36px);font-weight:900;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:transform .1s,box-shadow .1s;}
+.mb{display:flex;gap:clamp(12px,1.8vw,28px);margin-top:clamp(20px,2.5vw,48px);}
+.mb button{flex:1;padding:clamp(18px,2.4vw,46px) 18px;border:none;border-radius:12px;font-size:clamp(16px,2vw,40px);font-weight:900;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:transform .1s,box-shadow .1s;}
 .mb button:active{transform:scale(.97);}
 .bs{background:linear-gradient(135deg,#00ff44,#00cc35);color:#000;box-shadow:0 4px 20px rgba(0,255,68,.25);}
-.bs:hover{box-shadow:0 6px 28px rgba(0,255,68,.4);}
+.bs:hover{box-shadow:0 6px 30px rgba(0,255,68,.45);}
 .bc{background:#0f0f1e;color:#555;border:1px solid #2a2a3a;}
 .bc:hover{color:#888;border-color:#444;}
-.mn{font-size:clamp(9px,.8vw,18px);color:#333;margin-top:clamp(8px,1vw,18px);}
-.hint{text-align:center;font-size:8px;color:#1f1f2f;padding:1px 0 3px;letter-spacing:.3px;}
+.mn{font-size:clamp(10px,1vw,20px);color:#333;margin-top:clamp(10px,1.2vw,22px);}
+.hint{text-align:center;font-size:clamp(8px,.6vw,14px);color:#1f1f2f;padding:1px 0 3px;letter-spacing:.3px;}
 </style>
 </head>
 <body>
@@ -108,7 +141,7 @@ td{padding:6px 5px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
 </div>
 <div class="sbar"><span><span class="dot"></span>LIVE &middot; Auto-refresh 30s</span><span id="hU">Connecting...</span></div>
 <div class="wrap"><table><thead><tr id="thr"></tr></thead><tbody id="tbod"></tbody></table></div>
-<div class="hint">TAP A DAILY CELL TO ENTER YOUR SALES &nbsp;&middot;&nbsp; TAP DOWNS OR SHIPPED TO UPDATE</div>
+<div class="hint">TAP A DAILY CELL TO LOG SALES &nbsp;&middot;&nbsp; TAP SHIPPED OR M/U TO UPDATE</div>
 <div class="ov" id="modal">
   <div class="mo">
     <div class="mh">
@@ -117,7 +150,7 @@ td{padding:6px 5px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
     </div>
     <div class="ms" id="mS"></div>
     <div class="mv" id="mV"></div>
-    <input type="number" id="mI" inputmode="numeric" min="0" placeholder="0">
+    <input type="number" id="mI" inputmode="decimal" min="0" step="0.01" placeholder="0">
     <div class="mb">
       <button class="bc" onclick="closeM()">✕ &nbsp;Cancel</button>
       <button class="bs" onclick="saveM()">&#10003; &nbsp;Save</button>
@@ -132,41 +165,30 @@ var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
 var SEED={week_start:"2026-05-04",month:"2026-05",quarter:"2026-Q2",quarter_shipped:322806,
   mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.7956,ytd_mu:0},
   reps:{
-    W839:{name:"RONNY B",      ytd:281030,goal:180000,shipped:159,  mtd_prev:0,downs:0,week:{mon:0,    tue:981,  wed:0,   thu:0,fri:0}},
-    W930:{name:"ADAM MISUREK", ytd:257311,goal:180000,shipped:22408,mtd_prev:0,downs:0,week:{mon:33651,tue:9383, wed:0,   thu:0,fri:0}},
-    W603:{name:"ADAM WEST",    ytd:249321,goal:110000,shipped:5834, mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:6508,thu:0,fri:0}},
-    W983:{name:"SCOT TOPORSH", ytd:246859,goal:110000,shipped:5790, mtd_prev:0,downs:0,week:{mon:119,  tue:1416, wed:6071,thu:0,fri:0}},
-    W784:{name:"FROGGY",       ytd:227621,goal:110000,shipped:15274,mtd_prev:0,downs:0,week:{mon:9162, tue:0,    wed:9722,thu:0,fri:0}},
-    W973:{name:"TJ SUTTON",    ytd:79606, goal:60000, shipped:3684, mtd_prev:0,downs:0,week:{mon:0,    tue:15965,wed:3683,thu:0,fri:0}},
-    W849:{name:"JOHN BAEMMERT",ytd:67579, goal:60000, shipped:2514, mtd_prev:0,downs:0,week:{mon:500,  tue:1496, wed:1543,thu:0,fri:0}},
-    W962:{name:"CHRIS K",      ytd:66197, goal:25000, shipped:1032, mtd_prev:0,downs:0,week:{mon:1032, tue:1416, wed:0,   thu:0,fri:0}},
-    W909:{name:"LUIS MILLAN",  ytd:31265, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,   thu:0,fri:0}},
-    W959:{name:"CASSIE",       ytd:30132, goal:20000, shipped:549,  mtd_prev:0,downs:0,week:{mon:0,    tue:180,  wed:369, thu:0,fri:0}},
-    W762:{name:"KERRY SMITH",  ytd:21267, goal:20000, shipped:3840, mtd_prev:0,downs:0,week:{mon:0,    tue:3840, wed:0,   thu:0,fri:0}},
-    W963:{name:"NICO T",       ytd:17684, goal:20000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:99,   wed:0,   thu:0,fri:0}},
-    W938:{name:"GEOFF NURSE",  ytd:13126, goal:20000, shipped:710,  mtd_prev:0,downs:0,week:{mon:0,    tue:170,  wed:0,   thu:0,fri:0}},
-    W953:{name:"JAMEL LEE",    ytd:9184,  goal:20000, shipped:100,  mtd_prev:0,downs:0,week:{mon:0,    tue:199,  wed:0,   thu:0,fri:0}},
-    W934:{name:"LESLIE KUBENY",ytd:8170,  goal:15000, shipped:0,    mtd_prev:0,downs:0,week:{mon:0,    tue:0,    wed:0,   thu:0,fri:0}}
+    W839:{name:"RONNY B",      ytd:281030,goal:180000,shipped:159,  mu:0,mtd_prev:0,week:{mon:0,    tue:981,  wed:0,   thu:0,fri:0}},
+    W930:{name:"ADAM MISUREK", ytd:257311,goal:180000,shipped:22408,mu:0,mtd_prev:0,week:{mon:33651,tue:9383, wed:0,   thu:0,fri:0}},
+    W603:{name:"ADAM WEST",    ytd:249321,goal:110000,shipped:5834, mu:0,mtd_prev:0,week:{mon:0,    tue:0,    wed:6508,thu:0,fri:0}},
+    W983:{name:"SCOT TOPORSH", ytd:246859,goal:110000,shipped:5790, mu:0,mtd_prev:0,week:{mon:119,  tue:1416, wed:6071,thu:0,fri:0}},
+    W784:{name:"FROGGY",       ytd:227621,goal:110000,shipped:15274,mu:0,mtd_prev:0,week:{mon:9162, tue:0,    wed:9722,thu:0,fri:0}},
+    W973:{name:"TJ SUTTON",    ytd:79606, goal:60000, shipped:3684, mu:0,mtd_prev:0,week:{mon:0,    tue:15965,wed:3683,thu:0,fri:0}},
+    W849:{name:"JOHN BAEMMERT",ytd:67579, goal:60000, shipped:2514, mu:0,mtd_prev:0,week:{mon:500,  tue:1496, wed:1543,thu:0,fri:0}},
+    W962:{name:"CHRIS K",      ytd:66197, goal:25000, shipped:1032, mu:0,mtd_prev:0,week:{mon:1032, tue:1416, wed:0,   thu:0,fri:0}},
+    W909:{name:"LUIS MILLAN",  ytd:31265, goal:20000, shipped:0,    mu:0,mtd_prev:0,week:{mon:0,    tue:0,    wed:0,   thu:0,fri:0}},
+    W959:{name:"CASSIE",       ytd:30132, goal:20000, shipped:549,  mu:0,mtd_prev:0,week:{mon:0,    tue:180,  wed:369, thu:0,fri:0}},
+    W762:{name:"KERRY SMITH",  ytd:21267, goal:20000, shipped:3840, mu:0,mtd_prev:0,week:{mon:0,    tue:3840, wed:0,   thu:0,fri:0}},
+    W963:{name:"NICO T",       ytd:17684, goal:20000, shipped:0,    mu:0,mtd_prev:0,week:{mon:0,    tue:99,   wed:0,   thu:0,fri:0}},
+    W938:{name:"GEOFF NURSE",  ytd:13126, goal:20000, shipped:710,  mu:0,mtd_prev:0,week:{mon:0,    tue:170,  wed:0,   thu:0,fri:0}},
+    W953:{name:"JAMEL LEE",    ytd:9184,  goal:20000, shipped:100,  mu:0,mtd_prev:0,week:{mon:0,    tue:199,  wed:0,   thu:0,fri:0}},
+    W934:{name:"LESLIE KUBENY",ytd:8170,  goal:15000, shipped:0,    mu:0,mtd_prev:0,week:{mon:0,    tue:0,    wed:0,   thu:0,fri:0}}
   }
 };
 var BD=null,EC=null;
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
 function tKey(){return{1:"mon",2:"tue",3:"wed",4:"thu",5:"fri"}[new Date().getDay()]||null;}
-
-/* FIX: use LOCAL date components, never toISOString (which shifts to UTC) */
-function localDateStr(d){
-  var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");
-  return y+"-"+m+"-"+day;
-}
-function getMon(d){
-  var dt=new Date(d instanceof Date?d.getTime():d);
-  var dy=dt.getDay(),df=dt.getDate()-dy+(dy===0?-6:1);
-  dt.setDate(df);
-  return localDateStr(dt);
-}
+function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return y+"-"+m+"-"+day;}
+function getMon(d){var dt=new Date(d instanceof Date?d.getTime():d);var dy=dt.getDay(),df=dt.getDate()-dy+(dy===0?-6:1);dt.setDate(df);return localDateStr(dt);}
 function ym(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
 function getQ(){return new Date().getFullYear()+"-Q"+(Math.floor(new Date().getMonth()/3)+1);}
-
 var FISCAL=[
   {s:"2026-01-05",e:"2026-01-30"},{s:"2026-02-02",e:"2026-02-27"},
   {s:"2026-03-02",e:"2026-04-03"},{s:"2026-04-06",e:"2026-05-01"},
@@ -179,87 +201,51 @@ function fiscalDL(){
   var t=new Date();t.setHours(0,0,0,0);
   for(var i=0;i<FISCAL.length;i++){
     var s=new Date(FISCAL[i].s+"T12:00:00"),e=new Date(FISCAL[i].e+"T12:00:00");
-    if(t>=s&&t<=e){
-      var c=0,d=new Date(t);d.setDate(d.getDate()+1);
-      while(d<=e){var w=d.getDay();if(w>0&&w<6)c++;d.setDate(d.getDate()+1);}
-      return c;
-    }
-  }
-  return"?";
+    if(t>=s&&t<=e){var c=0,d=new Date(t);d.setDate(d.getDate()+1);while(d<=e){var w=d.getDay();if(w>0&&w<6)c++;d.setDate(d.getDate()+1);}return c;}
+  }return"?";
 }
 function hdr(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
 function gel(id){return document.getElementById(id);}
-
 async function sbGet(){
-  try{
-    var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK+"&select=data_value",
-      {headers:{apikey:_k,"Authorization":"Bearer "+_k}});
-    if(!r.ok)return null;
-    var rows=await r.json();
-    return(rows&&rows.length>0)?rows[0].data_value:null;
-  }catch(e){return null;}
+  try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK+"&select=data_value",{headers:{apikey:_k,"Authorization":"Bearer "+_k}});if(!r.ok)return null;var rows=await r.json();return(rows&&rows.length>0)?rows[0].data_value:null;}catch(e){return null;}
 }
 async function sbSet(data){
-  try{
-    var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK,
-      {method:"PATCH",
-       headers:{apikey:_k,"Authorization":"Bearer "+_k,"Content-Type":"application/json","Prefer":"return=minimal"},
-       body:JSON.stringify({data_value:data})});
-    localStorage.setItem("dbw_b",JSON.stringify(data));
-    return r.status===204||r.status===200;
-  }catch(e){localStorage.setItem("dbw_b",JSON.stringify(data));return false;}
+  try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK,{method:"PATCH",headers:{apikey:_k,"Authorization":"Bearer "+_k,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({data_value:data})});localStorage.setItem("dbw_b",JSON.stringify(data));return r.status===204||r.status===200;}catch(e){localStorage.setItem("dbw_b",JSON.stringify(data));return false;}
 }
-
 function rollover(d){
   var ch=false,cm=getMon(new Date());
-  if(d.week_start!==cm){
-    Object.keys(d.reps).forEach(function(id){
-      var rep=d.reps[id];
-      rep.mtd_prev=(rep.mtd_prev||0)+DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0);
-      DAYS.forEach(function(k){rep.week[k]=0;});
-    });
-    d.week_start=cm;ch=true;
-  }
-  if(d.month!==ym()){
-    Object.keys(d.reps).forEach(function(id){
-      var rep=d.reps[id];rep.mtd_prev=0;rep.downs=0;rep.shipped=0;
-      DAYS.forEach(function(k){rep.week[k]=0;});
-    });
-    d.month=ym();ch=true;
-  }
+  if(d.week_start!==cm){Object.keys(d.reps).forEach(function(id){var rep=d.reps[id];rep.mtd_prev=(rep.mtd_prev||0)+DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0);DAYS.forEach(function(k){rep.week[k]=0;});});d.week_start=cm;ch=true;}
+  if(d.month!==ym()){Object.keys(d.reps).forEach(function(id){var rep=d.reps[id];rep.mtd_prev=0;rep.mu=0;rep.shipped=0;DAYS.forEach(function(k){rep.week[k]=0;});});d.month=ym();ch=true;}
   if(d.quarter!==getQ()){d.quarter_shipped=0;d.quarter=getQ();ch=true;}
   return ch;
 }
-
 function renderH(data){
   hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
   hdr("hDL",fiscalDL());
   var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:0,ytd_mu:0},qs=data.quarter_shipped||0;
-  hdr("hMU",(mgr.mtd_mu||0)>0?(mgr.mtd_mu).toFixed(2)+"x":"--");
-  hdr("hYMU",(mgr.ytd_mu||0)>0?(mgr.ytd_mu).toFixed(2)+"x":"--");
+  hdr("hMU",(mgr.mtd_mu||0)>0?mgr.mtd_mu.toFixed(2)+"x":"--");
+  hdr("hYMU",(mgr.ytd_mu||0)>0?mgr.ytd_mu.toFixed(2)+"x":"--");
   var lg=Math.max(0,mgr.low_target-qs),hg=Math.max(0,mgr.high_target-qs);
   hdr("hLG",lg>0?"$"+lg.toLocaleString():"HIT!");hdr("hLT","target $"+mgr.low_target.toLocaleString());
   hdr("hHG",hg>0?"$"+hg.toLocaleString():"HIT!");hdr("hHT","target $"+mgr.high_target.toLocaleString());
 }
-
 function render(data){
   renderH(data);
   var tk=tKey();
   var hcols=["<th class='hY'>YTD</th>","<th class='hN'>ROSTER</th>"];
   DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" &#9670;":"")+"</th>");});
-  hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hDo'>DOWNS</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
+  hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hMU'>M/U</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
   gel("thr").innerHTML=hcols.join("");
-
   var ids=Object.keys(data.reps).sort(function(a,b){return data.reps[b].ytd-data.reps[a].ytd;});
-  var oW=0,oM=0,oS=0,oD=0,dt=DAYS.map(function(){return 0;}),rows=[];
-
+  var oW=0,oM=0,oS=0,dt=DAYS.map(function(){return 0;}),rows=[];
   ids.forEach(function(id,rank){
     var rep=data.reps[id];
     var wk=DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0);
-    var mtd=(rep.mtd_prev||0)+wk-(rep.downs||0);
+    var mtd=(rep.mtd_prev||0)+wk;
+    var mu=rep.mu||0;
     var goal=rep.goal||0,pct=goal>0?Math.min(199,Math.round(mtd/goal*100)):0,hit=mtd>=goal;
     DAYS.forEach(function(k,i){dt[i]+=(rep.week[k]||0);});
-    oW+=wk;oM+=mtd;oS+=(rep.shipped||0);oD+=(rep.downs||0);
+    oW+=wk;oM+=mtd;oS+=(rep.shipped||0);
     var rk=rank===0?"r1":rank===1?"r2":rank===2?"r3":"";
     var med=rank===0?"🥇 ":rank===1?"🥈 ":rank===2?"🥉 ":rank===3?"🎖️ ":rank===4?"⭐ ":"";
     var dc=DAYS.map(function(k,i){
@@ -267,39 +253,43 @@ function render(data){
       var inn=v>=1000?"<span class='dg'>$"+v.toLocaleString()+"</span>":v>0?"<span class='dr'>$"+v.toLocaleString()+"</span>":"<span class='de'>&mdash;</span>";
       return"<td class='cD"+(iT?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>" +inn+"</td>";
     }).join("");
+    var muH=mu>0?"<span class='"+(mu>=2?"hot":"")+"'>"+mu.toFixed(2)+"x</span>":"<span class='de'>&mdash;</span>";
     var bc=hit?"#00ff44":pct>75?"#ffaa00":"#cc88ff";
     var pc="<td class='cP'><div class='pb'><span class='pn"+(hit?" done":"")+"'>"+pct+"%</span><div class='pbb'><div class='pbf' style='width:"+Math.min(100,pct)+"%;background:"+bc+";'></div></div></div></td>";
-    rows.push("<tr class='"+rk+"'><td class='cY'>"+fK(rep.ytd)+"</td><td class='cN'>"+med+rep.name+"</td>"+dc+"<td class='cW'>"+(wk>0?"$"+wk.toLocaleString():"&mdash;")+"</td><td class='cM"+(hit?" gh":"")+"'>"+(mtd>0?"$"+mtd.toLocaleString():"&mdash;")+"</td><td class='cS' onclick='openS(\""+id+"\")'>"+(rep.shipped>0?"$"+rep.shipped.toLocaleString():"&mdash;")+"</td><td class='cDo' onclick='openDo(\""+id+"\")'>"+(rep.downs>0?"-$"+rep.downs.toLocaleString():"&mdash;")+"</td><td class='cG'>"+fK(goal)+"</td>"+pc+"</tr>");
+    rows.push("<tr class='"+rk+"'><td class='cY'>"+fK(rep.ytd)+"</td><td class='cN'>"+med+rep.name+"</td>"+dc+
+      "<td class='cW'>"+(wk>0?"$"+wk.toLocaleString():"&mdash;")+"</td>"+
+      "<td class='cM"+(hit?" gh":"")+"'>"+(mtd>0?"$"+mtd.toLocaleString():"&mdash;")+"</td>"+
+      "<td class='cS' onclick='openS(\""+id+"\")'>"+(rep.shipped>0?"$"+rep.shipped.toLocaleString():"&mdash;")+"</td>"+
+      "<td class='cMU' onclick='openMU(\""+id+"\")'>"+muH+"</td>"+
+      "<td class='cG'>"+fK(goal)+"</td>"+pc+"</tr>");
   });
-
   var totD=DAYS.map(function(k,i){var v=dt[i];return"<td class='cD"+(tk===k?" tc":"")+"'>"+(v>0?"$"+v.toLocaleString():"&mdash;")+"</td>";}).join("");
-  rows.push("<tr class='tot'><td class='cY'></td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"&mdash;")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"&mdash;")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"&mdash;")+"</td><td class='cDo'>"+(oD>0?"-$"+oD.toLocaleString():"&mdash;")+"</td><td class='cG'></td><td class='cP'></td></tr>");
+  var omg=data.mgr&&data.mgr.mtd_mu>0?data.mgr.mtd_mu.toFixed(2)+"x":"&mdash;";
+  rows.push("<tr class='tot'><td class='cY'></td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"&mdash;")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"&mdash;")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"&mdash;")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cG'></td><td class='cP'></td></tr>");
   gel("tbod").innerHTML=rows.join("");
 }
-
-function icoFor(t){return t==="day"?"📝":t==="ship"?"📦":"⬇️";}
-function subFor(t){return t==="day"?"Written sales for this day":t==="ship"?"MTD shipped (from Colin's sheet)":"Cumulative MTD downs";}
-
-function openM(id,lbl,cur,type,field){
+function icoFor(t){return t==="day"?"📝":t==="ship"?"📦":t==="mu"?"📊":"⬇️";}
+function subFor(t){return t==="day"?"Written sales for this day":t==="ship"?"MTD shipped total (from Colin)":"Rep MTD markup (e.g. 1.85 = 1.85x)";}
+function openM(id,lbl,cur,type,field,isMU){
   EC={id:id,type:type,field:field};
   gel("mIco").textContent=icoFor(type);
-  hdr("mT",lbl);
-  hdr("mS",subFor(type));
-  hdr("mV",cur>0?"Current: $"+Number(cur).toLocaleString():"No entry yet");
+  hdr("mT",lbl);hdr("mS",subFor(type));
+  hdr("mV",cur>0?"Current: "+(isMU?cur.toFixed(2)+"x":"$"+Number(cur).toLocaleString()):"No entry yet");
   hdr("mN","Enter 0 to clear. Press Enter to save.");
   gel("mI").value=cur||"";
   gel("modal").classList.add("on");
   setTimeout(function(){gel("mI").select();gel("mI").focus();},80);
 }
-function openD(id,day){openM(id,BD.reps[id].name+" — "+DL[DAYS.indexOf(day)],BD.reps[id].week[day],"day",day);}
-function openDo(id){openM(id,BD.reps[id].name+" — DOWNS",BD.reps[id].downs,"downs","downs");}
-function openS(id){openM(id,BD.reps[id].name+" — SHIPPED",BD.reps[id].shipped,"ship","shipped");}
+function openD(id,day){openM(id,BD.reps[id].name+" — "+DL[DAYS.indexOf(day)],BD.reps[id].week[day],"day",day,false);}
+function openS(id){openM(id,BD.reps[id].name+" — SHIPPED",BD.reps[id].shipped,"ship","shipped",false);}
+function openMU(id){openM(id,BD.reps[id].name+" — M/U",BD.reps[id].mu||0,"mu","mu",true);}
 function closeM(){gel("modal").classList.remove("on");EC=null;}
 async function saveM(){
   if(!EC)return;
-  var val=parseInt(gel("mI").value)||0,rep=BD.reps[EC.id];
+  var raw=gel("mI").value,rep=BD.reps[EC.id];
+  var val=EC.type==="mu"?parseFloat(raw)||0:parseInt(raw)||0;
   if(EC.type==="day")rep.week[EC.field]=val;
-  else if(EC.type==="downs")rep.downs=val;
+  else if(EC.type==="mu")rep.mu=val;
   else rep.shipped=val;
   closeM();render(BD);
   hdr("hU","Saving...");
@@ -308,29 +298,24 @@ async function saveM(){
 }
 gel("mI").addEventListener("keydown",function(e){if(e.key==="Enter")saveM();if(e.key==="Escape")closeM();});
 gel("modal").addEventListener("click",function(e){if(e.target===gel("modal"))closeM();});
-
 var rt;
 function startR(){
   clearInterval(rt);
-  rt=setInterval(async function(){
-    var f=await sbGet();
-    if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);}
-    hdr("hU","↻ "+new Date().toLocaleTimeString());
-  },30000);
+  rt=setInterval(async function(){var f=await sbGet();if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);}hdr("hU","↻ "+new Date().toLocaleTimeString());},30000);
 }
-
 async function init(){
   hdr("hU","Loading...");
   var data=null;
   localStorage.removeItem("dbw_b");
   try{data=await sbGet();}catch(e){}
   if(!data){data=JSON.parse(JSON.stringify(SEED));hdr("hU","Using local data");}
-  /* safety: if rollover would clear week data, use SEED which has correct current week */
   var cm=getMon(new Date());
   if(data.week_start!==cm){
-    console.warn("rollover guard: week_start",data.week_start,"vs local Monday",cm,"— using SEED to protect week data");
+    console.warn("Week guard: loaded",data.week_start,"local Monday",cm,"— using SEED");
     data=JSON.parse(JSON.stringify(SEED));
   }
+  /* ensure mu field exists on all reps */
+  Object.keys(data.reps).forEach(function(id){if(data.reps[id].mu===undefined)data.reps[id].mu=0;});
   BD=data;
   try{render(BD);}catch(e){hdr("hU","Render error: "+e.message);console.error(e);return;}
   startR();
