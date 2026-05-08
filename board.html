@@ -7,25 +7,26 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#07070e;color:#e0e0e0;font-family:'Arial Black',Arial,sans-serif;min-height:100vh;}
-.title{text-align:center;font-size:clamp(18px,2.8vw,80px);font-weight:900;color:#00c8ff;text-shadow:0 0 30px rgba(0,200,255,.5);letter-spacing:4px;padding:10px 0 4px;text-transform:uppercase;}
+.title{text-align:center;font-size:clamp(18px,3.5vw,120px);font-weight:900;color:#00c8ff;text-shadow:0 0 30px rgba(0,200,255,.5);letter-spacing:4px;padding:10px 0 4px;text-transform:uppercase;}
 .nav{text-align:center;padding:3px 0 7px;}
 .nav a{display:inline-block;padding:5px 18px;background:#001420;border:1px solid #00c8ff;border-radius:20px;color:#00c8ff;font-size:11px;font-weight:900;text-decoration:none;}
 .igrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:0 5px 5px;}
 @media(min-width:700px){.igrid{grid-template-columns:repeat(6,1fr);}}
 .ib{background:#0c0c1c;border:1px solid #1a1a2e;border-radius:6px;padding:4px 6px;text-align:center;}
-.il{color:#888;font-size:clamp(8px,.7vw,18px);font-weight:bold;text-transform:uppercase;letter-spacing:.4px;display:block;}
+.il{color:#888;font-size:clamp(9px,.8vw,20px);font-weight:bold;text-transform:uppercase;letter-spacing:.4px;display:block;}
 .iv{font-weight:900;line-height:1.1;display:block;margin-top:2px;}
 .is{color:#444;font-size:8px;display:block;margin-top:1px;}
-.c1 .iv{color:#00c8ff;font-size:clamp(12px,1.7vw,44px);}
-.c2{border-color:#dddd0030;}.c2 .iv{color:#dddd00;font-size:clamp(10px,1.3vw,32px);}
-.c3{border-color:#00ff4430;}.c3 .iv{color:#00ff44;font-size:clamp(24px,4vw,110px);}
-.c4 .iv{color:#ffaa00;font-size:clamp(10px,1.3vw,32px);}
+.c1 .iv{color:#00c8ff;font-size:clamp(12px,2.2vw,72px);}
+.c2{border-color:#dddd0030;}.c2 .iv{color:#dddd00;font-size:clamp(10px,1.8vw,52px);}
+.c3{border-color:#00ff4430;}.c3 .iv{color:#00ff44;font-size:clamp(24px,6vw,150px);}
+.c4 .iv{color:#ffaa00;font-size:clamp(10px,1.8vw,52px);}
+.c5{border-color:#00ff4430;}.c5 .iv{color:#00ff44;font-size:clamp(10px,1.8vw,52px);}
 .sbar{display:flex;justify-content:space-between;padding:2px 8px 3px;font-size:10px;color:#333;}
 .dot{display:inline-block;width:7px;height:7px;background:#00ff44;border-radius:50%;box-shadow:0 0 8px #00ff44;animation:p 2s infinite;margin-right:4px;vertical-align:middle;}
 @keyframes p{0%,100%{opacity:1;}50%{opacity:.3;}}
 .wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 4px 8px;}
 table{width:100%;border-collapse:collapse;}
-thead th{padding:5px 3px;text-align:center;border:1px solid #0f0f1a;white-space:nowrap;font-size:clamp(10px,1.1vw,30px);font-weight:900;position:sticky;top:0;z-index:10;text-transform:uppercase;}
+thead th{padding:5px 3px;text-align:center;border:1px solid #0f0f1a;white-space:nowrap;font-size:clamp(10px,1.5vw,40px);font-weight:900;position:sticky;top:0;z-index:10;text-transform:uppercase;}
 .hY{background:#080814;color:#ffd700;min-width:80px;position:sticky;left:0;z-index:21;}
 .hN{background:#0c0c20;color:#fff;min-width:110px;border-right:2px solid #00c8ff60!important;position:sticky;left:80px;z-index:21;}
 .hD{background:#090e09;color:#00aa33;min-width:68px;}
@@ -43,25 +44,25 @@ tbody tr:hover{background:rgba(0,200,255,.03);}
 .r3{background:rgba(210,120,40,.03);}
 .tot{background:#001800!important;border-top:2px solid #00ff4460!important;}
 td{padding:5px 4px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center;vertical-align:middle;}
-.cY{background:#07070e;color:#ffd700;text-align:right;font-size:clamp(14px,1.8vw,58px);font-weight:900;text-shadow:0 0 10px rgba(255,215,0,.5);position:sticky;left:0;z-index:5;border-right:1px solid #18182c;min-width:80px;}
-.cN{background:#090918;color:#fff;font-weight:900;text-align:left;padding-left:9px;font-size:clamp(11px,1.4vw,46px);border-right:2px solid #00c8ff35!important;position:sticky;left:80px;z-index:5;}
+.cY{background:#07070e;color:#ffd700;text-align:right;font-size:clamp(14px,2.8vw,90px);font-weight:900;text-shadow:0 0 10px rgba(255,215,0,.5);position:sticky;left:0;z-index:5;border-right:1px solid #18182c;min-width:80px;}
+.cN{background:#090918;color:#fff;font-weight:900;text-align:left;padding-left:9px;font-size:clamp(11px,2.2vw,70px);border-right:2px solid #00c8ff35!important;position:sticky;left:80px;z-index:5;}
 .cD{cursor:pointer;}.cD:hover{background:rgba(255,255,255,.07)!important;}.cD.tc{border:1px solid #00ff4425!important;}
-.dg{color:#00ff44;font-weight:900;font-size:clamp(12px,1.4vw,46px);}
-.dr{color:#ff4444;font-weight:900;font-size:clamp(12px,1.4vw,46px);}
+.dg{color:#00ff44;font-weight:900;font-size:clamp(12px,2.2vw,70px);}
+.dr{color:#ff4444;font-weight:900;font-size:clamp(12px,2.2vw,70px);}
 .de{color:#1f1f35;}
-.cW{color:#ffcc00;font-weight:900;font-size:clamp(12px,1.4vw,46px);}
-.cM{color:#4499ff;font-weight:900;font-size:clamp(12px,1.4vw,46px);}
+.cW{color:#ffcc00;font-weight:900;font-size:clamp(12px,2.2vw,70px);}
+.cM{color:#4499ff;font-weight:900;font-size:clamp(12px,2.2vw,70px);}
 .cM.gh{color:#00ff44!important;text-shadow:0 0 10px rgba(0,255,68,.45);}
-.cS{color:#00ff44;font-weight:900;cursor:pointer;font-size:clamp(12px,1.4vw,46px);}.cS:hover{background:rgba(0,255,68,.07)!important;}
+.cS{color:#00ff44;font-weight:900;cursor:pointer;font-size:clamp(12px,2.2vw,70px);}.cS:hover{background:rgba(0,255,68,.07)!important;}
 .cDo{color:#ff5555;font-weight:900;cursor:pointer;}.cDo:hover{background:rgba(255,85,85,.07)!important;}
-.cG{color:#ff8800;font-size:clamp(12px,1.4vw,46px);font-weight:900;text-shadow:0 0 8px rgba(255,136,0,.5);}
+.cG{color:#ff8800;font-size:clamp(12px,2.2vw,70px);font-weight:900;text-shadow:0 0 8px rgba(255,136,0,.5);}
 .cP{padding:5px 7px;}
 .pb{display:flex;flex-direction:column;align-items:center;gap:2px;}
 .pbb{width:100%;height:5px;background:#18182c;border-radius:3px;overflow:hidden;}
 .pbf{height:100%;border-radius:3px;}
-.pn{font-size:clamp(11px,1.3vw,42px);font-weight:900;color:#cc88ff;}
+.pn{font-size:clamp(11px,2.0vw,62px);font-weight:900;color:#cc88ff;}
 .pn.done{color:#00ff44;}
-.tot td{color:#00ff44!important;font-weight:900;font-size:clamp(12px,1.4vw,46px);}
+.tot td{color:#00ff44!important;font-weight:900;font-size:clamp(12px,2.2vw,70px);}
 .tot .cY{color:#0f2f0f!important;}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:1000;display:none;align-items:center;justify-content:center;}
 .ov.on{display:flex;}
@@ -82,8 +83,8 @@ td{padding:5px 4px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
 <div class="title">&#9889; &nbsp;DBW WISCONSIN &mdash; LIVE SALES BOARD &nbsp;&#9889;</div>
 <div class="igrid">
   <div class="ib c1"><span class="il">Today</span><span class="iv" id="hT">--</span></div>
-  <div class="ib c2"><span class="il">18-Month Date</span><span class="iv" id="h18">--</span><span class="is">Fair game after this</span></div>
-  <div class="ib c2"><span class="il">36-Month Date</span><span class="iv" id="h36">--</span><span class="is">25% commission</span></div>
+  <div class="ib c2"><span class="il">Office MTD Written</span><span class="iv" id="hOW">--</span></div>
+  <div class="ib c5"><span class="il">Office MTD Shipped</span><span class="iv" id="hOS">--</span></div>
   <div class="ib c3"><span class="il">Days Left</span><span class="iv" id="hDL">--</span></div>
   <div class="ib c4"><span class="il">Low QTR Bonus</span><span class="iv" id="hLG">--</span><span class="is" id="hLT">to go</span></div>
   <div class="ib c4"><span class="il">High QTR Bonus</span><span class="iv" id="hHG">--</span><span class="is" id="hHT">to go</span></div>
@@ -194,9 +195,10 @@ function rollover(d){
 
 function renderH(data){
   hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
-  hdr("h18",dOff(18,5));hdr("h36",dOff(36,5));hdr("hDL",fiscalDL());
+  hdr("hDL",fiscalDL());
   var mgr=data.mgr||{low_target:1245067,high_target:1458507},qs=data.quarter_shipped||0;
   var lg=Math.max(0,mgr.low_target-qs),hg=Math.max(0,mgr.high_target-qs);
+  hdr("hOW",oM>0?"$"+oM.toLocaleString():"--");hdr("hOS",oS>0?"$"+oS.toLocaleString():"--");
   hdr("hLG",lg>0?"$"+lg.toLocaleString():"HIT!");hdr("hLT","target $"+mgr.low_target.toLocaleString());
   hdr("hHG",hg>0?"$"+hg.toLocaleString():"HIT!");hdr("hHT","target $"+mgr.high_target.toLocaleString());
 }
@@ -274,6 +276,7 @@ function startR(){
 async function init(){
   hdr("hU","Loading...");
   var data=null;
+  localStorage.removeItem("dbw_b");
   try{data=await sbGet();}catch(e){}
   if(!data){
     var c=localStorage.getItem("dbw_b");
