@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DBW Wisconsin — GSM Command Center</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#050e1d;--navy2:#0a1628;--navy3:#0f2040;--card:#0d1f38;
+  --gold:#c9a84c;--gold2:#e8c84a;--gold3:#f5d76e;
+  --green:#2ecc71;--red:#e74c3c;--blue:#5ba3e8;--purple:#9b59b6;
+  --text:#e8ecf0;--muted:#7a9bbf;--border:#1a3a5c;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--navy);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,var(--navy2),var(--navy3));border-bottom:3px solid var(--gold);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr-logo{font-size:1.7rem;font-weight:900;color:var(--gold);letter-spacing:2px;white-space:nowrap}
+.hdr-logo span{color:#fff}
+.badge{display:inline-block;background:var(--gold);color:var(--navy);font-size:0.65rem;font-weight:900;letter-spacing:1.5px;padding:3px 9px;border-radius:20px;vertical-align:middle;text-transform:uppercase}
+.hdr-meta{font-size:0.72rem;color:var(--muted);margin-top:3px}
+.hdr-right{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hdr-stat{text-align:right}
+.hdr-stat .val{font-size:1.1rem;font-weight:900;color:var(--gold2)}
+.hdr-stat .lbl{font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* BREADCRUMB */
+.breadcrumb{background:var(--navy2);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:6px;font-size:0.78rem;flex-wrap:wrap}
+.bc-item{color:var(--muted);cursor:pointer;transition:color 0.2s;white-space:nowrap}
+.bc-item:hover{color:var(--gold2)}
+.bc-item.active{color:var(--text);font-weight:700;cursor:default}
+.bc-sep{color:var(--border);font-size:0.8rem}
+.bc-year-badge{background:var(--gold);color:var(--navy);border-radius:10px;padding:1px 7px;font-weight:800;font-size:0.72rem}
+
+/* VIEWS */
+.view{display:none;padding:20px 24px;max-width:1400px;margin:0 auto}
+.view.active{display:block}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.gold::before{background:var(--gold)}
+.kpi.green::before{background:var(--green)}
+.kpi.red::before{background:var(--red)}
+.kpi.blue::before{background:var(--blue)}
+.kpi.purple::before{background:var(--purple)}
+.kpi-lbl{font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.kpi-val{font-size:1.6rem;font-weight:900;line-height:1;margin-bottom:3px}
+.kpi-val.gold{color:var(--gold2)}
+.kpi-val.green{color:var(--green)}
+.kpi-val.red{color:var(--red)}
+.kpi-val.blue{color:var(--blue)}
+.kpi-val.white{color:#fff}
+.kpi-sub{font-size:0.65rem;color:var(--muted)}
+.kpi-trend{font-size:0.7rem;font-weight:700;margin-top:4px}
+.kpi-trend.up{color:var(--green)}
+.kpi-trend.down{color:var(--red)}
+.kpi-trend.flat{color:var(--muted)}
+
+/* CHART CONTAINERS */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+.chart-card .chart-title{font-size:0.75rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chart-card .chart-title .note{color:var(--muted);font-weight:400;font-size:0.65rem;text-transform:none;letter-spacing:0}
+.chart-wrap{position:relative;height:260px}
+.chart-wrap.tall{height:340px}
+.chart-wrap.short{height:180px}
+
+/* GRID LAYOUTS */
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+@media(max-width:900px){.two-col,.three-col{grid-template-columns:1fr}}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:0.82rem}
+.tbl th{background:var(--navy3);color:var(--gold);font-size:0.65rem;text-transform:uppercase;letter-spacing:1px;padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);white-space:nowrap}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;transition:background 0.15s}
+.tbl tr:hover td{background:rgba(200,168,76,0.06);cursor:pointer}
+.tbl .rank{color:var(--muted);font-size:0.75rem;font-weight:700;width:30px}
+.tbl .rank.gold{color:var(--gold2)}
+.tbl .rank.silver{color:#aaa}
+.tbl .rank.bronze{color:#cd7f32}
+.tbl td.pos{color:var(--green);font-weight:700}
+.tbl td.neg{color:var(--red);font-weight:700}
+.tbl td.gold{color:var(--gold2);font-weight:700}
+.tbl td.blue{color:var(--blue);font-weight:700}
+.tbl td.hi{color:#fff;font-weight:700}
+.tbl tr.total-row td{background:var(--navy3);color:var(--gold2);font-weight:700;border-top:2px solid var(--gold)}
+.tbl tr.mtd-row td{border-left:3px solid var(--blue);color:var(--blue)}
+
+/* MONTH PILLS */
+.month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:600px){.month-grid{grid-template-columns:repeat(3,1fr)}}
+.month-pill{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s}
+.month-pill:hover{border-color:var(--gold);background:rgba(200,168,76,0.1)}
+.month-pill.active{border-color:var(--gold2);background:rgba(200,168,76,0.15)}
+.month-pill.missing{opacity:0.35;cursor:not-allowed}
+.month-pill.mtd{border-color:var(--blue);border-style:dashed}
+.month-pill .mp-name{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase}
+.month-pill .mp-val{font-size:0.88rem;font-weight:900;color:var(--gold2);margin-top:3px}
+.month-pill .mp-pct{font-size:0.6rem;margin-top:2px}
+.month-pill .mp-pct.up{color:var(--green)}
+.month-pill .mp-pct.down{color:var(--red)}
+
+/* YEAR CARDS */
+.year-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.year-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all 0.2s;text-align:center}
+.year-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 4px 20px rgba(200,168,76,0.15)}
+.year-card.missing{opacity:0.4;cursor:default;border-style:dashed}
+.year-card.current{border-color:var(--blue);border-style:dashed}
+.year-card .yc-year{font-size:1.1rem;font-weight:900;color:var(--gold2);margin-bottom:4px}
+.year-card .yc-sales{font-size:0.95rem;font-weight:700;color:#fff}
+.year-card .yc-trend{font-size:0.62rem;margin-top:4px}
+.year-card .yc-trend.up{color:var(--green)}
+.year-card .yc-trend.down{color:var(--red)}
+.year-card .yc-missing{font-size:0.65rem;color:var(--muted);margin-top:4px}
+
+/* REP CARDS */
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.rep-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.2s}
+.rep-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.rep-card .rc-name{font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.rep-card .rc-badge{background:var(--navy3);color:var(--gold);font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:8px}
+.rep-card .rc-total{font-size:1.1rem;font-weight:900;color:var(--gold2)}
+.rep-card .rc-meta{font-size:0.65rem;color:var(--muted);margin-top:3px}
+.rep-card .rc-rank{font-size:0.65rem;color:var(--muted)}
+
+/* BACK BTN */
+.back-btn{background:var(--navy3);border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px}
+.back-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* SECTION TITLES */
+.section-title{font-size:0.72rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ALERT */
+.alert{background:rgba(200,168,76,0.1);border:1px solid rgba(200,168,76,0.3);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.alert-dot{width:8px;height:8px;background:var(--gold);border-radius:50%;flex-shrink:0}
+
+/* RECORD BADGES */
+.record-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.record-badge{background:var(--navy3);border:1px solid var(--gold);border-radius:8px;padding:8px 12px;font-size:0.72rem}
+.record-badge .rb-label{color:var(--muted);font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px}
+.record-badge .rb-val{color:var(--gold2);font-weight:700}
+.record-badge .rb-sub{color:var(--muted);font-size:0.62rem}
+
+/* PROGRESS BARS */
+.pbar-wrap{background:var(--navy);border-radius:4px;height:6px;overflow:hidden;margin-top:4px}
+.pbar{height:100%;border-radius:4px;transition:width 0.5s ease}
+.pbar.gold{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.pbar.green{background:var(--green)}
+.pbar.blue{background:var(--blue)}
+
+/* STARS */
+.trophy-1::before{content:'🥇 '}
+.trophy-2::before{content:'🥈 '}
+.trophy-3::before{content:'🥉 '}
+
+/* MTD tag */
+.mtd-tag{background:rgba(91,163,232,0.15);border:1px solid var(--blue);color:var(--blue);font-size:0.6rem;font-weight:700;padding:2px 7px;border-radius:8px;letter-spacing:1px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;top:14px;left:18px;z-index:9999;background:#c9a84c;color:#050e1d;font-weight:700;font-size:13px;padding:8px 16px;border-radius:6px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">← Live Dashboard</a>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div>
+      <div class="hdr-logo">◆ DBW <span>WISCONSIN</span> &nbsp;<span class="badge">Command Center</span> &nbsp;<span class="badge" style="background:#1a3a5c;color:var(--blue)">2016–2026</span></div>
+      <div class="hdr-meta">Historical Sales Intelligence &nbsp;·&nbsp; <span id="hdrRepCount">31</span> Reps Tracked &nbsp;·&nbsp; 10 Years of Data</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-stat"><div class="val" id="hdrAllTime">—</div><div class="lbl">All-Time Revenue</div></div>
+    <div class="hdr-stat"><div class="val" id="hdrBestYear">—</div><div class="lbl">Best Year</div></div>
+    <div class="hdr-stat"><div class="val" id="hdrYoY">—</div><div class="lbl">YoY Change</div></div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb" id="breadcrumb">
+  <span class="bc-item active" onclick="navigate('home')">🏠 WI Office</span>
+</div>
+
+<!-- VIEW: HOME -->
+<div class="view active" id="view-home">
+  <div class="alert"><span class="alert-dot"></span><span id="homeAlertText"></span></div>
+
+  <div class="kpi-grid" id="homeKpis"></div>
+
+  <div class="section-title">All-Time Records</div>
+  <div class="record-wrap" id="homeRecords"></div>
+
+  <div class="section-title">Click a Year to Drill In</div>
+  <div class="year-grid" id="yearGrid"></div>
+
+  <div class="chart-card">
+    <div class="chart-title">📊 Annual Office Sales — 2016 to 2026 <span class="note">(click any bar to drill in)</span></div>
+    <div class="chart-wrap tall"><canvas id="annualChart"></canvas></div>
+  </div>
+
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title">📈 YoY Growth Rate (%)</div>
+      <div class="chart-wrap"><canvas id="growthChart"></canvas></div>
+    </div>
+    <div>
+      <div class="chart-card" style="height:100%">
+        <div class="chart-title">🏆 All-Time Rep Leaderboard</div>
+        <div class="tbl-wrap"><table class="tbl" id="allTimeRepTable"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Month-by-Month Averages</div>
+  <div class="chart-card">
+    <div class="chart-title">📅 Average Sales by Month (all years)</div>
+    <div class="chart-wrap short"><canvas id="avgMonthChart"></canvas></div>
+  </div>
+</div>
+
+<!-- VIEW: YEAR -->
+<div class="view" id="view-year">
+  <button class="back-btn" onclick="navigate('home')">← Back to All Years</button>
+  <div class="kpi-grid" id="yearKpis"></div>
+  <div class="section-title">Click a Month to Drill In</div>
+  <div class="month-grid" id="monthPills"></div>
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title" id="yearChartTitle">Monthly Breakdown</div>
+      <div class="chart-wrap"><canvas id="yearMonthChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title" id="yearRepTitle">Top Reps This Year</div>
+      <div class="tbl-wrap"><table class="tbl" id="yearRepTable"></table></div>
+    </div>
+  </div>
+  <div class="section-title">Full Year Month Table</div>
+  <div class="chart-card">
+    <div class="tbl-wrap"><table class="tbl" id="yearMonthTable"></table></div>
+  </div>
+</div>
+
+<!-- VIEW: MONTH -->
+<div class="view" id="view-month">
+  <button class="back-btn" id="monthBackBtn" onclick="navigate('year', currentYear)">← Back to Year</button>
+  <div class="kpi-grid" id="monthKpis"></div>
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title" id="monthRepChartTitle">Rep Rankings</div>
+      <div class="chart-wrap tall"><canvas id="monthRepChart"></canvas></div>
+    </div>
+    <div>
+      <div class="chart-card">
+        <div class="chart-title" id="monthRepTableTitle">All Reps</div>
+        <div class="tbl-wrap"><table class="tbl" id="monthRepTable"></table></div>
+      </div>
+      <div class="chart-card" style="margin-top:14px">
+        <div class="chart-title">📅 This Month — All Years</div>
+        <div class="chart-wrap short"><canvas id="monthHistoryChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW: REP -->
+<div class="view" id="view-rep">
+  <button class="back-btn" id="repBackBtn" onclick="repNavBack()">← Back</button>
+  <div class="kpi-grid" id="repKpis"></div>
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title" id="repYearChartTitle">Year-by-Year Sales</div>
+      <div class="chart-wrap"><canvas id="repYearChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title" id="repMonthChartTitle">Monthly Average (career)</div>
+      <div class="chart-wrap"><canvas id="repMonthChart"></canvas></div>
+    </div>
+  </div>
+  <div class="section-title">Career Year-by-Year Breakdown</div>
+  <div class="chart-card">
+    <div class="tbl-wrap"><table class="tbl" id="repCareerTable"></table></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const DATA = {"office_totals": {"2016": {"JAN": {"net": 80505.0}, "FEB": {"net": 85053.0}, "MAR": {"net": 225791.0}, "APR": {"net": 90791.0}, "MAY": {"net": 299500.0}, "JUN": {"net": 104890.0}, "JUL": {"net": 98801.0}, "AUG": {"net": 335978.0}, "SEP": {"net": 67747.0}, "OCT": {"net": 190256.0}, "NOV": {"net": 117319.0}, "DEC": {"net": 94522.0}}, "2017": {"JAN": {"net": 76611.0}, "FEB": {"net": 73681.0}, "MAR": {"net": 211230.0}, "APR": {"net": 173948.0}, "MAY": {"net": 294318.0}, "JUN": {"net": 134974.0}, "JUL": {"net": 166172.0}, "AUG": {"net": 373534.0}, "SEP": {"net": 98922.0}, "OCT": {"net": 296942.0}, "NOV": {"net": 128216.0}, "DEC": {"net": 149259.0}}, "2018": {"JAN": {"net": 132319.0}, "FEB": {"net": 94173.0}, "MAR": {"net": 297548.0}, "APR": {"net": 137509.0}, "MAY": {"net": 415520.0}, "JUN": {"net": 150382.0}, "JUL": {"net": 157998.0}, "AUG": {"net": 487898.0}, "SEP": {"net": 113052.0}, "OCT": {"net": 361676.0}, "NOV": {"net": 63944.0}, "DEC": {"net": 160108.0}}, "2019": {"JAN": {"net": 140902.0}, "FEB": {"net": 84034.0}, "MAR": {"net": 360052.0}, "APR": {"net": 211001.0}, "MAY": {"net": 360899.0}, "JUN": {"net": 208551.0}, "JUL": {"net": 158758.0}, "AUG": {"net": 569020.0}, "SEP": {"net": 148548.0}, "OCT": {"net": 494038.0}, "NOV": {"net": 134486.0}, "DEC": {"net": 108066.0}}, "2020": {"JAN": {"sales": 229863.34, "cogs": 130585.32, "mu": 1.7603, "returns": 14327.45, "net": 215535.89}, "FEB": {"sales": 190207.45, "cogs": 110122.98, "mu": 1.7272, "returns": 8745.77, "net": 181461.68}, "MAR": {"sales": 559907.52, "cogs": 306675.18, "mu": 1.8257, "returns": 23483.76, "net": 536423.76}, "APR": {"sales": 253215.09, "cogs": 146097.73, "mu": 1.7332, "returns": 24332.91, "net": 228882.18}, "MAY": {"sales": 286149.35, "cogs": 162671.62, "mu": 1.7591, "returns": 13218.7, "net": 272930.65}, "JUN": {"sales": 548643.85, "cogs": 299764.06, "mu": 1.8303, "returns": 18317.39, "net": 530326.46}, "JUL": {"sales": 186180.19, "cogs": 106004.15, "mu": 1.7563, "returns": 14313.76, "net": 171866.43}, "AUG": {"sales": 712306.83, "cogs": 400924.58, "mu": 1.7767, "returns": 19957.62, "net": 692349.21}, "SEP": {"sales": 155617.33, "cogs": 86299.58, "mu": 1.8032, "returns": 12465.6, "net": 143151.73}, "OCT": {"sales": 472383.9, "cogs": 261944.77, "mu": 1.8034, "returns": 19740.85, "net": 452643.05}, "NOV": {"sales": 125503.66, "cogs": 72659.27, "mu": 1.7273, "returns": 675.86, "net": 124827.8}, "DEC": {"sales": 229106.21, "cogs": 131625.29, "mu": 1.7406, "returns": 17509.91, "net": 211596.3}}, "2021": {"JAN": {"sales": 301306.41, "cogs": 177101.5, "mu": 1.7013, "returns": 2989.99, "net": 298316.42}, "FEB": {"sales": 184684.39, "cogs": 103608.2, "mu": 1.7825, "returns": 13866.83, "net": 170817.56}, "MAR": {"sales": 849697.2, "cogs": 496199.8, "mu": 1.7124, "returns": 27590.89, "net": 822106.31}, "APR": {"sales": 230539.68, "cogs": 134093.0, "mu": 1.7193, "returns": 15183.71, "net": 215355.97}, "MAY": {"sales": 526106.05, "cogs": 301607.49, "mu": 1.7443, "returns": 14021.01, "net": 512085.04}, "JUN": {"sales": 328289.16, "cogs": 193736.74, "mu": 1.6945, "returns": 28802.16, "net": 299487.0}, "JUL": {"sales": 307114.94, "cogs": 178763.0, "mu": 1.718, "returns": 18135.46, "net": 288979.48}, "AUG": {"sales": 843011.21, "cogs": 470617.01, "mu": 1.7913, "returns": 31737.9, "net": 811273.31}, "SEP": {"sales": 239837.67, "cogs": 135602.5, "mu": 1.7687, "returns": 9657.18, "net": 230180.49}, "OCT": {"sales": 600222.74, "cogs": 328724.48, "mu": 1.8259, "returns": 10923.58, "net": 589299.16}, "NOV": {"sales": 185122.42, "cogs": 112961.96, "mu": 1.6388, "returns": 14549.99, "net": 170572.43}, "DEC": {"sales": 229106.21, "cogs": 131625.29, "mu": 1.7406, "returns": 17509.91, "net": 211596.3}}, "2023": {"FEB": {"sales": 320549.34, "cogs": 183957.8, "mu": 1.7425, "returns": 14717.86, "net": 305831.48}, "MAR": {"sales": 289697.25, "cogs": 163629.19, "mu": 1.7704, "returns": 30701.42, "net": 258995.83}, "APR": {"sales": 913173.55, "cogs": 515648.28, "mu": 1.7709, "returns": 25855.82, "net": 887317.73}, "MAY": {"sales": 254063.4, "cogs": 146613.0, "mu": 1.7329, "returns": 5197.91, "net": 248865.49}, "JUN": {"sales": 737873.29, "cogs": 413095.07, "mu": 1.7862, "returns": 23478.43, "net": 714394.86}, "JUL": {"sales": 353294.88, "cogs": 200427.78, "mu": 1.7627, "returns": 22867.55, "net": 330427.33}, "AUG": {"sales": 229215.81, "cogs": 130288.77, "mu": 1.7593, "returns": 19135.55, "net": 210080.26}, "SEP": {"sales": 706566.76, "cogs": 399205.65, "mu": 1.7699, "returns": 30308.33, "net": 676258.43}, "OCT": {"sales": 349861.92, "cogs": 202782.19, "mu": 1.7253, "returns": 23055.35, "net": 326806.57}, "NOV": {"sales": 419949.91, "cogs": 235104.31, "mu": 1.7862, "returns": 27938.99, "net": 392010.92}, "DEC": {"sales": 289677.77, "cogs": 157481.8, "mu": 1.8394, "returns": 18148.32, "net": 271529.45}}, "2024": {"FEB": {"sales": 400414.14, "cogs": 240789.29, "mu": 1.6629, "returns": 7973.85, "net": 392440.29}, "MAR": {"sales": 336012.22, "cogs": 188448.45, "mu": 1.783, "returns": 11179.2, "net": 324833.02}, "APR": {"sales": 768024.15, "cogs": 429077.26, "mu": 1.7899, "returns": 28172.29, "net": 739851.86}, "MAY": {"sales": 336652.28, "cogs": 183999.14, "mu": 1.8296, "returns": 16369.59, "net": 320282.69}, "JUN": {"sales": 559111.06, "cogs": 310428.89, "mu": 1.8011, "returns": 17837.52, "net": 541273.54}, "JUL": {"sales": 530683.26, "cogs": 298188.44, "mu": 1.7797, "returns": 11604.49, "net": 519078.77}, "AUG": {"sales": 373456.76, "cogs": 206137.86, "mu": 1.8117, "returns": 13217.79, "net": 360238.97}, "SEP": {"sales": 743033.2, "cogs": 420065.31, "mu": 1.7689, "returns": 24150.38, "net": 718882.82}, "OCT": {"sales": 293095.62, "cogs": 170581.4, "mu": 1.7182, "returns": 26660.85, "net": 266434.77}, "NOV": {"sales": 707714.88, "cogs": 404671.48, "mu": 1.7489, "returns": 20196.03, "net": 687518.85}, "DEC": {"sales": 210201.46, "cogs": 116445.14, "mu": 1.8052, "returns": 11539.47, "net": 198661.99}}, "2025": {"FEB": {"sales": 420996.65, "cogs": 252594.66, "mu": 1.6667, "returns": 17206.9, "collections": 0, "net": 403789.75}, "MAR": {"sales": 240900.78, "cogs": 133543.68, "mu": 1.8039, "returns": 29108.5, "collections": 0, "net": 211792.28}, "APR": {"sales": 675017.85, "cogs": 390231.96, "mu": 1.7298, "returns": 12650.79, "collections": 0, "net": 662367.06}, "MAY": {"sales": 296737.9, "cogs": 169561.95, "mu": 1.75, "returns": 35649.54, "collections": 0, "net": 261088.36}, "JUN": {"sales": 614133.61, "cogs": 341916.94, "mu": 1.7961, "returns": 25056.36, "collections": 0, "net": 589077.25}, "JUL": {"sales": 399868.42, "cogs": 231931.58, "mu": 1.7241, "returns": 19352.83, "collections": 0, "net": 380515.59}, "AUG": {"sales": 343289.48, "cogs": 193299.51, "mu": 1.7759, "returns": 13281.04, "collections": 0, "net": 330008.44}, "SEP": {"sales": 726015.21, "cogs": 431409.07, "mu": 1.6829, "returns": 26098.48, "collections": 0, "net": 699916.73}, "OCT": {"sales": 388361.14, "cogs": 221613.17, "mu": 1.7524, "returns": 5639.86, "collections": 0, "net": 382721.28}, "NOV": {"sales": 443333.05, "cogs": 254713.73, "mu": 1.7405, "returns": 8674.2, "collections": 380.0, "net": 434278.85}, "DEC": {"sales": 256044.3, "cogs": 145229.57, "mu": 1.763, "returns": 15479.66, "collections": 11687.7, "net": 228876.94}}, "2026": {"MAY": {"sales": 38742.18, "cogs": 21305.0, "mu": 1.8185, "returns": 0, "net": 38742.18, "note": "MTD as of 2026-05-05"}}}, "rep_sales": {"ADAM M": {"2019": {"JAN": 0.0, "FEB": 0.0, "MAR": 29609.0, "APR": 27353.0, "MAY": 53539.0, "JUN": 22908.0, "JUL": 28229.0, "AUG": 52359.0, "SEP": 21982.0, "OCT": 80664.0, "NOV": 16797.0, "DEC": 13532.0}, "2020": {"JAN": 29835.0, "FEB": 26924.0, "MAR": 107529.0, "APR": 31969.0, "MAY": 37504.0, "JUN": 100021.0, "JUL": 16047.0, "AUG": 82675.0, "SEP": 32190.0, "OCT": 87077.0, "NOV": 18005.0, "DEC": 24991.0}, "2026": {"MAY": 22408.46}}, "ADAM WEST": {"2016": {"JAN": 20998.0, "FEB": -15928.0, "MAR": 18154.0, "APR": 19538.0, "MAY": 22169.0, "JUN": 35982.0, "JUL": 9942.0, "AUG": 5252.0, "SEP": 16612.0, "OCT": 932.0, "NOV": 3687.0, "DEC": 5669.0}, "2017": {"JAN": 11309.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 1049.0, "JUN": 30827.0, "JUL": 13604.0, "AUG": 0.0, "SEP": 7301.0, "OCT": 72.0, "NOV": 2090.0, "DEC": 33374.0}, "2018": {"JAN": 8623.0, "FEB": 7718.0, "MAR": -1053.0, "APR": 29005.0, "MAY": 36131.0, "JUN": 20196.0, "JUL": 26371.0, "AUG": 65575.0, "SEP": 17897.0, "OCT": 4482.0, "NOV": 12921.0, "DEC": 9861.0}, "2019": {"JAN": 12055.0, "FEB": 1110.0, "MAR": 48467.0, "APR": 49355.0, "MAY": 41472.0, "JUN": 55340.0, "JUL": 13418.0, "AUG": 94932.0, "SEP": 37104.0, "OCT": 71091.0, "NOV": 17469.0, "DEC": 15849.0}, "2020": {"JAN": 16056.0, "FEB": 2792.0, "MAR": 0.0, "APR": 32647.0, "MAY": 30302.0, "JUN": 53071.0, "JUL": 19957.0, "AUG": 105218.0, "SEP": 9191.0, "OCT": 45646.0, "NOV": 20922.0, "DEC": 12365.0}}, "ANGEL F": {"2016": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 9090.0, "JUN": 3031.0, "JUL": 6343.0, "AUG": 15085.0, "SEP": 2289.0, "OCT": 23185.0, "NOV": 3715.0, "DEC": 7907.0}, "2017": {"JAN": 3876.0, "FEB": 7128.0, "MAR": 17219.0, "APR": 13017.0, "MAY": 20573.0, "JUN": 4962.0, "JUL": 7080.0, "AUG": 23618.0, "SEP": 3177.0, "OCT": 7497.0, "NOV": 6957.0, "DEC": 4142.0}, "2018": {"JAN": 3745.0, "FEB": 10329.0, "MAR": 14675.0, "APR": 12587.0, "MAY": 29677.0, "JUN": 24135.0, "JUL": 13469.0, "AUG": 34341.0, "SEP": 2130.0, "OCT": 22903.0, "NOV": 7585.0, "DEC": 7419.0}, "2019": {"JAN": 3864.0, "FEB": 3855.0, "MAR": 22074.0, "APR": 12247.0, "MAY": 25428.0, "JUN": 9006.0, "JUL": 14175.0, "AUG": 33273.0, "SEP": 3647.0, "OCT": 28774.0, "NOV": 3188.0, "DEC": 17236.0}, "2020": {"JAN": 19774.0, "FEB": 12266.0, "MAR": 32952.0, "APR": 7517.0, "MAY": 14439.0, "JUN": 44920.0, "JUL": 5349.0, "AUG": 33698.0, "SEP": 11724.0, "OCT": 26043.0, "NOV": 8575.0, "DEC": 10484.0}}, "ANTHONY S": {"2020": {"JAN": 0.0, "FEB": 0.0, "MAR": 7846.0, "APR": 23304.0, "MAY": 18077.0, "JUN": 16385.0, "JUL": 13351.0, "AUG": 22923.0, "SEP": 8585.0, "OCT": 20865.0, "NOV": 1786.0, "DEC": 11893.0}}, "BRETT G": {"2017": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 8225.0, "MAY": 16830.0, "JUN": 10458.0, "JUL": 18536.0, "AUG": 23063.0, "SEP": 7530.0, "OCT": 26162.0, "NOV": 13471.0, "DEC": 15708.0}}, "CHRIS C": {"2016": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 0.0, "SEP": 0.0, "OCT": 0.0, "NOV": 5617.0, "DEC": 4748.0}}, "CRAIG F": {"2016": {"JAN": 2917.0, "FEB": 12383.0, "MAR": 20794.0, "APR": 5579.0, "MAY": 24329.0, "JUN": 3838.0, "JUL": 20537.0, "AUG": 21870.0, "SEP": 4821.0, "OCT": 22938.0, "NOV": 13678.0, "DEC": 5196.0}, "2017": {"JAN": 5998.0, "FEB": 5546.0, "MAR": 17786.0, "APR": 24659.0, "MAY": 27775.0, "JUN": 11258.0, "JUL": 14808.0, "AUG": 18828.0, "SEP": 14424.0, "OCT": 27821.0, "NOV": 16953.0, "DEC": 14828.0}, "2018": {"JAN": 17476.0, "FEB": 14640.0, "MAR": 30062.0, "APR": 14591.0, "MAY": 40961.0, "JUN": 12007.0, "JUL": 10279.0, "AUG": 19789.0, "SEP": 6711.0, "OCT": 27944.0, "NOV": 4184.0, "DEC": 17604.0}}, "EZEQUIEL": {"2019": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 7036.0, "AUG": 6835.0, "SEP": 6315.0, "OCT": 18684.0, "NOV": 2051.0, "DEC": 6071.0}}, "FRANK B": {"2018": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 64590.0, "SEP": 8955.0, "OCT": 17408.0, "NOV": 0.0, "DEC": 0.0}}, "GIOVANNI": {"2019": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 0.0, "SEP": 0.0, "OCT": 4831.0, "NOV": 5752.0, "DEC": 5151.0}}, "JARED A": {"2019": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 0.0, "SEP": 0.0, "OCT": 50074.0, "NOV": 18158.0, "DEC": 8977.0}, "2020": {"JAN": 27311.0, "FEB": 8614.0, "MAR": 44443.0, "APR": 22726.0, "MAY": 16668.0, "JUN": 23040.0, "JUL": 8894.0, "AUG": 26529.0, "SEP": 5095.0, "OCT": 20939.0, "NOV": 3976.0, "DEC": 14742.0}}, "JERED A": {"2016": {"JAN": 7718.0, "FEB": 16018.0, "MAR": 16787.0, "APR": 9525.0, "MAY": 21175.0, "JUN": 8849.0, "JUL": 4572.0, "AUG": 27437.0, "SEP": 5220.0, "OCT": 15328.0, "NOV": 7612.0, "DEC": 8763.0}}, "JOE W": {"2016": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 5236.0, "SEP": 2842.0, "OCT": 6198.0, "NOV": 156.0, "DEC": 0.0}}, "JOHN B": {"2017": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 978.0, "AUG": 19841.0, "SEP": 2726.0, "OCT": 16320.0, "NOV": 12780.0, "DEC": 5077.0}, "2026": {"MAY": 2003.98}}, "JOSEPH C": {"2017": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 9082.0, "AUG": 18030.0, "SEP": 10731.0, "OCT": 17194.0, "NOV": 11134.0, "DEC": 6088.0}, "2018": {"JAN": 1785.0, "FEB": 10345.0, "MAR": 24074.0, "APR": 11589.0, "MAY": 31068.0, "JUN": 12664.0, "JUL": 8995.0, "AUG": 16625.0, "SEP": 6894.0, "OCT": 30491.0, "NOV": 3236.0, "DEC": 6971.0}}, "JOSH M": {"2016": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 0.0, "SEP": 0.0, "OCT": 7561.0, "NOV": 4534.0, "DEC": 4023.0}}, "JUAN T": {"2017": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 4331.0, "MAY": 10702.0, "JUN": 8704.0, "JUL": 3424.0, "AUG": 22578.0, "SEP": 3298.0, "OCT": 11002.0, "NOV": 6778.0, "DEC": 5333.0}, "2018": {"JAN": 9656.0, "FEB": 3694.0, "MAR": 14122.0, "APR": 5654.0, "MAY": 40074.0, "JUN": 18509.0, "JUL": 11322.0, "AUG": 45620.0, "SEP": 7951.0, "OCT": 18787.0, "NOV": 10421.0, "DEC": 15309.0}}, "JUSTIN G": {"2016": {"JAN": 21771.0, "FEB": 34880.0, "MAR": 71130.0, "APR": 21658.0, "MAY": 82835.0, "JUN": 16770.0, "JUL": 17504.0, "AUG": 109408.0, "SEP": 4706.0, "OCT": 39187.0, "NOV": 27862.0, "DEC": 21731.0}, "2017": {"JAN": 35562.0, "FEB": 38644.0, "MAR": 125332.0, "APR": 40624.0, "MAY": 90331.0, "JUN": 11758.0, "JUL": 42711.0, "AUG": 103472.0, "SEP": 18604.0, "OCT": 67874.0, "NOV": 14943.0, "DEC": 22530.0}, "2018": {"JAN": 40774.0, "FEB": 16255.0, "MAR": 124398.0, "APR": 25924.0, "MAY": 70471.0, "JUN": 15229.0, "JUL": 27573.0, "AUG": 71693.0, "SEP": 15768.0, "OCT": 149748.0, "NOV": 9301.0, "DEC": 29031.0}, "2019": {"JAN": 59474.0, "FEB": 27097.0, "MAR": 69966.0, "APR": 29110.0, "MAY": 59562.0, "JUN": 25513.0, "JUL": 26587.0, "AUG": 91711.0, "SEP": 18460.0, "OCT": 70724.0, "NOV": 8943.0, "DEC": -3222.0}, "2020": {"JAN": 23973.0, "FEB": -400.0, "MAR": -2849.0, "APR": 37103.0, "MAY": 29921.0, "JUN": 50019.0, "JUL": 17810.0, "AUG": 72891.0, "SEP": 14572.0, "OCT": 49242.0, "NOV": 23865.0, "DEC": 4910.0}, "2026": {"MAY": 9391.99}}, "KEITH M": {"2016": {"JAN": 7477.0, "FEB": 5569.0, "MAR": 17452.0, "APR": 11259.0, "MAY": 34135.0, "JUN": 4584.0, "JUL": 8331.0, "AUG": 25282.0, "SEP": 6610.0, "OCT": 20367.0, "NOV": 13213.0, "DEC": 7553.0}}, "KERRY SMITH": {"2016": {"JAN": 6599.0, "FEB": 5509.0, "MAR": 46133.0, "APR": 3634.0, "MAY": 34906.0, "JUN": 8170.0, "JUL": 8024.0, "AUG": 54587.0, "SEP": 323.0, "OCT": 18635.0, "NOV": 7398.0, "DEC": 19964.0}, "2017": {"JAN": 799.0, "FEB": 3758.0, "MAR": 23952.0, "APR": 5794.0, "MAY": 28930.0, "JUN": 12793.0, "JUL": 4788.0, "AUG": 34432.0, "SEP": -510.0, "OCT": 28441.0, "NOV": 0.0, "DEC": 2770.0}, "2018": {"JAN": 11555.0, "FEB": 7639.0, "MAR": 15844.0, "APR": 7468.0, "MAY": 38778.0, "JUN": 5027.0, "JUL": 3374.0, "AUG": 33755.0, "SEP": 8397.0, "OCT": 16094.0, "NOV": 7214.0, "DEC": 6415.0}, "2019": {"JAN": 4073.0, "FEB": -603.0, "MAR": 29994.0, "APR": 5227.0, "MAY": 17757.0, "JUN": 2154.0, "JUL": 3480.0, "AUG": 15563.0, "SEP": 6983.0, "OCT": 21742.0, "NOV": 218.0, "DEC": 1065.0}, "2020": {"JAN": 8617.0, "FEB": 13898.0, "MAR": 6380.0, "APR": 1750.0, "MAY": 857.0, "JUN": 20537.0, "JUL": 4221.0, "AUG": 21657.0, "SEP": 1152.0, "OCT": 19724.0, "NOV": 684.0, "DEC": 11445.0}, "2026": {"MAY": 3839.76}}, "KIETH M": {"2019": {"JAN": 8017.0, "FEB": 11239.0, "MAR": 22603.0, "APR": 13345.0, "MAY": 22539.0, "JUN": 28556.0, "JUL": 14714.0, "AUG": 29409.0, "SEP": 17167.0, "OCT": 43736.0, "NOV": 11604.0, "DEC": 20631.0}, "2020": {"JAN": 20161.0, "FEB": 20033.0, "MAR": 50660.0, "APR": 11183.0, "MAY": 14354.0, "JUN": 43401.0, "JUL": 26913.0, "AUG": 60227.0, "SEP": 16588.0, "OCT": 42685.0, "NOV": 19798.0, "DEC": 30074.0}}, "KYLE S": {"2017": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 0.0, "SEP": 0.0, "OCT": 0.0, "NOV": 0.0, "DEC": 9615.0}}, "LARRY H": {"2016": {"JAN": 4102.0, "FEB": 8872.0, "MAR": 7749.0, "APR": 7203.0, "MAY": 7353.0, "JUN": 6874.0, "JUL": 8279.0, "AUG": 11655.0, "SEP": 4651.0, "OCT": 9959.0, "NOV": 7017.0, "DEC": 3340.0}}, "LUIS M": {"2019": {"JAN": 3808.0, "FEB": 9323.0, "MAR": 23151.0, "APR": 14696.0, "MAY": 19611.0, "JUN": 3898.0, "JUL": 15373.0, "AUG": 52202.0, "SEP": 14652.0, "OCT": 35282.0, "NOV": 13440.0, "DEC": 1594.0}, "2020": {"JAN": 3837.0, "FEB": 15232.0, "MAR": 57536.0, "APR": 12091.0, "MAY": 7442.0, "JUN": 22699.0, "JUL": 14482.0, "AUG": 79464.0, "SEP": 6600.0, "OCT": 35705.0, "NOV": 4950.0, "DEC": 17393.0}}, "MATHEW K": {"2016": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 10358.0, "SEP": 5163.0, "OCT": 9360.0, "NOV": 9596.0, "DEC": 2031.0}, "2017": {"JAN": 6910.0, "FEB": 12517.0, "MAR": 9113.0, "APR": 10591.0, "MAY": 15226.0, "JUN": 4042.0, "JUL": 5591.0, "AUG": 20079.0, "SEP": 4520.0, "OCT": 20693.0, "NOV": 5561.0, "DEC": 4048.0}, "2018": {"JAN": 7707.0, "FEB": 4243.0, "MAR": 20316.0, "APR": 6830.0, "MAY": 19372.0, "JUN": 480.0, "JUL": 0.0, "AUG": 0.0, "SEP": 0.0, "OCT": 0.0, "NOV": 0.0, "DEC": 0.0}}, "RICH K": {"2018": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 0.0, "SEP": 0.0, "OCT": 0.0, "NOV": 7132.0, "DEC": 4112.0}, "2019": {"JAN": 9889.0, "FEB": 1073.0, "MAR": 13018.0, "APR": 6343.0, "MAY": 8665.0, "JUN": 3443.0, "JUL": 12112.0, "AUG": 11326.0, "SEP": 11351.0, "OCT": 10944.0, "NOV": 5293.0, "DEC": 4343.0}}, "RONALD B": {"2017": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 47023.0, "MAY": 58375.0, "JUN": 28548.0, "JUL": 35666.0, "AUG": 43354.0, "SEP": 19886.0, "OCT": 45450.0, "NOV": 25106.0, "DEC": 14523.0}, "2018": {"JAN": 30998.0, "FEB": 19310.0, "MAR": 55110.0, "APR": 23861.0, "MAY": 108988.0, "JUN": 42135.0, "JUL": 56615.0, "AUG": 135910.0, "SEP": 38349.0, "OCT": 73819.0, "NOV": 1950.0, "DEC": 63386.0}, "2019": {"JAN": 39722.0, "FEB": 30940.0, "MAR": 98516.0, "APR": 50017.0, "MAY": 101931.0, "JUN": 52611.0, "JUL": 22620.0, "AUG": 166253.0, "SEP": 9150.0, "OCT": 53908.0, "NOV": 31573.0, "DEC": 16839.0}, "2020": {"JAN": 37873.0, "FEB": 40878.0, "MAR": 142272.0, "APR": 26230.0, "MAY": 70498.0, "JUN": 95712.0, "JUL": 11856.0, "AUG": 127886.0, "SEP": 10907.0, "OCT": 69556.0, "NOV": 13147.0, "DEC": 59031.0}, "2026": {"MAY": 159.0}}, "SCOT T": {"2020": {"JAN": 0.0, "FEB": 0.0, "MAR": 0.0, "APR": 0.0, "MAY": 0.0, "JUN": 0.0, "JUL": 0.0, "AUG": 0.0, "SEP": 12095.0, "OCT": 20208.0, "NOV": 8577.0, "DEC": 16788.0}, "2026": {"MAY": 119.0}}, "STEVE SURA": {"2016": {"JAN": 5761.0, "FEB": 9286.0, "MAR": 17024.0, "APR": 4814.0, "MAY": 46373.0, "JUN": 9782.0, "JUL": 10830.0, "AUG": 31997.0, "SEP": 9746.0, "OCT": 14818.0, "NOV": 13234.0, "DEC": 3597.0}, "2017": {"JAN": 12157.0, "FEB": 6088.0, "MAR": 17828.0, "APR": 19684.0, "MAY": 24527.0, "JUN": 11624.0, "JUL": 9904.0, "AUG": 46239.0, "SEP": 7235.0, "OCT": 28416.0, "NOV": 12443.0, "DEC": 11223.0}}, "TODD G": {"2019": {"JAN": 0.0, "FEB": 0.0, "MAR": 2654.0, "APR": 3308.0, "MAY": 10395.0, "JUN": 5122.0, "JUL": 1014.0, "AUG": 15157.0, "SEP": 1737.0, "OCT": 3584.0, "NOV": 0.0, "DEC": 0.0}}, "WATSON": {"2016": {"JAN": 3162.0, "FEB": 8464.0, "MAR": 10568.0, "APR": 7581.0, "MAY": 17135.0, "JUN": 7010.0, "JUL": 4439.0, "AUG": 17811.0, "SEP": 4764.0, "OCT": 1788.0, "NOV": 0.0, "DEC": 0.0}}, "JAMEL L": {"2026": {"MAY": 100.0}}, "CASSANDRA K": {"2026": {"MAY": 179.99}}, "GEOFFREY N": {"2026": {"MAY": 540.0}}}};
+
+const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const YEARS = Object.keys(DATA.office_totals).sort();
+const REPS  = Object.keys(DATA.rep_sales).sort();
+const MTD_MARKER = { year:'2026', month:'MAY' };
+
+// Active charts map
+const charts = {};
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function fmt(n, dec=0) {
+  if (n == null || isNaN(n)) return '—';
+  if (Math.abs(n) >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1e3) return '$' + (n/1e3).toFixed(dec===0?0:1) + 'K';
+  return '$' + n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+}
+function fmtFull(n) {
+  if (n == null || isNaN(n)) return '—';
+  return '$' + n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function pct(n, decimals=1) {
+  if (n == null || !isFinite(n)) return '—';
+  const s = n >= 0 ? '+' : '';
+  return s + n.toFixed(decimals) + '%';
+}
+function trend(val) {
+  if (val == null || !isFinite(val)) return '';
+  return val >= 0 ? '↑' : '↓';
+}
+function mu(n) {
+  if (!n || isNaN(n)) return '—';
+  return (n).toFixed(4) + 'x';
+}
+
+// Year net sales total
+function yearNet(year) {
+  const months = DATA.office_totals[year] || {};
+  return Object.values(months).reduce((s,m) => s + (m && m.net ? m.net : (m && m.sales ? m.sales : 0)), 0);
+}
+function yearSales(year) {
+  const months = DATA.office_totals[year] || {};
+  return Object.values(months).reduce((s,m) => s + (m && m.sales ? m.sales : 0), 0);
+}
+function yearCogs(year) {
+  const months = DATA.office_totals[year] || {};
+  return Object.values(months).reduce((s,m) => s + (m && m.cogs ? m.cogs : 0), 0);
+}
+function yearReturns(year) {
+  const months = DATA.office_totals[year] || {};
+  return Object.values(months).reduce((s,m) => s + (m && m.returns ? m.returns : 0), 0);
+}
+function yearMU(year) {
+  const s = yearSales(year), c = yearCogs(year);
+  return c > 0 ? s/c : null;
+}
+
+// Rep total career sales
+function repCareer(rep) {
+  let tot = 0;
+  const yd = DATA.rep_sales[rep] || {};
+  for (const yr of Object.keys(yd)) {
+    for (const mo of Object.values(yd[yr] || {})) tot += mo || 0;
+  }
+  return tot;
+}
+function repYearTotal(rep, year) {
+  const yd = DATA.rep_sales[rep] || {};
+  return Object.values(yd[year] || {}).reduce((s,v) => s+(v||0), 0);
+}
+
+// ============================================================
+// NAV STATE
+// ============================================================
+let currentView = 'home';
+let currentYear = null;
+let currentMonth = null;
+let currentRep = null;
+let repNavFrom = 'home'; // 'home' | 'year' | 'month'
+
+function navigate(view, year=null, month=null, rep=null) {
+  currentView = view;
+  currentYear = year;
+  currentMonth = month;
+  currentRep = rep;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  updateBreadcrumb();
+  if (view === 'home')  renderHome();
+  if (view === 'year')  renderYear(year);
+  if (view === 'month') renderMonth(year, month);
+  if (view === 'rep')   renderRep(rep);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goRep(rep, fromView, fromYear=null, fromMonth=null) {
+  repNavFrom = fromView;
+  navigate('rep', fromYear, fromMonth, rep);
+}
+
+function repNavBack() {
+  if (repNavFrom === 'month') navigate('month', currentYear, currentMonth);
+  else if (repNavFrom === 'year') navigate('year', currentYear);
+  else navigate('home');
+}
+
+function updateBreadcrumb() {
+  const bc = document.getElementById('breadcrumb');
+  let html = `<span class="bc-item" onclick="navigate('home')">🏠 WI Office</span>`;
+  if (currentYear) {
+    html += `<span class="bc-sep">›</span>`;
+    html += `<span class="bc-item ${!currentMonth && !currentRep ? 'active' : ''}" onclick="navigate('year','${currentYear}')"><span class="bc-year-badge">${currentYear}</span></span>`;
+  }
+  if (currentMonth) {
+    html += `<span class="bc-sep">›</span>`;
+    html += `<span class="bc-item ${!currentRep ? 'active' : ''}" onclick="navigate('month','${currentYear}','${currentMonth}')">${currentMonth}</span>`;
+  }
+  if (currentRep) {
+    html += `<span class="bc-sep">›</span>`;
+    html += `<span class="bc-item active">${currentRep}</span>`;
+  }
+  bc.innerHTML = html;
+}
+
+// ============================================================
+// HOME VIEW
+// ============================================================
+function renderHome() {
+  // All-time stats
+  let allNetArr = [];
+  for (const yr of YEARS) {
+    const n = yearNet(yr);
+    if (n > 0) allNetArr.push({yr, n});
+  }
+  const allTimeNet = allNetArr.reduce((s,x) => s+x.n, 0);
+  const bestYearObj = allNetArr.reduce((a,b) => a.n > b.n ? a : b, {yr:'—', n:0});
+  const prevYear = YEARS.filter(y=>y!=='2026').slice(-1)[0];
+  const prev2Year = YEARS.filter(y=>y!=='2026').slice(-2,-1)[0];
+  const yoy = prevYear && prev2Year ?
+    (yearNet(prevYear) - yearNet(prev2Year)) / yearNet(prev2Year) * 100 : null;
+
+  // Update header
+  document.getElementById('hdrAllTime').textContent = fmt(allTimeNet);
+  document.getElementById('hdrBestYear').textContent = bestYearObj.yr;
+  document.getElementById('hdrYoY').textContent = yoy != null ? pct(yoy) : '—';
+  document.getElementById('hdrRepCount').textContent = REPS.length;
+
+  // Alert
+  const missing = ['2022'];
+  document.getElementById('homeAlertText').innerHTML =
+    `<strong>2022 data not yet received.</strong> COGS/MU data available from 2020+. Rep-level breakdowns available 2016–2025. Feed additional files to fill gaps. &nbsp;<span class="mtd-tag">MAY 2026 = MTD</span>`;
+
+  // KPI grid
+  const allTimeSales = YEARS.reduce((s,y) => s+yearSales(y), 0);
+  const allTimeCogs = YEARS.reduce((s,y) => s+yearCogs(y), 0);
+  const allMU = allTimeCogs > 0 ? allTimeSales/allTimeCogs : null;
+  const allReturns = YEARS.reduce((s,y) => s+yearReturns(y), 0);
+  const nYears = YEARS.length;
+  document.getElementById('homeKpis').innerHTML = `
+    <div class="kpi gold"><div class="kpi-lbl">All-Time Revenue (Net)</div><div class="kpi-val gold">${fmt(allTimeNet)}</div><div class="kpi-sub">${nYears} years tracked</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Best Year</div><div class="kpi-val green">${bestYearObj.yr}</div><div class="kpi-sub">${fmt(bestYearObj.n)} net sales</div></div>
+    <div class="kpi ${yoy != null && yoy >= 0 ? 'green' : 'red'}"><div class="kpi-lbl">${prevYear} vs ${prev2Year}</div><div class="kpi-val ${yoy != null && yoy >= 0 ? 'green' : 'red'}">${yoy != null ? pct(yoy) : '—'}</div><div class="kpi-sub">${fmt(yearNet(prevYear))} vs ${fmt(yearNet(prev2Year))}</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">All-Time Avg MU</div><div class="kpi-val blue">${allMU ? allMU.toFixed(4) + 'x' : '—'}</div><div class="kpi-sub">Gross sales / COGS</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Reps in Database</div><div class="kpi-val white">${REPS.length}</div><div class="kpi-sub">All-time WI reps</div></div>
+    <div class="kpi red"><div class="kpi-lbl">All-Time Returns</div><div class="kpi-val red">${fmt(allReturns)}</div><div class="kpi-sub">Total returns/adjustments</div></div>
+  `;
+
+  // Records
+  let bestMonth = null, bestMonthAmt = 0;
+  for (const yr of YEARS) {
+    for (const mo of MONTHS) {
+      const d = DATA.office_totals[yr] && DATA.office_totals[yr][mo];
+      if (d) {
+        const v = d.net || d.sales || 0;
+        if (v > bestMonthAmt) { bestMonthAmt = v; bestMonth = `${mo} ${yr}`; }
+      }
+    }
+  }
+  const topRep = REPS.map(r => ({r, tot:repCareer(r)})).sort((a,b)=>b.tot-a.tot)[0];
+  const bestMU_entry = (() => {
+    let best = null, bestVal = 0;
+    for (const yr of YEARS) {
+      const m = yearMU(yr);
+      if (m && m > bestVal) { bestVal = m; best = yr; }
+    }
+    return {yr: best, val: bestVal};
+  })();
+  document.getElementById('homeRecords').innerHTML = `
+    <div class="record-badge"><span class="rb-label">🏆 Best Month Ever</span><span class="rb-val">${bestMonth}</span><span class="rb-sub">${fmt(bestMonthAmt)}</span></div>
+    <div class="record-badge"><span class="rb-label">👑 All-Time Top Rep</span><span class="rb-val">${topRep ? topRep.r : '—'}</span><span class="rb-sub">${topRep ? fmt(topRep.tot) : '—'} career</span></div>
+    <div class="record-badge"><span class="rb-label">📈 Best Annual MU</span><span class="rb-val">${bestMU_entry.yr || '—'}</span><span class="rb-sub">${bestMU_entry.val ? bestMU_entry.val.toFixed(4)+'x' : '—'}</span></div>
+    <div class="record-badge"><span class="rb-label">📅 Years Tracked</span><span class="rb-val">${YEARS.length} / 11</span><span class="rb-sub">2022 missing</span></div>
+  `;
+
+  // Year cards
+  const allYears = ['2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026'];
+  let yearCardsHtml = '';
+  for (const yr of allYears) {
+    if (yr === '2022') {
+      yearCardsHtml += `<div class="year-card missing"><div class="yc-year">${yr}</div><div class="yc-missing">No data</div></div>`;
+      continue;
+    }
+    const net = yearNet(yr);
+    const sales = yearSales(yr);
+    const prevYr = String(+yr - 1) === '2022' ? '2021' : String(+yr - 1);
+    const prevNet = DATA.office_totals[prevYr] ? yearNet(prevYr) : null;
+    const chg = prevNet ? (net - prevNet) / prevNet * 100 : null;
+    const isCurrent = yr === '2026';
+    yearCardsHtml += `
+      <div class="year-card${isCurrent?' current':''}" onclick="navigate('year','${yr}')">
+        <div class="yc-year">${yr}${isCurrent ? ' <span class="mtd-tag" style="font-size:0.55rem">MTD</span>' : ''}</div>
+        <div class="yc-sales">${fmt(net)}</div>
+        ${chg != null ? `<div class="yc-trend ${chg>=0?'up':'down'}">${trend(chg)} ${pct(chg)} YoY</div>` : '<div class="yc-missing">First year</div>'}
+      </div>`;
+  }
+  document.getElementById('yearGrid').innerHTML = yearCardsHtml;
+
+  // Annual chart
+  destroyChart('annualChart');
+  const annualLabels = allYears.filter(y => y !== '2022' && DATA.office_totals[y]);
+  const annualSales = annualLabels.map(y => yearSales(y));
+  const annualNet   = annualLabels.map(y => yearNet(y));
+  charts.annualChart = new Chart(document.getElementById('annualChart'), {
+    type: 'bar',
+    data: {
+      labels: annualLabels,
+      datasets: [
+        { label:'Total Sales', data: annualSales, backgroundColor: 'rgba(200,168,76,0.8)', borderColor:'#c9a84c', borderWidth:1 },
+        { label:'Net Revenue', data: annualNet,   backgroundColor: 'rgba(91,163,232,0.6)', borderColor:'#5ba3e8', borderWidth:1 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      onClick(e, els) { if (els.length) navigate('year', annualLabels[els[0].index]); },
+      onHover(e, els) { e.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+      plugins:{ legend:{ labels:{ color:'#7a9bbf', font:{size:11} } }, tooltip:{ callbacks:{ label(c){ return ' '+fmt(c.raw); } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf' }, grid:{ color:'rgba(26,58,92,0.5)' } },
+        y:{ ticks:{ color:'#7a9bbf', callback: v => fmt(v) }, grid:{ color:'rgba(26,58,92,0.5)' } }
+      }
+    }
+  });
+
+  // Growth chart
+  destroyChart('growthChart');
+  const growthYears = annualLabels.slice(1);
+  const growthVals = growthYears.map((yr,i) => {
+    const prev = annualLabels[i]; // i is offset by 1 since we sliced(1)
+    const prevN = yearNet(prev), curN = yearNet(yr);
+    return prevN > 0 ? (curN - prevN) / prevN * 100 : null;
+  });
+  charts.growthChart = new Chart(document.getElementById('growthChart'), {
+    type: 'bar',
+    data: {
+      labels: growthYears,
+      datasets: [{
+        label:'YoY Growth %',
+        data: growthVals,
+        backgroundColor: growthVals.map(v => v == null ? '#333' : v >= 0 ? 'rgba(46,204,113,0.7)' : 'rgba(231,76,60,0.7)'),
+        borderColor: growthVals.map(v => v == null ? '#555' : v >= 0 ? '#2ecc71' : '#e74c3c'),
+        borderWidth:1
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label(c){ return ' ' + (c.raw != null ? pct(c.raw) : '—'); } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf',font:{size:10} }, grid:{ color:'rgba(26,58,92,0.4)' } },
+        y:{ ticks:{ color:'#7a9bbf', callback:v => v+'%' }, grid:{ color:'rgba(26,58,92,0.4)' } }
+      }
+    }
+  });
+
+  // All-time rep table
+  const repRankings = REPS.map(r => ({r, tot:repCareer(r)})).sort((a,b)=>b.tot-a.tot).slice(0,12);
+  const maxRep = repRankings[0]?.tot || 1;
+  document.getElementById('allTimeRepTable').innerHTML = `
+    <thead><tr><th>#</th><th>Rep</th><th>Career Sales</th><th>Share</th></tr></thead>
+    <tbody>${repRankings.map((x,i) => `
+      <tr onclick="goRep('${x.r}','home')">
+        <td class="rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</td>
+        <td class="hi">${x.r}</td>
+        <td class="gold">${fmt(x.tot)}</td>
+        <td><div class="pbar-wrap"><div class="pbar gold" style="width:${(x.tot/maxRep*100).toFixed(1)}%"></div></div></td>
+      </tr>`).join('')}
+    </tbody>`;
+
+  // Avg by month chart
+  destroyChart('avgMonthChart');
+  const avgByMonth = MONTHS.map(mo => {
+    const vals = YEARS.map(yr => {
+      const d = DATA.office_totals[yr] && DATA.office_totals[yr][mo];
+      return d ? (d.net || d.sales || 0) : null;
+    }).filter(v => v != null);
+    return vals.length ? vals.reduce((s,v) => s+v, 0) / vals.length : null;
+  });
+  charts.avgMonthChart = new Chart(document.getElementById('avgMonthChart'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [{ label:'Avg Sales', data: avgByMonth, backgroundColor:'rgba(155,89,182,0.7)', borderColor:'#9b59b6', borderWidth:1 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label(c){ return ' '+fmt(c.raw); } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf',font:{size:10} }, grid:{ color:'rgba(26,58,92,0.4)' } },
+        y:{ ticks:{ color:'#7a9bbf', callback: v => fmt(v) }, grid:{ color:'rgba(26,58,92,0.4)' } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// YEAR VIEW
+// ============================================================
+function renderYear(year) {
+  const yd = DATA.office_totals[year] || {};
+  const isMTD = year === '2026';
+  const totalNet   = yearNet(year);
+  const totalSales = yearSales(year);
+  const totalCogs  = yearCogs(year);
+  const totalRet   = yearReturns(year);
+  const mu_val     = yearMU(year);
+  const prevYr     = String(+year - 1) === '2022' ? '2021' : String(+year - 1);
+  const prevNet    = DATA.office_totals[prevYr] ? yearNet(prevYr) : null;
+  const yoy        = prevNet ? (totalNet - prevNet) / prevNet * 100 : null;
+
+  // KPIs
+  document.getElementById('yearKpis').innerHTML = `
+    <div class="kpi gold"><div class="kpi-lbl">${year} Total Sales${isMTD?' (MTD)':''}</div><div class="kpi-val gold">${fmt(totalSales)}</div><div class="kpi-sub">${isMTD?'Through 5/5/2026':'Full year'}</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">${year} Net Revenue</div><div class="kpi-val blue">${fmt(totalNet)}</div><div class="kpi-sub">After returns</div></div>
+    <div class="kpi ${yoy != null && yoy >= 0 ? 'green' : 'red'}"><div class="kpi-lbl">vs ${prevYr}</div><div class="kpi-val ${yoy != null && yoy >= 0 ? 'green' : 'red'}">${yoy != null ? pct(yoy) : '—'}</div><div class="kpi-sub">${fmt(prevNet)} in ${prevYr}</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Avg Markup</div><div class="kpi-val blue">${mu_val ? mu_val.toFixed(4)+'x' : '—'}</div><div class="kpi-sub">Sales / COGS</div></div>
+    <div class="kpi red"><div class="kpi-lbl">Returns</div><div class="kpi-val red">${fmt(totalRet)}</div><div class="kpi-sub">${totalSales > 0 ? (totalRet/totalSales*100).toFixed(1)+'% of sales' : '—'}</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Months with Data</div><div class="kpi-val white">${Object.keys(yd).length}</div><div class="kpi-sub">of 12 possible</div></div>
+  `;
+
+  // Month pills
+  let pillsHtml = '';
+  for (const mo of MONTHS) {
+    const d = yd[mo];
+    const net = d ? (d.net || d.sales || 0) : null;
+    const prevD = DATA.office_totals[prevYr] && DATA.office_totals[prevYr][mo];
+    const prevMoNet = prevD ? (prevD.net || prevD.sales || 0) : null;
+    const moChg = (net && prevMoNet) ? (net - prevMoNet) / prevMoNet * 100 : null;
+    const isMo = (year === MTD_MARKER.year && mo === MTD_MARKER.month);
+    if (!d) {
+      pillsHtml += `<div class="month-pill missing"><div class="mp-name">${mo}</div><div class="mp-val">—</div></div>`;
+    } else {
+      pillsHtml += `
+        <div class="month-pill${isMo?' mtd':''}" onclick="navigate('month','${year}','${mo}')">
+          <div class="mp-name">${mo}${isMo?' 📍':''}</div>
+          <div class="mp-val">${fmt(net)}</div>
+          ${moChg != null ? `<div class="mp-pct ${moChg>=0?'up':'down'}">${trend(moChg)} ${pct(moChg)} YoY</div>` : '<div class="mp-pct flat">No prior</div>'}
+        </div>`;
+    }
+  }
+  document.getElementById('monthPills').innerHTML = pillsHtml;
+
+  // Month chart
+  destroyChart('yearMonthChart');
+  const chartMos = MONTHS.filter(mo => yd[mo]);
+  const chartNet  = chartMos.map(mo => yd[mo].net || yd[mo].sales || 0);
+  const chartCogs = chartMos.map(mo => yd[mo].cogs || null);
+  document.getElementById('yearChartTitle').textContent = `📊 ${year} Monthly Breakdown`;
+  charts.yearMonthChart = new Chart(document.getElementById('yearMonthChart'), {
+    type:'bar',
+    data:{
+      labels: chartMos,
+      datasets:[
+        { label:'Net Sales', data: chartNet,  backgroundColor:'rgba(200,168,76,0.8)', borderColor:'#c9a84c', borderWidth:1 },
+        { label:'COGS',      data: chartCogs, backgroundColor:'rgba(231,76,60,0.5)',  borderColor:'#e74c3c', borderWidth:1, type:'bar' }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      onClick(e,els){ if(els.length) navigate('month', year, chartMos[els[0].index]); },
+      onHover(e,els){ e.native.target.style.cursor = els.length?'pointer':'default'; },
+      plugins:{ legend:{ labels:{ color:'#7a9bbf', font:{size:11} } }, tooltip:{ callbacks:{ label(c){ return ' '+fmt(c.raw); } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf' }, grid:{ color:'rgba(26,58,92,0.4)' } },
+        y:{ ticks:{ color:'#7a9bbf', callback:v=>fmt(v) }, grid:{ color:'rgba(26,58,92,0.4)' } }
+      }
+    }
+  });
+
+  // Rep table for year
+  const repYear = REPS.map(r => {
+    const tot = repYearTotal(r, year);
+    return {r, tot};
+  }).filter(x => x.tot > 0).sort((a,b) => b.tot-a.tot);
+  const maxRepY = repYear[0]?.tot || 1;
+  document.getElementById('yearRepTitle').textContent = `🏆 Top Reps — ${year}`;
+  document.getElementById('yearRepTable').innerHTML = `
+    <thead><tr><th>#</th><th>Rep</th><th>Sales</th><th>Share</th></tr></thead>
+    <tbody>${repYear.map((x,i) => `
+      <tr onclick="goRep('${x.r}','year','${year}')">
+        <td class="rank ${i<3?['gold','silver','bronze'][i]:''}">${['🥇','🥈','🥉'][i]||i+1}</td>
+        <td class="hi">${x.r}</td>
+        <td class="gold">${fmt(x.tot)}</td>
+        <td><div class="pbar-wrap"><div class="pbar gold" style="width:${(x.tot/maxRepY*100).toFixed(1)}%"></div></div></td>
+      </tr>`).join('')}
+    </tbody>`;
+
+  // Full year month table
+  const prevYrData = DATA.office_totals[prevYr] || {};
+  let tblRows = '';
+  for (const mo of MONTHS) {
+    const d = yd[mo];
+    if (!d) { tblRows += `<tr><td>${mo}</td><td colspan="5" style="color:#333">No data</td></tr>`; continue; }
+    const net = d.net || d.sales || 0;
+    const prevD = prevYrData[mo];
+    const prevNet = prevD ? (prevD.net || prevD.sales || 0) : null;
+    const moChg = prevNet ? (net-prevNet)/prevNet*100 : null;
+    const isMo = (year===MTD_MARKER.year && mo===MTD_MARKER.month);
+    tblRows += `
+      <tr class="${isMo?'mtd-row':''}" onclick="navigate('month','${year}','${mo}')">
+        <td class="hi">${mo}${isMo?' <span class="mtd-tag">MTD</span>':''}</td>
+        <td class="gold">${fmtFull(d.sales)}</td>
+        <td style="color:#888">${d.cogs ? fmtFull(d.cogs) : '—'}</td>
+        <td class="blue">${d.mu ? d.mu.toFixed(4)+'x' : '—'}</td>
+        <td class="red">${d.returns ? fmtFull(d.returns) : '$0'}</td>
+        <td class="${moChg!=null ? (moChg>=0?'pos':'neg') : ''}">${moChg!=null ? (trend(moChg)+' '+pct(moChg)) : '—'}</td>
+      </tr>`;
+  }
+  document.getElementById('yearMonthTable').innerHTML = `
+    <thead><tr><th>Month</th><th>Total Sales</th><th>COGS</th><th>Markup</th><th>Returns</th><th>vs ${prevYr}</th></tr></thead>
+    <tbody>${tblRows}</tbody>
+    <tr class="total-row"><td>TOTAL ${year}</td><td>${fmtFull(totalSales)}</td><td>${totalCogs?fmtFull(totalCogs):'—'}</td><td>${mu_val?mu_val.toFixed(4)+'x':'—'}</td><td>${fmtFull(totalRet)}</td><td class="${yoy!=null?(yoy>=0?'pos':'neg'):''}">${yoy!=null?(trend(yoy)+' '+pct(yoy)):'—'}</td></tr>`;
+}
+
+// ============================================================
+// MONTH VIEW
+// ============================================================
+function renderMonth(year, month) {
+  const d = DATA.office_totals[year] && DATA.office_totals[year][month];
+  const prevYr = String(+year-1) === '2022' ? '2021' : String(+year-1);
+  const prevD  = DATA.office_totals[prevYr] && DATA.office_totals[prevYr][month];
+  const isMTD  = year===MTD_MARKER.year && month===MTD_MARKER.month;
+
+  const net   = d ? (d.net   || d.sales || 0) : 0;
+  const sales = d ? (d.sales || 0) : 0;
+  const cogs  = d ? (d.cogs  || 0) : 0;
+  const ret   = d ? (d.returns || 0) : 0;
+  const muV   = cogs > 0 ? sales/cogs : null;
+  const prevNet = prevD ? (prevD.net || prevD.sales || 0) : null;
+  const yoy  = prevNet ? (net - prevNet) / prevNet * 100 : null;
+
+  document.getElementById('monthBackBtn').onclick = () => navigate('year', year);
+  document.getElementById('monthKpis').innerHTML = `
+    <div class="kpi gold"><div class="kpi-lbl">${month} ${year} Sales${isMTD?' (MTD)':''}</div><div class="kpi-val gold">${fmtFull(sales)}</div><div class="kpi-sub">${isMTD?'Through 5/5/2026':'Full month'}</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Net Revenue</div><div class="kpi-val blue">${fmtFull(net)}</div><div class="kpi-sub">After $${ret.toLocaleString()} returns</div></div>
+    <div class="kpi ${yoy!=null&&yoy>=0?'green':'red'}"><div class="kpi-lbl">vs ${month} ${prevYr}</div><div class="kpi-val ${yoy!=null&&yoy>=0?'green':'red'}">${yoy!=null?pct(yoy):'—'}</div><div class="kpi-sub">${prevNet?fmt(prevNet)+' last year':'No prior year data'}</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Markup</div><div class="kpi-val blue">${muV?muV.toFixed(4)+'x':'—'}</div><div class="kpi-sub">${cogs?fmtFull(cogs)+' COGS':'No COGS data'}</div></div>
+  `;
+
+  // Rep rankings for this month
+  const repsMo = REPS.map(r => {
+    const v = DATA.rep_sales[r] && DATA.rep_sales[r][year] && DATA.rep_sales[r][year][month];
+    return {r, v: v || 0};
+  }).filter(x => x.v > 0).sort((a,b) => b.v-a.v);
+
+  document.getElementById('monthRepChartTitle').textContent = `🏆 ${month} ${year} — Rep Rankings`;
+  document.getElementById('monthRepTableTitle').textContent = `All Active Reps — ${month} ${year}`;
+
+  destroyChart('monthRepChart');
+  const repNames = repsMo.map(x => x.r);
+  const repVals  = repsMo.map(x => x.v);
+  charts.monthRepChart = new Chart(document.getElementById('monthRepChart'), {
+    type:'bar',
+    data:{
+      labels: repNames,
+      datasets:[{ label:'Sales', data:repVals, backgroundColor:repNames.map((_,i) => i===0?'rgba(200,168,76,0.9)':i===1?'rgba(170,170,170,0.8)':i===2?'rgba(205,127,50,0.8)':'rgba(91,163,232,0.7)'), borderWidth:0 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      onClick(e,els){ if(els.length) goRep(repNames[els[0].index], 'month', year, month); },
+      onHover(e,els){ e.native.target.style.cursor = els.length?'pointer':'default'; },
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label(c){ return ' '+fmtFull(c.raw); } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf', callback:v=>fmt(v) }, grid:{ color:'rgba(26,58,92,0.4)' } },
+        y:{ ticks:{ color:'#e8ecf0', font:{size:10} }, grid:{ display:false } }
+      }
+    }
+  });
+
+  // Rep table
+  const maxR = repsMo[0]?.v || 1;
+  document.getElementById('monthRepTable').innerHTML = `
+    <thead><tr><th>#</th><th>Rep</th><th>Sales</th></tr></thead>
+    <tbody>${repsMo.map((x,i) => `
+      <tr onclick="goRep('${x.r}','month','${year}','${month}')">
+        <td class="rank ${i<3?['gold','silver','bronze'][i]:''}">${['🥇','🥈','🥉'][i]||i+1}</td>
+        <td class="hi">${x.r}</td>
+        <td class="gold">${fmtFull(x.v)}</td>
+      </tr>`).join('')}
+    </tbody>`;
+
+  // This month across all years (history chart)
+  destroyChart('monthHistoryChart');
+  const histYears = YEARS.filter(y => DATA.office_totals[y] && DATA.office_totals[y][month]);
+  const histVals  = histYears.map(y => DATA.office_totals[y][month].net || DATA.office_totals[y][month].sales || 0);
+  charts.monthHistoryChart = new Chart(document.getElementById('monthHistoryChart'), {
+    type:'bar',
+    data:{
+      labels: histYears,
+      datasets:[{ label:month+' Sales', data:histVals, backgroundColor: histYears.map(y => y===year?'rgba(200,168,76,0.9)':'rgba(91,163,232,0.5)'), borderWidth:0 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label(c){ return ' '+fmt(c.raw); } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf',font:{size:10} }, grid:{ color:'rgba(26,58,92,0.3)' } },
+        y:{ ticks:{ color:'#7a9bbf', callback:v=>fmt(v) }, grid:{ color:'rgba(26,58,92,0.3)' } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// REP VIEW
+// ============================================================
+function renderRep(rep) {
+  const rd = DATA.rep_sales[rep] || {};
+  const careerYears = Object.keys(rd).sort();
+  const careerTot = repCareer(rep);
+
+  // Best year
+  let bestYr = null, bestYrAmt = 0;
+  for (const yr of careerYears) {
+    const t = repYearTotal(rep, yr);
+    if (t > bestYrAmt) { bestYrAmt = t; bestYr = yr; }
+  }
+  // Best month ever
+  let bestMo = null, bestMoAmt = 0, bestMoYr = null;
+  for (const yr of careerYears) {
+    for (const mo of MONTHS) {
+      const v = rd[yr] && rd[yr][mo] ? rd[yr][mo] : 0;
+      if (v > bestMoAmt) { bestMoAmt = v; bestMo = mo; bestMoYr = yr; }
+    }
+  }
+  // Avg per year
+  const avg = careerYears.length ? careerTot / careerYears.length : 0;
+  // All-time rank
+  const allRankings = REPS.map(r => ({r, tot:repCareer(r)})).sort((a,b)=>b.tot-a.tot);
+  const rank = allRankings.findIndex(x=>x.r===rep)+1;
+
+  document.getElementById('repKpis').innerHTML = `
+    <div class="kpi gold"><div class="kpi-lbl">Career Sales</div><div class="kpi-val gold">${fmt(careerTot)}</div><div class="kpi-sub">All-time total</div></div>
+    <div class="kpi green"><div class="kpi-lbl">Best Year</div><div class="kpi-val green">${bestYr||'—'}</div><div class="kpi-sub">${fmt(bestYrAmt)}</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Best Month</div><div class="kpi-val blue">${bestMo||'—'} ${bestMoYr||''}</div><div class="kpi-sub">${fmt(bestMoAmt)}</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">All-Time Rank</div><div class="kpi-val ${rank<=3?'green':'white'}">${rank===1?'🥇 #1':rank===2?'🥈 #2':rank===3?'🥉 #3':'#'+rank}</div><div class="kpi-sub">of ${REPS.length} reps</div></div>
+    <div class="kpi blue"><div class="kpi-lbl">Years Active</div><div class="kpi-val white">${careerYears.length}</div><div class="kpi-sub">${careerYears[0] || '—'} – ${careerYears.slice(-1)[0]||'—'}</div></div>
+    <div class="kpi gold"><div class="kpi-lbl">Avg / Year</div><div class="kpi-val gold">${fmt(avg)}</div><div class="kpi-sub">Career average</div></div>
+  `;
+
+  // Year chart
+  destroyChart('repYearChart');
+  const yrAmts = careerYears.map(yr => repYearTotal(rep, yr));
+  document.getElementById('repYearChartTitle').textContent = `📊 ${rep} — Year-by-Year`;
+  charts.repYearChart = new Chart(document.getElementById('repYearChart'), {
+    type:'bar',
+    data:{
+      labels: careerYears,
+      datasets:[{ label:'Annual Sales', data:yrAmts, backgroundColor:'rgba(200,168,76,0.8)', borderColor:'#c9a84c', borderWidth:1 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      onClick(e,els){ if(els.length) navigate('year', careerYears[els[0].index]); },
+      onHover(e,els){ e.native.target.style.cursor=els.length?'pointer':'default'; },
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label(c){ return ' '+fmt(c.raw); } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf' }, grid:{ color:'rgba(26,58,92,0.4)' } },
+        y:{ ticks:{ color:'#7a9bbf', callback:v=>fmt(v) }, grid:{ color:'rgba(26,58,92,0.4)' } }
+      }
+    }
+  });
+
+  // Monthly avg chart (career)
+  destroyChart('repMonthChart');
+  const moAvg = MONTHS.map(mo => {
+    const vals = careerYears.map(yr => rd[yr]&&rd[yr][mo]?rd[yr][mo]:null).filter(v=>v!=null);
+    return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : null;
+  });
+  document.getElementById('repMonthChartTitle').textContent = `📅 ${rep} — Monthly Avg (Career)`;
+  charts.repMonthChart = new Chart(document.getElementById('repMonthChart'), {
+    type:'bar',
+    data:{
+      labels: MONTHS,
+      datasets:[{ label:'Avg Monthly', data:moAvg, backgroundColor:'rgba(155,89,182,0.7)', borderColor:'#9b59b6', borderWidth:1 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label(c){ return c.raw!=null?' '+fmt(c.raw):'No data'; } } } },
+      scales:{
+        x:{ ticks:{ color:'#7a9bbf',font:{size:10} }, grid:{ color:'rgba(26,58,92,0.4)' } },
+        y:{ ticks:{ color:'#7a9bbf', callback:v=>fmt(v) }, grid:{ color:'rgba(26,58,92,0.4)' } }
+      }
+    }
+  });
+
+  // Career table
+  let careerRows = '';
+  for (const yr of careerYears) {
+    const tot = repYearTotal(rep, yr);
+    const prevYrStr = String(+yr-1)==='2022'?'2021':String(+yr-1);
+    const prevTot = rd[prevYrStr] ? repYearTotal(rep, prevYrStr) : null;
+    const chg = prevTot ? (tot-prevTot)/prevTot*100 : null;
+    const offTot = yearNet(yr) || yearSales(yr);
+    const share = offTot > 0 ? (tot/offTot*100) : null;
+    const mos = MONTHS.map(mo => {
+      const v = rd[yr]&&rd[yr][mo] ? rd[yr][mo] : null;
+      return v != null ? `<span title="${mo}">${fmt(v)}</span>` : `<span style="color:#333">—</span>`;
+    }).join(' ');
+    careerRows += `
+      <tr onclick="navigate('year','${yr}')">
+        <td class="hi">${yr}</td>
+        <td class="gold">${fmtFull(tot)}</td>
+        <td class="${chg!=null?(chg>=0?'pos':'neg'):''}">${chg!=null?trend(chg)+' '+pct(chg):'—'}</td>
+        <td class="blue">${share!=null?share.toFixed(1)+'%':'—'}</td>
+      </tr>`;
+  }
+  document.getElementById('repCareerTable').innerHTML = `
+    <thead><tr><th>Year</th><th>Total Sales</th><th>YoY Change</th><th>Office Share</th></tr></thead>
+    <tbody>${careerRows}</tbody>
+    <tr class="total-row"><td>CAREER TOTAL</td><td>${fmtFull(careerTot)}</td><td>—</td><td>—</td></tr>`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  navigate('home');
+});
+</script>
+</body>
+</html>
