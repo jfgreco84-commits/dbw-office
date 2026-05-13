@@ -236,7 +236,7 @@ function render(data){
   DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" &#9670;":"")+"</th>");});
   hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hMU'>M/U</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
   gel("thr").innerHTML=hcols.join("");
-  var ids=Object.keys(data.reps).sort(function(a,b){return data.reps[b].ytd-data.reps[a].ytd;});
+  var ids=Object.keys(data.reps).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
   var oW=0,oM=0,oS=0,dt=DAYS.map(function(){return 0;}),rows=[];
   ids.forEach(function(id,rank){
     var rep=data.reps[id];
@@ -256,7 +256,7 @@ function render(data){
     var muH=mu>0?"<span class='"+(mu>=2?"hot":"")+"'>"+mu.toFixed(2)+"x</span>":"<span class='de'>&mdash;</span>";
     var bc=hit?"#00ff44":pct>75?"#ffaa00":"#cc88ff";
     var pc="<td class='cP'><div class='pb'><span class='pn"+(hit?" done":"")+"'>"+pct+"%</span><div class='pbb'><div class='pbf' style='width:"+Math.min(100,pct)+"%;background:"+bc+";'></div></div></div></td>";
-    rows.push("<tr class='"+rk+"'><td class='cY'>"+fK(rep.ytd)+"</td><td class='cN'>"+med+rep.name+"</td>"+dc+
+    rows.push("<tr class='"+rk+"'><td class='cY'>"+fK((rep.ytd||0)+(rep.shipped||0))+"</td><td class='cN'>"+med+rep.name+"</td>"+dc+
       "<td class='cW'>"+(wk>0?"$"+wk.toLocaleString():"&mdash;")+"</td>"+
       "<td class='cM"+(hit?" gh":"")+"'>"+(mtd>0?"$"+mtd.toLocaleString():"&mdash;")+"</td>"+
       "<td class='cS' onclick='openS(\""+id+"\")'>"+(rep.shipped>0?"$"+rep.shipped.toLocaleString():"&mdash;")+"</td>"+
