@@ -163,8 +163,9 @@ td{padding:7px 5px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
 var _k=atob("c2Jfc2VjcmV0X1JUdDJxVEszSjF6RzZTZVhCQVFyd0Ffa1RFUkpGal8=");
 var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-87225ea4909d",DK="boardData";
 var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
-var SEED={week_start:"2026-05-18",month:"2026-05",quarter:"2026-Q2",quarter_shipped:355739,
-  mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.7956,ytd_mu:0.0},
+var rpt=new Set(SEED.reported_days||[]);  // days where at least 1 rep has a value (show $0 not —)
+var SEED={week_start:"2026-05-18",month:"2026-05",quarter:"2026-Q2",quarter_shipped:355739,reported_days:["mon","tue"],
+  mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762},
   reps:{
     W930:{name:"ADAM MISUREK  ", ytd:257311 , goal:180000 , shipped:98663 , mu:2.04, mtd_prev:99088  , week:{mon:0     ,tue:10178 ,wed:0     ,thu:0     ,fri:0}},
     W839:{name:"RONNY B       ", ytd:281030 , goal:180000 , shipped:5075  , mu:2.41, mtd_prev:2026   , week:{mon:2890  ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
@@ -278,7 +279,7 @@ function renderH(data){
   hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
   hdr("hDL",fiscalDL());
   hdr("hDLQ","Q2: "+fiscalQuarterDL()+" days");
-  var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:0,ytd_mu:0};
+  var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762};
   /* Live Q2 progress = banked prior months + current month's shipped across the office */
   var officeShipped=Object.keys(data.reps||{}).reduce(function(s,k){return s+(data.reps[k].shipped||0);},0);
   var qs=(data.quarter_shipped||0)+officeShipped;
@@ -309,7 +310,7 @@ function render(data){
     var med=rank===0?"🥇 ":rank===1?"🥈 ":rank===2?"🥉 ":rank===3?"🎖️ ":rank===4?"⭐ ":"";
     var dc=DAYS.map(function(k,i){
       var v=rep.week[k]||0,iT=tk===k;
-      var inn=v>=1000?"<span class='dg'>$"+v.toLocaleString()+"</span>":v>0?"<span class='dr'>$"+v.toLocaleString()+"</span>":"<span class='de'>&mdash;</span>";
+      var inn=v>=1000?"<span class='dg'>$"+v.toLocaleString()+"</span>":v>0?"<span class='dr'>$"+v.toLocaleString()+"</span>":rpt.has(k)?"<span class='dr'>$0</span>":"<span class='de'>&mdash;</span>";
       return"<td class='cD"+(iT?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>" +inn+"</td>";
     }).join("");
     var muH=mu>0?"<span class='"+(mu>=2?"hot":"")+"'>"+mu.toFixed(2)+"x</span>":"<span class='de'>&mdash;</span>";
@@ -322,7 +323,7 @@ function render(data){
       "<td class='cMU' onclick='openMU(\""+id+"\")'>"+muH+"</td>"+
       "<td class='cG'>"+fK(goal)+"</td>"+pc+"</tr>");
   });
-  var totD=DAYS.map(function(k,i){var v=dt[i];return"<td class='cD"+(tk===k?" tc":"")+"'>"+(v>0?"$"+v.toLocaleString():"&mdash;")+"</td>";}).join("");
+  var totD=DAYS.map(function(k,i){var v=dt[i];return"<td class='cD"+(tk===k?" tc":"")+"'>"+(v>0?"$"+v.toLocaleString():rpt.has(k)?"$0":"&mdash;")+"</td>";}).join("");
   var omg=data.mgr&&data.mgr.mtd_mu>0?data.mgr.mtd_mu.toFixed(2)+"x":"&mdash;";
   rows.push("<tr class='tot'><td class='cY'></td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"&mdash;")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"&mdash;")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"&mdash;")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cG'></td><td class='cP'></td></tr>");
   gel("tbod").innerHTML=rows.join("");
