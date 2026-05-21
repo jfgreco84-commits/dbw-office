@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- PUSH: 2026-05-13 19:31 DATA-THRU: 2026-05-12 Tue -->
+<!-- PUSH: 2026-05-21 14:08 BUGFIX: rpt-before-SEED -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>DBW WI - Live Sales Board</title>
@@ -163,7 +163,6 @@ td{padding:7px 5px;border:1px solid #0e0e1c;white-space:nowrap;text-align:center
 var _k=atob("c2Jfc2VjcmV0X1JUdDJxVEszSjF6RzZTZVhCQVFyd0Ffa1RFUkpGal8=");
 var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-87225ea4909d",DK="boardData";
 var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
-var rpt=new Set(SEED.reported_days||[]);  // days where at least 1 rep has a value (show $0 not —)
 var SEED={week_start:"2026-05-18",month:"2026-05",quarter:"2026-Q2",quarter_shipped:355739,reported_days:["mon","tue"],
   mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762},
   reps:{
@@ -184,6 +183,7 @@ var SEED={week_start:"2026-05-18",month:"2026-05",quarter:"2026-Q2",quarter_ship
     W953:{name:"JAMEL LEE     ", ytd:9184   , goal:20000  , shipped:317   , mu:2.33, mtd_prev:316    , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}}
   }
 } // __DBW_SEED_END__;
+var rpt=new Set(SEED.reported_days||[]);  // days where at least 1 rep has a value (show $0 not -)
 var BD=null,EC=null;
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
 function tKey(){return{1:"mon",2:"tue",3:"wed",4:"thu",5:"fri"}[new Date().getDay()]||null;}
