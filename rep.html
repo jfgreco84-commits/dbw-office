@@ -40359,7 +40359,7 @@ if(!rep){document.body.innerHTML='<div style="padding:40px;text-align:center;col
 
 renderBonus(repId);
 document.getElementById('rep-name').textContent=rep.name+(rep.nick?' "'+rep.nick+'"':'');
-document.getElementById('rep-meta').textContent=repId+' · '+(rep.scale==='veteran'?'Veteran Rep':'New Rep')+' · Data through May 12, 2026';
+document.getElementById('rep-meta').textContent=repId+' · '+(rep.scale==='veteran'?'Veteran Rep':'New Rep')+' · '+D.generated;
 document.title=rep.name+' — DBW';
 
 const ytd=D.ytd[repId]||{};
