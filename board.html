@@ -194,7 +194,109 @@ var SEED={week_start:"2026-05-25",month:"2026-05",quarter:"2026-Q2",quarter_ship
     W934:{name:"LESLIE KUBENY ", ytd:8170   , goal:15000  , shipped:1373  , mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
     W953:{name:"JAMEL LEE     ", ytd:9184   , goal:20000  , shipped:317   , mu:0, mtd_prev:316    , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}}
   }
-} // __DBW_SEED_END__
+} // __DBW_SEED_END__ // __DBW_SEED_END__;
+var rpt=new Set(SEED.reported_days||[]); // days where at least 1 rep has a value (show $0 not -)
+var BD=null,EC=null;
+function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
+function tKey(){return{1:"mon",2:"tue",3:"wed",4:"thu",5:"fri"}[new Date().getDay()]||null;}
+function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return y+"-"+m+"-"+day;}
+function getMon(d){var dt=new Date(d instanceof Date?d.getTime():d);var dy=dt.getDay(),df=dt.getDate()-dy+(dy===0?-6:1);dt.setDate(df);return localDateStr(dt);}
+function ym(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");}
+function getQ(){return new Date().getFullYear()+"-Q"+(Math.floor(new Date().getMonth()/3)+1);}
+var FISCAL=[
+{q:1,s:"2026-01-05",e:"2026-01-30",h:[]},
+{q:1,s:"2026-02-02",e:"2026-02-27",h:[]},
+{q:1,s:"2026-03-02",e:"2026-04-03",h:[]},
+{q:1,s:"2026-04-06",e:"2026-05-01",h:[]},
+{q:2,s:"2026-05-04",e:"2026-06-05",h:["2026-05-25"]},
+{q:2,s:"2026-06-08",e:"2026-07-03",h:[]},
+{q:2,s:"2026-07-06",e:"2026-07-31",h:[]},
+{q:3,s:"2026-08-03",e:"2026-09-04",h:["2026-09-07"]},
+{q:3,s:"2026-09-07",e:"2026-10-02",h:[]},
+{q:3,s:"2026-10-05",e:"2026-11-06",h:[]},
+{q:4,s:"2026-11-09",e:"2026-12-04",h:["2026-11-26"]},
+{q:4,s:"2026-12-07",e:"2026-12-31",h:["2026-12-25"]}
+];
+function currentPeriod(){
+var t=new Date();t.setHours(0,0,0,0);
+for(var i=0;i<FISCAL.length;i++){
+var s=new Date(FISCAL[i].s+"T12:00:00"),e=new Date(FISCAL[i].e+"T12:00:00");
+if(t>=s&&t<=e)return FISCAL[i];
+}return null;
+}
+function bdaysIn(start,end,holidays){
+var c=0,d=new Date(start);d.setHours(0,0,0,0);
+var stop=new Date(end);stop.setHours(0,0,0,0);
+while(d<=stop){
+var w=d.getDay();
+if(w>0&&w<6&&holidays.indexOf(localDateStr(d))<0)c++;
+d.setDate(d.getDate()+1);
+}
+return c;
+}
+function fiscalDL(){
+var p=currentPeriod();if(!p)return"?";
+var t=new Date();t.setHours(0,0,0,0);
+return bdaysIn(t,new Date(p.e+"T12:00:00"),p.h||[]);
+}
+function fiscalQuarterDL(){
+var p=currentPeriod();if(!p)return"?";
+var t=new Date();t.setHours(0,0,0,0);
+var c=0;
+for(var i=0;i<FISCAL.length;i++){
+if(FISCAL[i].q!==p.q)continue;
+var e=new Date(FISCAL[i].e+"T12:00:00");
+if(e<t)continue;
+var s=new Date(FISCAL[i].s+"T12:00:00");
+var startD=s<t?t:s;
+c+=bdaysIn(startD,e,FISCAL[i].h||[]);
+}
+return c;
+}
+function fiscalTotalDays(){
+var p=currentPeriod();if(!p)return 0;
+var s=new Date(p.s+"T12:00:00"),e=new Date(p.e+"T12:00:00");
+return bdaysIn(s,e,p.h||[]);
+}
+function hdr(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+function gel(id){return document.getElementById(id);}
+async function sbGet(){
+try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK+"&select=data_value",{headers:{apikey:_k,"Authorization":"Bearer "+_k}});if(!r.ok)return null;var rows=await r.json();return(rows&&rows.length>0)?rows[0].data_value:null;}catch(e){return null;}
+}
+async function sbSet(data){
+try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK,{method:"PATCH",headers:{apikey:_k,"Authorization":"Bearer "+_k,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({data_value:data})});localStorage.setItem("dbw_b",JSON.stringify(data));return r.status===204||r.status===200;}catch(e){localStorage.setItem("dbw_b",JSON.stringify(data));return false;}
+}
+function rollover(d){
+var ch=false,cm=getMon(new Date());
+if(d.week_start!==cm){
+Object.keys(d.reps).forEach(function(id){
+var rep=d.reps[id];
+rep.mtd_prev=(rep.mtd_prev||0)+DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0);
+DAYS.forEach(function(k){rep.week[k]=0;});
+});
+d.week_start=cm;ch=true;
+}
+if(d.month!==ym()){
+/* Bank current month's office shipped into quarter total BEFORE resetting reps */
+var monthShipped=Object.keys(d.reps).reduce(function(s,id){return s+(d.reps[id].shipped||0);},0);
+d.quarter_shipped=(d.quarter_shipped||0)+monthShipped;
+/* Roll prior month shipped into per-rep YTD baseline, then reset month-scoped fields */
+Object.keys(d.reps).forEach(function(id){
+var rep=d.reps[id];
+rep.ytd=(rep.ytd||0)+(rep.shipped||0);
+rep.mtd_prev=0;rep.mu=0;rep.shipped=0;
+DAYS.forEach(function(k){rep.week[k]=0;});
+});
+d.month=ym();ch=true;
+}
+if(d.quarter!==getQ()){d.quarter_shipped=0;d.quarter=getQ();ch=true;}
+return ch;
+}
+function renderH(data){
+hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
+hdr("hDL",fiscalDL());
+hdr("hDLQ","Q2: "+fiscalQuarterDL()+" days");
+var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762};
 /* Live Q2 progress = banked prior months + current month's shipped across the office */
 var officeShipped=Object.keys(data.reps||{}).reduce(function(s,k){return s+(data.reps[k].shipped||0);},0);
 var qs=(data.quarter_shipped||0)+officeShipped;
@@ -221,7 +323,6 @@ hdr("hPCS",dg>0?"day "+dg+" of "+td:"based on daily avg");
 hdr("hYS",oYTDS>0?"$"+oYTDS.toLocaleString():"--");
 }
 function render(data){
-var rpt=new Set(data.reported_days||[]);
 renderH(data);
 var tk=tKey();
 var hcols=["<th class='hY'>YTD</th>","<th class='hN'>ROSTER</th>"];
@@ -290,10 +391,6 @@ hdr("hU",(ok?"✓ Saved ":"Local ")+(new Date().toLocaleTimeString()));
 }
 gel("mI").addEventListener("keydown",function(e){if(e.key==="Enter")saveM();if(e.key==="Escape")closeM();});
 gel("modal").addEventListener("click",function(e){if(e.target===gel("modal"))closeM();});
-/* Supabase stubs — sbGet/sbSet/rollover not configured in this build */
-if(typeof sbGet==="undefined"){async function sbGet(){return null;}}
-if(typeof sbSet==="undefined"){async function sbSet(d){return false;}}
-if(typeof rollover==="undefined"){function rollover(d){return false;}}
 var rt;
 function startR(){
 clearInterval(rt);
@@ -306,7 +403,7 @@ localStorage.removeItem("dbw_b");
 try{data=await sbGet();}catch(e){}
 if(!data){data=JSON.parse(JSON.stringify(SEED));hdr("hU","Using local data");}
 /* Non-destructive rollover on load */
-try{if(rollover(data))await sbSet(data);}catch(e){}
+if(rollover(data))await sbSet(data);
 /* ensure mu field exists on all reps */
 Object.keys(data.reps).forEach(function(id){if(data.reps[id].mu===undefined)data.reps[id].mu=0;});
 BD=data;
