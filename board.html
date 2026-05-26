@@ -221,6 +221,7 @@ hdr("hPCS",dg>0?"day "+dg+" of "+td:"based on daily avg");
 hdr("hYS",oYTDS>0?"$"+oYTDS.toLocaleString():"--");
 }
 function render(data){
+var rpt=new Set(data.reported_days||[]);
 renderH(data);
 var tk=tKey();
 var hcols=["<th class='hY'>YTD</th>","<th class='hN'>ROSTER</th>"];
