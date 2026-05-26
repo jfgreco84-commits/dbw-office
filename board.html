@@ -289,6 +289,10 @@ hdr("hU",(ok?"✓ Saved ":"Local ")+(new Date().toLocaleTimeString()));
 }
 gel("mI").addEventListener("keydown",function(e){if(e.key==="Enter")saveM();if(e.key==="Escape")closeM();});
 gel("modal").addEventListener("click",function(e){if(e.target===gel("modal"))closeM();});
+/* Supabase stubs — sbGet/sbSet/rollover not configured in this build */
+if(typeof sbGet==="undefined"){async function sbGet(){return null;}}
+if(typeof sbSet==="undefined"){async function sbSet(d){return false;}}
+if(typeof rollover==="undefined"){function rollover(d){return false;}}
 var rt;
 function startR(){
 clearInterval(rt);
@@ -301,7 +305,7 @@ localStorage.removeItem("dbw_b");
 try{data=await sbGet();}catch(e){}
 if(!data){data=JSON.parse(JSON.stringify(SEED));hdr("hU","Using local data");}
 /* Non-destructive rollover on load */
-if(rollover(data))await sbSet(data);
+try{if(rollover(data))await sbSet(data);}catch(e){}
 /* ensure mu field exists on all reps */
 Object.keys(data.reps).forEach(function(id){if(data.reps[id].mu===undefined)data.reps[id].mu=0;});
 BD=data;
