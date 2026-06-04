@@ -35806,6 +35806,28 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
           "cogs_total": 166.0,
           "comm_total": 91.92
         }
+      ],
+      "6-1-2026": [
+        {
+          "invoice": "—",
+          "order": "—",
+          "date": "05/13/2026",
+          "cust_code": "—",
+          "cust_name": "See payroll detail",
+          "notes": ["Ship-sheet detail pending — payroll confirmed $75.03 commission on $1,462.36 sell"],
+          "items": [
+            {
+              "item": "—",
+              "qty": 0,
+              "sell": 1462.36,
+              "cogs": 857.04,
+              "comm": 75.03
+            }
+          ],
+          "sell_total": 1462.36,
+          "cogs_total": 857.04,
+          "comm_total": 75.03
+        }
       ]
     },
     "W930": {
@@ -40372,7 +40394,7 @@ const ytdBonus=D.bonus_ytd&&D.bonus_ytd[repId]!=null?D.bonus_ytd[repId]:null;
 const isGSM=(repId==='W603'||repId==='W784');
 const heroCards=[
   {label:'YTD Net Sales',value:fmt$(netSales),sub:'Gross: '+fmt$(grossSales),cls:'primary'},
-  {label:'Avg M/U',value:mu.toFixed(3),sub:mu>=1.75?'▲ Above bonus threshold':mu>=1.60?'Watch markup trend':'▼ Below target',cls:('primary '+(mu>=1.75?'green':mu>=1.60?'':'red')).trim()},
+  {label:'Avg M/U',value:grossSales===0?'—':mu.toFixed(3),sub:grossSales===0?'No shipments yet':mu>=1.75?'▲ Above bonus threshold':mu>=1.60?'Watch markup trend':'▼ Below target',cls:grossSales===0?'primary':(('primary '+(mu>=1.75?'green':mu>=1.60?'':'red')).trim())},
   {label:'YTD COGS',value:fmt$(cogs),sub:'Cost of goods sold',cls:'secondary'},
   {label:'YTD Returns',value:fmt$(totalRet),sub:'Returns & credits',cls:'secondary red'},
   {label:'YTD Collections',value:fmt$(totCollections),sub:'Collected on old invoices',cls:'secondary red'},
@@ -40592,7 +40614,7 @@ if(repId==='W603'||repId==='W784'){
 
   // ── QUARTERLY OFFICE NETS ────────────────────────────────────────────────────
   let q1Net=0,q2Net=0;
-  D.monthly.forEach(r=>{
+  D.monthly.filter(r=>D.roster[r.rep_id]).forEach(r=>{
     if([1,2,3].includes(r.month))q1Net+=(r.net_sales||0);
     if([4,5,6].includes(r.month))q2Net+=(r.net_sales||0);
   });
