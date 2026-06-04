@@ -293,8 +293,11 @@ return ch;
 }
 function renderH(data){
 hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
-hdr("hDL",fiscalDL());
-hdr("hDLQ","Q2: "+fiscalQuarterDL()+" days");
+var dl=fiscalDL();
+if(typeof dl!=="number"){hdr("hDL","Weekend");hdr("hDLQ","Period ends Fri");hdr("hPC","--");hdr("hPCS","between periods");return;}
+hdr("hDL",dl);
+var qLabel=(currentPeriod()||{q:"?"}).q;
+hdr("hDLQ","Q"+qLabel+": "+fiscalQuarterDL()+" days");
 var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762};
 /* Live Q2 progress = banked prior months + current month's shipped across the office */
 var officeShipped=Object.keys(data.reps||{}).reduce(function(s,k){return s+(data.reps[k].shipped||0);},0);
@@ -313,7 +316,7 @@ return s+(rep.mtd_prev||0)+wk;
 var oMTDS=Object.keys(data.reps).reduce(function(s,id){return s+(data.reps[id].shipped||0);},0);
 var oYTDS=Object.keys(data.reps).reduce(function(s,id){return s+(data.reps[id].ytd||0)+(data.reps[id].shipped||0);},0);
 /* Pace = (MTD Written / business days elapsed) * total business days in period */
-var dl=fiscalDL(),td=fiscalTotalDays(),dg=Math.max(1,td-dl);
+var td=fiscalTotalDays(),dg=Math.max(1,td-dl);
 var pace=oMTDW>0?Math.round(oMTDW/dg*td):0;
 hdr("hOW",oMTDW>0?"$"+oMTDW.toLocaleString():"--");
 hdr("hOS",oMTDS>0?"$"+oMTDS.toLocaleString():"--");
@@ -393,7 +396,7 @@ gel("modal").addEventListener("click",function(e){if(e.target===gel("modal"))clo
 var rt;
 function startR(){
 clearInterval(rt);
-rt=setInterval(async function(){var f=await sbGet();if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);}hdr("hU","↻ "+new Date().toLocaleTimeString());},30000);
+rt=setInterval(async function(){var f=await sbGet();if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);hdr("hU","↻ "+new Date().toLocaleTimeString());}else{hdr("hU","⚠ No data "+new Date().toLocaleTimeString());}},30000);
 }
 async function init(){
 hdr("hU","Loading...");
