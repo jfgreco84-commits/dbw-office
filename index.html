@@ -91,7 +91,7 @@ a.rep-link:hover{text-decoration:underline}
     <tbody id="monthly-office-body"></tbody>
   </table></div>
 
-  <div style="font-size:10px;color:#8892a4;margin-top:6px;padding:0 4px">* <strong style="color:#f5a623">Adj Net Profit</strong> = Net Sales − COGS − Commission − Hourly Pay (W953/W959/W962 @ $15/hr). Source: bi-weekly payroll recaps. May TBD pending 5/15 payday recap.</div>
+  <div style="font-size:10px;color:#8892a4;margin-top:6px;padding:0 4px">* <strong style="color:#f5a623">Adj Net Profit</strong> = Net Sales − COGS − Commission − Hourly Pay (W959/W962 @ $15/hr). Source: bi-weekly payroll recaps.</div>
   <div class="section-title">YTD Leaderboard — Net Sales</div>
   <div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="main" id="leaderboard">
     <thead><tr>
@@ -139,7 +139,7 @@ a.rep-link:hover{text-decoration:underline}
 <div style="text-align:center;padding:24px 0 40px;font-size:11px;color:#3a4255;letter-spacing:1px">DIAMOND BLADE WAREHOUSE &nbsp;·&nbsp; WISCONSIN OFFICE &nbsp;·&nbsp; GSM COMMAND CENTER &nbsp;·&nbsp; 2026</div>
 <script>
 const D={
-  "generated": "Data through June 03, 2026",
+  "generated": "Data through June 04, 2026",
   "roster": {
     "W603": {
       "name": "Adam West",
@@ -5241,6 +5241,7 @@ const D={
       "gross_profit": 4768.5,
       "mu": 1.5863
     },
+    // W953 (Jamel Lee, terminated) — historical data retained for reference, excluded from all displays via D.ranked
     "W953": {
       "sales": 9749.6,
       "cogs": 5430.65,
@@ -5277,6 +5278,7 @@ const D={
       "gross_profit": 36120.65,
       "mu": 1.8306
     },
+    // W963 (Nico Topors, terminated) — historical data retained for reference, excluded from all displays via D.ranked
     "W963": {
       "sales": 21535.93,
       "cogs": 12240.71,
@@ -5316,10 +5318,12 @@ const D={
     "W934": 1150.15,
     "W938": 2459.43,
     "W948": 548.68,
-    "W953": 1738.74,
+    "W953": 1738.74,  // terminated — historical
+
     "W959": 6977.88,
     "W962": 7939.33,
-    "W963": 2377.95,
+    "W963": 2377.95,  // terminated — historical
+
     "W973": 18046.82,
     "W983": 26998.43,
     "W961": 0
@@ -5365,7 +5369,7 @@ const D={
     "W762",
     "W938",
     "W934",
-    "W999"
+    "W948"
   ],
   "rep_apps": [
     "W603",
@@ -5376,11 +5380,11 @@ const D={
     "W930",
     "W934",
     "W938",
+    "W948",
     "W959",
     "W962",
     "W973",
-    "W983",
-    "W999"
+    "W983"
   ],
   "may_mtd": {
     "W603": {
@@ -5428,10 +5432,10 @@ const D={
       "cogs": 1217.5,
       "comm": 261.39
     },
-    "W953": {
-      "sell": 317,
-      "cogs": 166,
-      "comm": 56
+    "W948": {
+      "sell": 0,
+      "cogs": 0,
+      "comm": 0
     },
     "W959": {
       "sell": 240.0,
@@ -5443,11 +5447,6 @@ const D={
       "cogs": 312.0,
       "comm": 25.5
     },
-    "W963": {
-      "sell": 4348,
-      "cogs": 1486,
-      "comm": 1169
-    },
     "W973": {
       "sell": 2712.0,
       "cogs": 1356.0,
@@ -5457,6 +5456,11 @@ const D={
       "sell": 779.94,
       "cogs": 345.0,
       "comm": 146.31
+    },
+    "W999": {
+      "sell": 0,
+      "cogs": 0,
+      "comm": 0
     }
   },
   "may_day": 22,
@@ -5481,6 +5485,11 @@ const D={
     "April"
   ]
 };;;;;;;;;;;
+// RENDER EXCLUSION NOTE: Terminated/inactive reps (W953, W963 terminated; W961 inactive)
+// are excluded from leaderboard and accordions solely by being absent from D.ranked.
+// The terminated/inactive flags in D.roster are NOT checked by render code (except monthly
+// office summary and qTotals, which filter them explicitly). This is intentional design.
+// W784 (GSM, Justin Greco) is in D.ranked but intentionally absent from D.rep_apps (no public rep page).
 function fmt$(n){return n==null||isNaN(n)?'—':'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function muClass(mu){return mu>=1.8?'mu-hi':mu>=1.6?'mu-mid':'mu-lo'}
 
@@ -5518,20 +5527,22 @@ const mt={};
 D.months.forEach(m=>{mt[m]={gross:0,ret:0,coll:0,net:0,cogs:0,mu_n:0,mu_d:0};});
 D.monthly.forEach(r=>{
   if(!mt[r.month])return;
+  // Skip terminated/inactive reps from office monthly summary
+  if(D.roster[r.rep_id]&&(D.roster[r.rep_id].terminated||D.roster[r.rep_id].inactive))return;
   const x=mt[r.month];
   x.gross+=(r.sales||0);x.ret+=(r.returns||0);x.coll+=(r.collections||0);
   x.net+=(r.net_sales||0);x.cogs+=(r.cogs||0);
   if(r.cogs>0){x.mu_n+=(r.net_sales||0);x.mu_d+=r.cogs;}
 });
-// Payroll costs by month (commission + hourly guarantee for W953/W959/W962)
+// Payroll costs by month (commission + hourly guarantee for W959/W962)
 // Source: bi-weekly payroll recaps, assigned by pay-period-end date
-// May = 0 because next recap covers through ~5/12 (payday ~5/15)
+// May: sum of grand_total for paydays 5-1-2026, 5-15-2026, and 6-1-2026 (see D.payroll)
 const PAYROLL_COST={
   1:18567.64,  // Jan: comm $13,374 + hrly $5,194 (2 periods)
   2:25022.99,  // Feb: comm $20,073 + hrly $4,950 (2 periods)
   3:41212.79,  // Mar: comm $34,170 + hrly $7,043 (3 periods: PPE 3/3,3/17,3/31)
   4:15917.44,  // Apr: comm $11,076 + hrly $4,841 (2 periods: PPE 4/14,4/28)
-  5:0          // May: payroll TBD — next recap payday ~5/15
+  5:50711.62   // May: grand_total sum of paydays 5-1-2026 + 5-15-2026 + 6-1-2026
 };
 let moHtml='';
 D.months.forEach(m=>{
@@ -5569,7 +5580,7 @@ moHtml+=`<tr class="total-tr">
   <td>${fmt$(tNet)}</td>
   <td>${fmt$(tCogs)}</td>
   <td style="color:#4caf7d">${fmt$(tNet-tCogs)}</td>
-  <td style="color:#f5a623;font-weight:900">${fmt$(tAdjNP)}<span style="font-size:10px;color:#8892a4"> +May</span></td>
+  <td style="color:#f5a623;font-weight:900">${fmt$(tAdjNP)}</td>
   <td><span class="mu-chip ${muClass(tMU)}">${tMU.toFixed(3)}</span></td>
 </tr>`;
 document.getElementById('monthly-office-body').innerHTML=moHtml;
@@ -5580,7 +5591,7 @@ D.monthly.forEach(r=>{collByRep[r.rep_id]=(collByRep[r.rep_id]||0)+(r.collection
 let profHtml='';
 let ptGross=0,ptCogs=0,ptComm=0,ptBonus=0;
 D.ranked.forEach(rid=>{
-  const r=D.roster[rid];
+  const r=D.roster[rid]||{name:rid,nick:'',scale:'new_guy'};
   const y=D.ytd[rid]||{};
   const comm=D.comm_ytd[rid]||0;
   const bonus=D.bonus_ytd&&D.bonus_ytd[rid]!=null?D.bonus_ytd[rid]:null;
@@ -5647,8 +5658,9 @@ D.monthly.forEach(r=>{monthCollByRep[r.rep_id]=(monthCollByRep[r.rep_id]||0)+(r.
 let lbHtml='';
 D.ranked.forEach((rid,i)=>{
   const y=D.ytd[rid]||{};
-  const r=D.roster[rid];
+  const r=D.roster[rid]||{name:rid,nick:'',scale:'new_guy'};
   const comm=D.comm_ytd[rid]||0;
+  const hasYtd=D.ytd.hasOwnProperty(rid);
   const mu=y.mu||0;
   const np=(y.sales||0)-(y.cogs||0)-comm;
   const coll=monthCollByRep[rid]||0;
@@ -5660,7 +5672,7 @@ D.ranked.forEach((rid,i)=>{
     <td style="color:#4caf7d">${fmt$(np)}</td>
     <td style="color:#e05555">${y.returns?fmt$(y.returns):'—'}</td>
     <td style="color:#4a9eff">${coll?fmt$(coll):'—'}</td>
-    <td><span class="mu-chip ${muClass(mu)}">${mu.toFixed(3)}</span></td>
+    <td>${hasYtd?`<span class="mu-chip ${muClass(mu)}">${mu.toFixed(3)}</span>`:`<span style="color:#5a6375">—</span>`}</td>
     <td>${fmt$(comm)}</td>
   </tr>`;
 });
@@ -5673,7 +5685,7 @@ const moByRep={};
 D.monthly.forEach(mr=>{if(!moByRep[mr.rep_id])moByRep[mr.rep_id]=[];moByRep[mr.rep_id].push(mr);});
 let repHtml='';
 D.ranked.forEach((rid,i)=>{
-  const r=D.roster[rid];
+  const r=D.roster[rid]||{name:rid,nick:'',scale:'new_guy'};
   const y=D.ytd[rid]||{};
   const comm=D.comm_ytd[rid]||0;
   const months=moByRep[rid]||[];
@@ -5722,7 +5734,7 @@ D.ranked.forEach((rid,i)=>{
         <div class="stat-box"><div class="sl">Net Sales</div><div class="sv" style="color:#f5a623">${fmt$(y.net_sales)}</div></div>
         <div class="stat-box"><div class="sl">Net Profit</div><div class="sv" style="color:#4caf7d">${fmt$(np)}</div></div>
         <div class="stat-box"><div class="sl">Commission YTD</div><div class="sv" style="color:#4caf7d">${fmt$(comm)}</div></div>
-        <div class="stat-box"><div class="sl">Avg M/U</div><div class="sv" style="color:#${(y.mu||0)>=1.8?'4caf7d':(y.mu||0)>=1.6?'f5a623':'e05555'}">${(y.mu||0).toFixed(3)}</div></div>
+        <div class="stat-box"><div class="sl">Avg M/U</div><div class="sv" style="color:#${(y.mu||0)>=1.8?'4caf7d':(y.mu||0)>=1.6?'f5a623':'e05555'}">${D.ytd.hasOwnProperty(rid)?(y.mu||0).toFixed(3):'—'}</div></div>
         <div class="stat-box"><div class="sl">Gross Sales</div><div class="sv">${fmt$(y.sales)}</div></div>
         <div class="stat-box"><div class="sl">Returns</div><div class="sv" style="color:#e05555">${(y.returns||0)?fmt$(y.returns):'—'}</div></div>
         <div class="stat-box"><div class="sl">Collections</div><div class="sv" style="color:#4a9eff">${coll?fmt$(coll):'—'}</div></div>
@@ -5745,10 +5757,10 @@ document.getElementById('rep-list').innerHTML=repHtml;
 const GOAL_LOW  = 1250000;
 const GOAL_HIGH = 1500000;
 
-// Compute Q totals from monthly data (exclude W961)
+// Compute Q totals from monthly data (exclude inactive/terminated: W961, W953, W963)
 const qTotals = {};
 D.monthly.forEach(r=>{
-  if(r.rep_id==='W961') return;
+  if(r.rep_id==='W961'||r.rep_id==='W953'||r.rep_id==='W963') return;
   const q = r.month<=3 ? 1 : r.month<=6 ? 2 : r.month<=9 ? 3 : 4;
   if(!qTotals[q]) qTotals[q]={net:0,gross:0,cogs:0,months:[]};
   qTotals[q].net   += (r.net_sales||0);
