@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- PUSH: 2026-06-08 FIXES: header-stats,pct-goal,ytd-colors,juneteenth,timestamp -->
+<!-- PUSH: 2026-06-08b FIXES: dayscount-20,no-juneteenth,remove-nicoT-jamelL,blank-not-zero,pct-goal-MTD,ytd-pace-color,timezone-fix -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>DBW WI - Live Sales Board</title>
@@ -199,7 +199,7 @@ W934:{name:"LESLIE KUBENY ", ytd:8170 , goal:15000 , shipped:1373 , mu:0, mtd_pr
 W953:{name:"JAMEL LEE ", ytd:9184 , goal:20000 , shipped:317 , mu:2.33, mtd_prev:316 , week:{mon:0 ,tue:0 ,wed:0 ,thu:0 ,fri:0}}
 }
 } // __DBW_SEED_END__ // __DBW_SEED_END__;
-var rpt=new Set(SEED.reported_days||[]); // days where at least 1 rep has a value (show $0 not -)
+var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
 var BD=null,EC=null;
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
 function tKey(){return{1:"mon",2:"tue",3:"wed",4:"thu",5:"fri"}[new Date().getDay()]||null;}
@@ -213,7 +213,7 @@ var FISCAL=[
 {q:1,s:"2026-03-02",e:"2026-04-03",h:[]},
 {q:1,s:"2026-04-06",e:"2026-05-01",h:[]},
 {q:2,s:"2026-05-04",e:"2026-06-05",h:["2026-05-25"]},
-{q:2,s:"2026-06-08",e:"2026-07-03",h:["2026-06-19"]},
+{q:2,s:"2026-06-08",e:"2026-07-03",h:[]},
 {q:2,s:"2026-07-06",e:"2026-07-31",h:[]},
 {q:3,s:"2026-08-03",e:"2026-09-04",h:["2026-09-07"]},
 {q:3,s:"2026-09-07",e:"2026-10-02",h:[]},
@@ -222,10 +222,11 @@ var FISCAL=[
 {q:4,s:"2026-12-07",e:"2026-12-31",h:["2026-12-25"]}
 ];
 function currentPeriod(){
-var t=new Date();t.setHours(0,0,0,0);
+var n=new Date(),d=n.getFullYear()*10000+(n.getMonth()+1)*100+n.getDate();
 for(var i=0;i<FISCAL.length;i++){
-var s=new Date(FISCAL[i].s+"T12:00:00"),e=new Date(FISCAL[i].e+"T12:00:00");
-if(t>=s&&t<=e)return FISCAL[i];
+var sp=FISCAL[i].s.split("-"),ep=FISCAL[i].e.split("-");
+var s=(+sp[0])*10000+(+sp[1])*100+(+sp[2]),e=(+ep[0])*10000+(+ep[1])*100+(+ep[2]);
+if(d>=s&&d<=e)return FISCAL[i];
 }return null;
 }
 function bdaysIn(start,end,holidays){
@@ -264,15 +265,19 @@ return bdaysIn(s,e,p.h||[]);
 }
 function yearFraction(){
 /* Fraction of full 2026 fiscal year elapsed as of today (0-1).
-   Used to compute YTD pace targets for color-coding. */
-var today=new Date();today.setHours(0,0,0,0);
+   Uses YYYYMMDD integer comparison to avoid midnight-vs-noon timezone bug. */
+var n=new Date(),yr=n.getFullYear(),mo=n.getMonth()+1,da=n.getDate();
+var d=yr*10000+mo*100+da;
 var total=0,elapsed=0;
 for(var i=0;i<FISCAL.length;i++){
-var p=FISCAL[i],ps=new Date(p.s+"T12:00:00"),pe=new Date(p.e+"T12:00:00");
+var p=FISCAL[i];
+var sp=p.s.split("-"),ep=p.e.split("-");
+var sn=(+sp[0])*10000+(+sp[1])*100+(+sp[2]),en=(+ep[0])*10000+(+ep[1])*100+(+ep[2]);
+var ps=new Date(p.s+"T00:00:00"),pe=new Date(p.e+"T00:00:00");
 var pd=bdaysIn(ps,pe,p.h||[]);
 total+=pd;
-if(today>pe){elapsed+=pd;}
-else if(today>=ps){elapsed+=bdaysIn(ps,today,p.h||[]);}
+if(d>en){elapsed+=pd;}
+else if(d>=sn){var td=new Date(yr,mo-1,da);elapsed+=bdaysIn(ps,td,p.h||[]);}
 }
 return total>0?elapsed/total:0;
 }
@@ -323,7 +328,7 @@ hdr("hDL",fiscalDL());
 hdr("hDLQ","Q2: "+fiscalQuarterDL()+" days");
 var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762};
 /* Live Q2 progress = banked prior months + current month's shipped across the office */
-var officeShipped=Object.keys(data.reps||{}).reduce(function(s,k){return s+(data.reps[k].shipped||0);},0);
+var officeShipped=Object.keys(data.reps||{}).reduce(function(s,k){return HIDDEN_REPS[k]?s:s+(data.reps[k].shipped||0);},0);
 var qs=(data.quarter_shipped||0)+officeShipped;
 hdr("hMU",(mgr.mtd_mu||0)>0?mgr.mtd_mu.toFixed(2)+"x":"--");
 hdr("hYMU",(mgr.ytd_mu||0)>0?mgr.ytd_mu.toFixed(2)+"x":"--");
@@ -332,12 +337,13 @@ hdr("hLG",lg>0?"$"+lg.toLocaleString():"HIT!");hdr("hLT","target $"+mgr.low_targ
 hdr("hHG",hg>0?"$"+hg.toLocaleString():"HIT!");hdr("hHT","target $"+mgr.high_target.toLocaleString());
 /* ---- OFFICE TOTALS ROW ---- */
 var oMTDW=Object.keys(data.reps).reduce(function(s,id){
+if(HIDDEN_REPS[id])return s;
 var rep=data.reps[id];
 var wk=DAYS.reduce(function(ws,k){return ws+(rep.week[k]||0);},0);
 return s+(rep.mtd_prev||0)+wk;
 },0);
-var oMTDS=Object.keys(data.reps).reduce(function(s,id){return s+(data.reps[id].shipped||0);},0);
-var oYTDS=Object.keys(data.reps).reduce(function(s,id){return s+(data.reps[id].ytd||0)+(data.reps[id].shipped||0);},0);
+var oMTDS=Object.keys(data.reps).reduce(function(s,id){return HIDDEN_REPS[id]?s:s+(data.reps[id].shipped||0);},0);
+var oYTDS=Object.keys(data.reps).reduce(function(s,id){return HIDDEN_REPS[id]?s:s+(data.reps[id].ytd||0)+(data.reps[id].shipped||0);},0);
 /* Pace = (MTD Written / business days elapsed) * total business days in period */
 var dl=fiscalDL(),td=fiscalTotalDays(),dg=Math.max(1,td-dl);
 var pace=oMTDW>0?Math.round(oMTDW/dg*td):0;
@@ -348,13 +354,19 @@ hdr("hPCS",dg>0?"day "+dg+" of "+td:"(no data yet)");
 hdr("hYS","$"+oYTDS.toLocaleString());
 }
 function render(data){
+/* Compute reported days from actual live data (not stale SEED.reported_days) */
+var rpt=new Set();
+Object.keys(data.reps).forEach(function(id){
+if(HIDDEN_REPS[id])return;
+DAYS.forEach(function(k){if((data.reps[id].week[k]||0)>0)rpt.add(k);});
+});
 renderH(data);
 var tk=tKey();
 var hcols=["<th class='hY'>YTD</th>","<th class='hN'>ROSTER</th>"];
 DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" &#9670;":"")+"</th>");});
 hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hMU'>M/U</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
 gel("thr").innerHTML=hcols.join("");
-var ids=Object.keys(data.reps).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
+var ids=Object.keys(data.reps).filter(function(id){return !HIDDEN_REPS[id];}).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
 var oW=0,oM=0,oS=0,dt=DAYS.map(function(){return 0;}),rows=[];
 var yf=yearFraction(); /* fraction of full year elapsed — used for YTD pace coloring */
 ids.forEach(function(id,rank){
@@ -362,12 +374,14 @@ var rep=data.reps[id];
 var wk=DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0);
 var mtd=(rep.mtd_prev||0)+wk;
 var mu=rep.mu||0;
-/* % GOAL: compare YTD shipped vs annual goal (not MTD written) */
 var ytdTotal=(rep.ytd||0)+(rep.shipped||0);
-var goal=rep.goal||0,pct=goal>0?Math.min(199,Math.round(ytdTotal/goal*100)):0,hit=ytdTotal>=goal;
-/* YTD column color: green=on pace, yellow=within 15% behind, red=>15% behind */
-var ytdExp=goal>0?Math.round(goal*yf):0;
-var ytdCls=goal===0?"":ytdTotal>=ytdExp?"ytd-g":ytdTotal>=ytdExp*0.85?"ytd-y":"ytd-r";
+var goal=rep.goal||0;
+/* % GOAL: MTD written vs monthly goal */
+var pct=goal>0?Math.min(199,Math.round(mtd/goal*100)):0,hit=mtd>=goal;
+/* YTD color: annual equiv = monthly goal * 12 vs pace */
+var annualGoal=goal*12;
+var ytdExp=annualGoal>0?Math.round(annualGoal*yf):0;
+var ytdCls=annualGoal===0?"":ytdTotal>=ytdExp?"ytd-g":ytdTotal>=ytdExp*0.85?"ytd-y":"ytd-r";
 DAYS.forEach(function(k,i){dt[i]+=(rep.week[k]||0);});
 oW+=wk;oM+=mtd;oS+=(rep.shipped||0);
 var rk=rank===0?"r1":rank===1?"r2":rank===2?"r3":"";
