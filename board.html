@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- PUSH: 2026-05-21 14:17 DATA-THRU: 2026-05-20 Wed -->
+<!-- PUSH: 2026-06-08 FIXES: header-stats,pct-goal,ytd-colors,juneteenth,timestamp -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>DBW WI - Live Sales Board</title>
@@ -130,6 +130,10 @@ transition:border-color .15s,box-shadow .15s;
 .bc:hover{color:#888;border-color:#444;}
 .mn{font-size:clamp(10px,1vw,20px);color:#333;margin-top:clamp(10px,1.2vw,22px);}
 .hint{text-align:center;font-size:clamp(8px,.6vw,14px);color:#1f1f2f;padding:1px 0 3px;letter-spacing:.3px;}
+/* ---- YTD PACE COLORS ---- */
+.ytd-g{color:#00ff44!important;text-shadow:0 0 10px rgba(0,255,68,.3);}
+.ytd-y{color:#dddd00!important;text-shadow:0 0 8px rgba(221,221,0,.3);}
+.ytd-r{color:#ff4444!important;text-shadow:0 0 8px rgba(255,68,68,.3);}
 </style>
 </head>
 <body>
@@ -175,25 +179,26 @@ transition:border-color .15s,box-shadow .15s;
 var _k=atob("c2Jfc2VjcmV0X1JUdDJxVEszSjF6RzZTZVhCQVFyd0Ffa1RFUkpGal8=");
 var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-87225ea4909d",DK="boardData";
 var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
-var SEED={week_start:"2026-06-08",month:"2026-06",quarter:"2026-Q2",quarter_shipped:355739,reported_days:[],
-  mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.7486,ytd_mu:1.762},
-  reps:{
-    W839:{name:"RONNY B       ", ytd:281030 , goal:150000 , shipped:0     , mu:1.7386, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W930:{name:"ADAM MISUREK  ", ytd:257311 , goal:175000 , shipped:0     , mu:2.0029, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W603:{name:"ADAM WEST     ", ytd:249321 , goal:125000 , shipped:0     , mu:1.6389, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W983:{name:"SCOT TOPORSH  ", ytd:246859 , goal:100000 , shipped:0     , mu:1.7118, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W784:{name:"FROGGY        ", ytd:227621 , goal:75000  , shipped:0     , mu:1.7063, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W973:{name:"TJ SUTTON     ", ytd:79606  , goal:75000  , shipped:0     , mu:1.9074, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W849:{name:"JOHN BAEMMERT ", ytd:67579  , goal:60000  , shipped:0     , mu:1.8227, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W962:{name:"CHRIS K       ", ytd:66197  , goal:30000  , shipped:0     , mu:1.8306, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W909:{name:"LUIS MILLAN   ", ytd:31265  , goal:20000  , shipped:0     , mu:1.5658, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W959:{name:"CASSIE        ", ytd:30132  , goal:20000  , shipped:0     , mu:1.7211, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W762:{name:"KERRY SMITH   ", ytd:21267  , goal:40000  , shipped:0     , mu:1.8493, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W938:{name:"GEOFF NURSE   ", ytd:13126  , goal:15000  , shipped:0     , mu:1.7832, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W934:{name:"LESLIE KUBENY ", ytd:8170   , goal:10000  , shipped:0     , mu:1.4618, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W999:{name:"JAMES B       ", ytd:0      , goal:10000  , shipped:0     , mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}}
-  }
-} // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
+var SEED={week_start:"2026-05-18",month:"2026-05",quarter:"2026-Q2",quarter_shipped:322806,reported_days:["mon","tue","wed"],
+mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762},
+reps:{
+W930:{name:"ADAM MISUREK ", ytd:257311 , goal:180000 , shipped:98663 , mu:2.04, mtd_prev:99088 , week:{mon:0 ,tue:10178 ,wed:4550 ,thu:0 ,fri:0}},
+W839:{name:"RONNY B ", ytd:281030 , goal:180000 , shipped:5075 , mu:2.41, mtd_prev:2026 , week:{mon:2890 ,tue:0 ,wed:0 ,thu:0 ,fri:0}},
+W983:{name:"SCOT TOPORSH ", ytd:246859 , goal:110000 , shipped:26401 , mu:2.16, mtd_prev:26209 , week:{mon:1743 ,tue:1473 ,wed:1125 ,thu:0 ,fri:0}},
+W603:{name:"ADAM WEST ", ytd:249321 , goal:110000 , shipped:21880 , mu:1.81, mtd_prev:14317 , week:{mon:5947 ,tue:1616 ,wed:147 ,thu:0 ,fri:0}},
+W784:{name:"FROGGY ", ytd:227621 , goal:110000 , shipped:28835 , mu:1.68, mtd_prev:26956 , week:{mon:3291 ,tue:518 ,wed:0 ,thu:0 ,fri:0}},
+W973:{name:"TJ SUTTON ", ytd:79606 , goal:60000 , shipped:32154 , mu:1.48, mtd_prev:31710 , week:{mon:1743 ,tue:5220 ,wed:0 ,thu:0 ,fri:0}},
+W962:{name:"CHRIS K ", ytd:66197 , goal:25000 , shipped:14745 , mu:1.99, mtd_prev:15744 , week:{mon:0 ,tue:0 ,wed:0 ,thu:0 ,fri:0}},
+W849:{name:"JOHN BAEMMERT ", ytd:67579 , goal:60000 , shipped:13012 , mu:2.0, mtd_prev:12493 , week:{mon:200 ,tue:300 ,wed:459 ,thu:0 ,fri:0}},
+W959:{name:"CASSIE ", ytd:30132 , goal:20000 , shipped:10456 , mu:1.72, mtd_prev:6671 , week:{mon:3785 ,tue:0 ,wed:600 ,thu:0 ,fri:0}},
+W909:{name:"LUIS MILLAN ", ytd:31265 , goal:20000 , shipped:8198 , mu:1.35, mtd_prev:8348 , week:{mon:0 ,tue:0 ,wed:0 ,thu:0 ,fri:0}},
+W762:{name:"KERRY SMITH ", ytd:21267 , goal:20000 , shipped:9770 , mu:1.73, mtd_prev:9069 , week:{mon:701 ,tue:0 ,wed:0 ,thu:0 ,fri:0}},
+W963:{name:"NICO T ", ytd:17684 , goal:20000 , shipped:4548 , mu:3.0, mtd_prev:4348 , week:{mon:200 ,tue:0 ,wed:0 ,thu:0 ,fri:0}},
+W938:{name:"GEOFF NURSE ", ytd:13126 , goal:20000 , shipped:710 , mu:1.98, mtd_prev:170 , week:{mon:0 ,tue:0 ,wed:0 ,thu:0 ,fri:0}},
+W934:{name:"LESLIE KUBENY ", ytd:8170 , goal:15000 , shipped:1373 , mu:0, mtd_prev:0 , week:{mon:0 ,tue:0 ,wed:0 ,thu:0 ,fri:0}},
+W953:{name:"JAMEL LEE ", ytd:9184 , goal:20000 , shipped:317 , mu:2.33, mtd_prev:316 , week:{mon:0 ,tue:0 ,wed:0 ,thu:0 ,fri:0}}
+}
+} // __DBW_SEED_END__ // __DBW_SEED_END__;
 var rpt=new Set(SEED.reported_days||[]); // days where at least 1 rep has a value (show $0 not -)
 var BD=null,EC=null;
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
@@ -208,7 +213,7 @@ var FISCAL=[
 {q:1,s:"2026-03-02",e:"2026-04-03",h:[]},
 {q:1,s:"2026-04-06",e:"2026-05-01",h:[]},
 {q:2,s:"2026-05-04",e:"2026-06-05",h:["2026-05-25"]},
-{q:2,s:"2026-06-08",e:"2026-07-03",h:[]},
+{q:2,s:"2026-06-08",e:"2026-07-03",h:["2026-06-19"]},
 {q:2,s:"2026-07-06",e:"2026-07-31",h:[]},
 {q:3,s:"2026-08-03",e:"2026-09-04",h:["2026-09-07"]},
 {q:3,s:"2026-09-07",e:"2026-10-02",h:[]},
@@ -257,6 +262,27 @@ var p=currentPeriod();if(!p)return 0;
 var s=new Date(p.s+"T12:00:00"),e=new Date(p.e+"T12:00:00");
 return bdaysIn(s,e,p.h||[]);
 }
+function yearFraction(){
+/* Fraction of full 2026 fiscal year elapsed as of today (0-1).
+   Used to compute YTD pace targets for color-coding. */
+var today=new Date();today.setHours(0,0,0,0);
+var total=0,elapsed=0;
+for(var i=0;i<FISCAL.length;i++){
+var p=FISCAL[i],ps=new Date(p.s+"T12:00:00"),pe=new Date(p.e+"T12:00:00");
+var pd=bdaysIn(ps,pe,p.h||[]);
+total+=pd;
+if(today>pe){elapsed+=pd;}
+else if(today>=ps){elapsed+=bdaysIn(ps,today,p.h||[]);}
+}
+return total>0?elapsed/total:0;
+}
+function fSync(){
+/* "Last synced: MM/DD H:MM AM/PM CT" for the status bar */
+var d=new Date();
+var mo=String(d.getMonth()+1).padStart(2,"0"),dy=String(d.getDate()).padStart(2,"0");
+var h=d.getHours(),mn=String(d.getMinutes()).padStart(2,"0");
+return"Last synced: "+mo+"/"+dy+" "+(h%12||12)+":"+mn+" "+(h>=12?"PM":"AM")+" CT";
+}
 function hdr(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
 function gel(id){return document.getElementById(id);}
 async function sbGet(){
@@ -293,11 +319,8 @@ return ch;
 }
 function renderH(data){
 hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
-var dl=fiscalDL();
-if(typeof dl!=="number"){hdr("hDL","Weekend");hdr("hDLQ","Period ends Fri");hdr("hPC","--");hdr("hPCS","between periods");return;}
-hdr("hDL",dl);
-var qLabel=(currentPeriod()||{q:"?"}).q;
-hdr("hDLQ","Q"+qLabel+": "+fiscalQuarterDL()+" days");
+hdr("hDL",fiscalDL());
+hdr("hDLQ","Q2: "+fiscalQuarterDL()+" days");
 var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762};
 /* Live Q2 progress = banked prior months + current month's shipped across the office */
 var officeShipped=Object.keys(data.reps||{}).reduce(function(s,k){return s+(data.reps[k].shipped||0);},0);
@@ -316,13 +339,13 @@ return s+(rep.mtd_prev||0)+wk;
 var oMTDS=Object.keys(data.reps).reduce(function(s,id){return s+(data.reps[id].shipped||0);},0);
 var oYTDS=Object.keys(data.reps).reduce(function(s,id){return s+(data.reps[id].ytd||0)+(data.reps[id].shipped||0);},0);
 /* Pace = (MTD Written / business days elapsed) * total business days in period */
-var td=fiscalTotalDays(),dg=Math.max(1,td-dl);
+var dl=fiscalDL(),td=fiscalTotalDays(),dg=Math.max(1,td-dl);
 var pace=oMTDW>0?Math.round(oMTDW/dg*td):0;
-hdr("hOW",oMTDW>0?"$"+oMTDW.toLocaleString():"--");
-hdr("hOS",oMTDS>0?"$"+oMTDS.toLocaleString():"--");
-hdr("hPC",pace>0?"$"+pace.toLocaleString():"--");
-hdr("hPCS",dg>0?"day "+dg+" of "+td:"based on daily avg");
-hdr("hYS",oYTDS>0?"$"+oYTDS.toLocaleString():"--");
+hdr("hOW","$"+oMTDW.toLocaleString());
+hdr("hOS","$"+oMTDS.toLocaleString());
+hdr("hPC",oMTDW>0?"$"+pace.toLocaleString():"--");
+hdr("hPCS",dg>0?"day "+dg+" of "+td:"(no data yet)");
+hdr("hYS","$"+oYTDS.toLocaleString());
 }
 function render(data){
 renderH(data);
@@ -333,12 +356,18 @@ hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th clas
 gel("thr").innerHTML=hcols.join("");
 var ids=Object.keys(data.reps).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
 var oW=0,oM=0,oS=0,dt=DAYS.map(function(){return 0;}),rows=[];
+var yf=yearFraction(); /* fraction of full year elapsed — used for YTD pace coloring */
 ids.forEach(function(id,rank){
 var rep=data.reps[id];
 var wk=DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0);
 var mtd=(rep.mtd_prev||0)+wk;
 var mu=rep.mu||0;
-var goal=rep.goal||0,pct=goal>0?Math.min(199,Math.round(mtd/goal*100)):0,hit=mtd>=goal;
+/* % GOAL: compare YTD shipped vs annual goal (not MTD written) */
+var ytdTotal=(rep.ytd||0)+(rep.shipped||0);
+var goal=rep.goal||0,pct=goal>0?Math.min(199,Math.round(ytdTotal/goal*100)):0,hit=ytdTotal>=goal;
+/* YTD column color: green=on pace, yellow=within 15% behind, red=>15% behind */
+var ytdExp=goal>0?Math.round(goal*yf):0;
+var ytdCls=goal===0?"":ytdTotal>=ytdExp?"ytd-g":ytdTotal>=ytdExp*0.85?"ytd-y":"ytd-r";
 DAYS.forEach(function(k,i){dt[i]+=(rep.week[k]||0);});
 oW+=wk;oM+=mtd;oS+=(rep.shipped||0);
 var rk=rank===0?"r1":rank===1?"r2":rank===2?"r3":"";
@@ -351,7 +380,7 @@ return"<td class='cD"+(iT?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>" +
 var muH=mu>0?"<span class='"+(mu>=2?"hot":"")+"'>"+mu.toFixed(2)+"x</span>":"<span class='de'>&mdash;</span>";
 var bc=hit?"#00ff44":pct>75?"#ffaa00":"#cc88ff";
 var pc="<td class='cP'><div class='pb'><span class='pn"+(hit?" done":"")+"'>"+pct+"%</span><div class='pbb'><div class='pbf' style='width:"+Math.min(100,pct)+"%;background:"+bc+";'></div></div></div></td>";
-rows.push("<tr class='"+rk+"'><td class='cY'>"+fK((rep.ytd||0)+(rep.shipped||0))+"</td><td class='cN'>"+med+rep.name+"</td>"+dc+
+rows.push("<tr class='"+rk+"'><td class='cY"+(ytdCls?" "+ytdCls:"")+"'>"+fK(ytdTotal)+"</td><td class='cN'>"+med+rep.name+"</td>"+dc+
 "<td class='cW'>"+(wk>0?"$"+wk.toLocaleString():"&mdash;")+"</td>"+
 "<td class='cM"+(hit?" gh":"")+"'>"+(mtd>0?"$"+mtd.toLocaleString():"&mdash;")+"</td>"+
 "<td class='cS' onclick='openS(\""+id+"\")'>"+(rep.shipped>0?"$"+rep.shipped.toLocaleString():"&mdash;")+"</td>"+
@@ -360,7 +389,7 @@ rows.push("<tr class='"+rk+"'><td class='cY'>"+fK((rep.ytd||0)+(rep.shipped||0))
 });
 var totD=DAYS.map(function(k,i){var v=dt[i];return"<td class='cD"+(tk===k?" tc":"")+"'>"+(v>0?"$"+v.toLocaleString():rpt.has(k)?"$0":"&mdash;")+"</td>";}).join("");
 var omg=data.mgr&&data.mgr.mtd_mu>0?data.mgr.mtd_mu.toFixed(2)+"x":"&mdash;";
-rows.push("<tr class='tot'><td class='cY'></td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"&mdash;")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"&mdash;")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"&mdash;")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cG'></td><td class='cP'></td></tr>");
+rows.push("<tr class='tot'><td class='cY'></td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"$0")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"$0")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"$0")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cG'></td><td class='cP'></td></tr>");
 gel("tbod").innerHTML=rows.join("");
 }
 function icoFor(t){return t==="day"?"📝":t==="ship"?"📦":t==="mu"?"📊":"⬇️";}
@@ -389,14 +418,14 @@ else rep.shipped=val;
 closeM();render(BD);
 hdr("hU","Saving...");
 var ok=await sbSet(BD);
-hdr("hU",(ok?"✓ Saved ":"Local ")+(new Date().toLocaleTimeString()));
+hdr("hU",(ok?"✓ Saved — ":"Local — ")+fSync());
 }
 gel("mI").addEventListener("keydown",function(e){if(e.key==="Enter")saveM();if(e.key==="Escape")closeM();});
 gel("modal").addEventListener("click",function(e){if(e.target===gel("modal"))closeM();});
 var rt;
 function startR(){
 clearInterval(rt);
-rt=setInterval(async function(){var f=await sbGet();if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);hdr("hU","↻ "+new Date().toLocaleTimeString());}else{hdr("hU","⚠ No data "+new Date().toLocaleTimeString());}},30000);
+rt=setInterval(async function(){var f=await sbGet();if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);}hdr("hU",fSync());},30000);
 }
 async function init(){
 hdr("hU","Loading...");
@@ -411,7 +440,7 @@ Object.keys(data.reps).forEach(function(id){if(data.reps[id].mu===undefined)data
 BD=data;
 try{render(BD);}catch(e){hdr("hU","Render error: "+e.message);console.error(e);return;}
 startR();
-hdr("hU","✓ Live "+new Date().toLocaleTimeString());
+hdr("hU",fSync());
 }
 init();
 </script>
