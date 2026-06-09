@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- PUSH: 2026-06-08b FIXES: dayscount-20,no-juneteenth,remove-nicoT-jamelL,blank-not-zero,pct-goal-MTD,ytd-pace-color,timezone-fix -->
+<!-- PUSH: 2026-06-09 FIXES: ytd-column-always-green -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>DBW WI - Live Sales Board</title>
@@ -380,7 +380,7 @@ var pct=goal>0?Math.min(199,Math.round(mtd/goal*100)):0,hit=mtd>=goal;
 /* YTD color: annual equiv = monthly goal * 12 vs pace */
 var annualGoal=goal*12;
 var ytdExp=annualGoal>0?Math.round(annualGoal*yf):0;
-var ytdCls=annualGoal===0?"":ytdTotal>=ytdExp?"ytd-g":ytdTotal>=ytdExp*0.85?"ytd-y":"ytd-r";
+var ytdCls="ytd-g"; /* YTD column always green per user request (no pace red/yellow) */
 DAYS.forEach(function(k,i){dt[i]+=(rep.week[k]||0);});
 oW+=wk;oM+=mtd;oS+=(rep.shipped||0);
 var rk=rank===0?"r1":rank===1?"r2":rank===2?"r3":"";
