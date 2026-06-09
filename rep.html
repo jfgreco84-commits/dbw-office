@@ -39191,6 +39191,9 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
 </script>
 <script>
 const D=JSON.parse(document.getElementById('__dbw').textContent);
+/* AUDIT FIX 2026-06-09: keep D.ranked ordered by net sales so the GSM office table & any
+   ranking reflect current numbers (the stored order was frozen from an older snapshot). */
+try{D.ranked.sort((a,b)=>(((D.ytd[b]||{}).net_sales)||0)-(((D.ytd[a]||{}).net_sales)||0));}catch(e){}
 
 // ── BONUS COUNTDOWN ──────────────────────────────────────────────────────────
 const BONUS_DATA={
@@ -39316,6 +39319,8 @@ const params=new URLSearchParams(location.search);
 const repId=params.get('id')||params.get('rep');
 const rep=D.roster[repId];
 if(!rep){document.body.innerHTML='<div style="padding:40px;text-align:center;color:#e05555;font-size:20px">Rep not found.</div>';throw new Error('no rep');}
+/* AUDIT FIX 2026-06-09: YTD commission = sum of the actual paychecks shown below (the stored comm_ytd dropped the most recent 6/1 check for 6 reps). */
+const commYTD=rid=>(D.payroll||[]).filter(r=>r.rep_id===rid).reduce((a,r)=>a+(r.grand_total||0),0);
 
 renderBonus(repId);
 document.getElementById('rep-name').textContent=rep.name+(rep.nick?' "'+rep.nick+'"':'');
@@ -39323,7 +39328,7 @@ document.getElementById('rep-meta').textContent=repId+' · '+(rep.scale==='veter
 document.title=rep.name+' — DBW';
 
 const ytd=D.ytd[repId]||{};
-const comm=D.comm_ytd[repId]||0;
+const comm=commYTD(repId);
 const netSales=ytd.net_sales||0;
 const grossSales=ytd.sales||0;
 const cogs=ytd.cogs||0;
@@ -39551,10 +39556,10 @@ function renderDailyMsg(repId) {
 if(repId==='W603'||repId==='W784'){
   // ── CONFIG ──────────────────────────────────────────────────────────────────
   const SAL_PER_CHECK=3350, GUAR_PER_CHECK=1350, PP_TOTAL=26;
-  const DBW_DAYS_ELAPSED=86, DBW_DAYS_TOTAL=253;
+  const DBW_DAYS_ELAPSED=85+(MAY_DAY||0), DBW_DAYS_TOTAL=253; /* AUDIT FIX 2026-06-09: was hardcoded 86 (~May 3) while sales run thru end of May; 85 biz days Jan-Apr + May progress = 109, fixes ~27% over-projection */
   const Q_LOW=1250000, Q_LOW_BONUS=9000, Q_HIGH=1500000, Q_HIGH_BONUS=14000;
   const ppElapsed=D.pay_periods.length||9;
-  const myComm=D.comm_ytd[repId]||0;
+  const myComm=commYTD(repId);
   const myIndivBonus=D.bonus_ytd&&D.bonus_ytd[repId]!=null?D.bonus_ytd[repId]:null;
 
   // ── QUARTERLY OFFICE NETS ────────────────────────────────────────────────────
@@ -39694,7 +39699,7 @@ if(repId==='W603'||repId==='W784'){
   D.ranked.forEach(rid=>{
     const r=D.roster[rid];
     const y=D.ytd[rid]||{};
-    const c=D.comm_ytd[rid]||0;
+    const c=commYTD(rid);
     const bon=D.bonus_ytd&&D.bonus_ytd[rid]!=null?D.bonus_ytd[rid]:null;
     const gross=(y.sales||0),cogs=(y.cogs||0);
     const grossP=gross-cogs, netP=gross-cogs-c-(bon||0);

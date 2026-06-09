@@ -61,7 +61,7 @@ a.rep-link:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-<a href="history.html" style="position:fixed;top:14px;right:18px;z-index:9999;background:#c9a84c;color:#050e1d;font-weight:700;font-size:13px;padding:8px 16px;border-radius:6px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">📊 Historical Data</a>
+<a href="https://jfgreco84-commits.github.io/wi-sales-history/" style="position:fixed;top:14px;right:18px;z-index:9999;background:#c9a84c;color:#050e1d;font-weight:700;font-size:13px;padding:8px 16px;border-radius:6px;text-decoration:none;letter-spacing:0.5px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">📊 Historical Data</a>
 <div style="text-align:center;padding:8px 0 4px;background:#0a0a1a;border-bottom:1px solid #1a1a2e;">
   <a href="https://jfgreco84-commits.github.io/dbw-office/board.html"
      style="display:inline-block;padding:8px 26px;background:#003a50;border:1px solid #00c8ff;border-radius:20px;color:#00c8ff;font-size:14px;font-weight:900;text-decoration:none;font-family:Arial,sans-serif;letter-spacing:1px;">
@@ -4239,11 +4239,11 @@ const D={
   "comm_ytd": {
     "W603": 21813.16,
     "W762": 4343.04,
-    "W784": 27870.93,
-    "W839": 46963.8,
-    "W849": 14499.2,
+    "W784": 27945.96,
+    "W839": 47092.6,
+    "W849": 14995.32,
     "W909": 2751.37,
-    "W930": 53052.32,
+    "W930": 55271.42,
     "W934": 1150.15,
     "W938": 2459.43,
     "W948": 548.68,
@@ -4251,8 +4251,8 @@ const D={
     "W959": 6977.88,
     "W962": 7939.33,
     "W963": 2377.95,
-    "W973": 18046.82,
-    "W983": 26998.43,
+    "W973": 18536.42,
+    "W983": 27020.95,
     "W961": 0
   },
   "pay_periods": [
@@ -4280,7 +4280,7 @@ const D={
     "2": "February",
     "3": "March",
     "4": "April (FINAL)",
-    "5": "May (MTD)"
+    "5": "May (FINAL)"
   },
   "ranked": [
     "W839",
@@ -4411,7 +4411,11 @@ const D={
     "February",
     "April"
   ]
-};;;;;;;;;;;;;;
+};
+/* AUDIT FIX 2026-06-09: re-sort the leaderboard by net sales on every load so the
+   medals/ranks never go stale (D.ranked had been frozen in an older May-3 order while
+   the dollar figures were updated to final-May, putting #1 on the wrong rep). */
+try{D.ranked.sort((a,b)=>(((D.ytd[b]||{}).net_sales)||0)-(((D.ytd[a]||{}).net_sales)||0));}catch(e){}
 // RENDER EXCLUSION NOTE: Terminated/inactive reps (W953, W963 terminated; W961 inactive)
 // are excluded from leaderboard and accordions solely by being absent from D.ranked.
 // The terminated/inactive flags in D.roster are NOT checked by render code (except monthly
@@ -4591,7 +4595,7 @@ D.ranked.forEach((rid,i)=>{
   const mu=y.mu||0;
   const np=(y.sales||0)-(y.cogs||0)-comm;
   const coll=monthCollByRep[rid]||0;
-  const link=D.rep_apps.includes(rid)?`<a class="rep-link" href="rep.html?rep=${rid}" target="_blank">↗ View</a>`:'<span style="color:#5a6375;font-size:11px">GSM</span>';
+  const link=D.rep_apps.includes(rid)?`<a class="rep-link" href="rep.html?id=${rid}" target="_blank">↗ View</a>`:'<span style="color:#5a6375;font-size:11px">GSM</span>';
   lbHtml+=`<tr class="rank-${i+1}">
     <td>${i+1}</td>
     <td>${r.name}${r.nick?' "'+r.nick+'"':''} ${link}</td>
