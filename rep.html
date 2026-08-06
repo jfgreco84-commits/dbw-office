@@ -156,7 +156,7 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
 </header>
 <div class="container">
   <div id="bonus-section"></div>
-  <div class="section-title" style="margin-top:0">📦 MAY MTD — Shipped</div>
+  <div class="section-title" style="margin-top:0">📦 JULY MTD — Shipped (thru 7/30)</div>
 <div id="may-mtd-section" style="margin-bottom:18px"></div>
 <div class="section-title">2026 YTD Snapshot</div>
   <div id="daily-msg"></div>
@@ -168,7 +168,7 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
 <div id="gsm-section"></div>
 <script type="application/json" id="__dbw">
 {
-  "generated": "Data through July 30, 2026",
+  "generated": "Data through July 30, 2026 — July final numbers pending (Excel not yet ingested)",
   "roster": {
     "W603": {
       "name": "Adam West",
@@ -13995,14 +13995,18 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
     2,
     3,
     4,
-    5
+    5,
+    6,
+    7
   ],
   "month_names": {
     "1": "January",
     "2": "February",
     "3": "March",
-    "4": "April (FINAL)",
-    "5": "May (MTD)"
+    "4": "April",
+    "5": "May",
+    "6": "June (FINAL)",
+    "7": "July (MTD thru 7/30)"
   },
   "ranked": [
     "W839",
@@ -42849,7 +42853,7 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
     }
   },
   "may_day": 19,
-  "may_total_days": 24,
+  "may_total_days": 20,
   "bonus_ytd": {
     "W839": 1724.53,
     "W983": 6703.15,
@@ -43048,7 +43052,7 @@ if(mayMtdEl){
   mayMtdEl.innerHTML=`
   <div style="background:#0f1825;border:2px solid #f5a62366;border-radius:10px;padding:16px;margin-bottom:6px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="color:#f5a623;font-weight:900;font-size:14px;letter-spacing:1px">MAY 2026 — DAY ${MAY_DAY} OF ${MAY_TOTAL_DAYS}</div>
+      <div style="color:#f5a623;font-weight:900;font-size:14px;letter-spacing:1px">JULY 2026 — DAY ${MAY_DAY} OF ${MAY_TOTAL_DAYS}</div>
       <div style="background:#1a2535;border-radius:16px;padding:4px 14px;color:#f5a623;font-weight:700;font-size:13px">${MAY_DAY}/${MAY_TOTAL_DAYS} days • ${mayPct}% through</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">
@@ -43061,7 +43065,7 @@ if(mayMtdEl){
         <div style="color:${mayProjMonth>=85000?'#4caf7d':mayProjMonth>=60000?'#f5a623':'#e05555'};font-size:20px;font-weight:900">${mayProjMonth>0?fmt$(mayProjMonth):'—'}</div>
       </div>
       <div style="background:#1a2535;border-radius:8px;padding:12px;text-align:center">
-        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">May M/U</div>
+        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">July M/U</div>
         <div style="color:${mayMu>=1.75?'#4caf7d':mayMu>=1.60?'#f5a623':mayMu>0?'#e05555':'#5a6375'};font-size:20px;font-weight:900">${mayMu>0?mayMu.toFixed(3):'—'}</div>
       </div>
       <div style="background:#1a2535;border-radius:8px;padding:12px;text-align:center">
