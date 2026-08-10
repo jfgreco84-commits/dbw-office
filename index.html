@@ -6528,7 +6528,13 @@ D.monthly.forEach(r=>{
 });
 
 const qLabels = {1:'Q1 — Jan · Feb · Mar',2:'Q2 — Apr · May · Jun',3:'Q3 — Jul · Aug · Sep',4:'Q4 — Oct · Nov · Dec'};
-const qStatus = {1:'FINAL',2:'IN PROGRESS (May MTD)',3:'UPCOMING',4:'UPCOMING'};
+// Quarter status is DERIVED, never hardcoded. The old literal map rotted badly —
+// it still read "IN PROGRESS (May MTD)" for Q2 in August, and Q3 never rendered
+// at all because the loop below was hardcoded to [1,2].
+const _maxMonth = Math.max.apply(null, D.months);
+const _curQ = _maxMonth<=3?1:_maxMonth<=6?2:_maxMonth<=9?3:4;
+const qStatus = {};
+[1,2,3,4].forEach(q=>{ qStatus[q] = q<_curQ ? 'FINAL' : q===_curQ ? 'IN PROGRESS' : 'UPCOMING'; });
 
 function pctBar(pct, color){
   const w = Math.min(pct,100).toFixed(1);
@@ -6541,12 +6547,12 @@ function pctBar(pct, color){
 }
 
 let qHtml = '';
-[1,2].forEach(q=>{
+[1,2,3,4].filter(q=>q<=_curQ).forEach(q=>{
   const qt = qTotals[q]||{net:0};
   const net = qt.net;
   const mu  = qt.cogs>0?net/qt.cogs:0;
-  const isFinal = q===1;
-  const isActive = q===2;
+  const isFinal = q<_curQ;
+  const isActive = q===_curQ;
 
   const pLow  = net/GOAL_LOW*100;
   const pHigh = net/GOAL_HIGH*100;
