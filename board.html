@@ -179,7 +179,7 @@ transition:border-color .15s,box-shadow .15s;
 var _k="sb_publishable_WeQ8Xw3xKkTr1KqRyRt_Iw_IT1_qph4";
 var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-87225ea4909d",DK="boardData";
 var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
-var SEED={week_start:"2026-08-31",month:"2026-09",quarter:"2026-Q3",quarter_shipped:197968,reported_days:["mon"],
+var SEED={week_start:"2026-08-31",month:"2026-09",quarter:"2026-Q3",fiscal_month:"2026-08",fiscal_quarter:"2026-Q3",quarter_shipped:197968,reported_days:["mon"],
   mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.695,ytd_mu:1.7597},
   reps:{
     W839:{name:"RONNY B       ", ytd:416369 , goal:150000 , shipped:106762, mu:1.7343, mtd_prev:109700 , week:{mon:6558  ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
@@ -198,7 +198,7 @@ var SEED={week_start:"2026-08-31",month:"2026-09",quarter:"2026-Q3",quarter_ship
   }
 } // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
 var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
-var BOARD_VER="2026-09-01_080014"; /* bump on every board.html push -- TV auto-reloads when changed */
+var BOARD_VER="2026-09-01_091220"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
 function tKey(){return{1:"mon",2:"tue",3:"wed",4:"thu",5:"fri"}[new Date().getDay()]||null;}
@@ -214,9 +214,9 @@ var FISCAL=[
 {q:2,s:"2026-05-04",e:"2026-06-05",h:["2026-05-25"]},
 {q:2,s:"2026-06-08",e:"2026-07-03",h:[]},
 {q:2,s:"2026-07-06",e:"2026-07-31",h:[]},
-{q:3,s:"2026-08-03",e:"2026-09-04",h:["2026-09-07"]},
-{q:3,s:"2026-09-07",e:"2026-10-02",h:[]},
-{q:3,s:"2026-10-05",e:"2026-11-06",h:[]},
+{q:3,s:"2026-08-03",e:"2026-09-04",h:[]},
+{q:3,s:"2026-09-08",e:"2026-10-02",h:[]},
+{q:4,s:"2026-10-05",e:"2026-11-06",h:[]},
 {q:4,s:"2026-11-09",e:"2026-12-04",h:["2026-11-26"]},
 {q:4,s:"2026-12-07",e:"2026-12-31",h:["2026-12-25"]}
 ];
@@ -295,6 +295,18 @@ try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK
 async function sbSet(data){
 try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK,{method:"PATCH",headers:{apikey:_k,"Authorization":"Bearer "+_k,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({data_value:data})});localStorage.setItem("dbw_b",JSON.stringify(data));return r.status===204||r.status===200;}catch(e){localStorage.setItem("dbw_b",JSON.stringify(data));return false;}
 }
+function fiscalKeys(){
+/* FISCAL month/quarter identity, e.g. {fm:"2026-08",fq:"2026-Q3"}. Between fiscal
+   periods the UPCOMING one is used so banking happens right after a month ends. */
+var n=new Date(),d=n.getFullYear()*10000+(n.getMonth()+1)*100+n.getDate();
+for(var i=0;i<FISCAL.length;i++){
+var sp=FISCAL[i].s.split("-"),ep=FISCAL[i].e.split("-");
+var e=(+ep[0])*10000+(+ep[1])*100+(+ep[2]);
+if(d<=e)return{fm:sp[0]+"-"+String(i+1).padStart(2,"0"),fq:sp[0]+"-Q"+FISCAL[i].q};
+}
+var ls=FISCAL[FISCAL.length-1].s.split("-")[0];
+return{fm:ls+"-12",fq:ls+"-Q4"};
+}
 function rollover(d){
 var ch=false,cm=getMon(new Date());
 if(d.week_start!==cm){
@@ -305,26 +317,36 @@ DAYS.forEach(function(k){rep.week[k]=0;});
 });
 d.week_start=cm;ch=true;
 }
-if(d.month!==ym()){
-/* Bank current month's office shipped into quarter total BEFORE resetting reps */
+/* MONTH banking keys on the FISCAL month, never the calendar month. Fiscal August
+   runs Aug 3 - Sep 4; the old calendar-month check zeroed the whole board on
+   Sep 1 2026 and double-banked $428k into the quarter tracker. d.month and
+   d.quarter stay CALENDAR labels, kept current so old cached clients never see
+   a mismatch and can never fire their calendar-based banking. */
+var fk=fiscalKeys();
+if(!d.fiscal_month){d.fiscal_month=fk.fm;ch=true;}
+if(!d.fiscal_quarter){d.fiscal_quarter=fk.fq;ch=true;}
+if(d.fiscal_month!==fk.fm){
+/* Bank the ENDED fiscal month's office shipped into the quarter total */
 var monthShipped=Object.keys(d.reps).reduce(function(s,id){return s+(d.reps[id].shipped||0);},0);
 d.quarter_shipped=(d.quarter_shipped||0)+monthShipped;
-/* Roll prior month shipped into per-rep YTD baseline, then reset month-scoped fields */
+/* Roll ended month's shipped into per-rep YTD baseline, then reset month fields */
 Object.keys(d.reps).forEach(function(id){
 var rep=d.reps[id];
 rep.ytd=(rep.ytd||0)+(rep.shipped||0);
 rep.mtd_prev=0;rep.mu=0;rep.shipped=0;
 DAYS.forEach(function(k){rep.week[k]=0;});
 });
-d.month=ym();ch=true;
+d.fiscal_month=fk.fm;ch=true;
 }
-if(d.quarter!==getQ()){d.quarter_shipped=0;d.quarter=getQ();ch=true;}
+if(d.fiscal_quarter!==fk.fq){d.quarter_shipped=0;d.fiscal_quarter=fk.fq;ch=true;}
+if(d.month!==ym()){d.month=ym();ch=true;}
+if(d.quarter!==getQ()){d.quarter=getQ();ch=true;}
 return ch;
 }
 function renderH(data){
 hdr("hT",new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"2-digit"}));
 hdr("hDL",fiscalDL());
-hdr("hDLQ","Q2: "+fiscalQuarterDL()+" days");
+hdr("hDLQ","Q"+((currentPeriod()||{}).q||"?")+": "+fiscalQuarterDL()+" days");
 var mgr=data.mgr||{low_target:1245067,high_target:1458507,mtd_mu:1.7435,ytd_mu:1.762};
 /* Live Q2 progress = banked prior months + current month's shipped across the office */
 var officeShipped=Object.keys(data.reps||{}).reduce(function(s,k){return HIDDEN_REPS[k]?s:s+(data.reps[k].shipped||0);},0);
