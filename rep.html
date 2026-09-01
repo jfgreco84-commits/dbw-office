@@ -74480,8 +74480,8 @@ let html='';
   const gt=pr?pr.grand_total:null;
   html+=`<div class="period-card">
   <div class="period-header" onclick="toggle(this)">
-    <div><span class="period-payday">📅 Payday: ${pd}</span><span class="hint" style="font-size:11px;color:#5a6375;margin-left:10px">▼ show detail</span></div>
-    <div class="period-earned" style="color:${gt==null?'#5a6375':gt<0?'#e05555':gt===0?'#8892a4':'#4caf7d'}">${gt!=null?fmt$(gt):'—'}</div>
+    <div><span class="period-payday">${pr?`📅 Payday: ${pd}`:`🟢 THIS PAY PERIOD · payday ${pd}`}</span><span class="hint" style="font-size:11px;color:#5a6375;margin-left:10px">▼ show detail</span></div>
+    <div class="period-earned" style="color:${gt==null?'#5a6375':gt<0?'#e05555':gt===0?'#8892a4':'#4caf7d'}">${gt!=null?fmt$(gt):(repOrders[pd]&&repOrders[pd].length?'IN PROGRESS':'—')}</div>
   </div>
   <div class="period-body">`;
 
@@ -74572,7 +74572,7 @@ if(repId==='W603'||repId==='W784'){
   const SAL_PER_CHECK=3350, GUAR_PER_CHECK=1350, PP_TOTAL=26;
   const DBW_DAYS_ELAPSED=85+(MAY_DAY||0), DBW_DAYS_TOTAL=253; /* AUDIT FIX 2026-06-09: was hardcoded 86 (~May 3) while sales run thru end of May; 85 biz days Jan-Apr + May progress = 109, fixes ~27% over-projection */
   const Q_LOW=1250000, Q_LOW_BONUS=9000, Q_HIGH=1500000, Q_HIGH_BONUS=14000;
-  const ppElapsed=D.pay_periods.length||9;
+  const ppElapsed=[...new Set((D.payroll||[]).map(r=>r.payday))].length||D.pay_periods.length||9;
   const myComm=commYTD(repId);
   const myIndivBonus=D.bonus_ytd&&D.bonus_ytd[repId]!=null?D.bonus_ytd[repId]:null;
 
