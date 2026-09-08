@@ -41,13 +41,13 @@ font-size:clamp(11px,1.8vw,52px);
 font-weight:900;position:sticky;top:0;z-index:10;text-transform:uppercase;
 }
 .hY{background:#080814;color:#ffd700;min-width:100px;position:sticky;left:0;z-index:21;}
-.hN{background:#0c0c20;color:#fff;min-width:150px;border-right:2px solid #00c8ff60!important;position:sticky;left:100px;z-index:21;}
+.hN{background:#0c0c20;color:#fff;min-width:150px;border-right:2px solid #00c8ff60!important;position:sticky;left:190px;z-index:21;}
 .hD{background:#090e09;color:#00aa33;min-width:120px;}
 .hD.tc{background:#001600;color:#00ff44;border:1px solid #00ff4450!important;}
 .hW{background:#111000;color:#ffcc00;min-width:120px;}
 .hM{background:#000c20;color:#4499ff;min-width:130px;}
 .hS{background:#001600;color:#00ff44;min-width:120px;}
-.hMU{background:#0e0800;color:#ffaa00;min-width:90px;font-weight:900;text-shadow:0 0 6px rgba(255,170,0,.3);}
+.hMU{background:#0e0800;color:#ffaa00;min-width:90px;font-weight:900;text-shadow:0 0 6px rgba(255,170,0,.3);position:sticky;left:100px;z-index:21;}
 .hG{background:#120700;color:#ff8800;min-width:100px;font-weight:900;text-shadow:0 0 6px rgba(255,136,0,.4);}
 .hP{background:#0c0014;color:#cc88ff;min-width:100px;}
 /* ---- DATA ROWS ---- */
@@ -68,7 +68,7 @@ position:sticky;left:0;z-index:5;border-right:1px solid #18182c;min-width:100px;
 .cN{
 background:#090918;color:#fff;font-weight:900;text-align:left;padding-left:10px;
 font-size:clamp(12px,2.4vw,78px);
-border-right:2px solid #00c8ff35!important;position:sticky;left:100px;z-index:5;
+border-right:2px solid #00c8ff35!important;position:sticky;left:190px;z-index:5;
 }
 /* ---- DAILY CELLS ---- */
 .cD{cursor:pointer;min-width:120px;}
@@ -83,8 +83,8 @@ border-right:2px solid #00c8ff35!important;position:sticky;left:100px;z-index:5;
 .cM.gh{color:#00ff44!important;text-shadow:0 0 10px rgba(0,255,68,.45);}
 .cS{color:#00ff44;font-weight:900;cursor:pointer;font-size:clamp(13px,2.55vw,84px);}
 .cS:hover{background:rgba(0,255,68,.07)!important;}
-.cMU{color:#ffaa00;font-weight:900;cursor:pointer;font-size:clamp(13px,2.55vw,84px);}
-.cMU:hover{background:rgba(255,170,0,.07)!important;}
+.cMU{color:#ffaa00;font-weight:900;cursor:pointer;font-size:clamp(13px,2.55vw,84px);background:#0b0802;position:sticky;left:100px;z-index:5;min-width:90px;border-right:1px solid #18182c;}
+.cMU:hover{background:#1a1206!important;}
 .cMU.hot{color:#00ff44;text-shadow:0 0 10px rgba(0,255,68,.35);}
 .cG{color:#ff8800;font-size:clamp(13px,2.55vw,84px);font-weight:900;text-shadow:0 0 8px rgba(255,136,0,.5);}
 .cP{padding:6px 8px;}
@@ -94,7 +94,7 @@ border-right:2px solid #00c8ff35!important;position:sticky;left:100px;z-index:5;
 .pn{font-size:clamp(12px,2.3vw,76px);font-weight:900;color:#cc88ff;}
 .pn.done{color:#00ff44;}
 .tot td{color:#00ff44!important;font-weight:900;font-size:clamp(13px,2.55vw,84px);}
-.tot .cY{color:#0f2f0f!important;}
+.tot .cY{color:#00ff44!important;}
 /* ===== MODAL ===== */
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;display:none;align-items:center;justify-content:center;}
 .ov.on{display:flex;}
@@ -134,6 +134,7 @@ transition:border-color .15s,box-shadow .15s;
 .ytd-g{color:#00ff44!important;text-shadow:0 0 10px rgba(0,255,68,.3);}
 .ytd-y{color:#dddd00!important;text-shadow:0 0 8px rgba(221,221,0,.3);}
 .ytd-r{color:#ff4444!important;text-shadow:0 0 8px rgba(255,68,68,.3);}
+@media(max-width:699px){.hY,.cY{min-width:72px;}.hMU,.cMU{min-width:56px;}.hN,.cN{min-width:116px;}}
 </style>
 </head>
 <body>
@@ -200,6 +201,7 @@ var SEED={week_start:"2026-09-07",month:"2026-09",quarter:"2026-Q3",fiscal_month
 var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
 var BOARD_VER="2026-09-08_104352"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
+function fBig(n){return n>=1000000?"$"+(n/1000000).toFixed(2)+"M":fK(n);}
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
 function tKey(){return{1:"mon",2:"tue",3:"wed",4:"thu",5:"fri"}[new Date().getDay()]||null;}
 function localDateStr(d){var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return y+"-"+m+"-"+day;}
@@ -383,12 +385,12 @@ DAYS.forEach(function(k){if((data.reps[id].week[k]||0)>0)rpt.add(k);});
 });
 renderH(data);
 var tk=tKey();
-var hcols=["<th class='hY'>YTD</th>","<th class='hN'>ROSTER</th>"];
+var hcols=["<th class='hY'>YTD</th>","<th class='hMU'>M/U</th>","<th class='hN'>ROSTER</th>"];
 DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" &#9670;":"")+"</th>");});
-hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hMU'>M/U</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
+hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
 gel("thr").innerHTML=hcols.join("");
 var ids=Object.keys(data.reps).filter(function(id){return !HIDDEN_REPS[id];}).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
-var oW=0,oM=0,oS=0,dt=DAYS.map(function(){return 0;}),rows=[];
+var oW=0,oM=0,oS=0,oG=0,oY=0,dt=DAYS.map(function(){return 0;}),rows=[];
 var yf=yearFraction(); /* fraction of full year elapsed — used for YTD pace coloring */
 ids.forEach(function(id,rank){
 var rep=data.reps[id];
@@ -404,7 +406,7 @@ var annualGoal=goal*12;
 var ytdExp=annualGoal>0?Math.round(annualGoal*yf):0;
 var ytdCls="ytd-g"; /* YTD column always green per user request (no pace red/yellow) */
 DAYS.forEach(function(k,i){dt[i]+=(rep.week[k]||0);});
-oW+=wk;oM+=mtd;oS+=(rep.shipped||0);
+oW+=wk;oM+=mtd;oS+=(rep.shipped||0);oG+=goal;oY+=ytdTotal;
 var rk=rank===0?"r1":rank===1?"r2":rank===2?"r3":"";
 var med=rank===0?"🥇 ":rank===1?"🥈 ":rank===2?"🥉 ":rank===3?"🎖️ ":rank===4?"⭐ ":"";
 var dc=DAYS.map(function(k,i){
@@ -415,18 +417,33 @@ return"<td class='cD"+(iT?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>" +
 var muH=mu>0?"<span class='"+(mu>=2?"hot":"")+"'>"+mu.toFixed(2)+"x</span>":"<span class='de'>&mdash;</span>";
 var bc=hit?"#00ff44":pct>75?"#ffaa00":"#cc88ff";
 var pc="<td class='cP'><div class='pb'><span class='pn"+(hit?" done":"")+"'>"+pct+"%</span><div class='pbb'><div class='pbf' style='width:"+Math.min(100,pct)+"%;background:"+bc+";'></div></div></div></td>";
-rows.push("<tr class='"+rk+"'><td class='cY"+(ytdCls?" "+ytdCls:"")+"'>"+fK(ytdTotal)+"</td><td class='cN'>"+med+rep.name+"</td>"+dc+
+rows.push("<tr class='"+rk+"'><td class='cY"+(ytdCls?" "+ytdCls:"")+"'>"+fK(ytdTotal)+"</td>"+
+"<td class='cMU' onclick='openMU(\""+id+"\")'>"+muH+"</td>"+
+"<td class='cN'>"+med+rep.name+"</td>"+dc+
 "<td class='cW'>"+(wk>0?"$"+wk.toLocaleString():"&mdash;")+"</td>"+
 "<td class='cM"+(hit?" gh":"")+"'>"+(mtd>0?"$"+mtd.toLocaleString():"&mdash;")+"</td>"+
 "<td class='cS' onclick='openS(\""+id+"\")'>"+(rep.shipped>0?"$"+rep.shipped.toLocaleString():"&mdash;")+"</td>"+
-"<td class='cMU' onclick='openMU(\""+id+"\")'>"+muH+"</td>"+
 "<td class='cG'>"+fK(goal)+"</td>"+pc+"</tr>");
 });
 var totD=DAYS.map(function(k,i){var v=dt[i];return"<td class='cD"+(tk===k?" tc":"")+"'>"+(v>0?"$"+v.toLocaleString():rpt.has(k)?"$0":"&mdash;")+"</td>";}).join("");
-var omg=data.mgr&&data.mgr.mtd_mu>0?data.mgr.mtd_mu.toFixed(2)+"x":"&mdash;";
-rows.push("<tr class='tot'><td class='cY'></td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"$0")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"$0")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"$0")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cG'></td><td class='cP'></td></tr>");
+var omg=data.mgr&&data.mgr.ytd_mu>0?data.mgr.ytd_mu.toFixed(2)+"x":"&mdash;";
+rows.push("<tr class='tot'><td class='cY' title='Office YTD shipped'>"+(oY>0?fBig(oY):"&mdash;")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"$0")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"$0")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"$0")+"</td><td class='cG'>"+(oG>0?"$"+oG.toLocaleString():"&mdash;")+"</td><td class='cP'></td></tr>");
 gel("tbod").innerHTML=rows.join("");
+syncSticky();
 }
+/* Frozen-column offsets are MEASURED, not hardcoded: the YTD | M/U | ROSTER widths
+   change with viewport (clamp font sizes + per-breakpoint min-widths), and a stale
+   hardcoded left made ROSTER sit on top of M/U. */
+function syncSticky(){try{
+var r=document.querySelector("#tbod tr");if(!r||r.children.length<3)return;
+var w0=r.children[0].getBoundingClientRect().width,w1=r.children[1].getBoundingClientRect().width;
+if(!w0||!w1)return;
+var th=document.getElementById("thr"),tb=document.getElementById("tbod");
+[].forEach.call(th.children,function(e,i){if(i===1)e.style.left=w0+"px";if(i===2)e.style.left=(w0+w1)+"px";});
+[].forEach.call(tb.children,function(row){var c=row.children;if(c.length<3)return;
+c[1].style.left=w0+"px";c[2].style.left=(w0+w1)+"px";});
+}catch(e){}}
+addEventListener("resize",syncSticky);
 function icoFor(t){return t==="day"?"📝":t==="ship"?"📦":t==="mu"?"📊":"⬇️";}
 function subFor(t){return t==="day"?"Written sales for this day":t==="ship"?"MTD shipped total (from Colin)":"Rep MTD markup (e.g. 1.85 = 1.85x)";}
 function openM(id,lbl,cur,type,field,isMU){
