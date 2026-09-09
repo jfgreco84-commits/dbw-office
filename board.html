@@ -47,6 +47,7 @@ font-weight:900;position:sticky;top:0;z-index:10;text-transform:uppercase;
 .hW{background:#111000;color:#ffcc00;min-width:120px;}
 .hM{background:#000c20;color:#4499ff;min-width:130px;}
 .hS{background:#001600;color:#00ff44;min-width:120px;}
+.hMTDMU{background:#0e0800;color:#ffcc55;min-width:110px;font-weight:900;text-shadow:0 0 6px rgba(255,204,85,.3);}
 .hMU{background:#0e0800;color:#ffaa00;min-width:90px;font-weight:900;text-shadow:0 0 6px rgba(255,170,0,.3);position:sticky;left:100px;z-index:21;}
 .hG{background:#120700;color:#ff8800;min-width:100px;font-weight:900;text-shadow:0 0 6px rgba(255,136,0,.4);}
 .hP{background:#0c0014;color:#cc88ff;min-width:100px;}
@@ -86,6 +87,8 @@ border-right:2px solid #00c8ff35!important;position:sticky;left:190px;z-index:5;
 .cMU{color:#ffaa00;font-weight:900;cursor:pointer;font-size:clamp(13px,2.55vw,84px);background:#0b0802;position:sticky;left:100px;z-index:5;min-width:90px;border-right:1px solid #18182c;}
 .cMU:hover{background:#1a1206!important;}
 .cMU.hot{color:#00ff44;text-shadow:0 0 10px rgba(0,255,68,.35);}
+.cMTDMU{color:#ffcc55;font-weight:900;font-size:clamp(13px,2.55vw,84px);}
+.cMU span.hot,.cMTDMU span.hot{color:#00ff44;text-shadow:0 0 10px rgba(0,255,68,.35);}
 .cG{color:#ff8800;font-size:clamp(13px,2.55vw,84px);font-weight:900;text-shadow:0 0 8px rgba(255,136,0,.5);}
 .cP{padding:6px 8px;}
 .pb{display:flex;flex-direction:column;align-items:center;gap:3px;}
@@ -335,7 +338,7 @@ d.quarter_shipped=(d.quarter_shipped||0)+monthShipped;
 Object.keys(d.reps).forEach(function(id){
 var rep=d.reps[id];
 rep.ytd=(rep.ytd||0)+(rep.shipped||0);
-rep.mtd_prev=0;rep.mu=0;rep.shipped=0;
+rep.mtd_prev=0;rep.mu=0;rep.mtd_mu=0;rep.shipped=0;
 DAYS.forEach(function(k){rep.week[k]=0;});
 });
 d.fiscal_month=fk.fm;ch=true;
@@ -385,9 +388,9 @@ DAYS.forEach(function(k){if((data.reps[id].week[k]||0)>0)rpt.add(k);});
 });
 renderH(data);
 var tk=tKey();
-var hcols=["<th class='hY'>YTD</th>","<th class='hMU'>M/U</th>","<th class='hN'>ROSTER</th>"];
+var hcols=["<th class='hY'>YTD</th>","<th class='hMU'>YTD M/U</th>","<th class='hN'>ROSTER</th>"];
 DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" &#9670;":"")+"</th>");});
-hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
+hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hMTDMU'>MTD M/U</th><th class='hG'>GOAL</th><th class='hP'>% GOAL</th>");
 gel("thr").innerHTML=hcols.join("");
 var ids=Object.keys(data.reps).filter(function(id){return !HIDDEN_REPS[id];}).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
 var oW=0,oM=0,oS=0,oG=0,oY=0,dt=DAYS.map(function(){return 0;}),rows=[];
@@ -397,6 +400,7 @@ var rep=data.reps[id];
 var wk=DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0);
 var mtd=(rep.mtd_prev||0)+wk;
 var mu=rep.mu||0;
+var mmu=rep.mtd_mu||0;
 var ytdTotal=(rep.ytd||0)+(rep.shipped||0);
 var goal=rep.goal||0;
 /* % GOAL: MTD written vs monthly goal */
@@ -415,6 +419,7 @@ var inn=v>=1000?"<span class='dg'>$"+v.toLocaleString()+"</span>":v>0?"<span cla
 return"<td class='cD"+(iT?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>" +inn+"</td>";
 }).join("");
 var muH=mu>0?"<span class='"+(mu>=2?"hot":"")+"'>"+mu.toFixed(2)+"x</span>":"<span class='de'>&mdash;</span>";
+var mmuH=mmu>0?"<span class='"+(mmu>=2?"hot":"")+"'>"+mmu.toFixed(2)+"x</span>":"<span class='de'>&mdash;</span>";
 var bc=hit?"#00ff44":pct>75?"#ffaa00":"#cc88ff";
 var pc="<td class='cP'><div class='pb'><span class='pn"+(hit?" done":"")+"'>"+pct+"%</span><div class='pbb'><div class='pbf' style='width:"+Math.min(100,pct)+"%;background:"+bc+";'></div></div></div></td>";
 rows.push("<tr class='"+rk+"'><td class='cY"+(ytdCls?" "+ytdCls:"")+"'>"+fK(ytdTotal)+"</td>"+
@@ -423,11 +428,13 @@ rows.push("<tr class='"+rk+"'><td class='cY"+(ytdCls?" "+ytdCls:"")+"'>"+fK(ytdT
 "<td class='cW'>"+(wk>0?"$"+wk.toLocaleString():"&mdash;")+"</td>"+
 "<td class='cM"+(hit?" gh":"")+"'>"+(mtd>0?"$"+mtd.toLocaleString():"&mdash;")+"</td>"+
 "<td class='cS' onclick='openS(\""+id+"\")'>"+(rep.shipped>0?"$"+rep.shipped.toLocaleString():"&mdash;")+"</td>"+
+"<td class='cMTDMU'>"+mmuH+"</td>"+
 "<td class='cG'>"+fK(goal)+"</td>"+pc+"</tr>");
 });
 var totD=DAYS.map(function(k,i){var v=dt[i];return"<td class='cD"+(tk===k?" tc":"")+"'>"+(v>0?"$"+v.toLocaleString():rpt.has(k)?"$0":"&mdash;")+"</td>";}).join("");
 var omg=data.mgr&&data.mgr.ytd_mu>0?data.mgr.ytd_mu.toFixed(2)+"x":"&mdash;";
-rows.push("<tr class='tot'><td class='cY' title='Office YTD shipped'>"+(oY>0?fBig(oY):"&mdash;")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"$0")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"$0")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"$0")+"</td><td class='cG'>"+(oG>0?"$"+oG.toLocaleString():"&mdash;")+"</td><td class='cP'></td></tr>");
+var ommg=data.mgr&&data.mgr.mtd_mu>0?data.mgr.mtd_mu.toFixed(2)+"x":"&mdash;";
+rows.push("<tr class='tot'><td class='cY' title='Office YTD shipped'>"+(oY>0?fBig(oY):"&mdash;")+"</td><td class='cMU' style='color:#ffaa00;'>"+omg+"</td><td class='cN'>OFFICE TOTAL</td>"+totD+"<td class='cW'>"+(oW>0?"$"+oW.toLocaleString():"$0")+"</td><td class='cM'>"+(oM>0?"$"+oM.toLocaleString():"$0")+"</td><td class='cS'>"+(oS>0?"$"+oS.toLocaleString():"$0")+"</td><td class='cMTDMU' style='color:#ffcc55;'>"+ommg+"</td><td class='cG'>"+(oG>0?"$"+oG.toLocaleString():"&mdash;")+"</td><td class='cP'></td></tr>");
 gel("tbod").innerHTML=rows.join("");
 syncSticky();
 }
@@ -458,7 +465,7 @@ setTimeout(function(){gel("mI").select();gel("mI").focus();},80);
 }
 function openD(id,day){openM(id,BD.reps[id].name+" — "+DL[DAYS.indexOf(day)],BD.reps[id].week[day],"day",day,false);}
 function openS(id){openM(id,BD.reps[id].name+" — SHIPPED",BD.reps[id].shipped,"ship","shipped",false);}
-function openMU(id){openM(id,BD.reps[id].name+" — M/U",BD.reps[id].mu||0,"mu","mu",true);}
+function openMU(id){openM(id,BD.reps[id].name+" — YTD M/U",BD.reps[id].mu||0,"mu","mu",true);}
 function closeM(){gel("modal").classList.remove("on");EC=null;}
 async function saveM(){
 if(!EC)return;
@@ -488,7 +495,7 @@ if(!data){data=JSON.parse(JSON.stringify(SEED));hdr("hU","Using local data");}
 /* Non-destructive rollover on load */
 if(rollover(data))await sbSet(data);
 /* ensure mu field exists on all reps */
-Object.keys(data.reps).forEach(function(id){if(data.reps[id].mu===undefined)data.reps[id].mu=0;});
+Object.keys(data.reps).forEach(function(id){if(data.reps[id].mu===undefined)data.reps[id].mu=0;if(data.reps[id].mtd_mu===undefined)data.reps[id].mtd_mu=0;});
 BD=data;
 try{render(BD);}catch(e){hdr("hU","Render error: "+e.message);console.error(e);return;}
 startR();
