@@ -2134,26 +2134,25 @@ const D=JSON.parse(document.getElementById('__dbw').textContent);
 try{D.ranked.sort((a,b)=>(((D.ytd[b]||{}).net_sales)||0)-(((D.ytd[a]||{}).net_sales)||0));}catch(e){}
 
 // ── BONUS COUNTDOWN ──────────────────────────────────────────────────────────
+// Source: Jeff's OCTWISCO2026.xlsx (WI 2026 + "Kell Luis Les Geof Casie ChrisK" tabs), forwarded 2026-10-01.
+// Tiers are only valid for BONUS_MONTH; the countdown hides once that month ends until the next sheet is loaded.
+// mu = markup required at that tier (as printed on the sheet).
+const BONUS_MONTH="OCTOBER";
 const BONUS_DATA={
-  // VETERANS
-  "W603":{tiers:[{t:85000,p:2},{t:95000,p:3},{t:105000,p:4}],atr:176250.46},
-  "W762":{tiers:[{t:35000,p:2},{t:45000,p:3},{t:55000,p:4}],atr:124526},
-  "W784":{tiers:[{t:85000,p:2},{t:95000,p:3},{t:105000,p:4}],atr:179748},
-  "W839":{tiers:[{t:135000,p:1},{t:155000,p:2},{t:175000,p:3}],atr:215261.32},
+  "W603":{tiers:[{t:75000,p:2},{t:85000,p:3},{t:100000,p:4}],atr:176250.46},
+  "W762":{tiers:[{t:30000,p:2},{t:40000,p:3},{t:50000,p:4}],atr:124526},
+  "W784":{tiers:[{t:75000,p:2},{t:85000,p:3},{t:100000,p:4}],atr:179748},
+  "W839":{tiers:[{t:125000,p:1},{t:150000,p:2},{t:175000,p:3}],atr:215261.32},
   "W849":{tiers:[{t:30000,p:2},{t:40000,p:3},{t:50000,p:4}],atr:null},
-  // NEW REPS — tiers pending GSM confirmation
-  "W909":{tiers:[{t:15000,p:2},{t:25000,p:3},{t:35000,p:4}],atr:null,pending:true},
-  "W930":{tiers:[{t:110000,p:2},{t:120000,p:3},{t:140000,p:4}],atr:169570.55},
-  "W934":{tiers:[{t:10000,p:2},{t:18000,p:3},{t:25000,p:4}],atr:null,pending:true},
-  "W938":{tiers:[{t:10000,p:2},{t:18000,p:3},{t:25000,p:4}],atr:null,pending:true},
-  "W948":{tiers:[{t:10000,p:2},{t:18000,p:3},{t:25000,p:4}],atr:null,pending:true},
-  "W953":{tiers:[{t:9000,p:2},{t:12000,p:2.5},{t:15000,p:3},{t:18000,p:3.5}],atr:null,mu_req:1.7},
-  "W959":{tiers:[{t:7500,p:2},{t:10000,p:2.5},{t:12500,p:3},{t:15000,p:3.5}],atr:null,mu_req:1.7},
-  "W962":{tiers:[{t:7500,p:2},{t:10000,p:2.5},{t:12500,p:3},{t:15000,p:3.5}],atr:null},
-  "W963":{tiers:[{t:5000,p:2},{t:7500,p:2.5},{t:10000,p:3},{t:12500,p:3.5}],atr:null},
-  "W973":{tiers:[{t:35000,p:2},{t:45000,p:3},{t:55000,p:4}],atr:null},
-  "W961":{tiers:[{t:10000,p:2},{t:18000,p:3},{t:25000,p:4}],atr:null,pending:true},
-  "W983":{tiers:[{t:70000,p:2},{t:80000,p:3},{t:90000,p:4}],atr:114841.91},
+  "W930":{tiers:[{t:100000,p:4,mu:1.85}],atr:169570.55},
+  "W973":{tiers:[{t:35000,p:2,mu:1.7},{t:45000,p:3},{t:55000,p:4}],atr:null},
+  "W983":{tiers:[{t:50000,p:2},{t:60000,p:3},{t:70000,p:4}],atr:114841.91},
+  // Shared ladder for Luis, Les, Geof, Cassie, Chris K
+  "W909":{tiers:[{t:15000,p:1,mu:1.7},{t:17500,p:1.5},{t:20000,p:1.75},{t:22500,p:2},{t:25000,p:2.25},{t:27500,p:2.5},{t:30000,p:3},{t:32500,p:3.5}],atr:null},
+  "W934":{tiers:[{t:15000,p:1,mu:1.7},{t:17500,p:1.5},{t:20000,p:1.75},{t:22500,p:2},{t:25000,p:2.25},{t:27500,p:2.5},{t:30000,p:3},{t:32500,p:3.5}],atr:null},
+  "W938":{tiers:[{t:15000,p:1,mu:1.7},{t:17500,p:1.5},{t:20000,p:1.75},{t:22500,p:2},{t:25000,p:2.25},{t:27500,p:2.5},{t:30000,p:3},{t:32500,p:3.5}],atr:null},
+  "W959":{tiers:[{t:15000,p:1,mu:1.7},{t:17500,p:1.5},{t:20000,p:1.75},{t:22500,p:2},{t:25000,p:2.25},{t:27500,p:2.5},{t:30000,p:3},{t:32500,p:3.5}],atr:null},
+  "W962":{tiers:[{t:15000,p:1,mu:1.7},{t:17500,p:1.5},{t:20000,p:1.75},{t:22500,p:2},{t:25000,p:2.25},{t:27500,p:2.5},{t:30000,p:3},{t:32500,p:3.5}],atr:null},
 };
 
 const MAY_DAY=D.may_day||1;
@@ -2194,13 +2193,10 @@ function renderBonus(repId){
   if(!bd||!bd.tiers.length){el.style.display='none';return;}
   // find current DBW month
   const today=new Date();today.setHours(0,0,0,0);
-  let cur=null;
-  for(const m of DBW_CAL){
-    const s=new Date(m.s),e=new Date(m.e);
-    s.setHours(0,0,0,0);e.setHours(0,0,0,0);
-    if(today<=e){cur=m;if(today>=s)break;}  // take first month that hasn't ended; break early if we're inside it
-  }
+  // Tiers belong to BONUS_MONTH only: show that month (counting down before it starts), hide after it ends.
+  const cur=DBW_CAL.find(m=>m.m===BONUS_MONTH);
   if(!cur){el.style.display='none';return;}
+  {const ce=new Date(cur.e);ce.setHours(0,0,0,0);if(today>ce){el.style.display='none';return;}}
   const s=new Date(cur.s),e=new Date(cur.e);
   s.setHours(0,0,0,0);e.setHours(0,0,0,0);
   const total=cur.d;
@@ -2211,7 +2207,7 @@ function renderBonus(repId){
   else{elapsed=MAY_DAY;remaining=total-elapsed;}
   const pct=Math.min(100,Math.round((elapsed/total)*100));
   const colors=['#f5a623','#4caf7d','#4a9eff'];
-  const labels=['LEVEL 1','LEVEL 2','TOP TIER'];
+  const labels=bd.tiers.map((t,i)=>i===bd.tiers.length-1?'TOP TIER':'LEVEL '+(i+1));
   let tierHtml='';
   bd.tiers.forEach((t,i)=>{
     const pace=Math.ceil(t.t/total);
@@ -2223,7 +2219,7 @@ function renderBonus(repId){
       :`${fmt$(pace)}/day`;
     tierHtml+=`<div class="bonus-tier" style="border-left:4px solid ${c}">
       <div class="bt-label" style="color:${c}">${labels[i]} — ${t.p}% BONUS</div>
-      <div class="bt-threshold">Target: <strong>${fmt$(t.t)}</strong></div>
+      <div class="bt-threshold">Target: <strong>${fmt$(t.t)}</strong>${t.mu?` &nbsp;(needs ${t.mu}+ M/U)`:''}</div>
       <div class="bt-pace">📈 ${paceStr}</div>
       <div class="bt-earn" style="color:${c}">💰 Earns: ${earn}</div>
     </div>`;
