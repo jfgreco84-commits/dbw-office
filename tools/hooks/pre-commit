@@ -1,0 +1,37 @@
+#!/bin/sh
+# Card-data guard: masks customer card numbers, expiration dates and security
+# codes in the site files before every commit, so the ShipSheet/MTD/payroll
+# automations can never publish them. The commit goes ahead with the masked file.
+# Install once per clone:  git config core.hooksPath tools/hooks
+
+files=$(git diff --cached --name-only --diff-filter=ACM -- '*.html' '*.json' '*.js' '*.md' '*.csv' '*.txt')
+[ -z "$files" ] && exit 0
+
+PY=""
+for c in python3 python py; do
+  if command -v "$c" >/dev/null 2>&1 && "$c" -c "import sys" >/dev/null 2>&1; then PY="$c"; break; fi
+done
+if [ -z "$PY" ]; then
+  echo "card-guard: Python was not found, so this commit is blocked (card data could slip through)." >&2
+  echo "card-guard: install Python from python.org, then run the automation again." >&2
+  exit 1
+fi
+
+root=$(git rev-parse --show-toplevel)
+echo "$files" | while IFS= read -r f; do
+  [ -f "$root/$f" ] || continue
+  "$PY" "$root/tools/card_guard.py" --fix "$root/$f" || exit 1
+  git add -- "$root/$f"
+done || exit 1
+
+# Belt and braces: refuse the commit if anything card-like is still staged.
+tmp=$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/cardguard$$")
+mkdir -p "$tmp"
+fail=0
+echo "$files" | while IFS= read -r f; do
+  [ -f "$root/$f" ] || continue
+  git show ":$f" > "$tmp/staged" 2>/dev/null || continue
+  "$PY" "$root/tools/card_guard.py" --check "$tmp/staged" >/dev/null || { echo "card-guard: card data still staged in $f, commit blocked." >&2; exit 1; }
+done || fail=1
+rm -rf "$tmp"
+exit $fail
