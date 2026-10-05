@@ -156,7 +156,7 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
 </header>
 <div class="container">
   <div id="bonus-section"></div>
-  <div class="section-title" style="margin-top:0">📦 AUGUST MTD — Shipped</div>
+  <div class="section-title" style="margin-top:0" id="mtd-title">📦 MTD — Shipped</div>
 <div id="may-mtd-section" style="margin-bottom:18px"></div>
 <div class="section-title">2026 YTD Snapshot</div>
   <div id="daily-msg"></div>
@@ -19897,6 +19897,29 @@ const DBW_CAL=[
   {m:"NOVEMBER", s:"2026-11-09",e:"2026-12-04",d:18},
   {m:"DECEMBER", s:"2026-12-07",e:"2026-12-31",d:18},
 ];
+// Office holidays inside the fiscal months above (that's why some months are a day or two short).
+const DBW_HOLIDAYS=["2026-05-25","2026-07-03","2026-09-07","2026-11-26","2026-11-27","2026-12-25"];
+// Parse "YYYY-MM-DD" as a LOCAL date (new Date("2026-10-05") is UTC midnight = the evening before in Wisconsin).
+function localDate(str){const [y,mo,d]=str.split('-').map(Number);return new Date(y,mo-1,d);}
+function ymd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function isBizDay(d){const w=d.getDay();return w!==0&&w!==6&&!DBW_HOLIDAYS.includes(ymd(d));}
+// Business days of fiscal month `cal` already finished before `today` (today itself not counted).
+function bizDaysDone(cal,today){
+  const s=localDate(cal.s),e=localDate(cal.e);let n=0;
+  for(const d=new Date(s);d<today&&d<=e;d.setDate(d.getDate()+1)){if(isBizDay(d))n++;}
+  return Math.min(n,cal.d);
+}
+const TODAY=new Date();TODAY.setHours(0,0,0,0);
+// The MTD numbers belong to the last month present in the data, not to a hardcoded month.
+const MTD_MONTH_NUM=Math.max(...((D.months&&D.months.length)?D.months:[1]));
+const MTD_CAL=DBW_CAL[MTD_MONTH_NUM-1]||null;
+const MTD_LABEL=MTD_CAL?MTD_CAL.m:'MONTH';
+const MTD_TOTAL=MTD_CAL?MTD_CAL.d:MAY_TOTAL_DAYS;
+const MTD_CLOSED=!!MTD_CAL&&TODAY>localDate(MTD_CAL.e);
+const MTD_DAY=MTD_CLOSED?MTD_TOTAL:Math.min(MAY_DAY,MTD_TOTAL);
+const titleCase=w=>w.charAt(0)+w.slice(1).toLowerCase();
+// Fiscal business days elapsed this year = full months before the MTD month + days into it.
+const DBW_DAYS_DONE=DBW_CAL.slice(0,MTD_MONTH_NUM-1).reduce((a,c)=>a+c.d,0)+MTD_DAY;
 
 
 
@@ -19921,16 +19944,14 @@ function renderBonus(repId){
   // Tiers belong to BONUS_MONTH only: show that month (counting down before it starts), hide after it ends.
   const cur=DBW_CAL.find(m=>m.m===BONUS_MONTH);
   if(!cur){el.style.display='none';return;}
-  {const ce=new Date(cur.e);ce.setHours(0,0,0,0);if(today>ce){el.style.display='none';return;}}
-  const s=new Date(cur.s),e=new Date(cur.e);
-  s.setHours(0,0,0,0);e.setHours(0,0,0,0);
+  const s=localDate(cur.s),e=localDate(cur.e);
+  if(today>e){el.style.display='none';return;}
   const total=cur.d;
-  // Use server-supplied day number to avoid UTC timezone edge cases
-  let elapsed,remaining;
-  if(today<s){elapsed=0;remaining=total;}
-  else if(today>=e){elapsed=total;remaining=0;}
-  else{elapsed=MAY_DAY;remaining=total-elapsed;}
-  const pct=Math.min(100,Math.round((elapsed/total)*100));
+  // Count business days off the fiscal calendar (the data's day number belongs to the MTD month, which may be a different month).
+  const done=today<s?0:bizDaysDone(cur,today);
+  const remaining=total-done;
+  const elapsed=today<s?0:Math.min(total,done+(isBizDay(today)?1:0));
+  const pct=Math.min(100,Math.round((done/total)*100));
   const colors=['#f5a623','#4caf7d','#4a9eff'];
   const labels=bd.tiers.map((t,i)=>i===bd.tiers.length-1?'TOP TIER':'LEVEL '+(i+1));
   let tierHtml='';
@@ -19977,7 +19998,9 @@ function muClass(mu){return mu>=1.75?'mu-hi':mu>=1.60?'mu-mid':'mu-lo'}
 const params=new URLSearchParams(location.search);
 const repId=params.get('id')||params.get('rep');
 const rep=D.roster[repId];
-if(!rep){document.body.innerHTML='<div style="padding:40px;text-align:center;color:#e05555;font-size:20px">Rep not found.</div>';throw new Error('no rep');}
+// Only current reps (the app list) and the GSM get a dashboard; terminated reps stay in the data for history only.
+const ACTIVE_IDS=new Set([...(D.rep_apps||[]),'W784']);
+if(!rep||!ACTIVE_IDS.has(repId)){document.body.innerHTML='<div style="padding:40px;text-align:center;color:#e05555;font-size:20px">Rep not found.</div>';throw new Error('no rep');}
 /* AUDIT FIX 2026-06-09: YTD commission = sum of the actual paychecks shown below (the stored comm_ytd dropped the most recent 6/1 check for 6 reps). */
 const commYTD=rid=>(D.payroll||[]).filter(r=>r.rep_id===rid).reduce((a,r)=>a+(r.grand_total||0),0);
 
@@ -20017,8 +20040,12 @@ const mayData=MAY_MTD_DATA[repId]||{sell:0,cogs:0,comm:0};
 const maySell=mayData.sell||0;
 const mayCogs=mayData.cogs||0;
 const mayMu=mayCogs>0?maySell/mayCogs:0;
-const mayProjMonth=MAY_DAY>0?(maySell/MAY_DAY)*MAY_TOTAL_DAYS:0;
-const mayPct=MAY_TOTAL_DAYS>0?Math.round((MAY_DAY/MAY_TOTAL_DAYS)*100):0;
+const mayProjMonth=MTD_CLOSED?maySell:(MTD_DAY>0?(maySell/MTD_DAY)*MTD_TOTAL:0);
+const mayPct=MTD_TOTAL>0?Math.round((MTD_DAY/MTD_TOTAL)*100):0;
+// The bonus tiers are for BONUS_MONTH; only compare against them when the MTD numbers are that month.
+const goalApplies=MTD_LABEL===BONUS_MONTH;
+const topTier=(()=>{const bd=BONUS_DATA[repId];return bd&&bd.tiers&&bd.tiers.length?bd.tiers[bd.tiers.length-1].t:null;})();
+{const t=document.getElementById('mtd-title');if(t)t.textContent='📦 '+MTD_LABEL+(MTD_CLOSED?' FINAL':' MTD')+' — Shipped';}
 const mayShipPct=mayProjMonth>0?Math.min(Math.round((maySell/mayProjMonth)*100),100):0;
 
 const mayMtdEl=document.getElementById('may-mtd-section');
@@ -20026,8 +20053,8 @@ if(mayMtdEl){
   mayMtdEl.innerHTML=`
   <div style="background:#0f1825;border:2px solid #f5a62366;border-radius:10px;padding:16px;margin-bottom:6px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <div style="color:#f5a623;font-weight:900;font-size:14px;letter-spacing:1px">AUGUST 2026 — DAY ${MAY_DAY} OF ${MAY_TOTAL_DAYS}</div>
-      <div style="background:#1a2535;border-radius:16px;padding:4px 14px;color:#f5a623;font-weight:700;font-size:13px">${MAY_DAY}/${MAY_TOTAL_DAYS} days • ${mayPct}% through</div>
+      <div style="color:#f5a623;font-weight:900;font-size:14px;letter-spacing:1px">${MTD_LABEL} 2026 — ${MTD_CLOSED?'FINAL':'DAY '+MTD_DAY+' OF '+MTD_TOTAL}</div>
+      <div style="background:#1a2535;border-radius:16px;padding:4px 14px;color:#f5a623;font-weight:700;font-size:13px">${MTD_DAY}/${MTD_TOTAL} days • ${MTD_CLOSED?'month closed':mayPct+'% through'}</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px">
       <div style="background:#1a2535;border-radius:8px;padding:12px;text-align:center">
@@ -20035,17 +20062,17 @@ if(mayMtdEl){
         <div style="color:#f5a623;font-size:20px;font-weight:900">${maySell>0?fmt$(maySell):'$0.00'}</div>
       </div>
       <div style="background:#1a2535;border-radius:8px;padding:12px;text-align:center">
-        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Proj Month-End</div>
+        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${MTD_CLOSED?'Month Total':'Proj Month-End'}</div>
         <div style="color:${mayProjMonth>=85000?'#4caf7d':mayProjMonth>=60000?'#f5a623':'#e05555'};font-size:20px;font-weight:900">${mayProjMonth>0?fmt$(mayProjMonth):'—'}</div>
       </div>
       <div style="background:#1a2535;border-radius:8px;padding:12px;text-align:center">
-        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">August M/U</div>
+        <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${titleCase(MTD_LABEL)} M/U</div>
         <div style="color:${mayMu>=1.75?'#4caf7d':mayMu>=1.60?'#f5a623':mayMu>0?'#e05555':'#5a6375'};font-size:20px;font-weight:900">${mayMu>0?mayMu.toFixed(3):'—'}</div>
       </div>
       <div style="background:#1a2535;border-radius:8px;padding:12px;text-align:center">
         <div style="color:#8892a4;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Monthly Goal</div>
-        <div style="color:#4caf7d;font-size:15px;font-weight:900;padding-top:2px">${(()=>{const bd=BONUS_DATA[repId];return bd&&bd.tiers&&bd.tiers.length?fmt$(bd.tiers[bd.tiers.length-1].t):'—';})()}</div>
-        <div style="color:#5a6375;font-size:10px;margin-top:2px">Top-tier target</div>
+        <div style="color:#4caf7d;font-size:15px;font-weight:900;padding-top:2px">${goalApplies&&topTier?fmt$(topTier):'—'}</div>
+        <div style="color:#5a6375;font-size:10px;margin-top:2px">${goalApplies?'Top-tier target':'Tiers are for '+titleCase(BONUS_MONTH)}</div>
       </div>
     </div>
     <div style="background:#1a2535;border-radius:6px;height:10px;overflow:hidden;margin-bottom:6px">
@@ -20053,7 +20080,7 @@ if(mayMtdEl){
     </div>
     <div style="display:flex;justify-content:space-between;font-size:10px;color:#5a6375">
       <span>MTD: ${fmt$(maySell)} (${mayShipPct}% of projected)</span>
-      <span>Goal: ${(()=>{const bd=BONUS_DATA[repId];return bd&&bd.tiers&&bd.tiers.length?fmt$(bd.tiers[bd.tiers.length-1].t)+' (top tier)':'See GSM for targets';})()}</span>
+      <span>Goal: ${goalApplies&&topTier?fmt$(topTier)+' (top tier)':(topTier?'see '+titleCase(BONUS_MONTH)+' bonus above':'See GSM for targets')}</span>
     </div>
   </div>`;
 }
@@ -20081,7 +20108,7 @@ function renderOrders(ppKey){
         <div class="order-cust">${o.cust_name||o.cust_code}</div>
       </div>`;
     if(o.notes&&o.notes.length){
-      h+=`<div class="order-notes">${o.notes.map(n=>`<span>📝 ${n}</span>`).join('')}</div>`;
+      h+=`<div class="order-notes">${o.notes.map(n=>`<span>📝 ${String(n).replace(/_x000D_/g,'')}</span>`).join('')}</div>`;
     }
     h+=`<table class="inner order-table">
       <thead><tr>
@@ -20120,7 +20147,8 @@ function renderOrders(ppKey){
 }
 
 let html='';
-[...D.pay_periods].slice().reverse().forEach(pd=>{
+const ppTime=pd=>{const [mo,d,y]=pd.split('-').map(Number);return new Date(y,mo-1,d).getTime();};
+[...D.pay_periods].sort((a,b)=>ppTime(a)-ppTime(b)).reverse().forEach(pd=>{
   const pr=payroll[pd];
   const gt=pr?pr.grand_total:null;
   html+=`<div class="period-card">
@@ -20215,21 +20243,26 @@ function renderDailyMsg(repId) {
 if(repId==='W603'||repId==='W784'){
   // ── CONFIG ──────────────────────────────────────────────────────────────────
   const SAL_PER_CHECK=3350, GUAR_PER_CHECK=1350, PP_TOTAL=26;
-  const DBW_DAYS_ELAPSED=85+(MAY_DAY||0), DBW_DAYS_TOTAL=253; /* AUDIT FIX 2026-06-09: was hardcoded 86 (~May 3) while sales run thru end of May; 85 biz days Jan-Apr + May progress = 109, fixes ~27% over-projection */
+  const DBW_DAYS_TOTAL=DBW_CAL.reduce((a,c)=>a+c.d,0); /* 253 */
+  const DBW_DAYS_ELAPSED=Math.max(1,DBW_DAYS_DONE); /* FIX 2026-10-05: was 85+MAY_DAY (frozen at May), which made Sept read as 41% of the year */
   const Q_LOW=1250000, Q_LOW_BONUS=9000, Q_HIGH=1500000, Q_HIGH_BONUS=14000;
   const ppElapsed=[...new Set((D.payroll||[]).map(r=>r.payday))].length||D.pay_periods.length||9;
   const myComm=commYTD(repId);
   const myIndivBonus=D.bonus_ytd&&D.bonus_ytd[repId]!=null?D.bonus_ytd[repId]:null;
 
   // ── QUARTERLY OFFICE NETS ────────────────────────────────────────────────────
-  let q1Net=0,q2Net=0;
-  D.monthly.filter(r=>D.roster[r.rep_id]).forEach(r=>{
-    if([1,2,3].includes(r.month))q1Net+=(r.net_sales||0);
-    if([4,5,6].includes(r.month))q2Net+=(r.net_sales||0);
+  // A quarter is done once its last fiscal month has closed; the one holding today's fiscal month is in progress.
+  const qBonusFor=net=>net>=Q_HIGH?Q_HIGH_BONUS:net>=Q_LOW?Q_LOW_BONUS:0;
+  const curFiscal=(()=>{const i=DBW_CAL.findIndex(c=>TODAY<=localDate(c.e));return i<0?12:i+1;})();
+  const quarters=[1,2,3,4].map(qn=>{
+    const months=[qn*3-2,qn*3-1,qn*3];
+    let net=0;
+    D.monthly.filter(r=>D.roster[r.rep_id]&&months.includes(r.month)).forEach(r=>{net+=(r.net_sales||0);});
+    const done=curFiscal>months[2];
+    const inProg=!done&&curFiscal>=months[0];
+    return {q:'Q'+qn,net,bonus:done?qBonusFor(net):null,done,inProg};
   });
-  const q1Bonus=q1Net>=Q_LOW?(q1Net>=Q_HIGH?Q_HIGH_BONUS:Q_LOW_BONUS):0;
-  const q1Done=true;
-  const qEarned=q1Bonus;
+  const qEarned=quarters.filter(q=>q.done).reduce((a,q)=>a+q.bonus,0);
 
   // ── PACE HELPERS ─────────────────────────────────────────────────────────────
   const paceEOY=(val,days)=>days>0?(val/days)*DBW_DAYS_TOTAL:0;
@@ -20260,24 +20293,18 @@ if(repId==='W603'||repId==='W784'){
   }
 
   // ── QUARTERLY BONUS CARDS ────────────────────────────────────────────────────
-  const quarters=[
-    {q:'Q1',net:q1Net,bonus:q1Bonus,done:true},
-    {q:'Q2',net:q2Net,bonus:null,done:false},
-    {q:'Q3',net:null,bonus:null,done:false},
-    {q:'Q4',net:null,bonus:null,done:false},
-  ];
   const qCardsHtml=quarters.map(q=>{
     if(q.done){
-      return '<div class="gsm-card gc-earned">'+
-        '<div class="gc-label">'+q.q+' ✓ Earned</div>'+
+      return '<div class="gsm-card'+(q.bonus>0?' gc-earned':'')+'">'+
+        '<div class="gc-label">'+q.q+(q.bonus>0?' ✓ Earned':' Closed · no bonus')+'</div>'+
         '<div class="gc-value">'+fmt$(q.bonus)+'</div>'+
         '<div class="gc-sub">Office: '+fmt$(q.net)+'</div>'+
       '</div>';
     }
-    const pct=q.net&&q.net>0?Math.min(Math.round((q.net/Q_LOW)*100),100):0;
-    const toLow=q.net&&q.net>0?Math.max(0,Q_LOW-q.net):null;
-    const toHigh=q.net&&q.net>0?Math.max(0,Q_HIGH-q.net):null;
-    const inProg=q.q==='Q2'&&q.net>0;
+    const pct=q.net>0?Math.min(Math.round((q.net/Q_LOW)*100),100):0;
+    const toLow=Math.max(0,Q_LOW-(q.net||0));
+    const toHigh=Math.max(0,Q_HIGH-(q.net||0));
+    const inProg=q.inProg;
     return '<div class="gsm-card">'+
       '<div class="gc-label">'+q.q+(inProg?' In Progress':' Upcoming')+'</div>'+
       (inProg?
@@ -20326,7 +20353,8 @@ if(repId==='W603'||repId==='W784'){
   :'';
 
   // ── PROJECTED TOTALS ─────────────────────────────────────────────────────────
-  const qBonusProjected=Q_LOW_BONUS*4;
+  // Earned quarters at what they actually paid, open quarters at the low bonus (conservative).
+  const qBonusProjected=quarters.reduce((a,q)=>a+(q.done?q.bonus:Q_LOW_BONUS),0);
   const totalYTD=(repId==='W784'?salYTD+guarYTD:0)+qEarned+myComm+(myIndivBonus||0);
   const totalEOY=(repId==='W784'?salEOY+guarEOY:0)+qBonusProjected+commPaced+(myIndivBonus||0);
   const totalPacePct=totalEOY>0?Math.min(Math.round((totalYTD/totalEOY)*100),100):0;
@@ -20339,7 +20367,7 @@ if(repId==='W603'||repId==='W784'){
       '<div class="gp-value">'+fmt$(totalEOY)+'</div>'+
       '<div class="gp-sub">'+
         (repId==='W784'?'Salary $'+salEOY.toLocaleString()+' + Guar $'+guarEOY.toLocaleString()+' + ':'')+
-        'Q Bonuses $'+qBonusProjected.toLocaleString()+' (conservative 4×low) + Commission $'+Math.round(commPaced).toLocaleString()+
+        'Q Bonuses $'+qBonusProjected.toLocaleString()+' (earned + low for open quarters) + Commission $'+Math.round(commPaced).toLocaleString()+
       '</div>'+
       '<div style="margin-top:12px;background:#1a2030;border-radius:4px;height:8px">'+
         '<div style="background:#4caf7d;width:'+totalPacePct+'%;height:100%;border-radius:4px"></div>'+
