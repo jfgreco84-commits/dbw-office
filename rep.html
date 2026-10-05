@@ -20091,6 +20091,14 @@ const payroll={};
 (D.payroll||[]).filter(r=>r.rep_id===repId).forEach(r=>{payroll[r.payday]=r;});
 const repOrders=(D.payroll_orders&&D.payroll_orders[repId])||{};
 
+// Backstop for tools/card_guard.py: never show a card number, its date or codes, even if one reaches the data.
+function luhnOk(d){let t=0;for(let i=0;i<d.length;i++){let x=+d[d.length-1-i];if(i%2){x*=2;if(x>9)x-=9;}t+=x;}return t%10===0;}
+function maskCards(t){
+  return t.replace(/(\d{12,19}|\d{4}[ -]\d{6}[ -]\d{4,5}|\d{4}(?:[ -]\d{4}){2,3})(?!\d)(\s*(?:0?[1-9]|1[0-2])\s*\/\s*(?:\d{4}|\d{2}))?((?:\s*\d{3,4}(?![\d\/])){0,2})/g,(all,pan,exp)=>{
+    const d=pan.replace(/\D/g,'');
+    return (exp||(d.length>=13&&'3456'.includes(d[0])&&luhnOk(d)))?'[CARD REMOVED ****'+d.slice(-4)+']':all;
+  }).replace(/\b(cvv2?|cvc2?|cid)\s*[:#]?\s*\d{3,4}\b/gi,'[CODE REMOVED]');
+}
 function renderOrders(ppKey){
   const ords=repOrders[ppKey]||[];
   if(!ords.length) return '<p class="no-data" style="padding:6px 0">No ship sheet orders found for this period.</p>';
@@ -20108,7 +20116,7 @@ function renderOrders(ppKey){
         <div class="order-cust">${o.cust_name||o.cust_code}</div>
       </div>`;
     if(o.notes&&o.notes.length){
-      h+=`<div class="order-notes">${o.notes.map(n=>`<span>📝 ${String(n).replace(/_x000D_/g,'')}</span>`).join('')}</div>`;
+      h+=`<div class="order-notes">${o.notes.map(n=>`<span>📝 ${maskCards(String(n).replace(/_x000D_/g,''))}</span>`).join('')}</div>`;
     }
     h+=`<table class="inner order-table">
       <thead><tr>

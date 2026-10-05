@@ -1,0 +1,62 @@
+name: card-guard
+
+# Fails (and emails the owner) the moment card data reaches GitHub on any branch,
+# and runs the guard's own tests. The PC pre-commit hook (tools/hooks/pre-commit)
+# is what keeps card data out of commits; this is the alarm if it is ever bypassed.
+#
+# Optional second layer, off until switched on: when the repository variable
+# PAGES_VIA_ACTIONS is "true" and Settings > Pages > Source is "GitHub Actions",
+# the site is deployed from here with every page scrubbed first, so the live site
+# never serves card data even if a bad commit lands.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guard tests
+        run: python3 tools/card_guard_test.py
+      - name: No card data in published files
+        run: |
+          git ls-files -z -- '*.html' '*.json' '*.js' '*.md' '*.csv' '*.txt' \
+            | grep -zv '^tools/card_guard' \
+            | xargs -0 python3 tools/card_guard.py --check
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the site with card data masked
+        run: |
+          mkdir _site
+          git ls-files -z | grep -zv -e '^\.github/' -e '^tools/' -e '^_inbox/' -e '^cloud_board/' \
+            | xargs -0 -I{} cp --parents {} _site/
+          touch _site/.nojekyll
+          find _site -type f \( -name '*.html' -o -name '*.json' -o -name '*.js' \) -print0 \
+            | xargs -0 python3 tools/card_guard.py --fix
+          find _site -type f \( -name '*.html' -o -name '*.json' -o -name '*.js' \) -print0 \
+            | xargs -0 python3 tools/card_guard.py --check
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
