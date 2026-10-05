@@ -203,7 +203,7 @@ var SEED={week_start:"2026-09-28",month:"2026-10",quarter:"2026-Q4",fiscal_month
   }
 } // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
 var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
-var BOARD_VER="2026-10-02_120111"; /* bump on every board.html push -- TV auto-reloads when changed */
+var BOARD_VER="2026-10-05_180000"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
 function fBig(n){return n>=1000000?"$"+(n/1000000).toFixed(2)+"M":fK(n);}
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
@@ -295,10 +295,16 @@ return"Last synced: "+mo+"/"+dy+" "+(h%12||12)+":"+mn+" "+(h>=12?"PM":"AM")+" CT
 }
 function hdr(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
 function gel(id){return document.getElementById(id);}
+/* CLOUD_OK: a cloud read has succeeded this session. Until then the board never writes,
+   so a failed or timed-out read can't push stale SEED/local numbers over the live ones.
+   SB_READ_OK: whether the most recent read reached the cloud (null = it failed). */
+var CLOUD_OK=false,SB_READ_OK=false;
 async function sbGet(){
-try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK+"&select=data_value",{headers:{apikey:_k,"Authorization":"Bearer "+_k}});if(!r.ok)return null;var rows=await r.json();return(rows&&rows.length>0)?rows[0].data_value:null;}catch(e){return null;}
+SB_READ_OK=false;
+try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK+"&select=data_value",{headers:{apikey:_k,"Authorization":"Bearer "+_k}});if(!r.ok)return null;var rows=await r.json();SB_READ_OK=true;CLOUD_OK=true;return(rows&&rows.length>0)?rows[0].data_value:null;}catch(e){return null;}
 }
 async function sbSet(data){
+if(!CLOUD_OK){try{localStorage.setItem("dbw_b",JSON.stringify(data));}catch(e){}return false;}
 try{var r=await fetch(SBU+"/rest/v1/app_data?user_id=eq."+UID+"&data_key=eq."+DK,{method:"PATCH",headers:{apikey:_k,"Authorization":"Bearer "+_k,"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({data_value:data})});localStorage.setItem("dbw_b",JSON.stringify(data));return r.status===204||r.status===200;}catch(e){localStorage.setItem("dbw_b",JSON.stringify(data));return false;}
 }
 function fiscalKeys(){
@@ -339,7 +345,7 @@ d.quarter_shipped=(d.quarter_shipped||0)+monthShipped;
 Object.keys(d.reps).forEach(function(id){
 var rep=d.reps[id];
 rep.ytd=(rep.ytd||0)+(rep.shipped||0);
-rep.mtd_prev=0;rep.mu=0;rep.mtd_mu=0;rep.shipped=0;
+rep.mtd_prev=0;rep.mtd_mu=0;rep.shipped=0; /* rep.mu is YTD M/U: it carries across months */
 DAYS.forEach(function(k){rep.week[k]=0;});
 });
 d.fiscal_month=fk.fm;ch=true;
@@ -480,14 +486,14 @@ else rep.shipped=val;
 closeM();render(BD);
 hdr("hU","Saving...");
 var ok=await sbSet(BD);
-hdr("hU",(ok?"✓ Saved — ":"Local — ")+fSync());
+hdr("hU",ok?"✓ Saved — "+fSync():"⚠ OFFLINE — this entry is NOT saved to the cloud");
 }
 gel("mI").addEventListener("keydown",function(e){if(e.key==="Enter")saveM();if(e.key==="Escape")closeM();});
 gel("modal").addEventListener("click",function(e){if(e.target===gel("modal"))closeM();});
 var rt;
 function startR(){
 clearInterval(rt);
-rt=setInterval(async function(){var f=await sbGet();if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);}hdr("hU",fSync());},30000);
+rt=setInterval(async function(){var f=await sbGet();if(f){BD=f;if(rollover(BD))await sbSet(BD);render(BD);}hdr("hU",SB_READ_OK?fSync():"⚠ OFFLINE — showing last numbers, retrying");},30000);
 }
 /* A pushed SEED (Colin's shipped/M-U, JJ's written numbers) is applied to the live
    store ONCE per SEED. Before this, a new SEED only mattered while the store was
@@ -506,6 +512,9 @@ if(d.seed_hash===undefined&&d.seed_ver===LEGACY_SEED.ver)d.seed_hash=LEGACY_SEED
 if(d.seed_ver==="2026-09-17_134958")d.seed_ver="2026-09-17_085258"; /* that one push was stamped in UTC; the desktop script stamps Central */
 if(d.seed_hash===h)return false; /* this exact seed is already in the store */
 if((d.seed_ver||"")>BOARD_VER)return false; /* store already carries a newer seed */
+/* A seed still describing a fiscal month the store has already closed would put that month's
+   shipped back and re-bank it into YTD and the quarter on the next rollover. Skip it. */
+if(SEED.fiscal_month&&d.fiscal_month&&SEED.fiscal_month<d.fiscal_month)return false;
 var sd=JSON.parse(JSON.stringify(SEED));
 ["week_start","month","quarter","fiscal_month","fiscal_quarter","quarter_shipped","mgr"].forEach(function(k){if(sd[k]!==undefined)d[k]=sd[k];});
 var today=tKey(),yk=yKey();
@@ -536,7 +545,7 @@ hdr("hU","Loading...");
 var data=null;
 localStorage.removeItem("dbw_b");
 try{data=await sbGet();}catch(e){}
-if(!data){data=JSON.parse(JSON.stringify(SEED));data.seed_ver=BOARD_VER;data.seed_hash=seedHash();hdr("hU","Using local data");}
+if(!data){data=JSON.parse(JSON.stringify(SEED));data.seed_ver=BOARD_VER;data.seed_hash=seedHash();}
 else if(applySeed(data)){try{await sbSet(data);}catch(e){}}
 /* Non-destructive rollover on load */
 if(rollover(data))await sbSet(data);
@@ -545,7 +554,7 @@ Object.keys(data.reps).forEach(function(id){if(data.reps[id].mu===undefined)data
 BD=data;
 try{render(BD);}catch(e){hdr("hU","Render error: "+e.message);console.error(e);return;}
 startR();
-hdr("hU",fSync());
+hdr("hU",SB_READ_OK?fSync():"⚠ OFFLINE — showing saved numbers, retrying");
 }
 /* ---- TV AUTO-RELOAD: load new versions on the screen without a manual cache-bust ---- */
 setInterval(function(){
