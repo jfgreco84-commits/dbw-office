@@ -1,13 +1,10 @@
 name: card-guard
 
-# Fails (and emails the owner) the moment card data reaches GitHub on any branch,
-# and runs the guard's own tests. The PC pre-commit hook (tools/hooks/pre-commit)
-# is what keeps card data out of commits; this is the alarm if it is ever bypassed.
-#
-# Optional second layer, off until switched on: when the repository variable
-# PAGES_VIA_ACTIONS is "true" and Settings > Pages > Source is "GitHub Actions",
-# the site is deployed from here with every page scrubbed first, so the live site
-# never serves card data even if a bad commit lands.
+# Customer card data must never be published from this repo.
+#  - check:   fails (and emails the owner) when a push carries card data; runs the guard tests.
+#  - autofix: masks it and pushes the cleaned files, then rebuilds the site, so the
+#             desktop automations can't keep card data on the site even on a PC without
+#             the pre-commit hook (tools/hooks/pre-commit).
 
 on:
   push:
@@ -30,33 +27,43 @@ jobs:
             | grep -zv '^tools/card_guard' \
             | xargs -0 python3 tools/card_guard.py --check
 
-  deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true'
+  autofix:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
+      contents: write
       pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     concurrency:
-      group: pages
+      group: card-guard-${{ github.ref }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
-      - name: Build the site with card data masked
-        run: |
-          mkdir _site
-          git ls-files -z | grep -zv -e '^\.github/' -e '^tools/' -e '^_inbox/' -e '^cloud_board/' \
-            | xargs -0 -I{} cp --parents {} _site/
-          touch _site/.nojekyll
-          find _site -type f \( -name '*.html' -o -name '*.json' -o -name '*.js' \) -print0 \
-            | xargs -0 python3 tools/card_guard.py --fix
-          find _site -type f \( -name '*.html' -o -name '*.json' -o -name '*.js' \) -print0 \
-            | xargs -0 python3 tools/card_guard.py --check
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          ref: ${{ github.ref }}
+      - name: Mask card data and push the cleaned files
+        id: fix
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -e
+          scan() { git ls-files -z -- '*.html' '*.json' '*.js' '*.md' '*.csv' '*.txt' | grep -zv '^tools/card_guard' | xargs -0 python3 tools/card_guard.py --check >/dev/null; }
+          if scan; then echo "no card data"; echo "pushed=no" >> "$GITHUB_OUTPUT"; exit 0; fi
+          # The desktop automations push several commits a minute apart; let that burst finish.
+          if [ "$BRANCH" = main ]; then sleep 90; fi
+          git config user.name "card-guard"
+          git config user.email "card-guard@users.noreply.github.com"
+          for attempt in 1 2 3 4; do
+            git fetch -q origin "$BRANCH" && git reset -q --hard "origin/$BRANCH"
+            if scan; then echo "already clean"; echo "pushed=no" >> "$GITHUB_OUTPUT"; exit 0; fi
+            git ls-files -z -- '*.html' '*.json' '*.js' '*.md' '*.csv' '*.txt' | grep -zv '^tools/card_guard' \
+              | xargs -0 python3 tools/card_guard.py --fix
+            git commit -qam "card-guard: masked card data"
+            if git push -q origin "HEAD:$BRANCH"; then echo "pushed=yes" >> "$GITHUB_OUTPUT"; exit 0; fi
+            sleep $((attempt * 20))
+          done
+          echo "card-guard: could not push the cleaned files"; exit 1
+      - name: Rebuild the site from the cleaned commit
+        if: steps.fix.outputs.pushed == 'yes' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages rebuild request failed; the next push will deploy the cleaned files."
