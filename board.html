@@ -184,26 +184,28 @@ transition:border-color .15s,box-shadow .15s;
 var _k="sb_publishable_WeQ8Xw3xKkTr1KqRyRt_Iw_IT1_qph4";
 var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-87225ea4909d",DK="boardData";
 var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
-var SEED={week_start:"2026-10-05",month:"2026-10",quarter:"2026-Q4",fiscal_month:"2026-10",fiscal_quarter:"2026-Q4",quarter_shipped:0,reported_days:["mon","tue","wed"],
+var SEED={week_start:"2026-10-05",month:"2026-10",quarter:"2026-Q4",fiscal_month:"2026-10",fiscal_quarter:"2026-Q4",quarter_shipped:0,reported_days:["mon"],
   mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.9402,ytd_mu:1.7649},
+  /* One-time: Sep 29 Tue written that bad 10/06 seeds put on THIS Tuesday. Cleared only where the cell still holds exactly that number. */
+  clear_stale:{date:"2026-10-06",day:"tue",reps:{W839:1040,W603:5930,W784:16825,W973:4009,W959:737,W909:3625}},
   reps:{
-    W839:{name:"RONNY B       ", ytd:546044 , goal:75000  , shipped:0     , mu:1.7432, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:1040  ,wed:0     ,thu:0     ,fri:0}},
-    W930:{name:"ADAM MISUREK  ", ytd:498977 , goal:75000  , shipped:8051  , mu:1.9972, mtd_mu:2.0182, mtd_prev:0      , week:{mon:11206 ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W784:{name:"FROGGY        ", ytd:506613 , goal:50000  , shipped:0     , mu:1.7078, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:16825 ,wed:0     ,thu:0     ,fri:0}},
-    W603:{name:"ADAM WEST     ", ytd:500438 , goal:50000  , shipped:0     , mu:1.6373, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:5930  ,wed:5125  ,thu:0     ,fri:0}},
-    W983:{name:"SCOT TOPORSH  ", ytd:441890 , goal:50000  , shipped:0     , mu:1.734, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W973:{name:"TJ SUTTON     ", ytd:201288 , goal:30000  , shipped:0     , mu:1.9403, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:4009  ,wed:0     ,thu:0     ,fri:0}},
-    W849:{name:"JOHN BAEMMERT ", ytd:188879 , goal:30000  , shipped:0     , mu:1.7627, mtd_mu:0, mtd_prev:0      , week:{mon:255   ,tue:0     ,wed:590   ,thu:0     ,fri:0}},
-    W962:{name:"CHRIS K       ", ytd:141689 , goal:15000  , shipped:0     , mu:1.872, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W762:{name:"KERRY SMITH   ", ytd:81302  , goal:10000  , shipped:4025  , mu:1.8151, mtd_mu:1.8009, mtd_prev:0      , week:{mon:4025  ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W959:{name:"CASSIE        ", ytd:77646  , goal:10000  , shipped:0     , mu:1.7552, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:737   ,wed:1500  ,thu:0     ,fri:0}},
-    W909:{name:"LUIS MILLAN   ", ytd:48706  , goal:5000   , shipped:0     , mu:1.5858, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:3625  ,wed:567   ,thu:0     ,fri:0}},
-    W934:{name:"LESLIE KUBENY ", ytd:38812  , goal:5000   , shipped:0     , mu:1.5934, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W938:{name:"GEOFF NURSE   ", ytd:22459  , goal:5000   , shipped:0     , mu:1.7745, mtd_mu:0, mtd_prev:0      , week:{mon:255   ,tue:0     ,wed:0     ,thu:0     ,fri:0}}
+    W839:{name:"RONNY B       ", ytd:588641 , goal:75000  , shipped:0     , mu:1.7432, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W930:{name:"ADAM MISUREK  ", ytd:526878 , goal:75000  , shipped:8051  , mu:1.9972, mtd_mu:2.0182, mtd_prev:0      , week:{mon:11206 ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W784:{name:"FROGGY        ", ytd:556289 , goal:50000  , shipped:0     , mu:1.7078, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W603:{name:"ADAM WEST     ", ytd:584072 , goal:50000  , shipped:0     , mu:1.6373, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W983:{name:"SCOT TOPORSH  ", ytd:481613 , goal:50000  , shipped:0     , mu:1.734, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W973:{name:"TJ SUTTON     ", ytd:217579 , goal:30000  , shipped:0     , mu:1.9403, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W849:{name:"JOHN BAEMMERT ", ytd:197306 , goal:30000  , shipped:0     , mu:1.7627, mtd_mu:0, mtd_prev:0      , week:{mon:255   ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W962:{name:"CHRIS K       ", ytd:146972 , goal:15000  , shipped:0     , mu:1.872, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W762:{name:"KERRY SMITH   ", ytd:96670  , goal:10000  , shipped:4025  , mu:1.8151, mtd_mu:1.8009, mtd_prev:0      , week:{mon:4025  ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W959:{name:"CASSIE        ", ytd:87495  , goal:10000  , shipped:0     , mu:1.7552, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W909:{name:"LUIS MILLAN   ", ytd:74776  , goal:5000   , shipped:0     , mu:1.5858, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W934:{name:"LESLIE KUBENY ", ytd:39934  , goal:5000   , shipped:0     , mu:1.5934, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
+    W938:{name:"GEOFF NURSE   ", ytd:23411  , goal:5000   , shipped:0     , mu:1.7745, mtd_mu:0, mtd_prev:0      , week:{mon:255   ,tue:0     ,wed:0     ,thu:0     ,fri:0}}
   }
 } // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
 var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
-var BOARD_VER="2026-10-06_120056"; /* bump on every board.html push -- TV auto-reloads when changed */
+var BOARD_VER="2026-10-06_121000"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
 function fBig(n){return n>=1000000?"$"+(n/1000000).toFixed(2)+"M":fK(n);}
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
@@ -516,6 +518,7 @@ if((d.seed_ver||"")>BOARD_VER)return false; /* store already carries a newer see
    shipped back and re-bank it into YTD and the quarter on the next rollover. Skip it. */
 if(SEED.fiscal_month&&d.fiscal_month&&SEED.fiscal_month<d.fiscal_month)return false;
 var sd=JSON.parse(JSON.stringify(SEED));
+var storeFM=d.fiscal_month,thisWeek=sd.week_start===getMon(new Date());
 ["week_start","month","quarter","fiscal_month","fiscal_quarter","quarter_shipped","mgr"].forEach(function(k){if(sd[k]!==undefined)d[k]=sd[k];});
 var today=tKey(),yk=yKey();
 Object.keys(sd.reps).forEach(function(id){
@@ -537,6 +540,11 @@ s.mtd_prev=(s.mtd_prev||0)-(wkSum(s.week)-(today?(s.week[today]||0):0));
 /* A seed carrying $0 for today never beats a number already tapped into today's cell. */
 if(today&&!(s.week[today]>0)&&r.week[today]>0)s.week[today]=r.week[today];
 }
+/* Guards against a desktop seed built from stale data (10/06 put Sep 29-30 on this week and
+   dropped September from YTD). JJ's sheet runs through yesterday, so a seed never sets today or a
+   later day this week; and the YTD baseline (prior months' shipped) never shrinks inside a fiscal month. */
+if(thisWeek&&s.week&&r.week){var ti=DAYS.indexOf(today);if(ti>=0)DAYS.forEach(function(k,i){if(i===ti)s.week[k]=r.week[k]||0;else if(i>ti)s.week[k]=0;});}
+if(storeFM===sd.fiscal_month&&s.ytd!==undefined&&(r.ytd||0)>s.ytd)s.ytd=r.ytd;
 ["name","ytd","goal","shipped","mu","mtd_mu","mtd_prev","week"].forEach(function(k){if(s[k]!==undefined)r[k]=s[k];});
 });
 d.seed_ver=BOARD_VER;d.seed_hash=h;return true;
