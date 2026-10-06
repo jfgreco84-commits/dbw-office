@@ -186,6 +186,8 @@ var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-
 var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
 var SEED={week_start:"2026-10-05",month:"2026-10",quarter:"2026-Q4",fiscal_month:"2026-10",fiscal_quarter:"2026-Q4",quarter_shipped:0,reported_days:["mon"],
   mgr:{low_target:1245067,high_target:1458507,mtd_mu:0.0,ytd_mu:1.7644},
+  /* One-time: Sep 29 Tue written that the bad 10/06 seed put on THIS Tuesday. Cleared only where the cell still holds exactly that number. */
+  clear_stale:{date:"2026-10-06",day:"tue",reps:{W839:1040,W603:5930,W784:16825,W973:4009,W959:737,W909:3625}},
   reps:{
     W839:{name:"RONNY B       ", ytd:588641 , goal:75000  , shipped:0     , mu:1.7432, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
     W603:{name:"ADAM WEST     ", ytd:584072 , goal:50000  , shipped:0     , mu:1.6373, mtd_mu:0, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
@@ -203,7 +205,7 @@ var SEED={week_start:"2026-10-05",month:"2026-10",quarter:"2026-Q4",fiscal_month
   }
 } // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
 var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
-var BOARD_VER="2026-10-06_120000"; /* bump on every board.html push -- TV auto-reloads when changed */
+var BOARD_VER="2026-10-06_133000"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
 function fBig(n){return n>=1000000?"$"+(n/1000000).toFixed(2)+"M":fK(n);}
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
@@ -520,6 +522,7 @@ var sd=JSON.parse(JSON.stringify(SEED));
 var today=tKey(),yk=yKey();
 Object.keys(sd.reps).forEach(function(id){
 var r=d.reps[id]||(d.reps[id]={}),s=sd.reps[id];
+var cs=sd.clear_stale;if(cs&&r.week&&cs.reps[id]!==undefined&&r.week[cs.day]===cs.reps[id])r.week[cs.day]=0;
 if(s.week&&r.week){
 /* The desktop "UPDATE BOARD WRITTEN (JJ)" script hands the board a bare MTD total:
    mtd_prev = JJ's month-to-date, every weekday = $0. Taking that literally blanks
