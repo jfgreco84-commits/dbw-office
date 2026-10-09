@@ -86798,10 +86798,15 @@ const ppTime=pd=>{const [mo,d,y]=pd.split('-').map(Number);return new Date(y,mo-
 [...D.pay_periods].sort((a,b)=>ppTime(a)-ppTime(b)).reverse().forEach(pd=>{
   const pr=payroll[pd];
   const gt=pr?pr.grand_total:null;
+  /* Running tally for the pay period payroll hasn't closed yet: commission on the ShipSheet orders
+     loaded so far. Returns and holds only show up when payroll posts the period. */
+  const ppOrd=repOrders[pd]||[];
+  const soFar=(!pr&&ppOrd.length)?{comm:Math.round(ppOrd.reduce((t,o)=>t+(o.comm_total||0),0)*100)/100,
+    thru:ppOrd.map(o=>o.date).sort((a,b)=>{const t=x=>{const[m,d,y]=x.split('/').map(Number);return new Date(y,m-1,d).getTime();};return t(a)-t(b);}).pop().slice(0,5)}:null;
   html+=`<div class="period-card">
   <div class="period-header" onclick="toggle(this)">
     <div><span class="period-payday">${pr?`📅 Payday: ${pd}`:`🟢 THIS PAY PERIOD · payday ${pd}`}</span><span class="hint" style="font-size:11px;color:#5a6375;margin-left:10px">▼ show detail</span></div>
-    <div class="period-earned" style="color:${gt==null?'#5a6375':gt<0?'#e05555':gt===0?'#8892a4':'#4caf7d'}">${gt!=null?fmt$(gt):(repOrders[pd]&&repOrders[pd].length?'IN PROGRESS':'—')}</div>
+    <div class="period-earned" style="color:${gt==null?(soFar?'#e0b84c':'#5a6375'):gt<0?'#e05555':gt===0?'#8892a4':'#4caf7d'}">${gt!=null?fmt$(gt):(soFar?fmt$(soFar.comm)+`<div style="font-size:10px;font-weight:700;color:#8892a4;letter-spacing:.5px">SO FAR · SHIPPED THRU ${soFar.thru}</div>`:'—')}</div>
   </div>
   <div class="period-body">`;
 
