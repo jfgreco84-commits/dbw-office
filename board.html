@@ -199,11 +199,12 @@ var SEED={week_start:"2026-10-19",month:"2026-10",quarter:"2026-Q4",fiscal_month
     W959:{name:"CASSIE        ", ytd:87496  , goal:10000  , shipped:1373  , mu:1.7586, mtd_mu:2.043, mtd_prev:1373   , week:{mon:0     ,tue:0     ,wed:0     ,thu:1680  ,fri:0}},
     W909:{name:"LUIS MILLAN   ", ytd:74931  , goal:10000  , shipped:9755  , mu:1.597, mtd_mu:1.698, mtd_prev:8368   , week:{mon:3450  ,tue:16650 ,wed:0     ,thu:0     ,fri:0}},
     W934:{name:"LESLIE KUBENY ", ytd:39934  , goal:10000  , shipped:406   , mu:1.5898, mtd_mu:1.3013, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
-    W938:{name:"GEOFF NURSE   ", ytd:23807  , goal:10000  , shipped:110   , mu:1.7797, mtd_mu:2.2807, mtd_prev:0      , week:{mon:0     ,tue:260   ,wed:0     ,thu:0     ,fri:0}}
+    W938:{name:"GEOFF NURSE   ", ytd:23807  , goal:10000  , shipped:110   , mu:1.7797, mtd_mu:2.2807, mtd_prev:0      , week:{mon:0     ,tue:260   ,wed:0     ,thu:0     ,fri:0}},
+    MISC:{name:"MISC - WI     ", misc:true, ytd:0, goal:0, shipped:0, mu:0, mtd_mu:0, mtd_prev:406, week:{mon:0,tue:0,wed:0,thu:5711,fri:0}}
   }
 } // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
 var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
-var BOARD_VER="2026-10-23_100115"; /* bump on every board.html push -- TV auto-reloads when changed */
+var BOARD_VER="2026-10-23_114103"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
 function fBig(n){return n>=1000000?"$"+(n/1000000).toFixed(2)+"M":fK(n);}
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
@@ -399,7 +400,7 @@ var hcols=["<th class='hY'>YTD</th>","<th class='hMU'>YTD M/U</th>","<th class='
 DAYS.forEach(function(d,i){hcols.push("<th class='hD"+(tk===d?" tc":"")+"'>"+DL[i]+(tk===d?" &#9670;":"")+"</th>");});
 hcols.push("<th class='hW'>THIS WEEK</th><th class='hM'>MTD WRITTEN</th><th class='hS'>MTD SHIPPED</th><th class='hMTDMU'>MTD M/U</th><th class='hG'>GOAL</th><th class='hP'>% GOAL (SHIPPED)</th>");
 gel("thr").innerHTML=hcols.join("");
-var ids=Object.keys(data.reps).filter(function(id){return !HIDDEN_REPS[id];}).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
+var ids=Object.keys(data.reps).filter(function(id){return !HIDDEN_REPS[id]&&!data.reps[id].misc;}).sort(function(a,b){return (data.reps[b].ytd+(data.reps[b].shipped||0))-(data.reps[a].ytd+(data.reps[a].shipped||0));});
 var oW=0,oM=0,oS=0,oG=0,oY=0,dt=DAYS.map(function(){return 0;}),rows=[];
 var yf=yearFraction(); /* fraction of full year elapsed — used for YTD pace coloring */
 ids.forEach(function(id,rank){
@@ -439,6 +440,21 @@ rows.push("<tr class='"+rk+"'><td class='cY"+(ytdCls?" "+ytdCls:"")+"'>"+fK(ytdT
 "<td class='cS"+(hit?" gh":"")+"' onclick='openS(\""+id+"\")'>"+(shipped>0?"$"+shipped.toLocaleString():"&mdash;")+"</td>"+
 "<td class='cMTDMU'>"+mmuH+"</td>"+
 "<td class='cG'>"+fK(goal)+"</td>"+pc+"</tr>");
+});
+/* MISC - WI: JJ's unassigned written dollars. No rank, goal or shipped; it counts in
+   the written totals so OFFICE TOTAL matches JJ's WI TOTALS row to the dollar. */
+Object.keys(data.reps).filter(function(id){return !HIDDEN_REPS[id]&&data.reps[id].misc;}).forEach(function(id){
+var rep=data.reps[id];
+var wk=DAYS.reduce(function(s,k){return s+(rep.week[k]||0);},0),mtd=(rep.mtd_prev||0)+wk;
+DAYS.forEach(function(k,i){dt[i]+=(rep.week[k]||0);});
+oW+=wk;oM+=mtd;
+var dc=DAYS.map(function(k){
+var v=rep.week[k]||0;
+return"<td class='cD"+(tk===k?" tc":"")+"' onclick='openD(\""+id+"\",\""+k+"\")'>"+(v>0?"<span class='dg' style='color:#aaa;'>$"+v.toLocaleString()+"</span>":"<span class='de'>&mdash;</span>")+"</td>";
+}).join("");
+rows.push("<tr style='color:#aaa;'><td class='cY'><span class='de'>&mdash;</span></td><td class='cMU'><span class='de'>&mdash;</span></td><td class='cN'>"+rep.name+"</td>"+dc+
+"<td class='cW'>"+(wk>0?"$"+wk.toLocaleString():"&mdash;")+"</td><td class='cM'>"+(mtd>0?"$"+mtd.toLocaleString():"&mdash;")+"</td>"+
+"<td class='cS'><span class='de'>&mdash;</span></td><td class='cMTDMU'><span class='de'>&mdash;</span></td><td class='cG'><span class='de'>&mdash;</span></td><td class='cP'></td></tr>");
 });
 var totD=DAYS.map(function(k,i){var v=dt[i];return"<td class='cD"+(tk===k?" tc":"")+"'>"+(v>0?"$"+v.toLocaleString():rpt.has(k)?"$0":"&mdash;")+"</td>";}).join("");
 var omg=data.mgr&&data.mgr.ytd_mu>0?data.mgr.ytd_mu.toFixed(2)+"x":"&mdash;";
