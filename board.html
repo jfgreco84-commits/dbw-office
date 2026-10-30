@@ -201,7 +201,7 @@ var SEED={week_start:"2026-10-26",month:"2026-10",quarter:"2026-Q4",fiscal_month
     W934:{name:"LESLIE KUBENY ", ytd:39934  , goal:10000  , shipped:5917  , mu:1.6108, mtd_mu:1.739, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
     W938:{name:"GEOFF NURSE   ", ytd:23807  , goal:10000  , shipped:110   , mu:1.7797, mtd_mu:2.2807, mtd_prev:260    , week:{mon:0     ,tue:1725  ,wed:0     ,thu:0     ,fri:0}}
   }
-} // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
+} // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__ // __DBW_SEED_END__;
 var HIDDEN_REPS={W963:true,W953:true}; // terminated 2026-06-01 — excluded from display & totals
 /* MISC - WI (JJ's unassigned written) lives here, OUTSIDE the SEED block: the desktop
    SEED push rewrites that block and doesn't carry MISC yet. ensureMisc() puts it back in the
@@ -217,7 +217,7 @@ if(d.fiscal_month&&d.fiscal_month!==MISC_SEED.fiscal_month){m.mtd_prev=0;DAYS.fo
 else if(d.week_start&&d.week_start!==MISC_SEED.week_start){m.mtd_prev+=DAYS.reduce(function(s,k){return s+(m.week[k]||0);},0);DAYS.forEach(function(k){m.week[k]=0;});}
 d.reps.MISC=m;d.misc_ver=MISC_SEED.ver;return true;
 }catch(e){return false;}}
-var BOARD_VER="2026-10-30_144620"; /* bump on every board.html push -- TV auto-reloads when changed */
+var BOARD_VER="2026-10-30_100107"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
 function fBig(n){return n>=1000000?"$"+(n/1000000).toFixed(2)+"M":fK(n);}
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
