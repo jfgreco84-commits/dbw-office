@@ -185,17 +185,17 @@ var _k="sb_publishable_WeQ8Xw3xKkTr1KqRyRt_Iw_IT1_qph4";
 var SBU="https://ylotwhvkrlobrpdmngul.supabase.co",UID="e1f5af34-415d-4fa8-8c01-87225ea4909d",DK="boardData";
 var DAYS=["mon","tue","wed","thu","fri"],DL=["MON","TUES","WED","THURS","FRI"];
 var SEED={week_start:"2026-10-26",month:"2026-10",quarter:"2026-Q4",fiscal_month:"2026-10",fiscal_quarter:"2026-Q4",quarter_shipped:0,reported_days:["mon","tue","wed","thu"],
-  mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.8329,ytd_mu:1.769},
+  mgr:{low_target:1245067,high_target:1458507,mtd_mu:1.8408,ytd_mu:1.7697},
   reps:{
     W839:{name:"RONNY B       ", ytd:588641 , goal:150000 , shipped:53562 , mu:1.7438, mtd_mu:1.7508, mtd_prev:45798  , week:{mon:0     ,tue:4620  ,wed:4750  ,thu:0     ,fri:0}},
     W603:{name:"ADAM WEST     ", ytd:584073 , goal:80000  , shipped:44228 , mu:1.6378, mtd_mu:1.6443, mtd_prev:64658  , week:{mon:3229  ,tue:100   ,wed:4241  ,thu:0     ,fri:0}},
-    W930:{name:"ADAM MISUREK  ", ytd:529670 , goal:125000 , shipped:59437 , mu:1.9989, mtd_mu:2.0518, mtd_prev:30647  , week:{mon:14429 ,tue:5981  ,wed:9310  ,thu:5000  ,fri:0}},
-    W784:{name:"FROGGY        ", ytd:557914 , goal:100000 , shipped:28734 , mu:1.7147, mtd_mu:1.8539, mtd_prev:24835  , week:{mon:4041  ,tue:0     ,wed:0     ,thu:2390  ,fri:0}},
+    W930:{name:"ADAM MISUREK  ", ytd:529670 , goal:125000 , shipped:64436 , mu:2.0019, mtd_mu:2.0785, mtd_prev:30647  , week:{mon:14429 ,tue:5981  ,wed:9310  ,thu:5000  ,fri:0}},
+    W784:{name:"FROGGY        ", ytd:557914 , goal:100000 , shipped:31124 , mu:1.7158, mtd_mu:1.8675, mtd_prev:24835  , week:{mon:4041  ,tue:0     ,wed:0     ,thu:2390  ,fri:0}},
     W983:{name:"SCOT TOPORSH  ", ytd:481613 , goal:75000  , shipped:32483 , mu:1.7582, mtd_mu:2.1707, mtd_prev:33356  , week:{mon:950   ,tue:3950  ,wed:0     ,thu:0     ,fri:0}},
-    W973:{name:"TJ SUTTON     ", ytd:219104 , goal:40000  , shipped:17279 , mu:1.9158, mtd_mu:1.6603, mtd_prev:8847   , week:{mon:0     ,tue:3350  ,wed:4806  ,thu:768   ,fri:0}},
-    W849:{name:"JOHN BAEMMERT ", ytd:197893 , goal:40000  , shipped:7911  , mu:1.7655, mtd_mu:1.8287, mtd_prev:7531   , week:{mon:280   ,tue:0     ,wed:792   ,thu:4474  ,fri:0}},
+    W973:{name:"TJ SUTTON     ", ytd:219104 , goal:40000  , shipped:18047 , mu:1.918, mtd_mu:1.6924, mtd_prev:8847   , week:{mon:0     ,tue:3350  ,wed:4806  ,thu:768   ,fri:0}},
+    W849:{name:"JOHN BAEMMERT ", ytd:197893 , goal:40000  , shipped:8160  , mu:1.7658, mtd_mu:1.8337, mtd_prev:7531   , week:{mon:280   ,tue:0     ,wed:792   ,thu:4474  ,fri:0}},
     W962:{name:"CHRIS K       ", ytd:146971 , goal:20000  , shipped:7455  , mu:1.8837, mtd_mu:2.1707, mtd_prev:7455   , week:{mon:0     ,tue:1000  ,wed:0     ,thu:0     ,fri:0}},
-    W762:{name:"KERRY SMITH   ", ytd:96669  , goal:10000  , shipped:10450 , mu:1.8139, mtd_mu:1.798, mtd_prev:8959   , week:{mon:1280  ,tue:210   ,wed:0     ,thu:3840  ,fri:0}},
+    W762:{name:"KERRY SMITH   ", ytd:96669  , goal:10000  , shipped:14289 , mu:1.806, mtd_mu:1.7426, mtd_prev:8959   , week:{mon:1280  ,tue:210   ,wed:0     ,thu:3840  ,fri:0}},
     W909:{name:"LUIS MILLAN   ", ytd:74931  , goal:10000  , shipped:17064 , mu:1.5726, mtd_mu:1.5128, mtd_prev:15319  , week:{mon:0     ,tue:3200  ,wed:0     ,thu:0     ,fri:0}},
     W959:{name:"CASSIE        ", ytd:87496  , goal:10000  , shipped:3053  , mu:1.754, mtd_mu:1.7167, mtd_prev:3053   , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
     W934:{name:"LESLIE KUBENY ", ytd:39934  , goal:10000  , shipped:5917  , mu:1.6108, mtd_mu:1.739, mtd_prev:0      , week:{mon:0     ,tue:0     ,wed:0     ,thu:0     ,fri:0}},
@@ -217,7 +217,7 @@ if(d.fiscal_month&&d.fiscal_month!==MISC_SEED.fiscal_month){m.mtd_prev=0;DAYS.fo
 else if(d.week_start&&d.week_start!==MISC_SEED.week_start){m.mtd_prev+=DAYS.reduce(function(s,k){return s+(m.week[k]||0);},0);DAYS.forEach(function(k){m.week[k]=0;});}
 d.reps.MISC=m;d.misc_ver=MISC_SEED.ver;return true;
 }catch(e){return false;}}
-var BOARD_VER="2026-10-30_100107"; /* bump on every board.html push -- TV auto-reloads when changed */
+var BOARD_VER="2026-10-30_181131"; /* bump on every board.html push -- TV auto-reloads when changed */
 var BD=null,EC=null;
 function fBig(n){return n>=1000000?"$"+(n/1000000).toFixed(2)+"M":fK(n);}
 function fK(n){if(n>=100000)return"$"+Math.round(n/1000)+"k";if(n>=10000)return"$"+(n/1000).toFixed(1)+"k";return"$"+n.toLocaleString();}
