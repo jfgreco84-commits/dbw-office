@@ -1,0 +1,116 @@
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="DBW Wisco home"><b>DBW</b><i>WISCO</i><small>Diamond Blade Warehouse · Wisconsin</small></a>
+    <div class="search"><input id="q" type="search" placeholder="Search blade, size or part #  (try “Super G 14” or AGT7B7)" aria-label="Search the catalog" autocomplete="off"></div>
+    <a class="top-call" data-phone href="#"></a>
+    <button class="cartbtn" data-cart aria-label="Open cart">Cart <span class="n" id="cartn">0</span></button>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="sawblade" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="eyebrow">Diamond Blade Warehouse · Wisconsin Branch</div>
+    <h1>Reorder your blades in <em>60 seconds.</em></h1>
+    <p class="lead">Every blade, bit and chain we sell, with the price right on it. Tell us what you cut and what you run. Add it to the cart, hit send, and your Wisco rep takes it from there.</p>
+    <div class="hero-cta">
+      <button class="btn hi" data-find>Find my blade</button>
+      <button class="btn ghost" data-pricing>Get my account pricing</button>
+    </div>
+    <ol class="steps"><li>Pick your material</li><li>Pick your saw</li><li>Add to cart</li><li>Send to your rep</li></ol>
+  </div>
+</section>
+
+<section class="finder wrap" id="finder" aria-label="Blade finder">
+  <div class="finder-card">
+    <div class="fq"><h2>What are you cutting? <span>Tap one. Every blade gets a star rating for that material.</span></h2><div class="chips" id="mats"></div></div>
+    <div class="fq"><h2>What saw are you running? <span>We only show sizes that fit.</span></h2><div class="chips" id="saws"></div></div>
+    <div class="fq"><h2>Know your diameter? <span>Optional.</span></h2><div class="chips scroll" id="dias"></div></div>
+  </div>
+</section>
+
+<main class="shop wrap" id="shop">
+  <div class="reorder" id="reorder" hidden>
+    <div><b>Welcome back. Same as last time?</b><p id="reorderinfo"></p></div>
+    <button class="btn hi sm" data-reorder>Reorder my last order</button>
+  </div>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Product categories"></div>
+  <div class="bar">
+    <div class="count" id="count"></div>
+    <div class="right">
+      <button class="clear" id="clear" hidden>Clear filters</button>
+      <label class="cond" for="sort" style="font-size:12.5px;color:var(--muted)">Sort</label>
+      <select id="sort"><option value="best">Best match</option><option value="grade">Top grade first</option><option value="price">Price: low to high</option><option value="az">A to Z</option></select>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="showmore" id="more" hidden><button class="btn line">Show more</button></div>
+</main>
+
+<section class="strip">
+  <div class="wrap">
+    <div><h3>A real rep on every order</h3><p>Nothing here charges a card. Your order lands with your Wisco rep, who confirms price, freight and ship date before it moves.</p></div>
+    <div><h3>List price is the ceiling</h3><p>Account-level, quantity and Platinum pricing all still apply. One button asks your rep for your numbers.</p></div>
+    <div><h3>Graded so you can choose fast</h3><p>Best, Better, Good, Value. Plus a 5-star rating for the exact material you are cutting.</p></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <div><b style="color:var(--asphalt-ink)">DBW Wisco</b> · the Wisconsin branch of Diamond Blade Warehouse · <a data-phone href="#"></a> · <span class="sel" data-oemail></span></div>
+    <div>List prices from the <span data-pl></span> price list, before account discounts. <span data-total></span> items. Prices and availability can change. Your rep confirms every order.</div>
+  </div>
+</footer>
+
+<div class="dock" id="dock" hidden>
+  <div id="dockinfo"></div>
+  <button class="btn hi sm" data-cart>Review order</button>
+</div>
+
+<dialog id="cart" class="sheet" aria-labelledby="carttitle">
+  <div class="d-head"><h2 id="carttitle">Your order</h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <div class="d-body" id="cartbody"></div>
+  <div class="d-foot" id="cartfoot">
+    <div class="tot" id="carttot"></div>
+    <p class="note" id="cartnote"></p>
+    <button class="btn hi block" data-checkout>Send order to my rep</button>
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><button class="more" data-close>Keep shopping</button><button class="more" data-emptycart>Empty cart</button></div>
+  </div>
+</dialog>
+
+<dialog id="send" class="sheet" aria-labelledby="sendtitle">
+  <div class="d-head"><h2 id="sendtitle">Send order to my rep</h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <form class="d-body" id="sendform" novalidate>
+    <p class="note" id="sendintro"></p>
+    <div class="checks" id="discwrap" hidden><div class="field"><label>Which pricing should we check?</label></div><div class="checks" id="discs"></div></div>
+    <div class="two">
+      <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" autocomplete="name" required></div>
+      <div class="field"><label for="f-company">Company</label><input id="f-company" name="company" autocomplete="organization"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"></div>
+      <div class="field"><label for="f-email">Email (optional)</label><input id="f-email" name="email" type="email" autocomplete="email"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="f-rep">Your sales rep</label><select id="f-rep" name="rep"></select></div>
+      <div class="field"><label for="f-po">PO # (optional)</label><input id="f-po" name="po"></div>
+    </div>
+    <div class="field"><label for="f-notes">Notes: ship-to, need-by date, anything else</label><textarea id="f-notes" name="notes"></textarea></div>
+    <div class="field"><label>What your rep receives</label><pre class="order" id="preview"></pre></div>
+    <div class="callout" id="sentmsg" hidden></div>
+  </form>
+  <div class="d-foot">
+    <div class="sendrow">
+      <button class="btn hi" data-email>Email it</button>
+      <button class="btn brand" data-sms id="textbtn" hidden>Text it</button>
+      <button class="btn line" data-copy>Copy it</button>
+    </div>
+    <button class="more" data-share>Copy a reorder link for this cart</button>
+  </div>
+</dialog>
+
+<dialog id="detail" class="modal" aria-labelledby="detailtitle">
+  <div class="d-head"><h2 id="detailtitle"></h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <div class="d-body" id="detailbody"></div>
+  <div class="d-foot"><div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap"><button class="btn line sm" data-close>Back to blades</button><button class="btn hi sm" data-cart>Review order</button></div></div>
+</dialog>
