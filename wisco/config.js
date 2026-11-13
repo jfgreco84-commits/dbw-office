@@ -61,6 +61,12 @@ window.WISCO = {
     "I want to open an account"
   ],
 
+  // Rewards. Change the wording here and it changes everywhere on the site.
+  rewards: {
+    review: "10% off your next order",       // for leaving an honest review, good or bad
+    referrer: "10% off their next order"     // what the person who referred a new customer earns
+  },
+
   // Real customer quotes only. Add them as { quote: "...", who: "Name, Company, City ST" }.
   // The section stays hidden until there is at least one.
   testimonials: [

@@ -379,3 +379,22 @@ ol.next { margin: 0; padding: 12px 12px 12px 32px; background: var(--mist); bord
 
 .tpl { background: var(--mist); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 600 14.5px/1.4 var(--sans); user-select: all; margin: 0 }
 .frank .tpl + .tpl { margin-top: 0 }
+
+/* ---------- checkout v2 ---------- */
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
+.seg button { border: 2px solid var(--line); background: #fff; border-radius: 12px; padding: 12px 10px; text-align: left; display: grid; gap: 2px; min-height: 64px }
+.seg button b { font: 900 15px var(--sans); color: var(--navy-2); letter-spacing: .02em } .seg button span { font: 600 12.5px var(--sans); color: var(--muted) }
+.seg button[aria-pressed="true"] { border-color: var(--red); background: #FFF5F6; box-shadow: 0 4px 12px rgba(214,31,58,.18) }
+#orderwrap, #newwrap, #reviewwrap, #referwrap { display: grid; gap: 16px }
+.three-in { display: grid; grid-template-columns: 2fr 1fr 1.2fr; gap: 10px }
+.hint { font: 600 12.5px var(--sans); color: var(--ok) }
+.credit { border: 1.5px solid var(--line); border-radius: 12px; padding: 0 14px; background: #fff }
+.credit summary { cursor: pointer; padding: 14px 0; font: 800 14.5px var(--sans); color: var(--royal); list-style: none; display: flex; justify-content: space-between; gap: 10px }
+.credit summary::-webkit-details-marker { display: none } .credit summary::after { content: "+"; font: 900 20px/1 var(--sans); color: var(--red) } .credit[open] summary::after { content: "–" }
+.credit[open] { padding-bottom: 14px; display: grid; gap: 12px }
+.refrow { display: grid; grid-template-columns: 1.3fr 1fr; gap: 10px } @media (max-width: 440px) { .refrow { grid-template-columns: 1fr } }
+.starpick { display: flex; gap: 6px } .starpick button { border: 0; background: none; font-size: 40px; line-height: 1; color: #D5DBE8; padding: 2px 4px } .starpick button.on { color: var(--beak) }
+.aftersend { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px } .aftersend span { font: 800 14px var(--sans); color: var(--navy-2); flex-basis: 100% }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--royal-hi); outline: 3px solid rgba(47,107,255,.25); outline-offset: 0 }
+
+dialog:not([open]) { display: none !important }

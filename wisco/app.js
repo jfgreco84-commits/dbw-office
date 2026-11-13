@@ -12,6 +12,7 @@
     set: function (k, v) { try { localStorage.setItem("wisco." + k, JSON.stringify(v)); } catch (e) { } }
   };
   var FRANK = (W.managerName || "Frank").split(" ")[0];
+  var RW = W.rewards || { review: "10% off your next order", referrer: "10% off their next order" };
   var BREAKS = W.breaks || [6, 12, 25, 36, 50, 100, 200, 500];
   var TIER = { supreme: "Best · Supreme grade", premium: "Better · Premium grade", standard: "Good · Standard grade", economy: "Value · Economy grade", pro: "Pro Series" };
   var TR = { supreme: 4, pro: 4, premium: 3, standard: 2, economy: 1, "": 0 };
@@ -235,7 +236,7 @@
     var T = (W.testimonials || []).filter(function (t) { return t && t.quote; });
     app.innerHTML =
       '<section class="hero"><div class="wrap"><div>' +
-      (function () { var r = repBySlug(me().rep); return '<span class="pill"><i>★</i> ' + (r ? "Your salesman: " + esc(r.name) : "A division of Diamond Blade Warehouse, LLC") + " <i>★</i></span>"; })() +
+      (function () { var r = repBySlug(me().rep); var rf = store.get("ref", ""); return '<span class="pill"><i>★</i> ' + (r ? "Your salesman: " + esc(r.name) : rf ? "Referred by " + esc(rf) : "A division of Diamond Blade Warehouse, LLC") + " <i>★</i></span>"; })() +
       "<h1>The right blade. Right now.</h1>" +
       '<p class="sub">Tell us what you cut. We ship it anywhere in the USA. <b>Your blades, your price, 60 seconds.</b></p>' +
       '<div class="doors">' +
@@ -266,7 +267,11 @@
 
       (T.length ? '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Straight from the jobsite</h2><p>Real customers. Their words.</p></div><div class="three">' + T.map(function (t) { return '<figure class="quote"><blockquote>' + esc(t.quote) + "</blockquote><figcaption>" + esc(t.who || "") + "</figcaption></figure>"; }).join("") + "</div></div></section>" : "") +
 
-      '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>How’d we do?</h2><p>Tell us what worked and what didn’t. ' + esc(FRANK) + ' reads every one, and we ask on every order.</p></div><div class="center"><button class="btn chrome" data-feedback>Tell ' + esc(FRANK) + " how we did</button></div></div></section>";
+      '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>Two ways to save</h2><p>No points, no fine print. Your rep applies it to your next order.</p></div><div class="three">' +
+      '<div class="point"><b>Leave a review</b><p>Tell us how the blades held up, good or bad. An honest review earns you ' + esc(RW.review) + '.</p><button class="btn chrome sm" data-review style="margin-top:12px">Leave a review</button></div>' +
+      '<div class="point"><b>Refer a contractor</b><p>Send someone our way. When they place a first order and name you, you get ' + esc(RW.review) + '.</p><button class="btn chrome sm" data-refer style="margin-top:12px">Refer a contractor</button></div>' +
+      '<div class="point"><b>Just tell us</b><p>Something off with an order, a blade or a rep? ' + esc(FRANK) + ' reads every note.</p><button class="btn ghost sm" data-feedback style="margin-top:12px">Send ' + esc(FRANK) + " a note</button></div>" +
+      "</div></div></section>";
     setNav("#home");
   }
 
@@ -580,7 +585,9 @@
     pricing: { title: "Get my price breaks", intro: "Tell us which pricing to check. Your rep comes back with your real numbers.", head: "DBW WISCO PRICING REQUEST", subj: "Pricing request" },
     saw: { title: "Send my saw deal", intro: "Your rep confirms the package, freight and ship date, then it’s yours.", head: "DBW WISCO SAW DEAL", subj: "Saw deal request" },
     equip: { title: "Find me equipment", intro: "Give us as much as you can: make, model, size, new or used, how soon.", head: "DBW WISCO EQUIPMENT REQUEST", subj: "Equipment request", msg: "What are you looking for? Make, model, anything you know" },
-    feedback: { title: "How’d we do?", intro: "Tell us what worked and what didn’t. " + FRANK + " reads every one.", head: "DBW WISCO FEEDBACK", subj: "Feedback", msg: "Tell us how we did" }
+    feedback: { title: "How’d we do?", intro: "Tell us what worked and what didn’t. " + FRANK + " reads every one.", head: "DBW WISCO FEEDBACK", subj: "Feedback", msg: "Tell us how we did" },
+    review: { title: "Leave a review", intro: "An honest review, good or bad, earns you " + RW.review + ". Your rep applies it.", head: "DBW WISCO REVIEW", subj: "Review" },
+    refer: { title: "Refer a contractor", intro: "Send a contractor our way. When they place their first order and name you, you get " + RW.review.replace("your", "your") + ".", head: "DBW WISCO REFERRAL", subj: "Referral" }
   };
   function me() { return store.get("me", {}); }
   function repBySlug(s) { return (W.reps || []).filter(function (r) { return slug(r.name) === s; })[0]; }
@@ -592,32 +599,60 @@
     }).join("");
     $("#f-rep").value = cur || "";
   }
+  function setAcct(v) {
+    var f = $("#sendform"), order = mode === "order" || mode === "saw";
+    $("#f-acct").value = v;
+    $$("#acctseg [data-acct]").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.acct === v); });
+    $("#newwrap").hidden = !(order && v === "new");
+    $("#replabel").textContent = v === "new" ? "Know who you want to work with? (optional)" : "Pick your salesman";
+    $("#creditsum").textContent = v === "new" ? "Want terms? Add trade references to set up credit" : "Need a higher credit limit? Add trade references";
+    $("#creditnote").textContent = v === "new" ? "Three trade references get a Net 30 or Net 45 account moving. Skip this if you’re paying by card or check." : "Tell us the limit you need and give us current references. Your rep takes it to credit.";
+    if (v === "new" && /terms/i.test(f.elements.pay.value)) $("#creditwrap").open = true;
+    preview();
+  }
   function openSend(m) {
-    mode = m; var M = MODES[m], info = me(), f = $("#sendform");
+    mode = m; var M = MODES[m], info = me(), f = $("#sendform"), order = m === "order" || m === "saw";
     $("#sendtitle").textContent = M.title; $("#sendintro").textContent = M.intro;
     $("#discwrap").hidden = m !== "pricing";
     $("#msgwrap").hidden = !M.msg; if (M.msg) $("#msglabel").textContent = M.msg;
-    $("#paywrap").hidden = $("#paynote").hidden = !(m === "order" || m === "saw");
-    $("#fbwrap").hidden = m === "feedback";
-    ["name", "company", "phone", "email"].forEach(function (k) { f.elements[k].value = info[k] || ""; });
-    ["po", "notes", "msg", "feedback"].forEach(function (k) { f.elements[k].value = ""; });
-    f.elements.fav.value = info.fav || "";
+    $("#acctseg").hidden = !order; $("#orderwrap").hidden = !(order || m === "pricing");
+    $("#paywrap").hidden = $("#paynote").hidden = !order; $("#creditwrap").hidden = !order;
+    $("#reviewwrap").hidden = m !== "review"; $("#referwrap").hidden = m !== "refer";
+    ["name", "company", "phone", "email", "addr", "city", "state", "zip"].forEach(function (k) { f.elements[k].value = info[k] || ""; });
+    ["po", "notes", "msg", "review", "stars", "fname", "fco", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p"].forEach(function (k) { f.elements[k].value = ""; });
+    f.elements.fav.value = info.fav || ""; f.elements.ref.value = store.get("ref", "") || "";
+    $("#refhint").textContent = "They earn " + RW.referrer + " when you order.";
+    $$("#starpick button").forEach(function (x) { x.classList.remove("on"); });
+    $("#creditwrap").open = false;
     f.elements.pay.innerHTML = (W.payments || []).map(function (p) { return "<option>" + esc(p) + "</option>"; }).join("");
     if (info.pay) f.elements.pay.value = info.pay;
     renderReps(repBySlug(info.rep) ? info.rep : "");
     $("#discs").innerHTML = (W.discounts || []).map(function (d, i) { return '<label><input type="checkbox" name="disc" value="' + esc(d) + '"' + (i < 2 ? " checked" : "") + "> " + esc(d) + "</label>"; }).join("");
     $("#textbtn").hidden = !W.textNumber; $("#textbtn").textContent = "Text it to " + FRANK; $("#sentmsg").hidden = true;
-    preview(); ["cart", "detail", "extras"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); $("#send").showModal(); $("#sendform").scrollTop = 0;
+    $("#sharebtn").hidden = !(m === "order"); $("#friendbtn").hidden = m !== "refer";
+    setAcct(info.acct === "new" && !info.sent ? "new" : (info.sent ? "existing" : (info.acct || "existing")));
+    ["cart", "detail", "extras"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); $("#send").showModal(); $("#sendform").scrollTop = 0;
   }
-  function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
+  function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
   function buildText(o) {
     var t = totals(), rep = repBySlug(o.rep), L = [], M = MODES[mode], items = mode === "order" || mode === "pricing";
     L.push(M.head);
     L.push("From: " + (o.name || "(name)") + (o.company ? ", " + o.company : ""));
     if (o.phone) L.push("Phone: " + o.phone);
     if (o.email) L.push("Email: " + o.email);
-    L.push("Salesman: " + (rep ? rep.name : "Not sure"));
-    if (mode === "order" || mode === "saw") { L.push("Pay by: " + o.pay); if (o.po) L.push("PO #: " + o.po); }
+    var order = mode === "order" || mode === "saw";
+    if (order) L.push("Account: " + (o.acct === "new" ? "NEW ACCOUNT" : "Existing customer"));
+    if (order && o.acct === "new" && (o.addr || o.city || o.zip)) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · "));
+    if (order || mode === "pricing") L.push("Salesman: " + (rep ? rep.name : (o.acct === "new" ? "None yet. Assign a rep." : "Not sure. Look this account up in Sage / Zoho by phone or company.")));
+    if (order) { L.push("Pay by: " + o.pay); if (o.po) L.push("PO #: " + o.po); }
+    if ((order || mode === "pricing") && o.ref) L.push("REFERRED BY: " + o.ref + "  (they earn " + RW.referrer + ")");
+    var refs = [[o.r1, o.r1p], [o.r2, o.r2p], [o.r3, o.r3p]].filter(function (x) { return x[0] || x[1]; });
+    if (order && (refs.length || o.limit)) {
+      L.push(""); L.push(o.acct === "new" ? "CREDIT REQUEST: set up terms" + (o.limit ? ", limit " + o.limit : "") : "CREDIT REQUEST: raise limit" + (o.limit ? " to " + o.limit : ""));
+      refs.forEach(function (x, i) { L.push("  Ref " + (i + 1) + ": " + [x[0], x[1]].filter(Boolean).join(" · ")); });
+    }
+    if (mode === "review") { L.push(""); L.push("RATING: " + (o.stars ? "★★★★★".slice(0, +o.stars) + "☆☆☆☆☆".slice(0, 5 - o.stars) + " (" + o.stars + " of 5)" : "(not rated)")); if (o.review) L.push(o.review); L.push("OK to post on the site: " + (o.pub ? "YES" : "NO")); L.push("Reward owed: " + RW.review); }
+    if (mode === "refer") { L.push(""); L.push("REFERRING: " + [o.fname, o.fco].filter(Boolean).join(" · ")); L.push("Reward when they order: " + RW.review.replace(/your/i, "the referrer’s")); }
     if (mode === "pricing" && o.disc.length) { L.push(""); L.push("Please check: " + o.disc.join("; ")); }
     if (M.msg && o.msg) { L.push(""); L.push(o.msg); }
     if (mode === "saw") { L.push(""); L.push(dealText()); }
@@ -642,18 +677,25 @@
   function preview() { $("#preview").textContent = buildText(formData()); }
   function afterSend(how) {
     var o = formData(), t = totals();
-    store.set("me", { name: o.name, company: o.company, phone: o.phone, email: o.email, rep: o.rep, pay: o.pay, fav: o.fav });
+    store.set("me", { name: o.name, company: o.company, phone: o.phone, email: o.email, rep: o.rep, pay: o.pay, fav: o.fav, acct: o.acct, addr: o.addr, city: o.city, state: o.state, zip: o.zip, sent: mode === "order" || me().sent ? 1 : 0 });
     if (mode === "order" && t.lines.length) store.set("last", { date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }), items: cart.slice() });
     var m = $("#sentmsg"); m.hidden = false;
     m.innerHTML = how === "posted" ? "<b>Sent.</b><span>A real person has it. Expect a call or text back.</span>"
       : how === "copied" ? "<b>Copied.</b><span>Paste it into a text or email to " + esc(FRANK) + ".</span>"
         : "<b>Last step: hit send in your " + (how === "sms" ? "messages" : "email") + " app.</b><span>It’s already written for you. If nothing opened, tap Copy and paste it to " + esc(how === "sms" ? (W.textDisplay || "") : (W.orderEmail || "")) + ".</span>";
+    if (mode === "order" || mode === "saw") m.innerHTML += '<div class="aftersend"><span>Want ' + esc(RW.review) + '?</span><button type="button" class="btn blue sm" data-review>Leave a review</button><button type="button" class="btn ghost-d sm" data-refer>Refer a contractor</button></div>';
     m.scrollIntoView({ block: "nearest" });
   }
+  function friendLink() { var o = formData(), who = (o.company || o.name || "").slice(0, 60); return location.origin + location.pathname + "?ref=" + encodeURIComponent(who); }
   function needName() {
     var f = $("#sendform"), M = MODES[mode];
     if (M.msg && !f.elements.msg.value.trim()) { f.elements.msg.focus(); toast("Tell us a little so we know what to chase"); return true; }
     if (!f.elements.name.value.trim()) { f.elements.name.focus(); toast("Add your name so we know who it’s from"); return true; }
+    if (mode === "review" && !f.elements.stars.value) { toast("Tap a star rating first"); return true; }
+    if (mode === "review" && !f.elements.review.value.trim()) { f.elements.review.focus(); toast("Tell us a little about how it went"); return true; }
+    if (mode === "refer" && !f.elements.fname.value.trim()) { f.elements.fname.focus(); toast("Who are you referring?"); return true; }
+    if ((mode === "order" || mode === "saw") && !f.elements.phone.value.trim()) { f.elements.phone.focus(); toast("Add a phone number so we can confirm the order"); return true; }
+    if ((mode === "order" || mode === "saw") && f.elements.acct.value === "new" && !f.elements.zip.value.trim()) { f.elements.zip.focus(); toast("Add your ship-to ZIP so we can quote freight"); return true; }
     return false;
   }
   function mailto(to, subj, body) { location.href = "mailto:" + encodeURIComponent(to || "") + "?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body); }
@@ -742,6 +784,11 @@
     if ((el = t.closest("[data-open]"))) { openDetail(FAM[el.closest(".card").dataset.f]); return; }
     if (t.closest("[data-pricing]") || t.closest("[data-breaks]")) { e.preventDefault(); openSend("pricing"); return; }
     if (t.closest("[data-equip]")) { openSend("equip"); return; }
+    if (t.closest("[data-review]")) { openSend("review"); return; }
+    if (t.closest("[data-refer]")) { openSend("refer"); return; }
+    if ((el = t.closest("[data-acct]"))) { setAcct(el.dataset.acct); return; }
+    if ((el = t.closest("[data-star]"))) { var sv = +el.dataset.star; $("#f-stars").value = sv; $$("#starpick button").forEach(function (x) { x.classList.toggle("on", +x.dataset.star <= sv); }); preview(); return; }
+    if (t.closest("[data-friend]")) { if (!$("#f-name").value.trim()) { $("#f-name").focus(); toast("Add your name so they know who sent them"); return; } location.href = "sms:?&body=" + encodeURIComponent("I get my diamond blades from DBW Wisco. Prices are on the site and a real person handles the order. Tell them I sent you: " + friendLink()); return; }
     if (t.closest("[data-feedback]")) { openSend("feedback"); return; }
     if (t.closest("[data-cart]")) { ["detail", "extras", "send"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); renderCart(); $("#cart").showModal(); return; }
     if (t.closest("[data-checkout]")) { openExtras(); return; }
@@ -771,7 +818,13 @@
     if (t.id === "dfam") fillDealVars();
   });
   document.addEventListener("input", function (e) { var id = e.target.id || ""; if (/^c[ab]-|^c-ft/.test(id)) costCalc(); if (/^r-/.test(id)) rentCalc(); });
-  $("#sendform").addEventListener("input", preview);
+  $("#sendform").addEventListener("input", function () {
+    preview();
+    var f = $("#sendform"), info = me();   // keep what they typed, even if they close the sheet
+    ["name", "company", "phone", "email", "addr", "city", "state", "zip", "fav"].forEach(function (k) { info[k] = f.elements[k].value.trim(); });
+    info.acct = f.elements.acct.value; store.set("me", info);
+  });
+  $("#sendform").addEventListener("change", function (e) { if (e.target.id === "f-pay" && /terms/i.test(e.target.value) && $("#f-acct").value === "new") $("#creditwrap").open = true; preview(); });
   $("#sendform").addEventListener("submit", function (e) { e.preventDefault(); });
   window.addEventListener("hashchange", route);
 
@@ -782,6 +835,7 @@
   $$("[data-pl]").forEach(function (a) { a.textContent = C.priceList || "current"; });
   var P = new URLSearchParams(location.search);
   if (P.get("rep")) { var info = me(); info.rep = slug(P.get("rep")); store.set("me", info); }
+  if (P.get("ref")) store.set("ref", P.get("ref").replace(/[<>]/g, "").slice(0, 60));
   if (P.get("cart")) {
     cart = [];
     P.get("cart").split(",").forEach(function (x) { var a = x.split("*"), hit = SKU[(a[0] || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")]; if (hit) cart.push({ f: hit[0].id, v: vkey(hit[0].vars[hit[1]]), q: Math.max(1, parseInt(a[1], 10) || 1) }); });
