@@ -426,3 +426,20 @@ dialog:not([open]) { display: none !important }
 @media (max-width: 860px) { body[data-r="home"] .bf:not(.open) { display: none } }
 @media (max-width: 560px) { table.cmp.saws { font-size: 13px } table.cmp.saws .add { padding: 0 8px; height: 40px } table.cmp.saws th, table.cmp.saws td { padding: 8px 6px } }
 @media (max-width: 560px) { table.cmp.saws th { white-space: normal; letter-spacing: .04em } }
+
+/* ---------- v11: owner walkthrough ---------- */
+.brand img { width: 62px } .brand b { font-size: 24px; letter-spacing: .05em } .brand small { font-size: 10px }
+@media (max-width: 400px) { .brand img { width: 54px } .brand b { font-size: 21px } }
+.cartbtn { height: 48px; padding: 0 16px 0 18px; font-size: 15px; border: 2px solid #fff; border-radius: 12px; box-shadow: 0 0 0 3px rgba(214,31,58,.9), 0 8px 20px rgba(0,0,0,.4) }
+.cartbtn .n { min-width: 28px; height: 28px; font-size: 14px }
+.kick { display: inline-block; font: 900 13px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: #fff; background: var(--red); border-radius: 6px; padding: 6px 12px; margin: 0 8px 10px 0 }
+.kick.rep { background: rgba(7,20,51,.6); border: 1px solid rgba(255,255,255,.5) }
+.mixnote { display: block; font: 700 13px/1.45 var(--sans); color: var(--muted); margin-top: 6px } .sec-head .mixnote { margin: 6px auto 0; max-width: 620px } .nudge .mixnote { margin-top: 8px }
+.tile span { line-height: 1.35 }
+.whyfix { background: #FFF6E5; border: 1px solid #F1D49A; border-left: 5px solid #E0A020; border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; color: var(--ink); display: grid; gap: 2px }
+.whyfix b { font: 900 11.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: #8A5A00 } .whyfix span { font: 600 14.5px/1.45 var(--sans) }
+.levels { background: var(--grad-band); color: #fff } .levels .sec-head h2 { color: #fff } .levels .sec-head p { color: #DCE7FF }
+.lvl { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.25); border-radius: var(--radius); padding: 18px; display: grid; gap: 6px; align-content: start }
+.lvl em { font: 400 30px/1 var(--slab); font-style: normal; color: var(--sky) } .lvl b { font: 900 17px var(--sans); letter-spacing: .06em; text-transform: uppercase } .lvl p { margin: 0; font: 600 14.5px/1.5 var(--sans); color: #DCE7FF }
+.lvl.top { background: var(--chrome); color: var(--navy); border-color: #fff; box-shadow: var(--glow) } .lvl.top em { color: var(--red) } .lvl.top p { color: var(--navy-2) }
+.levels .btn.ghost-d { color: #fff; border-color: rgba(255,255,255,.7); background: transparent }

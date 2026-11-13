@@ -169,10 +169,10 @@ SAWSEC = [
     ("STIHL", "Stihl Cutquik Saws"), ("HILTI", "Hilti Gas Saws"), ("DEWALT", 'DeWalt 9" Battery Saw'),
     ("BR/CC", "Walk-Behind & Early-Entry Saws"), ("SOFF", "Walk-Behind & Early-Entry Saws"),
 ]
-POPULAR = ["Dragon Supreme", "Dragon", "Superblade Extreme", "Super G", "T-Rex", "Viper General Purpose", "Eagle Premium",
+POPULAR = ["Dragon Supreme", "Dragon", "Superblade Extreme", "Super G", "T-Rex", "Viper General Purpose",
            "Superblade G3", "Superblade Arrow", "Zenesis Green Kut Purple", "Punisher", "Wolv", "Sabertooth", "Viper Premium",
-           "Eagle Heavy Duty", "Eagle Standard", "Blue Tornado", "Blacksmyth", "Swordfish", "Eagle - Small Diameter", "Jaguar",
-           "Wolverine Premium", "Turbo Cup - Premium", "Blue Cheetah", "V-Shape Wet Corebit", "Green Kut Purple", "Eagle Supreme",
+           "Blue Tornado", "Blacksmyth", "Swordfish", "Jaguar",
+           "Wolverine Premium", "Turbo Cup - Premium", "Blue Cheetah", "V-Shape Wet Corebit", "Green Kut Purple",
            "Hybrid", "Tornado", "Double Row", "Segmented Dry Corebit"]
 
 

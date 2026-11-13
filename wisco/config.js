@@ -4,10 +4,10 @@ window.WISCO = {
   // Every order, pricing request and question lands here.
   orderEmail: "fgreco@diamondbladewarehouse.com",
   managerName: "Frank Greco",
-  managerTitle: "General Sales Manager",
+  managerTitle: "General Manager of the Wisconsin division",
 
-  // Shown on the site as the number to call. Tap-to-call on phones.
-  phone: "(800) 325-2337",
+  // Extra people copied on every emailed order (optional), e.g. ["someone@diamondbladewarehouse.com"].
+  alsoCopy: [],
   // Shown next to "Text Frank".
   textDisplay: "(414) 213-0084",
   // Cell that receives texted orders, digits only with country code. "" hides the Text button.
@@ -21,20 +21,23 @@ window.WISCO = {
   // Replace this list with the real phone-name roster. No real last names unless they sell under them.
   // This is the current roster from the sales board (13 people). Keep it in step with the board.
   // Text a customer  .../wisco/?rep=snacks  and that rep is pre-picked and greets them on the home page.
+  // email   = where that rep's orders go. Leave "" and their orders go to orderEmail above.
+  // cell    = where "Text it" goes for that rep, digits with country code, e.g. "+14145550100". "" = your cell.
+  // manager = that rep's manager's email. They get a copy. You (orderEmail) are always copied.
   reps: [
-    { name: "Frank", photo: "frank.webp" },
-    { name: "Ronny B", photo: "" },
-    { name: "Batman", photo: "" },
-    { name: "Miz", photo: "" },
-    { name: "Snacks", photo: "" },
-    { name: "TJ", photo: "" },
-    { name: "JB", photo: "" },
-    { name: "Cutty", photo: "" },
-    { name: "Kerry", photo: "" },
-    { name: "Cassie", photo: "" },
-    { name: "Luis", photo: "" },
-    { name: "Les", photo: "" },
-    { name: "Jeff", photo: "" }
+    { name: "Frank", photo: "frank.webp", email: "", cell: "", manager: "" },
+    { name: "Ronny B", photo: "", email: "", cell: "", manager: "" },
+    { name: "Batman", photo: "batman.webp", email: "", cell: "", manager: "" },
+    { name: "Miz", photo: "miz.webp", email: "", cell: "", manager: "" },
+    { name: "Snacks", photo: "snacks.webp", email: "", cell: "", manager: "" },
+    { name: "TJ", photo: "tj.webp", email: "", cell: "", manager: "" },
+    { name: "JB", photo: "", email: "", cell: "", manager: "" },
+    { name: "Cutty", photo: "", email: "", cell: "", manager: "" },
+    { name: "Kerry", photo: "", email: "", cell: "", manager: "" },
+    { name: "Cassie", photo: "cassie.webp", email: "", cell: "", manager: "" },
+    { name: "Luis", photo: "", email: "", cell: "", manager: "" },
+    { name: "Les", photo: "les.webp", email: "", cell: "", manager: "" },
+    { name: "Jeff", photo: "jeff.webp", email: "", cell: "", manager: "" }
   ],
 
 
@@ -50,7 +53,11 @@ window.WISCO = {
   ],
 
   // Quantity price breaks a customer can ask for.
-  breaks: [6, 12, 25, 36, 50, 100, 200, 500],
+  breaks: [12, 25, 36, 50, 100, 200],
+  // Months (1 = January) when mix and match pricing applies. Every other month it takes
+  // singleItemMin of one item to get special pricing.
+  mixMonths: [3, 5, 8, 10],
+  singleItemMin: 25,
 
   // What a customer can ask to have checked from the pricing button.
   discounts: [

@@ -26,16 +26,16 @@
   var SAWDIA = { grinder: [3, 9], cutoff: [12, 16], walk: [14, 99] };
 
   var MATS = [
-    { k: "c", n: "Concrete", s: "Slabs, sidewalk, curb", keys: ["c"] },
-    { k: "r", n: "Hard & Reinforced", s: "Rebar, river rock, hard aggregate", keys: ["r"] },
-    { k: "g", n: "Green Concrete", s: "Early-entry joints", keys: ["g"] },
-    { k: "a", n: "Asphalt", s: "Patching, trenching, overlays", keys: ["a"] },
-    { k: "bp", n: "Brick, Block & Pavers", s: "Hardscape and masonry", keys: ["b", "p"] },
-    { k: "s", n: "Stone & Granite", s: "Natural stone, curb, countertops", keys: ["s"] },
-    { k: "t", n: "Tile & Porcelain", s: "Ceramic, porcelain, marble", keys: ["t"] },
-    { k: "x", n: "Metal & Ductile", s: "Pipe, rebar, rail, steel", keys: ["x"] },
-    { k: "m", n: "Mortar Joints", s: "Tuckpointing and grout", keys: ["m"] },
-    { k: "sp", n: "Grinding & Coatings", s: "Level, prep, strip", keys: ["sp"] }
+    { k: "c", n: "Concrete", s: "Slabs, driveways, sidewalks, curb, parking lots, walls, concrete pipe", keys: ["c"] },
+    { k: "r", n: "Hard & Reinforced", s: "Rebar, wire mesh, river rock, hard aggregate, bridge decks", keys: ["r"] },
+    { k: "g", n: "Green Concrete", s: "Early-entry joints, fresh pours, control joints", keys: ["g"] },
+    { k: "a", n: "Asphalt", s: "Patching, trenching, overlays, asphalt over concrete", keys: ["a"] },
+    { k: "bp", n: "Brick, Block & Pavers", s: "Hardscape, masonry, retaining wall, cinder block", keys: ["b", "p"] },
+    { k: "s", n: "Stone & Granite", s: "Natural stone, granite curb, flagstone, countertops", keys: ["s"] },
+    { k: "t", n: "Tile & Porcelain", s: "Ceramic, porcelain, marble, glass tile", keys: ["t"] },
+    { k: "x", n: "Metal & Ductile", s: "Ductile pipe, rebar, rail, steel, rescue", keys: ["x"] },
+    { k: "m", n: "Mortar Joints", s: "Tuckpointing, grout, crack chasing", keys: ["m"] },
+    { k: "sp", n: "Grinding & Coatings", s: "Level, prep, strip epoxy and glue", keys: ["sp"] }
   ];
   var SAWS = [
     { k: "grinder", n: "Angle Grinder", s: '4" to 9"', keys: ["grinder", "circ"] },
@@ -55,8 +55,8 @@
   var LADDER = [
     { label: "★ Unstoppable", rc: "", ids: ["dragon-supreme", "dragon"] },
     { label: "Best", rc: "b", ids: ["superblade-extreme", "super-g"] },
-    { label: "Better", rc: "b", ids: ["t-rex", "eagle-premium"] },
-    { label: "Good", rc: "g", ids: ["viper-general-purpose", "eagle-heavy-duty", "eagle-standard"] }
+    { label: "Better", rc: "b", ids: ["t-rex", "viper-premium"] },
+    { label: "Good", rc: "g", ids: ["viper-general-purpose"] }
   ];
   var LINES = [
     { k: "dragons", n: "The Dragons", s: "Our top multi-purpose blades. Red for long life. Purple when the job is everything at once.", ids: ["dragon-supreme", "dragon"], img: ["dragon-supreme", "dragon"] },
@@ -64,6 +64,12 @@
     { k: "zenesis", n: "Zenesis Green Kut", s: "Early-entry blades with Zenesis diamond alignment. More footage, chip-free joints.", ids: ["zenesis-green-kut-purple", "zenesis-green-kut-orange", "zenesis-green-kut-green", "zenesis-green-kut-red", "zenesis-green-kut-yellow"], img: ["zenesis-green-kut-purple"] },
     { k: "4-core", n: "4-Core Bits", s: "Punisher, Wolv and Sabertooth. Pro Series bits for heavy rebar and hard aggregate.", ids: ["punisher", "wolv", "sabertooth"], img: ["punisher", "wolv", "sabertooth"] }
   ];
+  LINES.push(
+    { k: "workhorses", n: "T-Rex & Viper", s: "The everyday workhorses. Fast, fair priced, on the truck every day.", ids: ["t-rex", "viper-premium", "viper-general-purpose", "viper-supreme-turbo", "viper-specialty"], img: ["t-rex", "viper-premium"] },
+    { k: "wet", n: "Wet & Flat Saw Blades", s: "Walk-behind, low-horsepower, looping, wall saw and prestress.", cat: "wet", ids: [], img: ["3mlb-low-hp-concrete", "kmlb-low-hp-asphalt-green"] },
+    { k: "asphalt", n: "Wolverine Asphalt", s: "Hard bonds and drop segments for asphalt and abrasive material.", ids: ["wolverine-supreme", "wolverine-premium-plus-drop-segment", "wolverine-premium"], img: ["wolverine-supreme", "wolverine-premium"] },
+    { k: "metal", n: "Blacksmyth & Ductile", s: "Ductile pipe, rail, rebar and rescue. One blade instead of a box of abrasives.", cat: "metal", ids: [], img: ["blacksmyth-supreme", "americut-ductile-premium"] }
+  );
   var DONTFORGET = [
     { cat: "core", n: "Core bits" }, { cat: "chain", n: "Diamond chain" }, { cat: "abrasive", n: "Abrasive wheels" },
     { cat: "small", n: "Small diameter blades" }, { cat: "cup", n: "Cup wheels" }, { cat: "wet", n: "Large wet blades" },
@@ -105,7 +111,7 @@
     sp: "Double row for a flat floor. T-Seg for stripping coatings."
   };
   var TIERQUIP = { supreme: "More per blade, less per cut. That’s the whole point of this one.", pro: "Pro Series. Built for the hard jobs.", premium: "Good everyday blade. Crews stock these by the box.", standard: "Does the job at a fair price. Step up when the material gets hard.", economy: "Budget blade. Fine for the short job." };
-  function says(text, big) { return '<div class="bfs' + (big ? " big" : "") + '"><img alt="" src="brand/frank' + (big ? "" : "-sm") + '.webp"><div><b>Big ' + esc(FRANK) + " says</b><p>" + esc(text) + "</p></div></div>"; }
+  function says(text, big) { return '<div class="bfs' + (big ? " big" : "") + '"><img alt="" src="brand/frank' + (big ? "-cool" : "-sm") + '.webp"><div><b>Big ' + esc(FRANK) + " says</b><p>" + esc(text) + "</p></div></div>"; }
 
   /* Blade trouble guide. Causes and fixes follow the DBW troubleshooting page. */
   var FIX = [
@@ -118,6 +124,13 @@
     { k: "hot", n: "It’s overheating", s: "Blued core, burning smell.", why: "Not enough coolant. Wet blades need steady water. Dry blades need shallow passes and air.", now: "Check water flow. Cutting dry, take shallow passes and let the blade spin free every 10 to 15 seconds.", fix: "Make sure the blade is rated for the saw and for dry cutting if you run dry.", ids: [] },
     { k: "uneven", n: "Segments wearing uneven", s: "One side wears faster.", why: "Uneven water on the two sides of the blade, or a saw problem: bad bearings, a worn arbor or a spindle out of line.", now: "Flush the water system and check both sides are getting flow.", fix: "Have the saw checked before it eats another blade.", ids: [] }
   ];
+  var FIXWHY = {
+    glazed: { "dragon-supreme": "Softer bond that keeps wearing on hard, reinforced concrete, so fresh diamond stays on the edge and it keeps biting.", "superblade-arrow": "Arrow-shaped segments put less diamond on the cut at once. More pressure per diamond, so it keeps cutting hard material instead of polishing it.", "swordfish": "Open, aggressive segment built for speed on hard material. It clears the slurry that glazes a blade over." },
+    fast: { "wolverine-supreme": "Hard bond built for asphalt and abrasive material. It holds its diamond instead of letting the sand strip it.", "wolverine-premium": "Same hard asphalt bond at a lower cost-in. Made for abrasive material that eats a general-purpose blade.", "superblade-extreme": "Tall segments and a tough bond. More diamond to wear through before the blade is done." },
+    under: { "superblade-extreme": "Built-in undercut protection keeps abrasive slurry off the steel under the segments.", "wolverine-premium-plus-drop-segment": "Drop segments reach down the side of the core and take the wear, so the steel doesn’t.", "wolverine-supreme": "Wide undercut-protecting segments made for asphalt, the most abrasive thing you cut." },
+    segs: { "dragon-supreme": "Laser-welded segments on a softer bond. It cuts freely on hard material instead of hammering the welds.", "superblade-extreme": "Undercut protection keeps the core thick under the segments, so they have steel to hold onto.", "t-rex": "W-shaped segments cut cool and fast, with less shock on the weld." },
+    crack: { "dragon-supreme": "A softer bond cuts without forcing it. Less stress on the core means fewer cracks.", "hybrid": "Runs wet or dry and cuts smooth on mixed material, so the blade isn’t fighting the cut." }
+  };
   /* The questions customers actually ask, answered straight. From the sales floor. */
   var ANSWERS = [
     ["I already have a blade supplier.", "Good. You should. Are you under contract, or just used to calling the same guy? When’s the last time he called you with a better deal? We’re not asking you to switch. Compare one blade and decide."],
@@ -178,6 +191,18 @@
   function qtyHTML(n) { return '<span class="qty"><button type="button" data-q="-1" aria-label="Fewer">−</button><input type="number" inputmode="numeric" min="1" max="9999" value="' + n + '" aria-label="Quantity"><button type="button" data-q="1" aria-label="More">+</button></span>'; }
   function toast(msg) { var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2400); }
   function buyRow(v) { return '<div class="buy-row" data-row><div class="price">' + money(v[3]) + "<small>Buy It Now · " + esc(v[0]) + '</small></div><div class="act">' + qtyHTML(1) + '<button class="add" data-add>Add to order</button></div></div>'; }
+  var MIXM = W.mixMonths || [3, 5, 8, 10], ONEMIN = W.singleItemMin || 25, MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  function mixOn() { return MIXM.indexOf(new Date().getMonth() + 1) >= 0; }
+  function breakList() { return BREAKS.slice(0, -1).join(", ") + " and " + BREAKS[BREAKS.length - 1]; }
+  function mixNames() { var a = MIXM.map(function (m) { return MONTHS[m - 1]; }); return a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
+  function mixLine() { return mixOn() ? "Mix and match is on this month: every piece on the order counts toward your price break." : "Mix and match pricing runs in " + mixNames() + ". This month, special pricing starts at " + ONEMIN + " of one item."; }
+  /* Where the order stands against the price breaks. Mix months count the whole order; other months count the biggest single line. */
+  function breakState(t) {
+    var mix = mixOn(), big = null; t.lines.forEach(function (l) { if (!big || l.c.q > big.c.q) big = l; });
+    var n = mix ? t.units : (big ? big.c.q : 0), list = mix ? BREAKS : BREAKS.filter(function (q) { return q >= ONEMIN; });
+    var nb = list.filter(function (q) { return q > n; })[0], pb = list.filter(function (q) { return q <= n; }).pop();
+    return { mix: mix, n: n, nb: nb, pb: pb, of: mix ? "" : (big ? " of " + big.f.n : " of one item"), need: nb ? nb - n : 0 };
+  }
   function breaksLine() { return 'Buying more? <button class="more" data-breaks>Ask for ' + BREAKS.join(", ") + " piece price breaks</button>"; }
 
   function cardHTML(f, o) {
@@ -240,34 +265,36 @@
     return '<div class="last wb"><div><b>Welcome back' + (who ? ", " + esc(who) : "") + '.</b><span>Same as last time? ' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>';
   }
   function home() {
-    var top = C.families.filter(function (f) { return f.rank < 99; }).slice(0, 8);
+    var top = C.families.filter(function (f) { return f.rank < 99 && f.id.indexOf("eagle") !== 0 && f.cats.indexOf("core") < 0; }).slice(0, 16);
     var line = ["dragon", "superblade-g3", "dragon-supreme", "superblade-arrow", "zenesis-green-kut-purple"];
     var lines = LINES.map(function (L) {
-      var fs = L.ids.map(function (id) { return FAM[id]; }).filter(Boolean); if (!fs.length) return "";
+      var fs = lineFams(L); if (!fs.length) return "";
       var from = Math.min.apply(null, fs.map(function (f) { return f.min; }));
       return '<a class="linecard" href="#line-' + L.k + '"><span class="lc-art">' + L.img.map(function (id) { return FAM[id] && FAM[id].img ? '<img alt="" loading="lazy" src="img/' + esc(FAM[id].img) + '">' : ""; }).join("") + "</span><b>" + esc(L.n) + "</b><span>" + esc(L.s) + "</span><em>From " + money(from) + " →</em></a>";
     }).join("");
+    var r0 = repBySlug(me().rep);
     var T = (W.testimonials || []).filter(function (t) { return t && t.quote; });
     app.innerHTML =
       '<section class="hero"><div class="wrap"><div>' +
       (function () { var r = repBySlug(me().rep); var rf = store.get("ref", ""); return '<span class="pill"><i>★</i> ' + (r ? "Your salesman: " + esc(r.name) : rf ? "Referred by " + esc(rf) : "A division of Diamond Blade Warehouse, LLC") + " <i>★</i></span>"; })() +
+      (r0 ? '<span class="kick rep">Your salesman: ' + esc(r0.name) + "</span>" : "") + '<span class="kick">Simplified reorder</span>' +
       "<h1>The right blade. Right now.</h1>" +
-      '<p class="sub">Tell us what you cut. We ship it anywhere in the USA. <b>Your blades, your price, 60 seconds.</b></p>' +
+      '<p class="sub">Tell us what you cut. We ship it anywhere in the USA, same day or next. <b>Your blades, your price, 60 seconds.</b></p>' +
       welcomeBack() +
       '<div class="doors">' +
       '<a class="door d1 shine" href="#finder"><div><b>Blade Finder</b><span>Two taps. We line up the right blade.</span></div><em>→</em></a>' +
       '<a class="door d2" href="#reorder"><div><b>Fast Reorder</b><span>Know what you run? Punch it in and go.</span></div><em>→</em></a>' +
-      '<a class="door d3 withav" href="#ask-frank"><img alt="" src="brand/frank-sm.webp"><div><b>Ask ' + esc(FRANK) + "</b><span>Not sure? Get Big " + esc(FRANK) + "’s pick in 3 taps.</span></div><em>→</em></a>" +
+      '<a class="door d3 withav" href="#ask-frank"><img alt="" src="brand/frank-cool-sm.webp"><div><b>Ask ' + esc(FRANK) + "</b><span>Not sure? Get Big " + esc(FRANK) + "’s pick in 3 taps.</span></div><em>→</em></a>" +
       "</div>" +
-      '<div class="minis"><a href="#saw-deal">Build a saw deal</a><a href="#fix">Blade trouble?</a><a href="#cost">Cost per cut</a><a href="#equipment">Equipment</a><a href="#depth">Depth chart</a><a href="#shop">Shop all</a></div>' +
+      '<div class="minis"><a href="#saw-deal">Build a saw deal</a><a href="#fix">Blade trouble?</a><a href="#cost">Cost per cut</a><a href="#equipment">Equipment</a><a href="#depth">Depth chart</a><a href="#shop">Shop all</a><a href="#" data-terms>Apply for Net 30</a></div>' +
       '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="DBW Wisco, a division of Diamond Blade Warehouse" width="430" height="458">' +
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Our heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + "</div></div></section>" +
 
-      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What the crews run</h2><p>Dragon first. Then Extreme, Super G, T-Rex and Viper. The blades our reps quote all day.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a></div></div></section>' +
+      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What the crews run</h2><p>Dragon first. Then Extreme, Super G, T-Rex and Viper. Our most common blades, in the order our reps quote them.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a></div></div></section>' +
 
-      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Starter orders</h2><p>One tap loads a first order. Change anything before you send it. Twelve or more pieces puts you in price-break territory.</p></div>' + startersHTML() + "</div></section>" +
+      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Starter orders</h2><p>One tap loads a first order. Change anything before you send it. Price breaks at ' + breakList() + ' pieces.</p><p class="mixnote">' + esc(mixLine()) + "</p></div>" + startersHTML() + "</div></section>" +
 
       '<section class="sec deal"><div class="wrap two-col"><div><div class="sec-head left"><h2>Need a saw?</h2><p>Bundle it with 15, 25 or 36 blades and the saw price drops. Stack enough and it’s free. Renting now? There’s a calculator for that too.</p></div><a class="btn chrome shine" href="#saw-deal">Build my saw deal</a></div>' +
       '<div><div class="sec-head left"><h2>If they make it, we can get it</h2><p>Don’t sleep on the equipment deals. Tell your rep the make and model and they’ll hunt down the best deal out there. Buy blades in bulk and we can often eat most of the cost. It works like Costco: the more you buy, the better the deal.</p></div><a class="btn red" href="#equipment">Find me equipment</a></div></div></section>' +
@@ -277,6 +304,12 @@
       "<div class=\"point l\"><b>One hand washes the other</b><p>We sell blades and equipment to put food on our families’ tables. You and your crews use them to put food on yours. One good American company doing good business with another.</p></div>" +
       "<div class=\"point l\"><b>We obsess so you don’t have to</b><p>You’re the one sweating behind the saw. We sweat the blades, the bonds and the freight, and we’re here for you every day of the week.</p></div>" +
       '</div><div class="bribe"><b>We remember who you are.</b><span>Tell your salesman your favorite team, athlete or school. We make a point of remembering, and it has a way of showing up in the box.</span></div></div></section>' +
+
+      '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>Buy It Now is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three">' +
+      '<div class="lvl"><em>1</em><b>Buy It Now</b><p>The price on every blade here. No account needed. Order today.</p></div>' +
+      '<div class="lvl"><em>2</em><b>Quantity breaks</b><p>' + breakList() + " pieces. " + esc(mixLine()) + "</p></div>" +
+      '<div class="lvl top"><em>3</em><b>Account pricing</b><p>Steady customers earn a pricing level on their account, and it applies to every order. Ask where you stand and what moves you up.</p></div>' +
+      '</div><div class="center"><button class="btn chrome shine" data-pricing>Check my account pricing</button><button class="btn ghost-d" data-terms>Apply for Net 30 terms</button></div></div></section>' +
 
       '<section class="sec"><div class="wrap narrow"><div class="sec-head"><h2>Straight answers</h2><p>The questions we hear every day.</p></div><div class="qa">' + ANSWERS.map(function (x) { return "<details><summary>" + esc(x[0]) + "</summary><p>" + esc(x[1]) + "</p></details>"; }).join("") + '</div><div class="promise"><b>Our word</b><span>You’re never stuck with a blade you’re not happy with. We’ll swap it or take it back.</span></div><div class="center"><a class="btn blue" href="#cost">Run the cost-per-cut math</a><a class="btn ghost-d" href="#fix">Blade giving you trouble?</a></div></div></section>' +
 
@@ -387,9 +420,10 @@
     setNav("#shop");
   }
 
+  function lineFams(L) { return L.cat ? C.families.filter(function (f) { return f.cats.indexOf(L.cat) >= 0; }) : L.ids.map(function (id) { return FAM[id]; }).filter(Boolean); }
   function lineScreen(k) {
     var L = byK(LINES, k); if (!L) return home();
-    var fs = L.ids.map(function (id) { return FAM[id]; }).filter(Boolean);
+    var fs = lineFams(L);
     app.innerHTML = shell("Our heavy hitters", 0, 0, "<h1>" + esc(L.n) + ".</h1>" + says(L.s) + '<div class="results">' + fs.map(function (f) { return cardHTML(f); }).join("") + "</div>" + frankBox(""));
   }
 
@@ -473,7 +507,7 @@
       var fs = f.ids.map(function (id) { return FAM[id]; }).filter(Boolean);
       h = "<h1>" + esc(f.n) + ".</h1>" +
         '<div class="frank"><b class="h">What’s going on</b><p>' + esc(f.why) + '</p><b class="h">Do this now</b><p>' + esc(f.now) + '</p><b class="h">The real fix</b><p>' + esc(f.fix) + "</p></div>" +
-        (fs.length ? '<h2 class="wiz-h2">Blades that fix it</h2><div class="results">' + fs.map(function (x) { return cardHTML(x); }).join("") + "</div>" : "") + frankBox("");
+        (fs.length ? '<h2 class="wiz-h2">Blades that fix it</h2><div class="results">' + fs.map(function (x) { var w = (FIXWHY[f.k] || {})[x.id]; return "<div>" + (w ? '<div class="whyfix"><b>Why this one</b><span>' + esc(w) + "</span></div>" : "") + cardHTML(x) + "</div>"; }).join("") + "</div>" : "") + frankBox("");
     }
     app.innerHTML = shell("Blade trouble?", 0, 0, h); setNav("");
   }
@@ -545,7 +579,7 @@
   function bfLines() {
     var t = totals(), a = (QUIP[bfCtx] || QUIP.home).slice();
     if (bfCtx === "results" && wiz.mat && MATQUIP[wiz.mat.k]) a = [MATQUIP[wiz.mat.k]];
-    if (t.units) { var nb = BREAKS.filter(function (q) { return q > t.units; })[0]; if (nb) a.unshift("You’ve got " + t.units + " on the order. " + (nb - t.units) + " more hits the " + nb + "-piece break."); }
+    if (t.units) { var bs = breakState(t); if (bs.nb) a.unshift(bs.need + " more" + bs.of + " hits the " + bs.nb + "-piece price."); }
     return a;
   }
   function bfShow(ctx) { if (ctx) { bfCtx = ctx; bfI = 0; } var a = bfLines(); $("#bfp").textContent = a[bfI % a.length]; }
@@ -570,13 +604,13 @@
     var t = totals(), b = $("#cartbody");
     if (!t.lines.length) { b.innerHTML = '<div class="empty d">Your order’s empty. Hit Blade Finder or Fast Reorder and load it up.</div>'; $("#cartfoot").hidden = true; return; }
     $("#cartfoot").hidden = false;
-    var nb = BREAKS.filter(function (q) { return q > t.units; })[0], pb = BREAKS.filter(function (q) { return q <= t.units; }).pop();
+    var bs = breakState(t), nb = bs.nb, pb = bs.pb;
     var hasCat = {}; t.lines.forEach(function (l) { l.f.cats.forEach(function (c) { hasCat[c] = 1; }); });
-    var cq = nb && nb - t.units <= 6 ? "You’re " + (nb - t.units) + " away from the " + nb + "-piece break." : !hasCat.core ? "No core bits on here? It’s the same freight bill either way." : !hasCat.small && !hasCat.cup ? "Running grinders? Small blades and cup wheels ship on this same order." : "Good order. Ask for your price break before you send it.";
-    var nudge = '<div class="nudge">' + says(cq) + (nb ? '<div class="nbar"><i style="width:' + Math.min(100, t.units / nb * 100) + '%"></i></div><span>' + (pb ? "You’ve hit the " + pb + "-piece break. " : "") + (nb - t.units) + " more to the " + nb + "-piece price break.</span>" : "<span>You’ve hit our biggest listed break. Your rep takes it from here.</span>") + "</div>";
+    var cq = nb && bs.need <= 6 ? "You’re " + bs.need + " away" + bs.of + " from the " + nb + "-piece price." : !hasCat.core ? "No core bits on here? It’s the same freight bill either way." : !hasCat.small && !hasCat.cup ? "Running grinders? Small blades and cup wheels ship on this same order." : "Good order. Ask for your price break before you send it.";
+    var nudge = '<div class="nudge">' + says(cq) + (nb ? '<div class="nbar"><i style="width:' + Math.min(100, bs.n / nb * 100) + '%"></i></div><span>' + (pb ? "You’ve hit the " + pb + "-piece price. " : "") + bs.need + " more" + esc(bs.of) + " to the " + nb + "-piece price break.</span>" : "<span>You’ve hit our biggest listed break. Your rep takes it from here.</span>") + '<small class="mixnote">' + esc(mixLine()) + "</small></div>";
     b.innerHTML = nudge + t.lines.map(function (l, i) {
       return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · " + money(l.v[3]) + ' each</div></div><div class="lp">' + money(l.v[3] * l.c.q) + "</div><div>" + qtyHTML(l.c.q) + '</div><button class="rm" data-rm>Remove</button></div>';
-    }).join("") + '<div class="callout"><b>That’s Buy It Now. Buy more, pay less.</b><span>Ask your rep for ' + BREAKS.join(", ") + ' piece price breaks, or your account pricing.</span><button class="btn blue sm" data-breaks>Get my price breaks</button></div>';
+    }).join("") + '<div class="callout"><b>That’s Buy It Now. Buy more, pay less.</b><span>Price breaks at ' + breakList() + ' pieces, plus your account pricing.</span><button class="btn blue sm" data-breaks>Get my price breaks</button></div>';
     $("#carttot").innerHTML = "<span>Buy It Now total</span><span>" + money(t.total) + "</span>";
     $("#cartnote").textContent = "Freight and tax are confirmed by your rep. Nothing is charged on this site.";
   }
@@ -589,7 +623,7 @@
     extras = { free: "", stock: false, breaks: [] };
     $("#extrasbody").innerHTML =
       '<div class="xcard gift"><b>With every order: 1 item at our cost.</b><span>Our way of saying thanks for the business. Pick the one you want at our cost and your rep sends back the number.</span><select id="xfree" aria-label="Item at cost"><option value="">Let my rep pick the best one</option>' + t.lines.map(function (l, i) { return '<option value="' + i + '">' + esc(l.f.n + " " + vlabel(l.v)) + "</option>"; }).join("") + "</select></div>" +
-      '<div class="xcard"><b>Stock up and save.</b><span>We keep deep inventory on Dragon, Superblade Extreme, Super G, T-Rex, Viper and Eagle. Want our stock-up pricing on those?</span><label class="xcheck"><input type="checkbox" id="xstock"> Yes, have my rep quote stock-up pricing</label></div>' +
+      '<div class="xcard"><b>Stock up and save.</b><span>We keep deep inventory on Dragon, Superblade Extreme, Super G, T-Rex and Viper. Want our stock-up pricing on those?</span><label class="xcheck"><input type="checkbox" id="xstock"> Yes, have my rep quote stock-up pricing</label></div>' +
       '<div class="xcard"><b>Buying in quantity?</b><span>Tap the price breaks you want quoted.</span><div class="xchips" id="xbreaks">' + BREAKS.map(function (q) { return '<button type="button" data-xbreak="' + q + '" aria-pressed="false">' + q + "</button>"; }).join("") + "</div></div>" +
       (miss.length ? '<div class="xcard"><b>Don’t forget your…</b><span>One order, one freight bill. Tap to add.</span><div class="xchips">' + miss.map(function (d) { return '<button type="button" data-xcat="' + d.cat + '">' + esc(d.n) + "</button>"; }).join("") + "</div></div>" : "");
     $("#cart").close(); $("#extras").showModal();
@@ -598,6 +632,7 @@
   /* ---------- send ---------- */
   var mode = "order";
   var MODES = {
+    terms: { title: "Apply for Net 30 terms", intro: "Tell us who you are. Add two or three trade references and the credit limit you’re after. We’ll get it in front of the right person and call you.", head: "DBW WISCO TERMS APPLICATION", subj: "Net 30 terms application" },
     order: { title: "Send my order", intro: "Fill this in once. This phone remembers it, so next time it’s two taps.", head: "DBW WISCO ORDER", subj: "Order" },
     pricing: { title: "Get my price breaks", intro: "Tell us which pricing to check. Your rep comes back with your real numbers.", head: "DBW WISCO PRICING REQUEST", subj: "Pricing request" },
     saw: { title: "Send my saw deal", intro: "Your rep confirms the package, freight and ship date, then it’s yours.", head: "DBW WISCO SAW DEAL", subj: "Saw deal request" },
@@ -628,24 +663,24 @@
     preview();
   }
   function openSend(m) {
-    mode = m; ordRef = newRef(); var M = MODES[m], info = me(), f = $("#sendform"), order = m === "order" || m === "saw";
+    mode = m; ordRef = newRef(); var M = MODES[m], info = me(), f = $("#sendform"), order = m === "order" || m === "saw", terms = m === "terms";
     $("#sendtitle").textContent = M.title; $("#sendintro").textContent = M.intro;
     $("#discwrap").hidden = m !== "pricing";
     $("#msgwrap").hidden = !M.msg; if (M.msg) $("#msglabel").textContent = M.msg;
-    $("#acctseg").hidden = !order; $("#orderwrap").hidden = !(order || m === "pricing");
-    $("#paywrap").hidden = $("#paynote").hidden = !order; $("#creditwrap").hidden = !order;
+    $("#acctseg").hidden = !(order || terms); $("#orderwrap").hidden = !(order || terms || m === "pricing");
+    $("#paywrap").hidden = $("#paynote").hidden = !order; $("#creditwrap").hidden = !(order || terms);
     $("#reviewwrap").hidden = m !== "review"; $("#referwrap").hidden = m !== "refer";
     ["name", "company", "phone", "email", "addr", "city", "state", "zip"].forEach(function (k) { f.elements[k].value = info[k] || ""; });
     ["po", "notes", "msg", "review", "stars", "fname", "fco", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p"].forEach(function (k) { f.elements[k].value = ""; });
     f.elements.fav.value = info.fav || ""; f.elements.ref.value = store.get("ref", "") || "";
     $("#refhint").textContent = "They earn " + RW.referrer + " when you order.";
     $$("#starpick button").forEach(function (x) { x.classList.remove("on"); });
-    $("#creditwrap").open = false;
+    $("#creditwrap").open = terms;
     f.elements.pay.innerHTML = (W.payments || []).map(function (p) { return "<option>" + esc(p) + "</option>"; }).join("");
     if (info.pay) f.elements.pay.value = info.pay;
     renderReps(repBySlug(info.rep) ? info.rep : "");
     $("#discs").innerHTML = (W.discounts || []).map(function (d, i) { return '<label><input type="checkbox" name="disc" value="' + esc(d) + '"' + (i < 2 ? " checked" : "") + "> " + esc(d) + "</label>"; }).join("");
-    $("#textbtn").hidden = !W.textNumber; $("#textbtn").textContent = "Text it to " + FRANK; $("#sentmsg").hidden = true;
+    $("#textbtn").hidden = !W.textNumber; $("#textbtn").textContent = "Text it to " + route2(repBySlug(info.rep) ? info.rep : "").who; $("#sentmsg").hidden = true;
     $("#sharebtn").hidden = !(m === "order"); $("#friendbtn").hidden = m !== "refer";
     setAcct(info.acct === "new" && !info.sent ? "new" : (info.sent ? "existing" : (info.acct || "existing")));
     ["cart", "detail", "extras"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); $("#send").showModal(); $("#sendform").scrollTop = 0;
@@ -666,14 +701,14 @@
     L.push("From: " + (o.name || "(name)") + (o.company ? ", " + o.company : ""));
     if (o.phone) L.push("Phone: " + o.phone);
     if (o.email) L.push("Email: " + o.email);
-    var order = mode === "order" || mode === "saw";
-    if (order) L.push("Account: " + (o.acct === "new" ? "NEW ACCOUNT" : "Existing customer"));
-    if (order && o.acct === "new" && (o.addr || o.city || o.zip)) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · "));
-    if (order || mode === "pricing") L.push("Salesman: " + (rep ? rep.name : (o.acct === "new" ? "None yet. Assign a rep." : "Not sure. Look this account up in Sage / Zoho by phone or company.")));
+    var order = mode === "order" || mode === "saw", terms = mode === "terms";
+    if (order || terms) L.push("Account: " + (o.acct === "new" ? "NEW ACCOUNT" : "Existing customer"));
+    if ((order || terms) && o.acct === "new" && (o.addr || o.city || o.zip)) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · "));
+    if (order || terms || mode === "pricing") L.push("Salesman: " + (rep ? rep.name : (o.acct === "new" ? "None yet. Assign a rep." : "Not sure. Look this account up in Sage / Zoho by phone or company.")));
     if (order) { L.push("Pay by: " + o.pay); if (o.po) L.push("PO #: " + o.po); }
     if ((order || mode === "pricing") && o.ref) L.push("REFERRED BY: " + o.ref + "  (they earn " + RW.referrer + ")");
     var refs = [[o.r1, o.r1p], [o.r2, o.r2p], [o.r3, o.r3p]].filter(function (x) { return x[0] || x[1]; });
-    if (order && (refs.length || o.limit)) {
+    if ((order || terms) && (refs.length || o.limit || terms)) {
       L.push(""); L.push(o.acct === "new" ? "CREDIT REQUEST: set up terms" + (o.limit ? ", limit " + o.limit : "") : "CREDIT REQUEST: raise limit" + (o.limit ? " to " + o.limit : ""));
       refs.forEach(function (x, i) { L.push("  Ref " + (i + 1) + ": " + [x[0], x[1]].filter(Boolean).join(" · ")); });
     }
@@ -721,17 +756,23 @@
     if (mode === "review" && !f.elements.stars.value) { toast("Tap a star rating first"); return true; }
     if (mode === "review" && !f.elements.review.value.trim()) { f.elements.review.focus(); toast("Tell us a little about how it went"); return true; }
     if (mode === "refer" && !f.elements.fname.value.trim()) { f.elements.fname.focus(); toast("Who are you referring?"); return true; }
-    if ((mode === "order" || mode === "saw") && !f.elements.phone.value.trim()) { f.elements.phone.focus(); toast("Add a phone number so we can confirm the order"); return true; }
+    if ((mode === "order" || mode === "saw" || mode === "terms") && !f.elements.phone.value.trim()) { f.elements.phone.focus(); toast("Add a phone number so we can confirm the order"); return true; }
     if ((mode === "order" || mode === "saw") && f.elements.acct.value === "new" && !f.elements.zip.value.trim()) { f.elements.zip.focus(); toast("Add your ship-to ZIP so we can quote freight"); return true; }
     return false;
   }
-  function mailto(to, subj, body) { location.href = "mailto:" + encodeURIComponent(to || "") + "?subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body); }
-  function sms(body) { location.href = "sms:" + W.textNumber + "?&body=" + encodeURIComponent(body); }
+  /* Who gets it. A rep with an email in config.js gets the order; Frank and the rep's manager are copied. No rep email = it goes to Frank. */
+  function route2(slugv) {
+    var r = repBySlug(slugv) || {}, main = W.orderEmail || "", uniq = function (a) { var seen = {}; return a.filter(function (x) { x = (x || "").toLowerCase(); if (!x || seen[x]) return false; seen[x] = 1; return true; }); };
+    var to = r.email || main, cc = uniq([main, r.manager].concat(W.alsoCopy || [])).filter(function (x) { return x.toLowerCase() !== to.toLowerCase(); });
+    return { to: to, cc: cc, cell: r.cell || W.textNumber || "", who: r.email || r.cell ? r.name : FRANK };
+  }
+  function mailto(to, subj, body, cc) { location.href = "mailto:" + encodeURIComponent(to || "") + "?" + (cc && cc.length ? "cc=" + encodeURIComponent(cc.join(",")) + "&" : "") + "subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body); }
+  function sms(body, cell) { location.href = "sms:" + (cell || W.textNumber) + "?&body=" + encodeURIComponent(body); }
   function sendEmail() {
     if (needName()) return;
     var o = formData(), rep = repBySlug(o.rep), body = buildText(o);
     var subj = MODES[mode].subj + " from " + (o.company || o.name) + (rep ? " (salesman: " + rep.name + ")" : "") + (o.po ? " PO " + o.po : "") + (ordRef ? " [" + ordRef + "]" : "");
-    var viaMail = function () { try { navigator.clipboard.writeText(body).catch(function () {}); } catch (e) {} mailto(W.orderEmail, subj, body); afterSend("email"); };
+    var viaMail = function () { try { navigator.clipboard.writeText(body).catch(function () {}); } catch (e) {} var rt = route2(o.rep); mailto(rt.to, subj, body, rt.cc); afterSend("email"); };
     if (W.formEndpoint && !isPreview) {
       fetch(W.formEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ _subject: subj, name: o.name, company: o.company, phone: o.phone, email: o.email, salesman: rep ? rep.name : "", message: body }) })
         .then(function (r) { if (!r.ok) throw 0; afterSend("posted"); }).catch(viaMail);
@@ -774,7 +815,7 @@
     if ((el = t.closest("[data-rtrep]"))) { var inf = me(); inf.rep = el.dataset.rtrep; store.set("me", inf); repTools(); return; }
     if (t.closest("[data-rtcopy]")) { var lk = $("#rtlink").textContent; if (/^http|^file/.test(lk)) copyText(lk, function () { toast("Link copied. Text it to a customer."); }); else toast("Pick your name first"); return; }
     if ((el = t.closest("[data-starter]"))) { var st = byK(STARTERS, el.dataset.starter); starterLines(st).forEach(function (l) { addToCart(l.f.id, vkey(l.v), l.q); }); renderCart(); $("#cart").showModal(); return; }
-    if (t.closest("[data-photo]")) { sms("Hey " + FRANK + ", here’s a picture of my blade. I need more of these. Name / company: "); return; }
+    if (t.closest("[data-photo]")) { var pr = route2(me().rep); sms("Hey " + pr.who + ", here’s a picture of my blade. I need more of these. Name / company: ", pr.cell); return; }
     if ((el = t.closest("[data-mat]"))) { wiz.mat = byK(MATS, el.dataset.mat); wizard(); window.scrollTo(0, 0); bfShow(wiz.saw ? "results" : "saw"); return; }
     if ((el = t.closest("[data-saw]"))) { wiz.saw = byK(SAWS, el.dataset.saw); wizard(); window.scrollTo(0, 0); bfShow(wiz.mode === "ask" ? "want" : "results"); return; }
     if ((el = t.closest("[data-want]"))) { wiz.want = byK(WANTS, el.dataset.want); wizard(); window.scrollTo(0, 0); return; }
@@ -813,6 +854,7 @@
     if ((el = t.closest("[data-open]"))) { openDetail(FAM[el.closest(".card").dataset.f]); return; }
     if (t.closest("[data-pricing]") || t.closest("[data-breaks]")) { e.preventDefault(); openSend("pricing"); return; }
     if (t.closest("[data-equip]")) { openSend("equip"); return; }
+    if (t.closest("[data-terms]")) { e.preventDefault(); openSend("terms"); return; }
     if (t.closest("[data-review]")) { openSend("review"); return; }
     if (t.closest("[data-refer]")) { openSend("refer"); return; }
     if ((el = t.closest("[data-acct]"))) { setAcct(el.dataset.acct); return; }
@@ -825,12 +867,12 @@
     if (t.closest("[data-backcart]")) { $("#extras").close(); renderCart(); $("#cart").showModal(); return; }
     if ((el = t.closest("[data-xbreak]"))) { var qn = parseInt(el.dataset.xbreak, 10), ix = extras.breaks.indexOf(qn); if (ix >= 0) extras.breaks.splice(ix, 1); else extras.breaks.push(qn); extras.breaks.sort(function (a, b) { return a - b; }); el.setAttribute("aria-pressed", ix < 0); return; }
     if ((el = t.closest("[data-xcat]"))) { $("#extras").close(); shop.cat = el.dataset.xcat; shop.q = ""; shop.n = SHOPPAGE; app.innerHTML = ""; go("#shop"); return; }
-    if ((el = t.closest("[data-rep]"))) { renderReps(el.dataset.rep); preview(); return; }
+    if ((el = t.closest("[data-rep]"))) { renderReps(el.dataset.rep); $("#textbtn").textContent = "Text it to " + route2(el.dataset.rep).who; preview(); return; }
     if ((el = t.closest("[data-close]"))) { el.closest("dialog").close(); return; }
     if ((el = t.closest("[data-rm]"))) { cart.splice(parseInt(el.closest(".line").dataset.i, 10), 1); saveCart(); renderCart(); return; }
     if (t.closest("[data-reorder]")) { var last = lastOrder(); if (last) { last.items.forEach(function (c) { if (FAM[c.f] && findVar(FAM[c.f], c.v)) addToCart(c.f, c.v, c.q); }); renderCart(); $("#cart").showModal(); } return; }
     if (t.closest("[data-email]")) { sendEmail(); return; }
-    if (t.closest("[data-sms]")) { if (needName()) return; sms(buildText(formData())); afterSend("sms"); return; }
+    if (t.closest("[data-sms]")) { if (needName()) return; var fo = formData(); sms(buildText(fo), route2(fo.rep).cell); afterSend("sms"); return; }
     if (t.closest("[data-copy]")) { if (needName()) return; copyText(buildText(formData()), function () { afterSend("copied"); }); return; }
     if (t.closest("[data-share]")) { copyText(shareLink(), function () { toast("Reorder link copied. Text it to anyone."); }); return; }
     if ((el = t.closest("[data-fsms]"))) { sms(frankMsg(el.closest("[data-frank]").dataset.frank)); return; }
@@ -858,7 +900,8 @@
   window.addEventListener("hashchange", route);
 
   /* ---------- boot ---------- */
-  $$("[data-phone]").forEach(function (a) { a.textContent = W.phone || ""; a.href = "tel:" + (W.phone || "").replace(/[^0-9+]/g, ""); });
+  $$("[data-oemail-link]").forEach(function (a) { a.textContent = W.orderEmail || ""; a.href = "mailto:" + (W.orderEmail || ""); });
+  $$("[data-mgr]").forEach(function (a) { a.textContent = (W.managerName || "Frank") + ", " + (W.managerTitle || ""); });
   $$("[data-text]").forEach(function (a) { a.textContent = W.textDisplay || ""; a.href = "sms:" + (W.textNumber || ""); });
   $$("[data-oemail]").forEach(function (a) { a.textContent = W.orderEmail || ""; });
   $$("[data-pl]").forEach(function (a) { a.textContent = C.priceList || "current"; });
