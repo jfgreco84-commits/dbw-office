@@ -83,6 +83,14 @@ window.WISCO = {
   testimonials: [
   ],
 
+  // Official product flyers (PDF). Key = product id (the part after #blade- in its link), value = the flyer link.
+  // Only add a flyer that exists. A product with no entry shows no flyer button.
+  flyers: {
+    "dr-schulze-d160v-drill-stand": "https://www.diamondbladewarehouse.com/storage/app/media/blade%20flyers/D160V%20Drill%20Stand%20Flyer.pdf",
+    "dr-schulze-d350r-drill-stand": "https://www.diamondbladewarehouse.com/storage/app/media/blade%20flyers/D350R%20Drill%20Stand%20Flyer.pdf",
+    "dr-schulze-dk-32": "https://www.diamondbladewarehouse.com/storage/app/media/blade%20flyers/DK%2032%20Core%20Drill%20Flyer.pdf"
+  },
+
   // Blade videos. Key = blade id (the part after #blade- in its link), value = YouTube link.
   videos: {
   }

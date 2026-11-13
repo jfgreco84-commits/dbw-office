@@ -866,6 +866,8 @@
     var h = '<div class="pd"><div>' + pic(f) + "</div><div>" + (f.tier ? '<span class="tier ' + f.tier + '">' + TIER[f.tier] + "</span>" : "") + "<h3>" + esc(f.n) + "</h3>" +
       (f.hook ? '<p class="lede">' + esc(f.hook) + "</p>" : "") +
       (f.ben.length ? '<ul class="ben">' + f.ben.map(function (b) { return "<li>" + (b[0] ? "<b>" + esc(b[0]) + "</b>" : "") + esc(b[1]) + "</li>"; }).join("") + "</ul>" : (f.desc ? '<p class="note" style="font-size:15px;color:var(--ink)">' + esc(f.desc) + "</p>" : "")) + "</div></div>";
+    var fly = (W.flyers || {})[f.id];
+    if (fly) h += '<div class="center"><a class="btn gold" href="' + esc(fly) + '" target="_blank" rel="noopener">View the product flyer (PDF)</a></div>';
     if (TIERQUIP[f.tier]) h += says(TIERQUIP[f.tier]);
     h += '<div class="blk"><h4>Pick your size</h4><div class="sizes">' + f.vars.map(function (v) {
       return '<div class="sz' + (inSaw(v, wiz.saw) ? "" : " dim") + '" data-v="' + esc(vkey(v)) + '"><div><b>' + esc(vlabel(v)) + "</b><small>" + esc(v[0]) + (depthFor(f, v) ? " · cuts about " + depthFor(f, v) + " deep" : "") + '</small></div><div class="r"><span class="p">' + rangeTxt(v) + "</span>" + qtyHTML(1) + '<button class="add" data-add>Add</button></div></div>';
