@@ -137,8 +137,8 @@
     app.innerHTML =
       '<section class="hero"><div class="wrap"><div>' +
       '<span class="pill"><i>★</i> A division of Diamond Blade Warehouse <i>★</i></span>' +
-      "<h1>Wisco cuts different.</h1>" +
-      '<p class="sub">All-American attitude. Milwaukee hustle. <b>Your blades, your price, 60 seconds.</b></p>' +
+      "<h1>The right blade. Right now.</h1>" +
+      '<p class="sub">Tell us what you cut. We ship it anywhere in the USA. <b>Your blades, your price, 60 seconds.</b></p>' +
       '<div class="doors">' +
       '<a class="door d1 shine" href="#finder"><div><b>Blade Finder</b><span>Two taps. We line up the right blade.</span></div><em>→</em></a>' +
       '<a class="door d2" href="#reorder"><div><b>Fast Reorder</b><span>Know what you run? Punch it in and go.</span></div><em>→</em></a>' +
@@ -147,10 +147,10 @@
       '<div class="tiny">Got an account? <a href="#" data-pricing>Get your account pricing</a> · or <a href="#shop">shop everything</a></div>' +
       '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="Diamond Blade Warehouse Wisconsin" width="430" height="458">' +
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
-      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Wisco’s heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + '</div></div></section>' +
-      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What Wisco runs</h2><p>The everyday blades our contractors reorder the most.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a></div></div></section>' +
+      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Our heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + '</div></div></section>' +
+      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What the crews run</h2><p>The everyday blades contractors across the country reorder the most.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a></div></div></section>' +
       '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>How we do it</h2><p>No runaround. No shopping cart games.</p></div><div class="three">' +
-      '<div class="point"><b>A real rep, every order</b><p>Nothing here charges a card. Your order hits your Wisco rep, who confirms price, freight and ship date before it moves.</p></div>' +
+      '<div class="point"><b>A real rep, every order</b><p>Nothing here charges a card. Your order hits your rep, who confirms price, freight and ship date before it moves.</p></div>' +
       '<div class="point"><b>List price is the ceiling</b><p>Account, quantity and Platinum pricing still apply. One button gets you your real numbers.</p></div>' +
       '<div class="point"><b>Best. Better. Good.</b><p>Every blade is graded and star-rated for the exact material you cut. No guessing.</p></div>' +
       "</div></div></section>";
@@ -252,7 +252,7 @@
   function lineScreen(k) {
     var L = byK(LINES, k); if (!L) return home();
     var fs = L.ids.map(function (id) { return FAM[id]; }).filter(Boolean);
-    app.innerHTML = shell("Wisco’s heavy hitters", 0, 0, "<h1>" + esc(L.n) + ".</h1>" + '<p class="lead">' + esc(L.s) + '</p><div class="results">' + fs.map(function (f) { return cardHTML(f); }).join("") + "</div>" + frankBox(""));
+    app.innerHTML = shell("Our heavy hitters", 0, 0, "<h1>" + esc(L.n) + ".</h1>" + '<p class="lead">' + esc(L.s) + '</p><div class="results">' + fs.map(function (f) { return cardHTML(f); }).join("") + "</div>" + frankBox(""));
   }
 
   function route() {
