@@ -51,10 +51,10 @@
     { label: "Good", rc: "g", ids: ["viper-general-purpose", "eagle-heavy-duty", "eagle-standard"] }
   ];
   var LINES = [
-    { k: "dragons", n: "The Dragons", s: "Our baddest multi-purpose blades. Red for life, Purple for everything.", ids: ["dragon-supreme", "dragon"], img: ["dragon-supreme", "dragon"] },
+    { k: "dragons", n: "The Dragons", s: "Our top multi-purpose blades. Red for long life. Purple when the job is everything at once.", ids: ["dragon-supreme", "dragon"], img: ["dragon-supreme", "dragon"] },
     { k: "superblades", n: "The Superblades", s: "Extreme, Super G, G3 and Arrow. Built to drop your cost per cut.", ids: ["superblade-extreme", "super-g", "superblade-g3", "superblade-arrow"], img: ["superblade-g3", "superblade-arrow"] },
     { k: "zenesis", n: "Zenesis Green Kut", s: "Early-entry blades with Zenesis diamond alignment. More footage, chip-free joints.", ids: ["zenesis-green-kut-purple", "zenesis-green-kut-orange", "zenesis-green-kut-green", "zenesis-green-kut-red", "zenesis-green-kut-yellow"], img: ["zenesis-green-kut-purple"] },
-    { k: "4-core", n: "4-Core Bits", s: "Punisher, Wolv and Sabertooth. Pro Series bits for the holes nobody else wants.", ids: ["punisher", "wolv", "sabertooth"], img: ["punisher", "wolv", "sabertooth"] }
+    { k: "4-core", n: "4-Core Bits", s: "Punisher, Wolv and Sabertooth. Pro Series bits for heavy rebar and hard aggregate.", ids: ["punisher", "wolv", "sabertooth"], img: ["punisher", "wolv", "sabertooth"] }
   ];
   var DONTFORGET = [
     { cat: "core", n: "Core bits" }, { cat: "chain", n: "Diamond chain" }, { cat: "abrasive", n: "Abrasive wheels" },
@@ -260,13 +260,13 @@
       "<div class=\"point l\"><b>A real person, every order</b><p>You should never have to fight an automated maze just to reorder. Every order on this site lands with a human who knows your account. Nothing here charges a card.</p></div>" +
       "<div class=\"point l\"><b>One hand washes the other</b><p>We sell blades and equipment to put food on our families’ tables. You and your crews use them to put food on yours. One good American company doing good business with another.</p></div>" +
       "<div class=\"point l\"><b>We obsess so you don’t have to</b><p>You’re the one sweating behind the saw. We sweat the blades, the bonds and the freight, and we’re here for you every day of the week.</p></div>" +
-      '</div><div class="bribe"><b>Professional bribery, the good old-fashioned way.</b><span>Tell your salesman your favorite team, athlete, school or color. We make it a point to remember, and it has a way of showing up in the box.</span></div></div></section>' +
+      '</div><div class="bribe"><b>We remember who you are.</b><span>Tell your salesman your favorite team, athlete or school. We make a point of remembering, and it has a way of showing up in the box.</span></div></div></section>' +
 
       '<section class="sec"><div class="wrap narrow"><div class="sec-head"><h2>Straight answers</h2><p>The questions we hear every day.</p></div><div class="qa">' + ANSWERS.map(function (x) { return "<details><summary>" + esc(x[0]) + "</summary><p>" + esc(x[1]) + "</p></details>"; }).join("") + '</div><div class="promise"><b>Our word</b><span>You’re never stuck with a blade you’re not happy with. We’ll swap it or take it back.</span></div><div class="center"><a class="btn blue" href="#cost">Run the cost-per-cut math</a><a class="btn ghost-d" href="#fix">Blade giving you trouble?</a></div></div></section>' +
 
       (T.length ? '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Straight from the jobsite</h2><p>Real customers. Their words.</p></div><div class="three">' + T.map(function (t) { return '<figure class="quote"><blockquote>' + esc(t.quote) + "</blockquote><figcaption>" + esc(t.who || "") + "</figcaption></figure>"; }).join("") + "</div></div></section>" : "") +
 
-      '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>How’d we do?</h2><p>Good, bad or ugly. ' + esc(FRANK) + ' reads every one, and we ask on every order.</p></div><div class="center"><button class="btn chrome" data-feedback>Tell ' + esc(FRANK) + " how we did</button></div></div></section>";
+      '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>How’d we do?</h2><p>Tell us what worked and what didn’t. ' + esc(FRANK) + ' reads every one, and we ask on every order.</p></div><div class="center"><button class="btn chrome" data-feedback>Tell ' + esc(FRANK) + " how we did</button></div></div></section>";
     setNav("#home");
   }
 
@@ -580,7 +580,7 @@
     pricing: { title: "Get my price breaks", intro: "Tell us which pricing to check. Your rep comes back with your real numbers.", head: "DBW WISCO PRICING REQUEST", subj: "Pricing request" },
     saw: { title: "Send my saw deal", intro: "Your rep confirms the package, freight and ship date, then it’s yours.", head: "DBW WISCO SAW DEAL", subj: "Saw deal request" },
     equip: { title: "Find me equipment", intro: "Give us as much as you can: make, model, size, new or used, how soon.", head: "DBW WISCO EQUIPMENT REQUEST", subj: "Equipment request", msg: "What are you looking for? Make, model, anything you know" },
-    feedback: { title: "How’d we do?", intro: "Good, bad or ugly. " + FRANK + " reads every one.", head: "DBW WISCO FEEDBACK", subj: "Feedback", msg: "Tell us how we did" }
+    feedback: { title: "How’d we do?", intro: "Tell us what worked and what didn’t. " + FRANK + " reads every one.", head: "DBW WISCO FEEDBACK", subj: "Feedback", msg: "Tell us how we did" }
   };
   function me() { return store.get("me", {}); }
   function repBySlug(s) { return (W.reps || []).filter(function (r) { return slug(r.name) === s; })[0]; }

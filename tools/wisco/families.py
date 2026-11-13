@@ -45,7 +45,7 @@ def fam(name, t, m, h, b=None, cat=None, d=None):
 
 # ---------------- High-speed multi-purpose ----------------
 fam("Super G", "supreme", dict(c=5, r=4, a=4, b=4.5, p=4.5, s=4, pi=4.5, x=3),
-    "Our best-selling blade, period. Put it on the saw Monday and quit thinking about blades.",
+    "Our best-selling blade. One blade for concrete, block, pavers, asphalt and pipe.",
     [("True multi-purpose bond", "Concrete, block, pavers, asphalt, pipe. One blade on the truck instead of four."),
      ("Double laser-welded segments", "Fights undercutting so you wear the diamond out, not the core."),
      ("Runs dry", "No hose, no slurry. Pull the cord and cut, indoors or out.")])
@@ -60,12 +60,12 @@ fam("Superblade Extreme", "supreme", dict(c=4.5, a=4.5, b=4.5, s=4, pi=4.5, p=4.
      ("Drop segments", "Undercut protection built in, so soft abrasive material can't eat the core."),
      ("One blade for mixed sites", "Asphalt in the morning, concrete pipe after lunch. Same blade.")])
 fam("Superblade Arrow", "supreme", dict(r=5, c=4.5, s=5, b=4.5, p=4.5, pi=4.5, a=3.5),
-    "The ultimate hard-material blade. When the aggregate fights back, this is the one you reach for.",
+    "Our hard-material blade. Built for rebar, river rock, fire brick and granite curb.",
     [("Arrow-shaped slant segments", "Throws dust out of the cut and guards against undercut wear."),
      ("15mm segment height", "A tall segment is more diamond to burn. More cuts before you call us."),
      ("Hard-material bond", "Stays open on rebar, river rock, fire brick and granite curb instead of glazing over.")])
 fam("Swordfish", "supreme", dict(r=5, s=5, pi=4.5, b=4, c=4.5, p=4),
-    "Hard, dense, ugly material? Swordfish goes straight through it.",
+    "Made for hard, dense material where an ordinary blade glazes over.",
     [("Side-slit segments", "Pulls itself through the cut so the saw doesn't bog."),
      ("Extra-deep gullets", "Clears dust fast, runs cooler, no binding on deep plunge cuts."),
      ("Rigid high-tensile core", "Tracks dead straight. Your cut line stays your cut line.")])
@@ -103,7 +103,7 @@ fam("Eagle Premium", "premium", dict(c=4.5, r=3.5, b=4),
      ("Laser-welded segments", "Safe dry cutting on high-speed saws."),
      ("Priced for volume", "The blade most crews stock by the 10-pack.")])
 fam("T-Rex", "premium", dict(c=4, r=4, b=4, p=4, pi=4, s=3.5),
-    "The W-shaped segment bites first and asks questions later.",
+    "A W-shaped segment that cuts fast and aggressive at a fair price.",
     [("W-shaped segments", "Fast, aggressive cut on concrete, reinforced concrete, pipe, brick and block."),
      ("Cobalt steel core", "Won't warp or wobble when it gets hot."),
      ("Contractor pricing", "Premium performance without the supreme price tag.")])
@@ -155,7 +155,7 @@ fam("Blue Tornado", "supreme", dict(s=5, b=4.5, p=4.5, c=4, t=3.5),
     "Titanium-coated turbo segments that cut extremely fast and leave a smooth finish.",
     [("Titanium-encapsulated diamond", "Diamonds stay in the segment longer. Faster cut, longer life."),
      ("Blue heat-sink core", "Sheds heat fast so the blade stays flat on long cuts."),
-     ("Curved gullets", "Throws dust out and runs quieter. Your ears will notice."),
+     ("Curved gullets", "Clears dust and runs quieter."),
      ('4" through 14"', "Same blade from the grinder to the cut-off saw.")])
 fam("Tornado", "supreme", dict(s=4.5, b=4.5, c=4, p=4, t=3.5),
     "A T-segment turbo that cuts extremely fast with long life on concrete, stone and roof tile.",
