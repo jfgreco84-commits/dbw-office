@@ -19,25 +19,24 @@ window.WISCO = {
 
   // "Pick your salesman". name = the PHONE NAME customers know. photo = file in wisco/brand/reps/ (optional).
   // Replace this list with the real phone-name roster. No real last names unless they sell under them.
-  // Text a customer  .../wisco/?rep=snacks  and that rep is pre-picked.
+  // This is the current roster from the sales board (13 people). Keep it in step with the board.
+  // Text a customer  .../wisco/?rep=snacks  and that rep is pre-picked and greets them on the home page.
   reps: [
-    { name: "Frank", photo: "" },
+    { name: "Frank", photo: "frank.webp" },
+    { name: "Ronny B", photo: "" },
     { name: "Batman", photo: "" },
     { name: "Miz", photo: "" },
-    { name: "Cutty", photo: "" },
     { name: "Snacks", photo: "" },
-    { name: "Ronny B", photo: "" },
     { name: "TJ", photo: "" },
-    { name: "Kerry", photo: "" },
     { name: "JB", photo: "" },
-    { name: "Les", photo: "" },
+    { name: "Cutty", photo: "" },
+    { name: "Kerry", photo: "" },
     { name: "Cassie", photo: "" },
-    { name: "Anessa", photo: "" },
     { name: "Luis", photo: "" },
-    { name: "Paul Z", photo: "" },
-    { name: "Blake", photo: "" },
+    { name: "Les", photo: "" },
     { name: "Jeff", photo: "" }
   ],
+
 
   // How the customer wants to pay. No card or bank numbers are ever typed into the site.
   payments: [

@@ -69,6 +69,34 @@
     ["Early-entry saw", [['6"', '1-3/16"'], ['8"', '2"'], ['10"', '3"'], ['12"', '4"'], ['13-1/2"', '4-1/2"'], ['14"', '5"']]],
     ["Deep-cut tools", [["Ring saw, 14\"", '10"'], ["Cut-n-Break, 9\"", '16" in passes'], ["Diamond chain saw", "bar length: 10\" to 25\""], ["Core bit", "barrel length: 9\" to 24\""]]]
   ];
+  /* Big Frank: the comment machine. Short, in his voice, never a made-up claim. */
+  var QUIP = {
+    home: ["Dragon first. Always. If it can’t cut it, call me.", "Buying 6 or more? Don’t pay Buy It Now. Ask for the price break.", "Tell your salesman your favorite team. Trust me on this one.", "Need a saw? Stack blades with it and watch what happens to the price.", "If they make it, we can get it. Try me.", "Not sure what to run? Three taps and I’ll tell you."],
+    mat: ["Tell me what you’re cutting. I’ll line ’em up."],
+    saw: ["What saw? I only show sizes that fit it."],
+    want: ["Be straight with me. Speed, life or price?"],
+    reorder: ["Got the old blade in your hand? The part number’s printed on it. Type that.", "Easier yet: text me a picture of the old blade."],
+    shop: ["Everything’s got a price on it. Buying a stack? Ask for the break.", "Can’t find it? Doesn’t mean we can’t get it."],
+    equipment: ["Make, model, how soon. Give me that and watch what I come back with.", "Buying blades in bulk? That’s how the saw gets cheap."],
+    depth: ["Rule of thumb: a 14 cuts 5 inches. Need deeper? Go 16, or ask me about a ring saw."],
+    send: ["Fill it in once. Next time it’s two taps.", "No card numbers on here. Ever. We do that by phone like grown-ups."],
+    line: ["These are the ones we put our name on."]
+  };
+  var MATQUIP = {
+    c: "Cured concrete all day? Dragon. Tight budget? T-Rex won’t let you down.",
+    r: "Rebar and river rock? That’s Dragon Supreme country.",
+    g: "Green concrete is a timing game. Get the joints in clean and get out.",
+    a: "Asphalt eats cheap blades. Run the right bond and quit burning segments.",
+    bp: "Pavers and block: you want clean edges and fewer wasted pieces.",
+    s: "Granite glazes a blade over fast. You want one that stays open.",
+    t: "Porcelain chips if you look at it wrong. Thin rim, and let the blade do the work.",
+    x: "Still burning abrasive wheels on ductile? Blacksmyth. Same depth, first cut to last.",
+    m: "Tuck pointing all day? Get a blade that holds its width.",
+    sp: "Double row if you want it flat. T-Seg if you’re stripping coatings."
+  };
+  var TIERQUIP = { supreme: "This is the good stuff. More per blade, less per cut.", pro: "Pro Series. For the jobs nobody else wants.", premium: "Solid everyday blade. Crews stock these by the box.", standard: "Honest blade that does the job. Step up when the job gets ugly.", economy: "Budget blade. Fine for the short job. Step up when it gets hard." };
+  function says(text, big) { return '<div class="bfs' + (big ? " big" : "") + '"><img alt="" src="brand/frank' + (big ? "" : "-sm") + '.webp"><div><b>Big ' + esc(FRANK) + " says</b><p>" + esc(text) + "</p></div></div>"; }
+
   var byK = function (arr, k) { return arr.filter(function (x) { return x.k === k; })[0]; };
 
   var FAM = {}, SKU = {}, MATNAME = {}, SAWNAME = {}, CATNAME = {};
@@ -169,13 +197,13 @@
     var T = (W.testimonials || []).filter(function (t) { return t && t.quote; });
     app.innerHTML =
       '<section class="hero"><div class="wrap"><div>' +
-      '<span class="pill"><i>★</i> A division of Diamond Blade Warehouse, LLC <i>★</i></span>' +
+      (function () { var r = repBySlug(me().rep); return '<span class="pill"><i>★</i> ' + (r ? "Your salesman: " + esc(r.name) : "A division of Diamond Blade Warehouse, LLC") + " <i>★</i></span>"; })() +
       "<h1>The right blade. Right now.</h1>" +
       '<p class="sub">Tell us what you cut. We ship it anywhere in the USA. <b>Your blades, your price, 60 seconds.</b></p>' +
       '<div class="doors">' +
       '<a class="door d1 shine" href="#finder"><div><b>Blade Finder</b><span>Two taps. We line up the right blade.</span></div><em>→</em></a>' +
       '<a class="door d2" href="#reorder"><div><b>Fast Reorder</b><span>Know what you run? Punch it in and go.</span></div><em>→</em></a>' +
-      '<a class="door d3" href="#ask-frank"><div><b>Ask ' + esc(FRANK) + "</b><span>Not sure? Get " + esc(FRANK) + "’s pick in 3 taps.</span></div><em>→</em></a>" +
+      '<a class="door d3 withav" href="#ask-frank"><img alt="" src="brand/frank-sm.webp"><div><b>Ask ' + esc(FRANK) + "</b><span>Not sure? Get Big " + esc(FRANK) + "’s pick in 3 taps.</span></div><em>→</em></a>" +
       "</div>" +
       '<div class="minis"><a href="#saw-deal">Build a saw deal</a><a href="#equipment">Equipment deals</a><a href="#depth">Cutting depth chart</a><a href="#shop">Shop everything</a></div>' +
       '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="DBW Wisco, a division of Diamond Blade Warehouse" width="430" height="458">' +
@@ -209,24 +237,24 @@
 
   function wizard() {
     var ask = wiz.mode === "ask", total = ask ? 3 : 2, kick = ask ? "Ask " + esc(FRANK) : "Blade Finder";
-    if (!wiz.mat) { app.innerHTML = shell(kick, 1, total, "<h1>What are you cutting?</h1>" + '<p class="lead">Tap one.</p>' + tiles(MATS, "mat")); return; }
+    if (!wiz.mat) { app.innerHTML = shell(kick, 1, total, "<h1>What are you cutting?</h1>" + says(QUIP.mat[0]) + tiles(MATS, "mat")); return; }
     if (!wiz.saw) {
       var saws = SAWS.filter(function (s) { return candidates(wiz.mat, s).length; });
       if (saws.length === 1) { wiz.saw = saws[0]; return wizard(); }
-      app.innerHTML = shell(kick, 2, total, chosen() + "<h1>What saw are you running?</h1>" + '<p class="lead">We only show sizes that fit it.</p>' + tiles(saws, "saw")); return;
+      app.innerHTML = shell(kick, 2, total, chosen() + "<h1>What saw are you running?</h1>" + says(QUIP.saw[0]) + tiles(saws, "saw")); return;
     }
-    if (ask && !wiz.want) { app.innerHTML = shell(kick, 3, total, chosen() + "<h1>What matters most?</h1>" + '<p class="lead">Be honest. ' + esc(FRANK) + " won’t judge.</p>" + tiles(WANTS, "want")); return; }
+    if (ask && !wiz.want) { app.innerHTML = shell(kick, 3, total, chosen() + "<h1>What matters most?</h1>" + says(QUIP.want[0]) + tiles(WANTS, "want")); return; }
     var list = candidates(wiz.mat, wiz.saw), o = { mat: wiz.mat, saw: wiz.saw }, h = chosen();
     if (!list.length) { app.innerHTML = shell(kick, 0, 0, h + "<h1>That one’s a phone call.</h1>" + '<div class="empty">Nothing on the shelf matches that combo. ' + esc(FRANK) + " will spec it for you.</div>" + frankBox("")); return; }
     if (ask) {
       var r = rank(list, wiz.mat, wiz.saw, wiz.want.k), top = r[0], alts = r.slice(1, 3);
       var why = { speed: "it’s the fastest thing we’ve got for that job", life: "it’ll outlast anything else on that saw", price: "it’s the lowest cost-in that still does the job right", frank: "it’s what I’d put on my own saw" }[wiz.want.k];
-      h += "<h1>" + esc(FRANK) + " says: run the " + esc(top.n) + ".</h1>" + '<p class="lead">For ' + esc(wiz.mat.n.toLowerCase()) + " on a " + esc(wiz.saw.n.toLowerCase()) + ", " + why + ".</p>" +
+      h += says("Run the " + top.n + ". For " + wiz.mat.n.toLowerCase() + " on a " + wiz.saw.n.toLowerCase() + ", " + why + ".", true) +
         '<div class="results">' + cardHTML(top, { mat: wiz.mat, saw: wiz.saw, pick: 1, ribbon: "★ " + esc(FRANK) + "’s Pick", ribbon2: esc(wiz.want.n) }) +
         alts.map(function (f, i) { return cardHTML(f, { mat: wiz.mat, saw: wiz.saw, ribbon: i ? "Also solid" : "Runner-up", rc: i ? "g" : "b" }); }).join("") + "</div>" + frankBox(top.n);
     } else {
       var lad = ladder(list), picks = lad.length >= 3 ? lad : bestBetterGood(list, wiz.mat, wiz.saw);
-      h += "<h1>Here’s your lineup.</h1>" + '<p class="lead">' + list.length + (list.length === 1 ? " blade fits." : " blades fit. Start with these.") + "</p>" +
+      h += "<h1>Here’s your lineup.</h1>" + says((MATQUIP[wiz.mat.k] || "Start at the top and work down.") + " " + list.length + (list.length === 1 ? " blade fits." : " fit. Start with these.")) +
         '<div class="results">' + (wiz.all
           ? rank(list, wiz.mat, wiz.saw).map(function (f) { return cardHTML(f, o); })
           : picks.map(function (p, i) { return cardHTML(p.f, { mat: wiz.mat, saw: wiz.saw, pick: i === 0, ribbon: p.label, rc: p.rc }); })).join("") + "</div>" +
@@ -263,11 +291,12 @@
   function reorder() {
     var last = store.get("last", null), n = last && last.items ? last.items.length : 0;
     app.innerHTML = shell("Fast Reorder", 0, 0,
-      "<h1>Know what you run?</h1>" + '<p class="lead">Type the blade name, the size, or the part number off your old blade.</p>' +
+      "<h1>Know what you run?</h1>" + says(QUIP.reorder[0]) +
       (n ? '<div class="last"><div><b>Same as last time?</b><span>' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>' : "") +
       '<input class="search-big" id="rq" type="search" placeholder="Dragon 14   or   AES14SGC1" autocomplete="off" aria-label="Search by blade, size or part number">' +
       '<div class="hintchips" id="rhints">' + ["Dragon 14", "Superblade Extreme 14", "Super G 14", "T-Rex 14", "Viper 14", "Blue Tornado 7"].map(function (x) { return '<button data-hint="' + esc(x) + '">' + esc(x) + "</button>"; }).join("") + "</div>" +
       '<div class="hits" id="rhits"></div>' +
+      (W.textNumber ? '<div class="frank"><b class="h">Easiest reorder there is</b><p>Snap a picture of your old blade and text it to ' + esc(FRANK) + '. We’ll read the label and write it up.</p><div class="sendrow"><button class="btn chrome sm" data-photo>Text ' + esc(FRANK) + " a photo</button></div><p class=\"note\">Text: <b style=\"user-select:all\">" + esc(W.textDisplay || "") + "</b></p></div>" : "") +
       '<div class="frank"><b class="h">Your rep can build your list for you</b><p>Ask your rep to text you a reorder link. It opens with your usual blades already in the cart.</p></div>');
     $("#rq").addEventListener("input", function (e) { runSearch(e.target.value); });
   }
@@ -293,7 +322,7 @@
   function lineScreen(k) {
     var L = byK(LINES, k); if (!L) return home();
     var fs = L.ids.map(function (id) { return FAM[id]; }).filter(Boolean);
-    app.innerHTML = shell("Our heavy hitters", 0, 0, "<h1>" + esc(L.n) + ".</h1>" + '<p class="lead">' + esc(L.s) + '</p><div class="results">' + fs.map(function (f) { return cardHTML(f); }).join("") + "</div>" + frankBox(""));
+    app.innerHTML = shell("Our heavy hitters", 0, 0, "<h1>" + esc(L.n) + ".</h1>" + says(L.s) + '<div class="results">' + fs.map(function (f) { return cardHTML(f); }).join("") + "</div>" + frankBox(""));
   }
 
   /* ---------- saw deal calculator ---------- */
@@ -318,7 +347,8 @@
     var max = SD.tiers.length ? SD.tiers[SD.tiers.length - 1][0] : 36;
     var saw = SD.saws.filter(function (s) { return s.sku === deal.saw; })[0];
     var bin = dealBIN(), sawNet = tot ? tot - bin.blades : 0, save = tot ? bin.saw + bin.blades - tot : 0;
-    var h = "<h1>Build your saw deal.</h1>" + '<p class="lead">Pick a gas saw. Stack 15, 25 or 36 blades, any 12" to 16" blade, mix and match. Every tier knocks the saw price down. Stack enough and the saw is free.</p>' +
+    var dq = !saw ? "Pick the saw you want. Then we stack blades till the price behaves." : !t ? (SD.tiers[0][0] - n) + " more blades and you’ve got yourself a saw deal." : next ? "You’re in. " + (next[0] - n) + " more gets you the " + next[0] + "-pack and a better number." : "That’s the top tier. Send it over and I’ll sharpen the pencil.";
+    var h = "<h1>Build your saw deal.</h1>" + says(dq) + '<p class="lead">Pick a gas saw. Stack 15, 25 or 36 blades, any 12" to 16" blade, mix and match. Every tier knocks the saw price down. Stack enough and the saw is free.</p>' +
       '<div class="frank"><b class="h">1. Pick your saw</b><select id="dsaw" class="bigsel" aria-label="Saw"><option value="">Choose a saw…</option>' + SD.saws.map(function (s) { return '<option value="' + esc(s.sku) + '"' + (s.sku === deal.saw ? " selected" : "") + ">" + esc(s.n) + "</option>"; }).join("") + "</select></div>" +
       '<div class="frank"><b class="h">2. Stack your blades</b><div class="dealadd"><select id="dfam" aria-label="Blade">' + fams.map(function (f) { return '<option value="' + f.id + '">' + esc(f.n) + "</option>"; }).join("") + '</select><select id="dvar" aria-label="Size"></select>' + qtyHTML(5) + '<button class="add" data-dealadd>Add</button></div>' +
       (deal.lines.length ? '<div class="deallines">' + deal.lines.map(function (l, i) { var f = FAM[l.f], v = f && findVar(f, l.v); return v ? '<div class="dl" data-i="' + i + '"><span><b>' + l.q + " x " + esc(f.n) + "</b><small>" + esc(vlabel(v)) + '</small></span><button class="link" data-dealrm>Remove</button></div>' : ""; }).join("") + "</div>" : '<p class="note">No blades yet. Add at least 15 to unlock a saw deal.</p>') + "</div>" +
@@ -352,7 +382,7 @@
     var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td><td class=\"num\">" + money(v[3]) + '</td><td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button></td></tr>' : ""; }).join("");
     var eq = C.families.filter(function (f) { return f.cats.indexOf("equip") >= 0 || f.cats.indexOf("dust") >= 0; });
     app.innerHTML = shell("Equipment deals", 0, 0,
-      "<h1>If they make it, we can get it.</h1>" + '<p class="lead">Don’t sleep on the equipment deals. Tell your rep exactly what you’re after and they’ll hunt down the best deal out there.</p>' +
+      "<h1>If they make it, we can get it.</h1>" + says(QUIP.equipment[0]) +
       '<div class="frank"><b class="h">Tell us what you’re looking for</b><p>Make, model, size, new or used, how soon. The more you give us, the better the deal we can chase. Buying blades in bulk? We can often eat most or all of the equipment cost.</p><div class="sendrow"><button class="btn chrome sm shine" data-equip>Have my rep hunt it down</button><a class="btn blue sm" href="#saw-deal">Build a free-saw deal</a></div></div>' +
       '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><div class="tablewrap"><table class="cmp"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th><th class="num">Buy It Now</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buy It Now is the one-saw price. Bundle it with blades and the number drops fast.</p></div>' +
       '<h2 class="wiz-h2">Equipment on the shelf</h2><div class="results two-up">' + eq.map(function (f) { return cardHTML(f); }).join("") + "</div>", true);
@@ -360,7 +390,7 @@
   }
   function depth() {
     app.innerHTML = shell("Cutting depth chart", 0, 0,
-      "<h1>How deep will it cut?</h1>" + '<p class="lead">Typical maximum depth of cut by blade size. Your saw’s guard and flanges can change it by up to half an inch.</p>' +
+      "<h1>How deep will it cut?</h1>" + says(QUIP.depth[0]) + '<p class="lead">Typical maximum depth of cut by blade size. Your saw’s guard and flanges can change it by up to half an inch.</p>' +
       DEPTH.map(function (g) { return '<div class="frank"><b class="h">' + esc(g[0]) + '</b><div class="tablewrap"><table class="cmp"><thead><tr><th>Blade / tool</th><th>Max depth of cut</th></tr></thead><tbody>' + g[1].map(function (r) { return "<tr><td>" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td></tr>"; }).join("") + "</tbody></table></div></div>"; }).join("") +
       '<div class="center"><a class="btn chrome" href="#finder">Find the blade for it</a></div>');
     setNav("");
@@ -373,15 +403,26 @@
     if (h === "#finder" || h === "#ask-frank") {
       var mode = h === "#finder" ? "finder" : "ask";
       if (!wiz.keep) { wiz.mat = wiz.saw = null; }
-      wiz.keep = false; wiz.mode = mode; wiz.want = null; wiz.all = false; wizard(); setNav(h);
-    } else if (h === "#reorder") { reorder(); setNav(h); }
-    else if (h === "#shop") { app.innerHTML = ""; shopScreen(); }
-    else if (h === "#saw-deal") sawDeal();
-    else if (h === "#equipment") equipment();
-    else if (h === "#depth") depth();
-    else if (h.indexOf("#line-") === 0) { lineScreen(h.slice(6)); setNav(""); }
-    else home();
+      wiz.keep = false; wiz.mode = mode; wiz.want = null; wiz.all = false; wizard(); setNav(h); bfShow("mat");
+    } else if (h === "#reorder") { reorder(); setNav(h); bfShow("reorder"); }
+    else if (h === "#shop") { app.innerHTML = ""; shopScreen(); bfShow("shop"); }
+    else if (h === "#saw-deal") { sawDeal(); bfShow("equipment"); }
+    else if (h === "#equipment") { equipment(); bfShow("equipment"); }
+    else if (h === "#depth") { depth(); bfShow("depth"); }
+    else if (h.indexOf("#line-") === 0) { lineScreen(h.slice(6)); setNav(""); bfShow("line"); }
+    else { home(); bfShow("home"); }
   }
+
+  /* ---------- floating Big Frank ---------- */
+  var bfCtx = "home", bfI = 0;
+  function bfLines() {
+    var t = totals(), a = (QUIP[bfCtx] || QUIP.home).slice();
+    if (bfCtx === "results" && wiz.mat && MATQUIP[wiz.mat.k]) a = [MATQUIP[wiz.mat.k]];
+    if (t.units) { var nb = BREAKS.filter(function (q) { return q > t.units; })[0]; if (nb) a.unshift("You’ve got " + t.units + " on the order. " + (nb - t.units) + " more hits the " + nb + "-piece break."); }
+    return a;
+  }
+  function bfShow(ctx) { if (ctx) { bfCtx = ctx; bfI = 0; } var a = bfLines(); $("#bfp").textContent = a[bfI % a.length]; }
+  function bfOpen(open) { $("#bf").classList.toggle("open", open); store.set("bf", open ? 1 : 0); }
 
   /* ---------- cart ---------- */
   function cartLines() { return cart.map(function (c) { var f = FAM[c.f], v = f && findVar(f, c.v); return f && v ? { c: c, f: f, v: v } : null; }).filter(Boolean); }
@@ -392,7 +433,7 @@
     if (hit) hit.q += q; else cart.push({ f: fid, v: key, q: q });
     saveCart();
   }
-  function saveCart() { store.set("cart", cart); badge(); }
+  function saveCart() { store.set("cart", cart); badge(); bfI = 0; bfShow(); }
   function badge() {
     var t = totals(); $("#cartn").textContent = t.units; $("#dock").hidden = !t.units; $("#fab").hidden = !!t.units;
     if (t.units) $("#dockinfo").innerHTML = "<b>" + t.units + (t.units === 1 ? " item" : " items") + " · " + money(t.total) + "</b><span>Buy It Now total, before your price breaks</span>";
@@ -401,7 +442,11 @@
     var t = totals(), b = $("#cartbody");
     if (!t.lines.length) { b.innerHTML = '<div class="empty d">Your order’s empty. Hit Blade Finder or Fast Reorder and load it up.</div>'; $("#cartfoot").hidden = true; return; }
     $("#cartfoot").hidden = false;
-    b.innerHTML = t.lines.map(function (l, i) {
+    var nb = BREAKS.filter(function (q) { return q > t.units; })[0], pb = BREAKS.filter(function (q) { return q <= t.units; }).pop();
+    var hasCat = {}; t.lines.forEach(function (l) { l.f.cats.forEach(function (c) { hasCat[c] = 1; }); });
+    var cq = nb && nb - t.units <= 6 ? "You’re " + (nb - t.units) + " away from the " + nb + "-piece break. Just saying." : !hasCat.core ? "No core bits on here? Same freight bill either way." : !hasCat.small && !hasCat.cup ? "Got grinders on the truck? Small blades and cup wheels ride free on this freight." : "Looks like a good order. Ask for your price break before you send it.";
+    var nudge = '<div class="nudge">' + says(cq) + (nb ? '<div class="nbar"><i style="width:' + Math.min(100, t.units / nb * 100) + '%"></i></div><span>' + (pb ? "You’ve hit the " + pb + "-piece break. " : "") + (nb - t.units) + " more to the " + nb + "-piece price break.</span>" : "<span>You’ve hit our biggest listed break. Your rep takes it from here.</span>") + "</div>";
+    b.innerHTML = nudge + t.lines.map(function (l, i) {
       return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · " + money(l.v[3]) + ' each</div></div><div class="lp">' + money(l.v[3] * l.c.q) + "</div><div>" + qtyHTML(l.c.q) + '</div><button class="rm" data-rm>Remove</button></div>';
     }).join("") + '<div class="callout"><b>That’s Buy It Now. Buy more, pay less.</b><span>Ask your rep for ' + BREAKS.join(", ") + ' piece price breaks, or your account pricing.</span><button class="btn blue sm" data-breaks>Get my price breaks</button></div>';
     $("#carttot").innerHTML = "<span>Buy It Now total</span><span>" + money(t.total) + "</span>";
@@ -529,6 +574,7 @@
     var h = '<div class="pd"><div>' + pic(f) + "</div><div>" + (f.tier ? '<span class="tier ' + f.tier + '">' + TIER[f.tier] + "</span>" : "") + "<h3>" + esc(f.n) + "</h3>" +
       (f.hook ? '<p class="lede">' + esc(f.hook) + "</p>" : "") +
       (f.ben.length ? '<ul class="ben">' + f.ben.map(function (b) { return "<li>" + (b[0] ? "<b>" + esc(b[0]) + "</b>" : "") + esc(b[1]) + "</li>"; }).join("") + "</ul>" : (f.desc ? '<p class="note" style="font-size:15px;color:var(--ink)">' + esc(f.desc) + "</p>" : "")) + "</div></div>";
+    if (TIERQUIP[f.tier]) h += says(TIERQUIP[f.tier]);
     h += '<div class="blk"><h4>Pick your size</h4><div class="sizes">' + f.vars.map(function (v) {
       return '<div class="sz' + (inSaw(v, wiz.saw) ? "" : " dim") + '" data-v="' + esc(vkey(v)) + '"><div><b>' + esc(vlabel(v)) + "</b><small>" + esc(v[0]) + '</small></div><div class="r"><span class="p">' + money(v[3]) + "</span>" + qtyHTML(1) + '<button class="add" data-add>Add</button></div></div>';
     }).join("") + "</div></div>";
@@ -547,8 +593,12 @@
   function flash(el, txt) { el.classList.add("ok"); var old = el.textContent; el.textContent = txt || "Added ✓"; setTimeout(function () { el.classList.remove("ok"); el.textContent = old; }, 1100); }
   document.addEventListener("click", function (e) {
     var t = e.target, el;
-    if ((el = t.closest("[data-mat]"))) { wiz.mat = byK(MATS, el.dataset.mat); wizard(); window.scrollTo(0, 0); return; }
-    if ((el = t.closest("[data-saw]"))) { wiz.saw = byK(SAWS, el.dataset.saw); wizard(); window.scrollTo(0, 0); return; }
+    if (t.closest("[data-bftoggle]")) { bfOpen(!$("#bf").classList.contains("open")); return; }
+    if (t.closest("[data-bfhide]")) { bfOpen(false); return; }
+    if (t.closest("[data-bfnext]")) { bfI++; bfShow(); return; }
+    if (t.closest("[data-photo]")) { sms("Hey " + FRANK + ", here’s a picture of my blade. I need more of these. Name / company: "); return; }
+    if ((el = t.closest("[data-mat]"))) { wiz.mat = byK(MATS, el.dataset.mat); wizard(); window.scrollTo(0, 0); bfShow(wiz.saw ? "results" : "saw"); return; }
+    if ((el = t.closest("[data-saw]"))) { wiz.saw = byK(SAWS, el.dataset.saw); wizard(); window.scrollTo(0, 0); bfShow(wiz.mode === "ask" ? "want" : "results"); return; }
     if ((el = t.closest("[data-want]"))) { wiz.want = byK(WANTS, el.dataset.want); wizard(); window.scrollTo(0, 0); return; }
     if (t.closest("[data-all]")) { wiz.all = true; wizard(); return; }
     if (t.closest("[data-keep]")) { wiz.keep = true; return; }
@@ -627,5 +677,6 @@
   }
   deal.lines = (deal.lines || []).filter(function (l) { return FAM[l.f] && findVar(FAM[l.f], l.v); });
   route(); badge();
+  bfOpen(store.get("bf", 0) === 1);
   if (P.get("cart") && cart.length) { renderCart(); $("#cart").showModal(); }
 })();

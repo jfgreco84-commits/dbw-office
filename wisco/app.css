@@ -319,3 +319,36 @@ table.cmp .add { height: 38px; padding: 0 12px }
 @media (min-width: 861px) { .fab { display: none } }
 
 .dealtotal b.sm { font: 900 22px/1.15 var(--sans); text-transform: uppercase; letter-spacing: .03em }
+
+/* ---------- Big Frank ---------- */
+.bfs { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 12px; align-items: center; background: #fff; color: var(--ink); border-radius: var(--radius); padding: 10px 14px 10px 10px; box-shadow: var(--shadow-sm); border-left: 6px solid var(--red); margin: 0 0 16px }
+.bfs img { width: 58px; height: auto; align-self: end }
+.bfs b { font: 900 11.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--red) }
+.bfs p { margin: 2px 0 0; font: 700 15.5px/1.35 var(--sans); color: var(--navy-2) }
+.bfs.big { grid-template-columns: 120px minmax(0, 1fr); padding: 14px 16px 0 10px; align-items: end }
+.bfs.big img { width: 120px } .bfs.big p { font: 400 clamp(22px, 4.6vw, 30px)/1.12 var(--slab); text-transform: uppercase; padding-bottom: 14px } .bfs.big b { font-size: 13px }
+.nudge { display: grid; gap: 8px } .nudge .bfs { margin: 0; box-shadow: none; border: 1px solid var(--line); border-left: 6px solid var(--red) }
+.nudge > span { font: 700 13px var(--sans); color: var(--muted) }
+.nbar { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden } .nbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--royal-hi), var(--red)) }
+.door.withav img { width: 54px; height: auto; flex: none; margin: -8px 0 -16px -6px; align-self: end }
+.door.withav div { flex: 1 }
+.bf { position: fixed; left: var(--gl); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 39; display: flex; align-items: flex-end; gap: 8px; pointer-events: none; max-width: min(340px, calc(100vw - 32px)) }
+.bf > * { pointer-events: auto }
+.bf-av { order: -1; flex: none; width: 66px; height: 66px; border-radius: 50%; border: 3px solid #fff; background: var(--grad-band); padding: 4px 0 0; overflow: hidden; box-shadow: 0 8px 22px rgba(7,20,51,.45); position: relative }
+.bf-av img { width: 100%; height: auto; display: block }
+.bf-av i { position: absolute; right: 4px; top: 4px; width: 13px; height: 13px; border-radius: 50%; background: var(--red); border: 2px solid #fff }
+.bf.open .bf-av i { display: none }
+.bf-bub { display: none; background: #fff; color: var(--ink); border-radius: 16px 16px 16px 4px; padding: 12px 14px; box-shadow: 0 10px 28px rgba(7,20,51,.35); border: 1px solid var(--line); margin-bottom: 14px }
+.bf.open .bf-bub { display: block }
+.bf-bub b { font: 900 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--red) }
+.bf-bub p { margin: 3px 0 8px; font: 700 14.5px/1.35 var(--sans); color: var(--navy-2) }
+.bf-act { display: flex; gap: 12px; align-items: center; font: 800 12px var(--sans) }
+.bf-act a, .bf-act button { color: var(--royal); background: none; border: 0; padding: 4px 0; font: inherit; text-decoration: underline } .bf-act button:last-child { margin-left: auto; text-decoration: none; color: var(--muted); font-size: 15px }
+body:has(#dock:not([hidden])) .bf { bottom: calc(86px + env(safe-area-inset-bottom, 0px)) }
+body:has(dialog[open]) .bf { display: none }
+.foot .wrap { padding-bottom: 130px }
+@media (max-width: 860px) { .bf { bottom: calc(84px + env(safe-area-inset-bottom, 0px)) } body:has(#dock:not([hidden])) .bf { bottom: calc(92px + env(safe-area-inset-bottom, 0px)) } }
+.door.withav img { width: 50px; height: 50px; margin: 0; border-radius: 50%; object-fit: cover; object-position: top; background: rgba(255,255,255,.14); border: 2px solid rgba(255,255,255,.7); align-self: center }
+@media (max-width: 860px) { .bf-av { width: 56px; height: 56px } }
+.bf-av i { animation: ping 2.4s ease-in-out infinite } @keyframes ping { 50% { transform: scale(1.35) } }
+@media (prefers-reduced-motion: reduce) { .bf-av i { animation: none } }
