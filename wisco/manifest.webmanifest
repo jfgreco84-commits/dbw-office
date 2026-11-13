@@ -1,7 +1,7 @@
 {
- "name": "DBW Wisco Blade Shop",
- "short_name": "DBW Wisco",
- "description": "Reorder diamond blades, core bits and chain from DBW Wisco, a division of Diamond Blade Warehouse, LLC.",
+ "name": "DBW WISCO Blade Shop",
+ "short_name": "DBW WISCO",
+ "description": "Reorder diamond blades, core bits and chain from DBW WISCO, a division of Diamond Blade Warehouse, LLC.",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",

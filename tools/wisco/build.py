@@ -202,6 +202,13 @@ BORROW = {
 }
 
 
+def whole(x):
+    """No cents on the site. $100 and up rounds up to the next $5. Under $100 rounds up to the next dollar."""
+    import math
+    x = round(x, 4)
+    return int(math.ceil(x / 5.0) * 5) if x >= 100 else int(math.ceil(x))
+
+
 def main():
     xlsx = sys.argv[1]
     imgdir = sys.argv[sys.argv.index("--images") + 1] if "--images" in sys.argv else None
@@ -358,8 +365,8 @@ def main():
             # Quantity pricing. v[3] = price each at 1-11. v[6] = price each at the five higher brackets.
             # Saws and equipment get one price and no brackets.
             c0 = COST.get(v[0]) or (v[3] / MARKUP if v[3] else None)   # v[3] is still cost x the first bracket here
-            if c0 and "equip" in cats: v[3] = round(c0 * EQUIP, 2)
-            elif c0: v[3] = round(c0 * TIERS[0], 2); v.append([round(c0 * t, 2) for t in TIERS[1:]])
+            if c0 and "equip" in cats: v[3] = whole(c0 * EQUIP)
+            elif c0: v[3] = whole(c0 * TIERS[0]); v.append([whole(c0 * t) for t in TIERS[1:]])
             # Saw-deal-ready pricing: a 14" to 20" high-speed blade is priced at what it costs per blade
             # inside a DEAL_PACK-blade package with the reference saw.  price = mult x (blade + saw / pack)
             if DEAL_MULT and DEAL_SAW in COST and "highspeed" in cats and v[2] in (14, 16, 18, 20) and v[0] in COST:

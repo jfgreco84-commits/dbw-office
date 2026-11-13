@@ -56,6 +56,8 @@ window.WISCO = {
   breaks: [12, 24, 36, 50, 100, 150, 200, 500],
   // The quantity buttons on Fast Reorder.
   quickQty: [12, 24, 36, 50, 100],
+  // Walk-behind saws at or under this horsepower get the low-horsepower blades in Blade Finder.
+  lowHpMax: 20,
   // Account levels, lowest to highest.
   levels: ["Contractor", "Pro", "Gold", "Distributor", "Platinum"],
   // Months (1 = January) when mix and match pricing applies. Every other month it takes

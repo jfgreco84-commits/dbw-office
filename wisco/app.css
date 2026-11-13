@@ -506,3 +506,56 @@ dialog:not([open]) { display: none !important }
 @media (min-width: 861px) { .stage { margin-top: 34px } .tools a { min-height: 36px; padding: 0 12px; font-size: 12.5px } }
 @media (max-width: 560px) { .sz { display: grid !important; grid-template-columns: 1fr !important; gap: 8px } .sz .r { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap } }
 .foot img.footlogo { width: 200px } @media (max-width: 700px) { .foot img.footlogo { width: 170px } }
+.frankme { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: start; margin-bottom: 12px } .frankme img { width: 96px; height: auto; border-radius: 14px; background: var(--grad-band); padding: 6px 4px 0 }
+.frankme p { margin: 6px 0 8px; font: 600 16px/1.5 var(--sans); color: var(--ink) } .frankme .sig { font: 800 12.5px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+@media (max-width: 480px) { .frankme { grid-template-columns: 72px minmax(0, 1fr); gap: 10px } .frankme img { width: 72px } .frankme p { font-size: 15px } }
+.hprow { display: flex; gap: 8px; align-items: center } .hprow input { flex: 1; min-width: 0; height: 52px; border: 1.5px solid var(--line); border-radius: 12px; padding: 0 14px; font: 700 18px var(--sans) } .hpbox { margin-top: 14px }
+.footname, .brand b { text-transform: uppercase }
+
+/* ---------- v15: saw package slider, easier calculators ---------- */
+.dealadd.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px } @media (max-width: 520px) { .dealadd.two { grid-template-columns: 1fr } }
+.slide { margin-top: 14px } .slidetop { display: flex; align-items: baseline; justify-content: space-between; gap: 10px } .slidetop b { font: 400 30px/1 var(--slab); color: var(--navy-2) } .slidetop span { font: 700 12.5px var(--sans); color: var(--muted) }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: transparent; margin: 4px 0 0 }
+input[type=range]::-webkit-slider-runnable-track { height: 12px; border-radius: 999px; background: linear-gradient(90deg, var(--red), var(--royal)) }
+input[type=range]::-moz-range-track { height: 12px; border-radius: 999px; background: linear-gradient(90deg, var(--red), var(--royal)) }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 36px; height: 36px; border-radius: 50%; margin-top: -12px; background: var(--gold); border: 3px solid #fff; box-shadow: 0 3px 10px rgba(7,20,51,.5) }
+input[type=range]::-moz-range-thumb { width: 30px; height: 30px; border-radius: 50%; background: #F7C948; border: 3px solid #fff; box-shadow: 0 3px 10px rgba(7,20,51,.5) }
+.ticks { display: flex; justify-content: space-between; font: 800 11.5px var(--sans); color: var(--muted); padding: 0 4px } .ticks i { font-style: normal }
+.slidenum { display: grid; grid-template-columns: 52px minmax(0, 120px) 52px; gap: 8px; justify-content: center; margin-top: 10px } .slidenum input { height: 52px; text-align: center; border: 1.5px solid var(--line); border-radius: 12px; font: 900 20px var(--sans); color: var(--navy-2); width: 100% }
+.stp { height: 52px; border-radius: 12px; border: 1.5px solid var(--royal); background: #F1F5FF; color: var(--navy-2); font: 900 24px var(--sans) }
+.dealtotal .drow { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.18); font: 700 15px var(--sans) } .dealtotal .drow i { font-style: normal } .dealtotal .drow b { font: 900 17px var(--sans); white-space: nowrap }
+.dealtotal .drow.good b, .dealtotal .drow.good i { color: #7CF0A8 } .dealtotal .drow.big { border-bottom: 0; padding-top: 10px } .dealtotal .drow.big b { font: 400 30px/1 var(--slab) } .dealtotal .drow.big i { font-weight: 900; text-transform: uppercase; letter-spacing: .08em }
+.rs { margin-top: 10px } .rs label { display: flex; justify-content: space-between; align-items: baseline; font: 800 13px var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) } .rs label b { font: 900 20px var(--sans); color: var(--navy-2); letter-spacing: 0 }
+.pknote { margin: 4px 0 10px; font: 600 14.5px/1.45 var(--sans); background: #FFF6E5; border-left: 5px solid #E0A020; border-radius: 8px; padding: 10px 12px }
+table.cmp .add.pk { margin-left: 6px; background: var(--gold); color: var(--gold-ink); border-color: #E0A313 } table.cmp td:last-child { white-space: nowrap }
+@media (max-width: 560px) { table.cmp.saws td:last-child { display: grid; gap: 4px } table.cmp .add.pk { margin-left: 0 } table.cmp.saws th:nth-child(3), table.cmp.saws td:nth-child(3) { display: none } }
+
+/* ---------- v16: header, shop filters, core bits, early-entry colors ---------- */
+.top, .tools { background: #0B1D4A } .top { background-image: none } .tools { border-top: 0 }
+.top .wrap { padding-block: 6px } .brand img { width: 104px; margin-block: -6px -14px; position: relative; z-index: 2 } .brand b { font-size: 28px } .brand small { font-size: 10.5px }
+.tools { top: calc(98px + env(safe-area-inset-top, 0px)) }
+@media (max-width: 860px) { .brand img { width: 84px; margin-block: -4px -12px } .brand b { font-size: 22px } .tools { top: calc(80px + env(safe-area-inset-top, 0px)) } }
+@media (max-width: 400px) { .brand img { width: 76px } .brand b { font-size: 20px } }
+.tools a.homeb { background: #fff; color: var(--navy); border-color: #fff; font-weight: 900 } .tools a.homeb span { font-size: 17px; margin-right: 4px; line-height: 1 }
+.shopsearch { width: 100%; height: 56px; border: 2px solid var(--royal); border-radius: 14px; padding: 0 16px; font: 700 17px var(--sans); margin-bottom: 14px; background: #fff }
+.flabel { display: block; font: 900 12.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--navy-2); margin: 4px 0 8px }
+.cats.wrapc { display: flex; flex-wrap: wrap; gap: 8px; overflow: visible; margin: 0 0 8px; padding: 0 }
+.cats.wrapc .cat { white-space: nowrap; padding: 12px 14px; font-size: 12.5px } .cat[aria-pressed="true"] { background: var(--navy-2); color: #fff; border-color: var(--navy-2) }
+.cats.tags .cat { border-style: dashed; background: #F7F9FD } .cats.tags .cat[aria-pressed="true"] { background: var(--gold); color: var(--gold-ink); border: 1.5px solid #E0A313 }
+.shopblurb { margin: 2px 0 14px; font: 700 15.5px/1.45 var(--sans); color: var(--navy-2); border-left: 5px solid var(--red); padding: 6px 0 6px 12px }
+.shopbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px } .shopbar select { max-width: 220px }
+.aggmap { background: #EAF0FB; border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-height: 120px } .aggmap svg { width: 100%; height: auto; display: block } .aggmap svg * { pointer-events: none } .aggmap svg .c, .aggmap svg .d, .aggmap svg .e, .aggmap svg .f, .aggmap svg .g { pointer-events: auto; cursor: pointer }
+.agglegend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font: 700 13px var(--sans) } .agglegend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 6px; vertical-align: -2px }
+.aggs { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) } .agg { text-align: left; border: 1.5px solid var(--line); border-radius: 12px; background: #F7F9FD; padding: 12px 14px; display: grid; gap: 3px; min-height: 64px } .agg b { font: 900 15px var(--sans); text-transform: uppercase; letter-spacing: .04em; color: var(--navy-2) } .agg span { font: 600 13px/1.35 var(--sans); color: var(--muted) }
+.agg[aria-pressed="true"] { background: var(--navy-2); border-color: var(--navy-2) } .agg[aria-pressed="true"] b, .agg[aria-pressed="true"] span { color: #fff }
+.eepick { background: var(--chrome); color: var(--navy); border-radius: var(--radius); padding: 18px; margin: 14px 0; text-align: center; box-shadow: var(--glow); display: grid; gap: 4px } .eepick span { font: 800 12.5px var(--sans); letter-spacing: .14em; text-transform: uppercase } .eepick b { font: 400 40px/1 var(--slab) } .eepick small { font: 600 13.5px var(--sans) }
+.hprow input[type=text] { flex: 1; min-width: 0; height: 52px; border: 1.5px solid var(--line); border-radius: 12px; padding: 0 14px; font: 700 16px var(--sans) }
+.aggbox { margin-top: 16px } .aggbox p { font-size: 15.5px; line-height: 1.5 }
+.tile span { font-size: 12.5px }
+@media (min-width: 1100px) { .tools .wrap { justify-content: flex-start; flex-wrap: nowrap } }
+.tools { position: sticky } .tools::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 36px; background: linear-gradient(90deg, transparent, #0B1D4A); pointer-events: none }
+@media (max-width: 560px) { .hprow { flex-wrap: wrap } .hprow .btn { width: 100% } }
+/* Hover must not move the thing you are pointing at, or it jitters on the edge and can't be clicked. */
+.tile:hover, .tile:focus-visible, .linecard:hover, .agg:hover { transform: none } .tile:hover, .tile:focus-visible { box-shadow: 0 10px 24px rgba(7,20,51,.35) } .linecard:hover { box-shadow: 0 16px 34px rgba(7,20,51,.4) }
+.dealtotal .drow.good b, .dealtotal .drow.good i { color: #0B7A3B }
+.aggmap + .agglegend + * , table.cmp td { white-space: normal } table.cmp { table-layout: auto } .frank table.cmp { width: 100% }

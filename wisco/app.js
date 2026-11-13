@@ -1,11 +1,12 @@
-/* DBW Wisco store. Vanilla JS, no build step. Data: catalog.js. Settings: config.js. */
+/* DBW WISCO store. Vanilla JS, no build step. Data: catalog.js. Settings: config.js. */
 (function () {
   "use strict";
   var C = window.CATALOG, W = window.WISCO || {};
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
-  var money = function (n) { return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  /* Prices on the site are whole dollars. Cents only show where the math needs them (cost per foot). */
+  var money = function (n) { n = Number(n); var w = Math.abs(n - Math.round(n)) < 0.005; return "$" + n.toLocaleString("en-US", { minimumFractionDigits: w ? 0 : 2, maximumFractionDigits: w ? 0 : 2 }); };
   var slug = function (s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); };
   var store = {
     get: function (k, d) {
@@ -26,25 +27,25 @@
   var SAWDIA = { grinder: [3, 9], cutoff: [12, 16], walk: [14, 99] };
 
   var MATS = [
-    { k: "c", n: "Concrete", s: "Slabs, driveways, sidewalks, curb, parking lots, walls, concrete pipe", keys: ["c"] },
-    { k: "r", n: "Hard & Reinforced", s: "Rebar, wire mesh, river rock, hard aggregate, bridge decks", keys: ["r"] },
-    { k: "g", n: "Green Concrete", s: "Early-entry joints, fresh pours, control joints", keys: ["g"] },
-    { k: "a", n: "Asphalt", s: "Patching, trenching, overlays, asphalt over concrete", keys: ["a"] },
-    { k: "bp", n: "Brick, Block & Pavers", s: "Hardscape, masonry, retaining wall, cinder block", keys: ["b", "p"] },
-    { k: "s", n: "Stone & Granite", s: "Granite, marble, quartzite, engineered stone, flagstone", keys: ["s"] },
-    { k: "t", n: "Tile & Porcelain", s: "Ceramic, porcelain, marble, glass tile", keys: ["t"] },
-    { k: "x", n: "Metal & Ductile", s: "Ductile iron pipe, rebar, rail, steel, demolition", keys: ["x"] },
-    { k: "m", n: "Mortar Joints", s: "Tuckpointing, grout, crack chasing", keys: ["m"] },
-    { k: "sp", n: "Grinding & Coatings", s: "Level, prep, strip epoxy and glue", keys: ["sp"] }
+    { k: "c", n: "Concrete", s: "Slabs, driveways, sidewalks, curb and gutter, parking lots, floors, foundations, walls, barrier wall, precast, concrete pipe", keys: ["c"] },
+    { k: "r", n: "Hard & Reinforced", s: "Bridges and bridge decks, highway, airport, rebar, wire mesh, post-tension, river rock, hard aggregate", keys: ["r"] },
+    { k: "g", n: "Green Concrete", s: "Early-entry joints, fresh pours, control joints, warehouse floors, next-day cuts", keys: ["g"] },
+    { k: "a", n: "Asphalt", s: "Roads, parking lots, patching, utility trenching, overlays, loop cuts, asphalt over concrete", keys: ["a"] },
+    { k: "bp", n: "Brick, Block & Pavers", s: "Hardscape, masonry, retaining wall, cinder block, CMU, fire brick, concrete pavers, clay pavers", keys: ["b", "p"] },
+    { k: "s", n: "Stone & Granite", s: "Granite, marble, quartzite, engineered stone, limestone, sandstone, bluestone, flagstone, granite curb", keys: ["s"] },
+    { k: "t", n: "Tile & Porcelain", s: "Ceramic, porcelain, large-format tile, marble, glass tile", keys: ["t"] },
+    { k: "x", n: "Metal & Ductile", s: "Ductile iron pipe, cast iron, rebar, rail, steel, fire and rescue, demolition", keys: ["x"] },
+    { k: "m", n: "Mortar Joints", s: "Tuckpointing, grout removal, crack chasing, joint cleanout", keys: ["m"] },
+    { k: "sp", n: "Grinding & Coatings", s: "Level high spots, surface prep, strip epoxy, glue, thinset and paint", keys: ["sp"] }
   ];
   var SAWS = [
     { k: "grinder", n: "Angle Grinder", s: '4" to 9"', keys: ["grinder", "circ"] },
     { k: "cutoff", n: "Cut-Off Saw", s: 'Hand-held 12" to 16"', keys: ["cutoff"] },
-    { k: "walk", n: "Walk-Behind Saw", s: '14" and bigger', keys: ["walk"] },
-    { k: "early", n: "Early-Entry Saw", s: "Soff-Cut style", keys: ["early"] },
-    { k: "table", n: "Tile / Masonry Saw", s: "Table and block saws", keys: ["table"] },
+    { k: "walk", n: "Walk-Behind Saw", s: "Pro 65 horsepower down to low horsepower", keys: ["walk"] },
+    { k: "early", n: "Early-Entry Saw", s: "Soff-Cut style or Gorilla style", keys: ["early"] },
+    { k: "table", n: "Tile / Masonry Saw", s: "Table and block saws", keys: ["table"], only: ["bp", "s", "t"] },
     { k: "wall", n: "Wall, Ring & Chain Saw", s: "Hydraulic, deep cut, diamond chain", keys: ["wall", "ring", "chain"] },
-    { k: "core", n: "Core Drill", s: "Hand-held or rig", keys: ["core"] }
+    { k: "core", n: "Core Drill or Core Rig", s: "Hand-held or rig mounted, any make or model", keys: ["core"] }
   ];
   var WANTS = [
     { k: "speed", n: "Fastest Cut", s: "Get me through it" },
@@ -73,7 +74,7 @@
   ];
   LINES.push(
     { k: "workhorses", n: "T-Rex & Viper", s: "The everyday workhorses. Fast, fair priced, on the truck every day.", ids: ["t-rex", "viper-premium", "viper-general-purpose", "viper-supreme-turbo", "viper-specialty"], img: ["t-rex", "viper-premium"] },
-    { k: "wet", n: "Wet & Flat Saw Blades", s: "Walk-behind, low-horsepower, looping, wall saw and prestress.", cat: "wet", ids: [], img: ["3mlb-low-hp-concrete", "kmlb-low-hp-asphalt-green"] },
+    { k: "wet", n: "Wet & Flat Saw Blades", s: "Bonded for your area and what you cut. Walk-behind, looping, wall saw and prestress.", cat: "wet", ids: [], img: ["3mlb-low-hp-concrete", "kmlb-low-hp-asphalt-green"] },
     { k: "asphalt", n: "Wolverine Asphalt", s: "Hard bonds and drop segments for asphalt and abrasive material.", ids: ["wolverine-supreme", "wolverine-premium-plus-drop-segment", "wolverine-premium"], img: ["wolverine-supreme", "wolverine-premium"] },
     { k: "metal", n: "Blacksmyth & Ductile", s: "Ductile pipe, rail, rebar and rescue. One blade instead of a box of abrasives.", cat: "metal", ids: [], img: ["blacksmyth-supreme", "americut-ductile-premium"] }
   );
@@ -92,7 +93,7 @@
   ];
   /* Big Frank: the comment machine. Short, in his voice, never a made-up claim. */
   var QUIP = {
-    home: ["Cheaper per box isn’t cheaper per cut. Price per foot is the number that matters.", "The more you buy, the better the price. Ask for the break before you send it.", "Blade spinning but not cutting? It’s glazed. Wrong bond for the material.", "When’s the last time your blade guy called you with a better deal?", "Renting your saws? Run the numbers on owning one.", "Not sure what to run? Three taps and I’ll tell you."],
+    home: ["Cheaper per box isn’t cheaper per cut. Price per foot is the number that matters.", "You don’t want the cheapest blade. You want the lowest cost per foot. Those are two different blades.", "A blade that quits halfway through the job costs you more than the blade.", "If your crew is changing blades, they aren’t cutting. Blade life is labor.", "The right bond for the material beats a pricier blade with the wrong one. Every time.", "Blade spinning but not cutting? It’s glazed. Wrong bond for the material.", "Hard material needs a soft bond. Soft, abrasive material needs a hard bond. Most blade problems start right there.", "The more you buy, the better the price. Ask before you send it.", "When’s the last time your blade guy called you with a better deal?", "You should be able to reach a real person who knows your account. Here, you can.", "Renting your saws? Run the numbers on owning one.", "Buying a saw? Buy it with the blades. That’s where the deal is.", "One blade that cuts concrete, block and asphalt means one blade on the truck.", "Tell me the material and the saw and I’ll tell you the blade. That part isn’t complicated.", "If a blade doesn’t do what I said it would, I want to hear about it first.", "Your saw is only as good as what’s spinning on it.", "Fast cut or long life? Tell me which one pays you and I’ll point you at the blade.", "Rebar and river rock will tell you fast what a blade is made of.", "A dull blade doesn’t just cut slow. It’s hard on the saw and on the guy running it.", "Aggregate changes from one region to the next. Your wet blade should be bonded for yours. Ours are.", "Send me a picture of what you’re running now. I’ll tell you if there’s a better blade for it.", "I’d rather sell you the right blade once than the wrong one twice.", "25 years in this business. I’m not always right, but I’m not wrong very often either.", "Not sure what to run on that job? Ask. That’s what I’m here for."],
     mat: ["Tell me what you’re cutting. The material picks the bond."],
     saw: ["What saw? I’ll only show sizes that fit it."],
     want: ["Speed, life or price. Pick the one that matters most on this job."],
@@ -118,7 +119,7 @@
     sp: "Double row for a flat floor. T-Seg for stripping coatings."
   };
   var TIERQUIP = { supreme: "More per blade, less per cut. That’s the whole point of this one.", pro: "Pro Series. Built for the hard jobs.", premium: "Good everyday blade. Crews stock these by the box.", standard: "Does the job at a fair price. Step up when the material gets hard.", economy: "Budget blade. Fine for the short job." };
-  function says(text, big) { return '<div class="bfs' + (big ? " big" : "") + '"><img alt="" src="brand/frank' + (big ? "-cool" : "-sm") + '.webp"><div><b>Big ' + esc(FRANK) + " says</b><p>" + esc(text) + "</p></div></div>"; }
+  function says(text, big) { return '<div class="bfs' + (big ? " big" : "") + '"><img alt="" src="brand/frank-cool' + (big ? "" : "-sm") + '.webp"><div><b>Big ' + esc(FRANK) + " says</b><p>" + esc(text) + "</p></div></div>"; }
 
   /* Blade trouble guide. Causes and fixes follow the DBW troubleshooting page. */
   var FIX = [
@@ -178,10 +179,12 @@
   function lastOrder() { var l = store.get("last", null); return l && Array.isArray(l.items) ? l : null; }
   var cart = store.get("cart", []);
   var isPreview = !/^https?:$/.test(location.protocol) || /claude|anthropic/.test(location.hostname);
-  var wiz = { mode: "finder", mat: null, saw: null, want: null, all: false };
+  var wiz = { mode: "finder", mat: null, saw: null, want: null, all: false, hp: null };
+  var LOWHP = W.lowHpMax || 20, WETLINE = "Our wet blades are specifically bonded for your area and what you are cutting, so you get optimal performance every time.";
+  var HPS = [{ k: "low", n: "Low horsepower", s: "Up to " + LOWHP + " HP. Push saws and small walk-behinds." }, { k: "high", n: "High horsepower", s: "Over " + LOWHP + " HP, up to Pro 65 class." }, { k: "any", n: "Not sure", s: "Show me what fits and I’ll ask." }];
   var SHOPPAGE = 24, ordRef = "";
-  var shop = { cat: "all", q: "", sort: "pop", n: SHOPPAGE };
-  var deal = store.get("deal", { saw: "", lines: [] });
+  var shop = { cat: "all", q: "", sort: "pop", n: SHOPPAGE, tag: "" };
+  var deal = store.get("deal2", { saw: "", lines: [] });
   var extras = { free: "", stock: false, breaks: [] };
 
   /* ---------- small pieces ---------- */
@@ -303,7 +306,7 @@
       '<a class="door d2" href="#reorder"><div><b>Fast Reorder</b><span>Know what you run? Punch it in and go.</span></div><em>→</em></a>' +
       '<a class="door d3 withav" href="#ask-frank"><img alt="" src="brand/frank-cool-sm.webp"><div><b>Ask ' + esc(FRANK) + "</b><span>Not sure? Get Big " + esc(FRANK) + "’s pick in 3 taps.</span></div><em>→</em></a>" +
       "</div>" +
-      '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="DBW Wisco, a division of Diamond Blade Warehouse" width="430" height="458">' +
+      '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="DBW WISCO, a division of Diamond Blade Warehouse" width="430" height="458">' +
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
 
       '<section class="costco"><div class="wrap"><div><b>The more you buy, the better the price.</b><span>We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
@@ -345,18 +348,36 @@
   function shell(kicker, step, total, body, wide) {
     return '<section class="screen wiz"><div class="wrap' + (wide ? " wide" : "") + '"><div class="wiz-top"><button class="back" data-back>← Back</button>' + (total ? dots(step, total) : "") + '</div><div class="wiz-kicker">' + kicker + "</div>" + body + "</div></section>";
   }
-  function chosen() { var a = []; if (wiz.mat) a.push(wiz.mat.n); if (wiz.saw) a.push(wiz.saw.n); if (wiz.want) a.push(wiz.want.n); return a.length ? '<div class="chosen">' + a.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</div>" : ""; }
+  function chosen() { var a = []; if (wiz.mat) a.push(wiz.mat.n); if (wiz.saw) a.push(wiz.saw.n); if (wiz.hp) a.push(byK(HPS, wiz.hp).n); if (wiz.want) a.push(wiz.want.n); return a.length ? '<div class="chosen">' + a.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</div>" : ""; }
 
+  function aggBox() {
+    return '<div class="frank aggbox"><b class="h">What’s in your concrete matters</b>' +
+      "<p>Limestone, dolomite, sandstone, pit gravel, river rock, traprock, granite, basalt, quartzite, chert, flint. They don’t cut the same, and they change from one part of the country to the next. Houston river rock is some of the hardest there is, so the bond has to be very soft. That same blade is the wrong blade in Wisconsin.</p>" +
+      "<p><b>We take that seriously.</b> Tell me where you cut and I’ll recommend the bond for the aggregate you actually have. The goal is the most footage for your money, not the most blades sold per year. We want to save you money and be your blade guys every year after this one.</p>" +
+      '<div class="hprow"><input id="aggloc" type="text" placeholder="City, state" autocomplete="address-level2" aria-label="City and state"><button class="btn gold sm" data-aggask>Get ' + esc(FRANK) + '’s recommendation</button></div>' +
+      '<div class="center" style="margin-top:10px"><a class="btn ghost-d sm" href="#early">See the aggregate map</a></div></div>';
+  }
   function wizard() {
     var ask = wiz.mode === "ask", total = ask ? 3 : 2, kick = ask ? "Ask " + esc(FRANK) : "Blade Finder";
-    if (!wiz.mat) { app.innerHTML = shell(kick, 1, total, "<h1>What are you cutting?</h1>" + says(QUIP.mat[0]) + tiles(MATS, "mat")); return; }
+    if (!wiz.mat) { app.innerHTML = shell(kick, 1, total, "<h1>What are you cutting?</h1>" + says(QUIP.mat[0]) + tiles(MATS, "mat") + aggBox()); return; }
     if (!wiz.saw) {
-      var saws = SAWS.filter(function (s) { return candidates(wiz.mat, s).length; });
+      var saws = SAWS.filter(function (s) { return (!s.only || s.only.indexOf(wiz.mat.k) >= 0) && candidates(wiz.mat, s).length; });
       if (saws.length === 1) { wiz.saw = saws[0]; return wizard(); }
       app.innerHTML = shell(kick, 2, total, chosen() + "<h1>What saw are you running?</h1>" + says(QUIP.saw[0]) + tiles(saws, "saw")); return;
     }
+    if (wiz.saw.k === "walk" && !wiz.hp) {
+      app.innerHTML = shell(kick, 2, total, chosen() + "<h1>How much horsepower?</h1>" + says("Horsepower changes the bond. Tell me what the saw puts out and I’ll match the blade to it.") + tiles(HPS, "hp", "three-up") +
+        '<div class="frank hpbox"><b class="h">Or type it in</b><div class="hprow"><input id="hpin" type="number" inputmode="numeric" min="1" max="200" placeholder="e.g. 13 or 65" aria-label="Saw horsepower"><button class="btn gold sm" data-hpgo>Show my blades</button></div></div>'); return;
+    }
     if (ask && !wiz.want) { app.innerHTML = shell(kick, 3, total, chosen() + "<h1>What matters most?</h1>" + says(QUIP.want[0]) + tiles(WANTS, "want")); return; }
     var list = candidates(wiz.mat, wiz.saw), o = { mat: wiz.mat, saw: wiz.saw }, h = chosen();
+    if (wiz.saw.k === "early") h += '<div class="frank wetbox"><b class="h">Which color for your aggregate?</b><p>The color is the bond. Tap your area on the map and we tell you which one to run.</p><div class="sendrow"><a class="btn gold sm" href="#early">Open the color guide</a></div></div>';
+    if (wiz.saw.k === "walk") {
+      var lowFam = function (f) { return /low-hp/.test(f.id); };
+      if (wiz.hp === "high") list = list.filter(function (f) { return !lowFam(f); });
+      if (wiz.hp === "low") list = list.filter(lowFam).concat(list.filter(function (f) { return !lowFam(f); }));
+      h += '<div class="frank wetbox"><b class="h">Wet blades, bonded for you</b><p>' + esc(WETLINE) + (wiz.hp === "high" ? " High-horsepower wet blades are built to order. Tell us the saw, the horsepower and where you cut." : "") + '</p><div class="sendrow"><button class="btn gold sm" data-wetspec>Spec my wet blade</button></div></div>';
+    }
     if (!list.length) { app.innerHTML = shell(kick, 0, 0, h + "<h1>That one’s a phone call.</h1>" + '<div class="empty">Nothing on the shelf matches that combo. ' + esc(FRANK) + " will spec it for you.</div>" + frankBox("")); return; }
     if (ask) {
       var r = rank(list, wiz.mat, wiz.saw, wiz.want.k), ladA = rungs(ladder(list)), picksA = ladA.length >= 3 ? ladA : bestBetterGood(list, wiz.mat, wiz.saw);
@@ -367,6 +388,8 @@
         '<div class="results">' + picksA.map(function (p) { var mine = p.f === top; return cardHTML(p.f, { mat: wiz.mat, saw: wiz.saw, pick: mine, ribbon: p.label, ribbon2: mine ? "★ " + esc(FRANK) + "’s Pick" : "", rc: p.rc }); }).join("") + "</div>" + frankBox(top.n);
     } else {
       var lad = ladder(list), picks = lad.length >= 3 ? lad : bestBetterGood(list, wiz.mat, wiz.saw), shown = {};
+      var pre = wiz.saw.k === "walk" && wiz.hp === "low" ? list.filter(function (f) { return /low-hp/.test(f.id); }) : [];
+      picks = pre.map(function (f) { return { f: f, label: "Built for low horsepower", rc: "" }; }).concat(picks);
       picks.forEach(function (p) { shown[p.f.id] = 1; });
       var rest = rank(list, wiz.mat, wiz.saw).filter(function (f) { return !shown[f.id]; });
       h += "<h1>Here’s your lineup.</h1>" + says((MATQUIP[wiz.mat.k] || "Start at the top and work down.") + " " + list.length + (list.length === 1 ? " blade fits." : " fit, best first.")) +
@@ -379,7 +402,9 @@
     return "Hey " + FRANK + ", question from the Wisco site." + (wiz.mat ? " I’m cutting " + wiz.mat.n.toLowerCase() : "") + (wiz.saw ? " with a " + wiz.saw.n.toLowerCase() : "") + (wiz.want ? ". Priority: " + wiz.want.n.toLowerCase() : "") + "." + (pickName ? " The site says run the " + pickName + "." : "") + " My question: ";
   }
   function frankBox(pickName) {
-    return '<div class="frank" data-frank="' + esc(pickName) + '"><b class="h">Want to talk it through with ' + esc(FRANK) + "?</b><p>25 years in this industry. “I’m not always right, but I’m not wrong very often.” Send your setup straight to him. A real person answers.</p>" +
+    return '<div class="frank" data-frank="' + esc(pickName) + '"><div class="frankme"><img alt="' + esc(W.managerName || "Frank") + '" src="brand/frank-cool.webp" width="96" height="104" loading="lazy"><div><b class="h">Talk it through with me.</b>' +
+      "<p>I’ve got 25 years in this industry. I’m not always right, but I’m not wrong very often either. Send over your question and your setup, and tell me what you’re looking to accomplish. I’ll get you set up right. I can promise you that.</p>" +
+      '<span class="sig">' + esc(W.managerName || "Frank") + ", " + esc(W.managerTitle || "") + "</span></div></div>" +
       '<div class="sendrow">' + (W.textNumber ? '<button class="btn gold sm" data-fsms>Text ' + esc(FRANK) + "</button>" : "") + '<button class="btn gold sm" data-femail>Email ' + esc(FRANK) + '</button><button class="btn ghost-d sm" data-fcopy>Copy my question</button></div>' +
       '<p class="note">' + (W.textDisplay ? "Text: <b style=\"user-select:all\">" + esc(W.textDisplay) + "</b> · " : "") + 'Email: <b style="user-select:all">' + esc(W.orderEmail || "") + "</b></p></div>";
   }
@@ -441,26 +466,88 @@
     if (!("IntersectionObserver" in window)) { shop.n = 9999; shopScreen(); return; }
     moreIO = new IntersectionObserver(function (en) { if (en.some(function (x) { return x.isIntersecting; })) { shop.n += SHOPPAGE; shopScreen(); } }, { rootMargin: "900px" }); moreIO.observe(el);
   }
+  var SHOPCATS = [
+    { k: "all", n: "Everything", s: "Every blade, bit, chain and saw we sell. The more you buy, the better the price." },
+    { k: "highspeed", n: "High-Speed Blades", s: "Dry blades for cut-off saws and walk-behinds. Dragons, Superblades, T-Rex. This is where the footage gets made." },
+    { k: "wet", n: "Wet Blades", s: "Bonded for your area and what you cut. Flat saw, loop, wall saw and prestress." },
+    { k: "small", n: "Small Diameter", s: '4" to 10" for grinders and circular saws. Fast, clean, on every truck.' },
+    { k: "core", n: "Core Bits", s: "4-Core Pro Series plus stock wet and dry bits. Built for rebar and hard aggregate." },
+    { k: "cup", n: "Cup Wheels", s: "Grind, level and strip. Turbo and double-row cups that move material." },
+    { k: "tuck", n: "Tuck Point & Crack", s: "Mortar out fast, brick left alone. Tuck point blades and crack chasers." },
+    { k: "tile", n: "Tile & Stone", s: "Chip-free cuts on porcelain, ceramic, marble and granite." },
+    { k: "green", n: "Green Concrete", s: "Early-entry blades color-matched to your aggregate. Clean joints the same day." },
+    { k: "chain", n: "Diamond Chain", s: "Chains, bars and sprockets matched to your saw. Deep cuts and square corners." },
+    { k: "metal", n: "Metal & Rescue", s: "Ductile, rail, rebar and rescue. One diamond blade instead of a box of abrasives." },
+    { k: "abrasive", n: "Abrasive Wheels", s: "Bonded cut-off wheels, by the box, when that’s what the job calls for." },
+    { k: "equip", n: "Saws & Equipment", s: "Saws, core rigs and drill stands. Buy it with blades and the price gets better." },
+    { k: "dust", n: "Vacs & Dust Control", s: "Shrouds and vacs that keep you silica-compliant without water." }
+  ];
+  var SHOPTAGS = [
+    { k: "s1216", n: '12" to 16"', t: function (f) { return f.vars.some(function (v) { return v[2] >= 12 && v[2] <= 16; }); } },
+    { k: "s1820", n: '18" to 20"', t: function (f) { return f.vars.some(function (v) { return v[2] >= 18 && v[2] <= 20; }); } },
+    { k: "cured", n: "Cured concrete", t: function (f) { return (f.m.c || 0) >= 4; } },
+    { k: "greenc", n: "Green concrete", t: function (f) { return (f.m.g || 0) >= 4; } },
+    { k: "asph", n: "Asphalt", t: function (f) { return (f.m.a || 0) >= 4; } },
+    { k: "lowhp", n: "Low horsepower", t: function (f) { return /low-hp/.test(f.id); } },
+    { k: "highhp", n: "High horsepower", t: function () { return false; } }
+  ];
   function shopScreen() {
-    var cats = [{ k: "all", n: "Everything" }].concat(C.cats.filter(function (c) { return C.families.some(function (f) { return f.cats.indexOf(c.k) >= 0; }); }));
-    var t = shop.q.toLowerCase().split(/\s+/).filter(Boolean);
-    var list = C.families.filter(function (f) { return (shop.cat === "all" || f.cats.indexOf(shop.cat) >= 0) && t.every(function (x) { return f.hay.indexOf(x) >= 0; }); });
+    var cats = SHOPCATS.filter(function (c) { return c.k === "all" || C.families.some(function (f) { return f.cats.indexOf(c.k) >= 0; }); });
+    var t = shop.q.toLowerCase().split(/\s+/).filter(Boolean), tag = byK(SHOPTAGS, shop.tag), curCat = byK(SHOPCATS, shop.cat) || SHOPCATS[0];
+    var list = C.families.filter(function (f) { return (shop.cat === "all" || f.cats.indexOf(shop.cat) >= 0) && (!tag || tag.t(f)) && t.every(function (x) { return f.hay.indexOf(x) >= 0; }); });
     if (shop.sort === "low") list.sort(function (a, b) { return a.min - b.min; });
     else if (shop.sort === "high") list.sort(function (a, b) { return b.min - a.min; });
     else if (shop.sort === "az") list.sort(function (a, b) { return a.n.localeCompare(b.n); });
     var left = list.length - shop.n;
-    var grid = list.length ? list.slice(0, shop.n).map(function (f) { return cardHTML(f); }).join("") + (left > 0 ? '<div id="shopmore" style="grid-column:1/-1;height:1px"></div>' : "") : '<div class="empty d" style="grid-column:1/-1">Nothing matches. Try fewer words, or ask ' + esc(FRANK) + ".</div>";
+    var grid = list.length ? list.slice(0, shop.n).map(function (f) { return cardHTML(f); }).join("") + (left > 0 ? '<div id="shopmore" style="grid-column:1/-1;height:1px"></div>' : "")
+      : shop.tag === "highhp" ? '<div class="frank" style="grid-column:1/-1"><b class="h">High-horsepower blades are built for you</b><p>' + esc(WETLINE) + ' Tell us the saw, the horsepower and where you cut.</p><div class="sendrow"><button class="btn gold sm" data-wetspec>Spec my blade</button></div></div>'
+      : '<div class="empty d" style="grid-column:1/-1">Nothing matches that. Clear a filter, try fewer words, or ask ' + esc(FRANK) + ".</div>";
     setTimeout(watchMore, 0);
-    if ($("#shopgrid")) { $("#shopgrid").innerHTML = grid; $("#shopn").textContent = list.length + " products"; $$(".cat").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.cat === shop.cat); }); return; }
-    app.innerHTML = '<section class="sec"><div class="wrap"><div class="sec-head"><h2>Shop everything</h2><p>Every blade, bit, chain and saw. Prices drop with quantity.</p></div>' +
-      '<div class="cats">' + cats.map(function (c) { return '<button class="cat" data-cat="' + c.k + '" aria-pressed="' + (shop.cat === c.k) + '">' + esc(c.n) + "</button>"; }).join("") + "</div>" +
-      '<div class="shopbar"><input id="sq" type="search" placeholder="Search blade, size or part #" aria-label="Search" value="' + esc(shop.q) + '"><select id="ssort" aria-label="Sort"><option value="pop">Most popular</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">A to Z</option></select><b id="shopn">' + list.length + ' products</b></div><div class="grid" id="shopgrid">' + grid + "</div></div></section>";
+    if ($("#shopgrid")) { $("#shopgrid").innerHTML = grid; $("#shopn").textContent = list.length + (list.length === 1 ? " product" : " products"); $("#shopblurb").textContent = curCat.s; $$(".cat").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.cat === shop.cat); }); $$(".tagc").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.tag === shop.tag); }); return; }
+    app.innerHTML = '<section class="sec"><div class="wrap"><div class="sec-head"><h2>Shop everything</h2><p>Pick what you’re after. Prices drop with quantity.</p></div>' +
+      '<input id="sq" class="shopsearch" type="search" placeholder="Search blade, size or part #" aria-label="Search" value="' + esc(shop.q) + '">' +
+      '<b class="flabel">What are you looking for?</b><div class="cats wrapc">' + cats.map(function (c) { return '<button class="cat" data-cat="' + c.k + '" aria-pressed="' + (shop.cat === c.k) + '">' + esc(c.n) + "</button>"; }).join("") + "</div>" +
+      '<p class="shopblurb" id="shopblurb">' + esc(curCat.s) + "</p>" +
+      '<b class="flabel">Narrow it down (optional)</b><div class="cats wrapc tags">' + SHOPTAGS.map(function (g) { return '<button class="cat tagc" data-tag="' + g.k + '" aria-pressed="' + (shop.tag === g.k) + '">' + esc(g.n) + "</button>"; }).join("") + "</div>" +
+      '<div class="shopbar"><select id="ssort" aria-label="Sort"><option value="pop">Most popular</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">A to Z</option></select><b id="shopn">' + list.length + (list.length === 1 ? " product" : " products") + '</b></div><div class="grid" id="shopgrid">' + grid + "</div></div></section>";
     $("#sq").addEventListener("input", function (e) { shop.q = e.target.value.trim(); shop.n = SHOPPAGE; shopScreen(); });
     $("#ssort").value = shop.sort; $("#ssort").addEventListener("change", function (e) { shop.sort = e.target.value; shopScreen(); });
     setNav("#shop");
   }
 
   function lineFams(L) { return L.cat ? C.families.filter(function (f) { return f.cats.indexOf(L.cat) >= 0; }) : L.ids.map(function (id) { return FAM[id]; }).filter(Boolean); }
+  function coreScreen() {
+    var four = ["punisher", "wolv", "sabertooth"].map(function (id) { return FAM[id]; }).filter(Boolean), stock = C.families.filter(function (f) { return f.cats.indexOf("core") >= 0 && four.indexOf(f) < 0; });
+    app.innerHTML = shell("Core bits", 0, 0, "<h1>Core bits.</h1>" + says("Rebar, hard aggregate, deep holes. Tell me the rig and the diameter and I’ll tell you the bit.") +
+      '<h2 class="wiz-h2">4-Core Pro Series</h2><p class="lead sm">Punisher, Wolv and Sabertooth. Our bits for heavy rebar and hard aggregate.</p><div class="results">' + four.map(function (f) { return cardHTML(f); }).join("") + "</div>" +
+      '<h2 class="wiz-h2">Stock core bits and adaptors</h2><p class="lead sm">Premium wet and dry concrete bits off the shelf, plus extensions and adaptors.</p><div class="results">' + stock.map(function (f) { return cardHTML(f); }).join("") + "</div>" + frankBox(""));
+    setNav("");
+  }
+  /* Early-entry bond colors. Chart and map are Diamond Blade Warehouse's own (Green Kut page and Aggregate Map page). */
+  var AGG = [
+    { k: "soft", n: "Soft", rocks: "Soft limestone, sandstone, dolomite limestone, siliceous, soft shell", color: "Yellow", hex: "#0490c3", cls: "g" },
+    { k: "medsoft", n: "Medium soft", rocks: "Pit gravel, limestone, dolomite", color: "Orange", hex: "#263c7a", cls: "c" },
+    { k: "med", n: "Medium", rocks: "Medium hard river rock, gravel, medium traprock, decomposed granite", color: "Red", hex: "#e6a823", cls: "e" },
+    { k: "medhard", n: "Medium hard", rocks: "Granite, slate, traprock, basalt, quartzite", color: "Green", hex: "#e02326", cls: "f" },
+    { k: "hard", n: "Hard", rocks: "Hard chert, hard quartz, flint rock, hard river rock", color: "Purple", hex: "#3f3a23", cls: "d" }
+  ], eeSel = "";
+  function earlyPick(k) { eeSel = k; earlyScreen(true); var r = $("#eeres"); if (r) r.scrollIntoView({ block: "start", behavior: "smooth" }); }
+  function earlyScreen(keep) {
+    var a = byK(AGG, eeSel), fams = a ? C.families.filter(function (f) { return f.cats.indexOf("green") >= 0 && new RegExp("\\b" + a.color + "$", "i").test(f.n); }) : [];
+    var y = keep ? window.scrollY : 0;
+    app.innerHTML = shell("Early-entry saws", 0, 0, "<h1>Which color blade?</h1>" + says("Soff-Cut style or Gorilla style, the color is the bond. Match it to your aggregate and the joint comes out clean.") +
+      '<div class="frank"><b class="h">1. Tap where you cut</b><p>Find your area on the map and tap it. Colors on the map show how hard the aggregate is there.</p><div class="aggmap" id="aggmap"><span class="note">Loading the map…</span></div>' +
+      '<div class="agglegend">' + AGG.map(function (x) { return '<span><i style="background:' + x.hex + '"></i>' + esc(x.n) + "</span>"; }).join("") + "</div></div>" +
+      '<div class="frank"><b class="h">Or 2. Pick your aggregate</b><div class="aggs">' + AGG.map(function (x) { return '<button type="button" class="agg" data-agg="' + x.k + '" aria-pressed="' + (x.k === eeSel) + '"><b>' + esc(x.n) + "</b><span>" + esc(x.rocks) + "</span></button>"; }).join("") + "</div></div>" +
+      '<div id="eeres">' + (a ? '<div class="eepick"><span>' + esc(a.n) + " aggregate</span><b>Run " + esc(a.color.toUpperCase()) + "</b><small>" + esc(a.rocks) + ".</small></div>" +
+        (fams.length ? '<div class="results">' + fams.map(function (f) { return cardHTML(f); }).join("") + "</div>" : "") : "") + "</div>" +
+      '<div class="frank"><b class="h">The whole color chart</b><table class="cmp"><thead><tr><th>Blade color</th><th>Aggregate</th></tr></thead><tbody>' +
+      [["White", "Soft and abrasive"], ["Yellow", "Soft"], ["Orange", "Medium soft"], ["Red", "Medium"], ["Green", "Medium hard"], ["Purple", "Hard"], ["Black", "Critically hard"], ["Next Day", "Cutting the next day, partially cured"]].map(function (r) { return "<tr><td><b>" + r[0] + "</b></td><td>" + r[1] + "</td></tr>"; }).join("") + '</tbody></table><p class="note">Fits Soff-Cut and Core Cut early-entry saws. Zenesis Green Kut also comes in Gorilla arbors. Aggregate changes from one pit to the next, so if you’re between two colors, ask.</p></div>' +
+      '<div class="frank"><b class="h">Not sure? Tell me where you cut</b><div class="hprow"><input id="eeloc" type="text" placeholder="City, state" autocomplete="address-level2" aria-label="City and state"><button class="btn gold sm" data-eeask>Ask ' + esc(FRANK) + "</button></div><p class=\"note\">I’ll confirm the color for your area and your mix.</p></div>");
+    setNav(""); if (keep) window.scrollTo(0, y);
+    var put = function () { var m = $("#aggmap"); if (!m || !window.AGGMAP) return; m.innerHTML = window.AGGMAP; m.addEventListener("click", function (e) { var c = e.target.getAttribute && e.target.getAttribute("class"), hit = AGG.filter(function (x) { return x.cls === c; })[0]; if (hit) earlyPick(hit.k); }); };
+    if (window.AGGMAP) put(); else { var sc = document.createElement("script"); sc.src = "aggmap.js"; sc.onload = put; sc.onerror = function () { var m = $("#aggmap"); if (m) m.innerHTML = '<span class="note">Map didn’t load. Pick your aggregate below.</span>'; }; document.head.appendChild(sc); }
+  }
   function lineScreen(k) {
     var L = byK(LINES, k); if (!L) return home();
     var fs = lineFams(L);
@@ -484,33 +571,63 @@
     deal.lines.forEach(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); if (v) blades += v[3] * l.q; });
     return { saw: sawP, blades: blades };
   }
+  /* Package math uses only the prices already on the site: blades at their quantity price, saw at its price.
+     "Saw after blade savings" = saw price minus what the quantity pricing took off the blades. */
+  function dealCalc() {
+    var mix = mixOn(), grp = { lg: 0, sm: 0 }, L = [], n = 0, blades = 0, list = 0;
+    deal.lines.forEach(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); if (v) { var g = v[2] && v[2] < 12 ? "sm" : "lg"; grp[g] += l.q; L.push({ l: l, f: f, v: v, g: g }); } });
+    L.forEach(function (x) { x.each = eachAt(x.v, mix ? grp[x.g] : x.l.q); n += x.l.q; blades += x.each * x.l.q; list += x.v[3] * x.l.q; });
+    var hit = SKU[(deal.saw || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")], sawP = hit ? hit[0].vars[hit[1]][3] : 0;
+    return { lines: L, n: n, blades: blades, save: list - blades, sawP: sawP, total: blades + sawP, net: Math.max(0, sawP - (list - blades)) };
+  }
+  function dealCur() { return { f: $("#dfam").value, v: $("#dvar").value }; }
+  function dealLine(c) { return deal.lines.filter(function (l) { return l.f === c.f && l.v === c.v; })[0]; }
+  function dealSetQty(q) {
+    q = Math.max(0, Math.min(9999, parseInt(q, 10) || 0)); var c = dealCur(), ln = dealLine(c);
+    if (ln && !q) deal.lines.splice(deal.lines.indexOf(ln), 1); else if (ln) ln.q = q; else if (q) deal.lines.push({ f: c.f, v: c.v, q: q });
+    store.set("deal2", deal); dealRefresh();
+  }
+  function dealSync() { var ln = dealLine(dealCur()), q = ln ? ln.q : 0; $("#dqty").value = Math.min(50, q); $("#dqn").value = q; }
+  function dealRefresh() {
+    var d = dealCalc(), saw = SD.saws.filter(function (x) { return x.sku === deal.saw; })[0], cur = dealLine(dealCur()), q = cur ? cur.q : 0;
+    $("#dqout").textContent = q + (q === 1 ? " blade" : " blades"); if (document.activeElement !== $("#dqn")) $("#dqn").value = q; if (document.activeElement !== $("#dqty")) $("#dqty").value = Math.min(50, q);
+    $("#deallines").innerHTML = d.lines.length ? d.lines.map(function (x) { return '<div class="dl" data-i="' + deal.lines.indexOf(x.l) + '"><span><b>' + x.l.q + " x " + esc(x.f.n) + "</b><small>" + esc(vlabel(x.v)) + " · " + money(x.each) + ' each</small></span><button class="link" data-dealrm>Remove</button></div>'; }).join("") : "";
+    $("#dealout").innerHTML = !saw ? '<div class="dealtotal off"><span>Pick a saw to see your package</span></div>' :
+      '<div class="dealtotal"><span>Your package</span>' +
+      '<div class="drow"><i>' + d.n + (d.n === 1 ? " blade" : " blades") + "</i><b>" + money(d.blades) + "</b></div>" +
+      (d.save > 0.005 ? '<div class="drow good"><i>Quantity pricing took off</i><b>− ' + money(d.save) + "</b></div>" : "") +
+      '<div class="drow"><i>' + esc(saw.n) + "</i><b>" + money(d.sawP) + "</b></div>" +
+      '<div class="drow big"><i>Package total</i><b>' + money(d.total) + "</b></div>" +
+      (d.n ? '<strong>' + (d.net <= 0 ? "Your blade savings cover the whole saw." : d.save > 0.005 ? "After your blade savings, the saw works out to " + money(d.net) + ", down from " + money(d.sawP) + "." : "Add blades and watch the saw get cheaper. The price drops at 12.") + "</strong>" : "<strong>Slide the blades up and watch the price move.</strong>") +
+      "<small>Before freight and tax. Your rep can sharpen this further on a real package.</small></div>";
+    var sb = $("[data-dealsend]"); if (sb) sb.disabled = !(saw && d.n);
+    var rp = $("#r-price"); if (rp) { rp.value = d.sawP || ""; rentCalc(); }
+  }
   function sawDeal() {
-    var fams = dealBlades(), n = dealCount(), t = dealTier(n), tot = dealTotal();
-    var next = SD.tiers.filter(function (x) { return x[0] > n; })[0];
-    var max = SD.tiers.length ? SD.tiers[SD.tiers.length - 1][0] : 36;
-    var saw = SD.saws.filter(function (s) { return s.sku === deal.saw; })[0];
-    var bin = dealBIN(), sawNet = tot ? tot - bin.blades : 0, save = tot ? bin.saw + bin.blades - tot : 0;
-    var dq = !saw ? "Pick the saw. Then stack blades until the numbers work." : !t ? (SD.tiers[0][0] - n) + " more blades and it’s a saw package." : next ? "You’re in. " + (next[0] - n) + " more gets you the " + next[0] + "-pack and a better number." : "That’s the top tier. Send it and I’ll get you a number today.";
-    var h = "<h1>Build your saw package.</h1>" + says(dq) + '<p class="lead">Buy the saw and the blades together and we work the price on both. Pick a saw, stack 15, 25 or 36 blades, and send it. Your rep comes back with the package price. The more you buy, the better the deal.</p>' +
-      '<div class="frank"><b class="h">1. Pick your saw</b><select id="dsaw" class="bigsel" aria-label="Saw"><option value="">Choose a saw…</option>' + SD.saws.map(function (s) { return '<option value="' + esc(s.sku) + '"' + (s.sku === deal.saw ? " selected" : "") + ">" + esc(s.n) + "</option>"; }).join("") + "</select></div>" +
-      '<div class="frank"><b class="h">2. Stack your blades</b><div class="dealadd"><select id="dfam" aria-label="Blade">' + fams.map(function (f) { return '<option value="' + f.id + '">' + esc(f.n) + "</option>"; }).join("") + '</select><select id="dvar" aria-label="Size"></select>' + qtyHTML(5) + '<button class="add" data-dealadd>Add</button></div>' +
-      (deal.lines.length ? '<div class="deallines">' + deal.lines.map(function (l, i) { var f = FAM[l.f], v = f && findVar(f, l.v); return v ? '<div class="dl" data-i="' + i + '"><span><b>' + l.q + " x " + esc(f.n) + "</b><small>" + esc(vlabel(v)) + '</small></span><button class="link" data-dealrm>Remove</button></div>' : ""; }).join("") + "</div>" : '<p class="note">No blades yet. Add at least 15 to unlock a saw package.</p>') + "</div>" +
-      '<div class="meter"><div class="bar"><i style="width:' + Math.min(100, n / max * 100) + '%"></i>' + SD.tiers.map(function (x) { return '<em style="left:' + (x[0] / max * 100) + '%" class="' + (n >= x[0] ? "hit" : "") + '">' + x[0] + "</em>"; }).join("") + "</div>" +
-      '<div class="meterline"><b>' + n + (n === 1 ? " blade" : " blades") + "</b>" + (next ? "<span>Add " + (next[0] - n) + " more to hit the " + next[0] + "-pack" + (t ? " and a better deal" : " and unlock a saw package") + "</span>" : "<span>Top tier. That’s the best deal we publish.</span>") + "</div></div>" +
-      (tot ? '<div class="dealtotal"><span>' + (sawNet <= 0 ? "FREE SAW UNLOCKED" : "SAW PACKAGE UNLOCKED") + " · " + t[0] + '-pack</span><b>' + money(tot) + "</b><small>Complete package: " + n + " blades plus the " + esc(saw.n) + ".</small>" +
-          (save > 0 ? "<strong>You save " + money(save) + " vs Buy It Now." + (sawNet <= 0 ? " The saw is free." : " The saw works out to " + money(sawNet) + ", down from " + money(bin.saw) + ".") + "</strong>" : "") + "<small>Freight and tax confirmed by your rep.</small></div>"
-        : (saw && t && SD.ref && saw.sku === SD.ref && dealReady()) ? '<div class="dealtotal"><span>SAW PACKAGE UNLOCKED · ' + t[0] + '-pack · SAW INCLUDED</span><b>' + money(bin.blades) + (n > (SD.pack || 15) ? " or less" : "") + "</b><small>" + n + " blades at Buy It Now, and the " + esc(saw.n) + " comes with them. Before freight and tax." + (n > (SD.pack || 15) ? " Past " + (SD.pack || 15) + " blades the price per blade drops. Send it and your rep comes back with the lower number." : " Stack 25 or 36 and the price per blade drops.") + "</small></div>"
-        : (saw && t) ? '<div class="dealtotal"><span>SAW PACKAGE UNLOCKED · ' + t[0] + '-pack</span><b class="sm">Your rep sends the package price</b><small>' + n + " blades plus the " + esc(saw.n) + ". Send it over and you’ll have a number back fast. Bigger stack, better deal.</small></div>"
-        : '<div class="dealtotal off"><span>' + (!saw ? "Pick a saw to see your package" : "Add " + (SD.tiers[0][0] - n) + " more blades to unlock a saw package") + "</span></div>") +
-      '<div class="center"><button class="btn chrome shine" data-dealsend' + (saw && t ? "" : " disabled") + ">Send this saw package to my rep</button>" + (deal.lines.length ? '<button class="btn ghost" data-dealclear>Start over</button>' : "") + "</div>" +
-      '<div class="frank cc"><b class="h">Renting your saws? Do the math.</b><p>Paying rent on a saw every job is paying for a saw you never own.</p><div class="ccgrid"><div class="field"><label for="r-day">Rental cost per day ($)</label><input id="r-day" type="number" inputmode="decimal" min="0" placeholder="e.g. 75"></div><div class="field"><label for="r-days">Days on the saw per month</label><input id="r-days" type="number" inputmode="decimal" min="0" placeholder="e.g. 10"></div></div><input type="hidden" id="r-price" value="' + (function () { var hit = SKU[(deal.saw || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")]; return hit ? hit[0].vars[hit[1]][3] : ""; })() + '"><div id="rout" class="ccout">Enter your rental rate and days to see what renting costs you.</div></div>' +
-      '<p class="note light">Want a saw that isn’t listed, or a bigger stack than 36? Your rep can build any package. That’s where the real deals are.</p>';
+    var fams = dealBlades();
+    if (!deal.saw && SD.saws.some(function (x) { return x.sku === "TS420"; })) deal.saw = "TS420";
+    var h = "<h1>Build your saw package.</h1>" + says("The more you buy, the better the price. Every blade you add lowers the price of the package.") +
+      '<div class="frank"><b class="h">1. Pick your saw</b><select id="dsaw" class="bigsel" aria-label="Saw"><option value="">Choose a saw…</option>' + SD.saws.map(function (x) { return '<option value="' + esc(x.sku) + '"' + (x.sku === deal.saw ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join("") + "</select></div>" +
+      '<div class="frank"><b class="h">2. Stack your blades</b><div class="dealadd two"><select id="dfam" aria-label="Blade">' + fams.map(function (f) { return '<option value="' + f.id + '"' + (f.id === "superblade-extreme" ? " selected" : "") + ">" + esc(f.n) + "</option>"; }).join("") + '</select><select id="dvar" aria-label="Size"></select></div>' +
+      '<div class="slide"><div class="slidetop"><b id="dqout">0 blades</b><span>Slide it, or type a number</span></div><input id="dqty" type="range" min="0" max="50" step="1" value="0" aria-label="How many blades"><div class="ticks"><i>0</i><i>12</i><i>24</i><i>36</i><i>50+</i></div>' +
+      '<div class="slidenum"><button type="button" class="stp" data-dstep="-1" aria-label="One fewer">−</button><input id="dqn" type="number" inputmode="numeric" min="0" max="9999" value="0" aria-label="Number of blades"><button type="button" class="stp" data-dstep="1" aria-label="One more">+</button></div></div>' +
+      '<p class="note">The price drops at 12, 24, 36, 50 and 100 blades. Most crews package 15, 25, 36, 50 or 100. ' + esc(mixLine()) + '</p><div class="deallines" id="deallines"></div></div>' +
+      '<div id="dealout"></div>' +
+      '<div class="center"><button class="btn gold shine" data-dealsend disabled>Send this saw package to my rep</button><button class="btn ghost" data-dealclear>Start over</button></div>' +
+      rentBox() +
+      '<p class="note light">Want a saw that isn’t listed, or a bigger stack? Your rep can build any package. That’s where the real deals are.</p>';
     app.innerHTML = shell("Build your own saw package", 0, 0, h);
-    fillDealVars(); setNav("#saw-deal");
+    fillDealVars(); dealSync(); dealRefresh(); setNav("#saw-deal");
+  }
+  function rentBox() {
+    return '<div class="frank cc"><b class="h">Renting your saws? Do the math.</b><p>Two sliders. That’s it.</p>' +
+      '<div class="rs"><label for="r-day">Rental per day <b id="r-day-o">$75</b></label><input id="r-day" type="range" min="20" max="300" step="5" value="75"></div>' +
+      '<div class="rs"><label for="r-days">Days you rent in a month <b id="r-days-o">8</b></label><input id="r-days" type="range" min="1" max="25" step="1" value="8"></div>' +
+      '<input type="hidden" id="r-price" value=""><div id="rout" class="ccout"></div></div>';
   }
   function fillDealVars() {
     var f = FAM[$("#dfam").value]; if (!f) return;
-    var vs = f.vars.filter(function (v) { return v[5]; }), d = defVar(f, vs);
+    var vs = f.vars.filter(function (v) { return v[5]; }), d = vs.filter(function (v) { return v[2] === 14; })[0] || defVar(f, vs);
     $("#dvar").innerHTML = vs.map(function (v) { return '<option value="' + esc(vkey(v)) + '"' + (v === d ? " selected" : "") + ">" + esc(vlabel(v)) + "</option>"; }).join("");
   }
   function dealText() {
@@ -518,7 +635,7 @@
     L.push("SAW PACKAGE REQUEST (" + (t ? t[0] + "-pack" : n + " blades") + ")");
     if (saw) L.push("Saw: " + saw.n + " (" + saw.sku + ")");
     deal.lines.forEach(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); if (v) L.push(l.q + " x " + v[0] + "  " + f.n + " " + vlabel(v)); });
-    var tot = dealTotal(); if (tot) L.push("Package total shown on site: " + money(tot));
+    var dc = dealCalc(); if (dc.n) L.push("Site price: blades " + money(dc.blades) + " + saw " + money(dc.sawP) + " = " + money(dc.total) + "  (before freight and tax, customer wants your best package price)");
     return L.join("\n");
   }
 
@@ -539,12 +656,12 @@
     setNav("");
   }
   function equipment() {
-    var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td><td class=\"num\">" + money(v[3]) + '</td><td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button></td></tr>' : ""; }).join("");
+    var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td><td class=\"num\">" + money(v[3]) + '</td><td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button><button class="add pk" data-pkg="' + esc(s.sku) + '">+ Blades</button></td></tr>' : ""; }).join("");
     var eq = C.families.filter(function (f) { return f.cats.indexOf("equip") >= 0 || f.cats.indexOf("dust") >= 0; });
     app.innerHTML = shell("Equipment deals", 0, 0,
       "<h1>If they make it, we can get it.</h1>" + says(QUIP.equipment[0]) +
       '<div class="frank"><b class="h">Tap what you need</b><p>Pick as many as you want. ' + esc(FRANK) + " goes hunting and comes back with the best price out there. It works like Costco: the more you buy, the better the price. Buying blades in bulk? We can often eat most or all of the equipment cost.</p>" + equipPicker("Go find me the best price") + '<div class="center"><a class="btn blue sm" href="#saw-deal">Build a saw package</a></div></div>' +
-      '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><div class="tablewrap"><table class="cmp saws"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th><th class="num">Buy now</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buying blades with it? Your rep can do better on the saw.</p><div class="center"><button class="btn gold sm" data-equip>Negotiate with your sales rep</button></div></div>' +
+      '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><p class="pknote"><b>With every blade you add, it lowers the cost of the saw.</b> Tap <b>+ Blades</b> on any saw, slide the blade count up and watch the price move.</p><div class="tablewrap"><table class="cmp saws"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th><th class="num">Buy now</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buying blades with it? Your rep can do better on the saw.</p><div class="center"><button class="btn gold sm" data-equip>Negotiate with your sales rep</button></div></div>' +
       '<h2 class="wiz-h2">Equipment on the shelf</h2><div class="results two-up swipe">' + eq.map(function (f) { return cardHTML(f); }).join("") + "</div>", true);
     setNav("#equipment");
   }
@@ -573,17 +690,18 @@
     app.innerHTML = shell("Cost per cut", 0, 0,
       "<h1>Price per box or price per foot?</h1>" + says(QUIP.cost[0]) +
       '<p class="lead">A blade that costs more and lasts longer is the cheaper blade. Put in what you pay and how many feet you get. Use your own numbers.</p>' +
-      '<div class="frank cc"><div class="ccgrid"><div><b class="h">Blade A (what you run now)</b><div class="field"><label for="ca-p">Price per blade ($)</label><input id="ca-p" type="number" inputmode="decimal" min="0" placeholder="e.g. 110"></div><div class="field"><label for="ca-f">Feet of cut per blade</label><input id="ca-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div>' +
-      '<div><b class="h">Blade B (the one you’re considering)</b><div class="field"><label for="cb-p">Price per blade ($)</label><input id="cb-p" type="number" inputmode="decimal" min="0" value="' + (dv ? dv[3] : "") + '"></div><div class="field"><label for="cb-f">Feet of cut per blade</label><input id="cb-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div></div>' +
+      '<div class="frank cc"><div class="ccgrid"><div><b class="h">Blade A (what you run now)</b><div class="field"><label for="ca-p">What you pay per blade ($)</label><input id="ca-p" type="number" inputmode="decimal" min="0" placeholder="e.g. 110"></div><div class="field"><label for="ca-f">Feet you get out of one</label><input id="ca-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div>' +
+      '<div><b class="h">Blade B (the one you’re considering)</b><div class="field"><label for="cb-p">What it costs per blade ($)</label><input id="cb-p" type="number" inputmode="decimal" min="0" value="' + (dv ? dv[3] : "") + '"></div><div class="field"><label for="cb-f">Feet you’d get out of one</label><input id="cb-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div></div>' +
       '<div class="field"><label for="c-ft">Feet you cut in a month</label><input id="c-ft" type="number" inputmode="decimal" min="0" placeholder="e.g. 5000"></div><div id="ccout" class="ccout">Fill in both blades to see the cost per foot.</div></div>' +
       '<p class="note light">Blade B starts at the ' + (d ? esc(d.n) + " 14\" Buy It Now price" : "price you enter") + '. Change it to any blade. We don’t fill in blade life for you, because it depends on your material, your saw and your operator.</p>' +
       '<div class="center"><a class="btn chrome" href="#finder">Find the right blade</a><button class="btn ghost" data-breaks>Get my price breaks</button></div>');
     setNav("");
+    costCalc();
   }
   function costCalc() {
     var g = function (id) { return parseFloat(($("#" + id) || {}).value) || 0; }, ap = g("ca-p"), af = g("ca-f"), bp = g("cb-p"), bf = g("cb-f"), ft = g("c-ft"), o = $("#ccout");
     if (!o) return;
-    if (!(ap && af && bp && bf)) { o.className = "ccout"; o.textContent = "Fill in both blades to see the cost per foot."; return; }
+    if (!(ap && af && bp && bf)) { o.className = "ccout"; o.innerHTML = 'Fill in both blades to see the cost per foot. <button type="button" class="btn gold sm" data-ccex style="margin-top:8px">Show me an example</button>'; return; }
     var a = ap / af, b = bp / bf, win = a === b ? "" : a < b ? "A" : "B", diff = Math.abs(a - b);
     o.className = "ccout on";
     o.innerHTML = '<div class="ccrow"><span>Blade A</span><b>' + money(a) + ' / ft</b></div><div class="ccrow"><span>Blade B</span><b>' + money(b) + " / ft</b></div>" +
@@ -597,7 +715,7 @@
     var mo = day * days, yr = mo * 12;
     o.className = "ccout on";
     o.innerHTML = '<div class="ccrow"><span>Rental per month</span><b>' + money(mo) + '</b></div><div class="ccrow"><span>Rental per year</span><b>' + money(yr) + "</b></div>" +
-      (price ? "<strong>A " + money(price) + " saw pays for itself in about " + (price / mo < 1 ? "under a month" : (price / mo).toFixed(1) + " months") + ". After that it’s yours.</strong>" : "<strong>Pick a saw above to see how fast it pays for itself.</strong>");
+      (price ? "<strong>You’re renting " + days + " days a month. A " + money(price) + " saw pays for itself in about " + (price / mo < 1 ? "under a month" : (price / mo).toFixed(1) + " months") + ". After that it’s yours.</strong>" : "<strong>Pick a saw above to see how fast it pays for itself.</strong>");
   }
 
   function repTools() {
@@ -617,13 +735,15 @@
     window.scrollTo(0, 0);
     if (h === "#finder" || h === "#ask-frank") {
       var mode = h === "#finder" ? "finder" : "ask";
-      if (!wiz.keep) { wiz.mat = wiz.saw = null; }
+      if (!wiz.keep) { wiz.mat = wiz.saw = null; } wiz.hp = null; wiz.hpn = null;
       wiz.keep = false; wiz.mode = mode; wiz.want = null; wiz.all = false; wizard(); setNav(h); bfShow("mat");
     } else if (h === "#reorder") { reorder(); setNav(h); bfShow("reorder"); }
     else if (h === "#shop") { app.innerHTML = ""; shopScreen(); bfShow("shop"); }
     else if (h === "#saw-deal") { sawDeal(); bfShow("equipment"); }
     else if (h === "#equipment") { equipment(); bfShow("equipment"); }
     else if (h === "#stone") { stoneScreen(); bfShow("home"); }
+    else if (h === "#core") { coreScreen(); bfShow("line"); }
+    else if (h === "#early") { eeSel = ""; earlyScreen(); bfShow("line"); }
     else if (h === "#depth") { depth(); bfShow("depth"); }
     else if (h === "#team") { repTools(); bfShow("home"); }
     else if (h === "#fix") { fixSel = ""; fixScreen(); bfShow("fix"); }
@@ -635,12 +755,13 @@
   /* ---------- floating Big Frank ---------- */
   var bfCtx = "home", bfI = 0;
   function bfLines() {
-    var t = totals(), a = (QUIP[bfCtx] || QUIP.home).slice();
+    var t = totals(), a = bfCtx === "home" || !QUIP[bfCtx] ? [] : QUIP[bfCtx].slice();
     if (bfCtx === "results" && wiz.mat && MATQUIP[wiz.mat.k]) a = [MATQUIP[wiz.mat.k]];
     if (t.units) { var bs = breakState(t); if (bs.nb) a.unshift(bs.need + " more" + bs.of + " hits the " + bs.nb + "-piece price."); }
     return a;
   }
-  function bfShow(ctx) { if (ctx) { bfCtx = ctx; bfI = 0; } var a = bfLines(); $("#bfp").textContent = a[bfI % a.length]; }
+  var HOMEQ = QUIP.home.slice().sort(function () { return Math.random() - 0.5; });
+  function bfShow(ctx) { if (ctx) { bfCtx = ctx; bfI = 0; } var a = bfLines(); a = a.concat(HOMEQ.filter(function (q) { return a.indexOf(q) < 0; })); $("#bfp").textContent = a[bfI % a.length]; }
   var lastY = 0; window.addEventListener("scroll", function () { var y = window.scrollY, el = $("#bf"); if (Math.abs(y - lastY) < 12) return; el.classList.toggle("away", y > lastY && y > 160); lastY = y; }, { passive: true });
   function bfOpen(open) { $("#bf").classList.toggle("open", open); store.set("bf", open ? 1 : 0); }
 
@@ -765,7 +886,7 @@
     var d = new Date(Date.now() + 30 * 864e5), p = function (n) { return ("0" + n).slice(-2); }, day = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate());
     var last = lastOrder(), items = last && last.items ? last.items.map(function (c) { var v = FAM[c.f] && findVar(FAM[c.f], c.v); return v ? encodeURIComponent(v[0]) + "*" + c.q : ""; }).filter(Boolean) : [];
     var link = location.origin + location.pathname + (items.length ? "?cart=" + items.join(",") : "") + (me().rep ? (items.length ? "&" : "?") + "rep=" + me().rep : "");
-    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//DBW Wisco//Reorder//EN", "BEGIN:VEVENT", "UID:" + Date.now() + "@dbwwisco", "DTSTAMP:" + new Date().toISOString().replace(/[-:]|\.\d+/g, ""), "DTSTART:" + day + "T090000", "DTEND:" + day + "T091500", "SUMMARY:Reorder blades from DBW Wisco", "DESCRIPTION:Running low? Your last order is one tap away: " + link.replace(/,/g, "\\,") + "\\nOr text " + FRANK + ": " + (W.textDisplay || W.phone || ""), "URL:" + link, "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:Reorder blades from DBW Wisco", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//DBW WISCO//Reorder//EN", "BEGIN:VEVENT", "UID:" + Date.now() + "@dbwwisco", "DTSTAMP:" + new Date().toISOString().replace(/[-:]|\.\d+/g, ""), "DTSTART:" + day + "T090000", "DTEND:" + day + "T091500", "SUMMARY:Reorder blades from DBW WISCO", "DESCRIPTION:Running low? Your last order is one tap away: " + link.replace(/,/g, "\\,") + "\\nOr text " + FRANK + ": " + (W.textDisplay || W.phone || ""), "URL:" + link, "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:Reorder blades from DBW WISCO", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
     var a = document.createElement("a"); a.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics); a.download = "reorder-dbw-wisco.ics"; document.body.appendChild(a); a.click(); a.remove();
     toast("Reminder made for " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ". Add it to your calendar.");
   }
@@ -808,7 +929,7 @@
     if (o.notes) { L.push(""); L.push("Notes: " + o.notes); }
     if (o.fav) L.push("Favorite team / athlete: " + o.fav);
     if (o.feedback) { L.push(""); L.push("FEEDBACK: " + o.feedback); }
-    L.push(""); L.push("Sent from the DBW Wisco site" + (C.priceList ? " · " + C.priceList + " pricing" : ""));
+    L.push(""); L.push("Sent from the DBW WISCO site" + (C.priceList ? " · " + C.priceList + " pricing" : ""));
     return L.join("\n");
   }
   function preview() { $("#preview").textContent = buildText(formData()); }
@@ -897,13 +1018,16 @@
     if ((el = t.closest("[data-starter]"))) { var st = byK(STARTERS, el.dataset.starter); starterLines(st).forEach(function (l) { addToCart(l.f.id, vkey(l.v), l.q); }); renderCart(); $("#cart").showModal(); return; }
     if (t.closest("[data-photo]")) { var pr = route2(me().rep); sms("Hey " + pr.who + ", here’s a picture of my blade. I need more of these. Name / company: ", pr.cell); return; }
     if ((el = t.closest("[data-mat]"))) { wiz.mat = byK(MATS, el.dataset.mat); wizard(); window.scrollTo(0, 0); bfShow(wiz.saw ? "results" : "saw"); return; }
-    if ((el = t.closest("[data-saw]"))) { wiz.saw = byK(SAWS, el.dataset.saw); wizard(); window.scrollTo(0, 0); bfShow(wiz.mode === "ask" ? "want" : "results"); return; }
+    if ((el = t.closest("[data-hp]"))) { wiz.hp = el.dataset.hp; wizard(); window.scrollTo(0, 0); bfShow(wiz.mode === "ask" ? "want" : "results"); return; }
+    if (t.closest("[data-hpgo]")) { var hv = parseFloat($("#hpin").value); if (!(hv > 0)) { $("#hpin").focus(); toast("Type the horsepower, or tap one of the choices"); return; } wiz.hp = hv <= LOWHP ? "low" : "high"; wiz.hpn = hv; wizard(); window.scrollTo(0, 0); return; }
+    if (t.closest("[data-wetspec]")) { openSend("pricing"); $("#f-notes").value = "Wet blade spec. Cutting: " + (wiz.mat ? wiz.mat.n : "") + ". Saw: walk-behind" + (wiz.hpn ? ", " + wiz.hpn + " HP" : wiz.hp ? ", " + byK(HPS, wiz.hp).n.toLowerCase() : "") + ". Blade size: \nCity / state where I cut: "; preview(); return; }
+    if ((el = t.closest("[data-saw]"))) { wiz.hp = null; wiz.hpn = null; wiz.saw = byK(SAWS, el.dataset.saw); wizard(); window.scrollTo(0, 0); bfShow(wiz.mode === "ask" ? "want" : "results"); return; }
     if ((el = t.closest("[data-want]"))) { wiz.want = byK(WANTS, el.dataset.want); wizard(); window.scrollTo(0, 0); return; }
     if (t.closest("[data-all]")) { wiz.all = true; wizard(); return; }
     if (t.closest("[data-keep]")) { wiz.keep = true; return; }
     if (t.closest("[data-back]")) {
       var h = location.hash;
-      if (h === "#finder" || h === "#ask-frank") { if (wiz.want) wiz.want = null; else if (wiz.saw) { wiz.saw = null; wiz.all = false; } else if (wiz.mat) wiz.mat = null; else return go("#home"); wizard(); return; }
+      if (h === "#finder" || h === "#ask-frank") { if (wiz.want) wiz.want = null; else if (wiz.hp) { wiz.hp = null; wiz.hpn = null; } else if (wiz.saw) { wiz.saw = null; wiz.all = false; } else if (wiz.mat) wiz.mat = null; else return go("#home"); wizard(); return; }
       if (h === "#fix" && fixSel) { fixSel = ""; fixScreen(); return; }
       return go("#home");
     }
@@ -918,6 +1042,10 @@
     if ((el = t.closest("[data-eqpick]"))) { var on = el.getAttribute("aria-pressed") !== "true"; el.setAttribute("aria-pressed", on); var ix2 = eqSel.indexOf(el.dataset.eqpick); if (on && ix2 < 0) eqSel.push(el.dataset.eqpick); if (!on && ix2 >= 0) eqSel.splice(ix2, 1); $$("[data-eqpick]").forEach(function (b) { b.setAttribute("aria-pressed", eqSel.indexOf(b.dataset.eqpick) >= 0); }); return; }
     if ((el = t.closest("[data-intent]"))) { setIntent(el.dataset.intent); return; }
     if (t.closest("[data-repchange]")) { store.set("replock", 0); renderReps($("#f-rep").value); return; }
+    if ((el = t.closest("[data-tag]"))) { shop.tag = shop.tag === el.dataset.tag ? "" : el.dataset.tag; shop.n = SHOPPAGE; shopScreen(); return; }
+    if ((el = t.closest("[data-agg]"))) { earlyPick(el.dataset.agg); return; }
+    if (t.closest("[data-aggask]")) { var al = ($("#aggloc") ? $("#aggloc").value : "").trim(); if (!al) { $("#aggloc").focus(); toast("Type your city and state first"); return; } openSend("pricing"); $("#f-notes").value = "Blade recommendation for my aggregate. I cut in: " + al + "\nWhat I cut (concrete, asphalt, green): \nSaw and blade size: "; preview(); return; }
+    if (t.closest("[data-eeask]")) { openSend("pricing"); $("#f-notes").value = "Early-entry blade color check. I cut in (city, state): " + ($("#eeloc") ? $("#eeloc").value : "") + "\nSaw (Soff-Cut or Gorilla, model): \nBlade size: "; preview(); return; }
     if (t.closest("[data-shopmore]")) { shop.n += SHOPPAGE; shopScreen(); return; }
     if (t.closest("[data-remind]")) { remind(); return; }
     if ((el = t.closest("[data-hint]"))) { $("#rq").value = el.dataset.hint; runSearch(el.dataset.hint); return; }
@@ -926,10 +1054,13 @@
       var q = Math.max(1, parseInt($(".dealadd .qty input").value, 10) || 1), fid2 = $("#dfam").value, key2 = $("#dvar").value;
       var ex = deal.lines.filter(function (l) { return l.f === fid2 && l.v === key2; })[0];
       if (ex) ex.q += q; else deal.lines.push({ f: fid2, v: key2, q: q });
-      store.set("deal", deal); sawDeal(); return;
+      store.set("deal2", deal); sawDeal(); return;
     }
-    if ((el = t.closest("[data-dealrm]"))) { deal.lines.splice(parseInt(el.closest(".dl").dataset.i, 10), 1); store.set("deal", deal); sawDeal(); return; }
-    if (t.closest("[data-dealclear]")) { deal = { saw: "", lines: [] }; store.set("deal", deal); sawDeal(); return; }
+    if ((el = t.closest("[data-dstep]"))) { var cl = dealLine(dealCur()); dealSetQty((cl ? cl.q : 0) + parseInt(el.dataset.dstep, 10)); return; }
+    if ((el = t.closest("[data-pkg]"))) { deal.saw = el.dataset.pkg; store.set("deal2", deal); go("#saw-deal"); return; }
+    if (t.closest("[data-ccex]")) { [["ca-p", 110], ["ca-f", 1500], ["cb-f", 5000], ["c-ft", 10000]].forEach(function (x) { $("#" + x[0]).value = x[1]; }); costCalc(); toast("Example numbers. Put in your own."); return; }
+    if ((el = t.closest("[data-dealrm]"))) { deal.lines.splice(parseInt(el.closest(".dl").dataset.i, 10), 1); store.set("deal2", deal); sawDeal(); return; }
+    if (t.closest("[data-dealclear]")) { deal = { saw: "TS420", lines: [] }; store.set("deal2", deal); sawDeal(); return; }
     if (t.closest("[data-dealsend]")) { openSend("saw"); return; }
     if ((el = t.closest("[data-eqadd]"))) { var hitE = SKU[el.dataset.eqadd.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; if (hitE) { addToCart(hitE[0].id, vkey(hitE[0].vars[hitE[1]]), 1); flash(el); } return; }
     if ((el = t.closest("[data-add]"))) {
@@ -948,7 +1079,7 @@
     if (t.closest("[data-refer]")) { openSend("refer"); return; }
     if ((el = t.closest("[data-acct]"))) { setAcct(el.dataset.acct); return; }
     if ((el = t.closest("[data-star]"))) { var sv = +el.dataset.star; $("#f-stars").value = sv; $$("#starpick button").forEach(function (x) { x.classList.toggle("on", +x.dataset.star <= sv); }); preview(); return; }
-    if (t.closest("[data-friend]")) { if (!$("#f-name").value.trim()) { $("#f-name").focus(); toast("Add your name so they know who sent them"); return; } location.href = "sms:?&body=" + encodeURIComponent("I get my diamond blades from DBW Wisco. Prices are on the site and a real person handles the order. Tell them I sent you: " + friendLink()); return; }
+    if (t.closest("[data-friend]")) { if (!$("#f-name").value.trim()) { $("#f-name").focus(); toast("Add your name so they know who sent them"); return; } location.href = "sms:?&body=" + encodeURIComponent("I get my diamond blades from DBW WISCO. Prices are on the site and a real person handles the order. Tell them I sent you: " + friendLink()); return; }
     if (t.closest("[data-feedback]")) { openSend("feedback"); return; }
     if (t.closest("[data-cart]")) { ["detail", "extras", "send"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); renderCart(); $("#cart").showModal(); return; }
     if (t.closest("[data-checkout]")) { openExtras(); return; }
@@ -975,10 +1106,13 @@
     var t = e.target, card = t.closest(".card"), line = t.closest(".line");
     if (t.matches("[data-size]") && card) { var f = FAM[card.dataset.f], keep = $(".qty input", card).value; $("[data-row]", card).outerHTML = buyRow(findVar(f, t.value)); $(".qty input", card).value = keep; }
     if (line && t.matches(".qty input")) { cart[parseInt(line.dataset.i, 10)].q = Math.max(1, parseInt(t.value, 10) || 1); saveCart(); renderCart(); }
-    if (t.id === "dsaw") { deal.saw = t.value; store.set("deal", deal); sawDeal(); }
-    if (t.id === "dfam") fillDealVars();
+    if (t.id === "dsaw") { deal.saw = t.value; store.set("deal2", deal); dealRefresh(); }
+    if (t.id === "dvar") dealSync(), dealRefresh();
+    if (t.id === "dfam") { fillDealVars(); dealSync(); dealRefresh(); }
   });
-  document.addEventListener("input", function (e) { var id = e.target.id || ""; if (/^c[ab]-|^c-ft/.test(id)) costCalc(); if (/^r-/.test(id)) rentCalc(); });
+  document.addEventListener("input", function (e) { var id = e.target.id || "";
+    if (id === "dqty" || id === "dqn") dealSetQty(e.target.value);
+    if (id === "r-day" && $("#r-day-o")) $("#r-day-o").textContent = "$" + e.target.value; if (id === "r-days" && $("#r-days-o")) $("#r-days-o").textContent = e.target.value; if (/^c[ab]-|^c-ft/.test(id)) costCalc(); if (/^r-/.test(id)) rentCalc(); });
   $("#sendform").addEventListener("input", function () {
     preview();
     var f = $("#sendform"), info = me();   // keep what they typed, even if they close the sheet
