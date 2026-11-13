@@ -14,7 +14,7 @@ Customer-facing reorder site for the Wisconsin branch. Static files, no server, 
 ## New price list each month
 
 ```
-python3 tools/wisco/build.py "/path/to/FINAL DECEMBER 2026 PRICE LIST.xlsx"
+python3 tools/wisco/build.py "/path/to/FINAL DECEMBER 2026 PRICE LIST.xlsx" --master "/path/to/2026_DBW_MASTER_PRICE_BOOK.xlsx"
 python3 tools/wisco/assemble.py
 ```
 
@@ -23,8 +23,10 @@ to sanity-check the sheet and writes customer prices only.
 
 Price shown = the price list's own customer column:
 blades, bits, grinders = the **3.0** column. Chain and core rigs = the sheet's top column (1.7 / 1.8).
-Prestress and wall saw = 2.1. Green Kut = MSRP. Abrasives = LIST. Anything with cost only (gas saws,
-Dustless, skid plates) shows "Price from your rep".
+Prestress and wall saw = 2.1. Green Kut = MSRP. Abrasives = LIST. Items with cost only (gas saws, Dustless, skid plates) are left off the site.
+
+`--master` adds two lines the monthly list leaves out, from the master price book: 4-Core Pro Series
+core bits (priced 3.0 x cost) and Zenesis Green Kut (the book's 2.2 column). Neither file is ever committed.
 
 ## Add a blade video
 

@@ -32,7 +32,7 @@ img { max-width: 100% }
 /* ---------- trust bar + header ---------- */
 .trust { background: var(--navy); color: #fff; font: 800 11px var(--sans); letter-spacing: .14em; text-transform: uppercase; display: flex; justify-content: center; gap: 6px 18px; flex-wrap: wrap; padding: 7px var(--gr) 7px var(--gl); text-align: center }
 .trust span + span::before { content: "•"; margin-right: 18px; color: var(--red) }
-@media (max-width: 560px) { .trust { font-size: 9.5px; letter-spacing: .08em; gap: 0 10px; flex-wrap: nowrap; white-space: nowrap } .trust span:nth-child(2) { display: none } .trust span + span::before { margin-right: 10px } }
+@media (max-width: 560px) { .trust { font-size: 9.5px; letter-spacing: .08em; gap: 0 10px; flex-wrap: nowrap; white-space: nowrap } .trust span:nth-child(n+2) { display: none } .trust span + span::before { margin-right: 10px } }
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: linear-gradient(120deg, #10307F, #071433); color: #fff }
 .top .wrap { display: flex; align-items: center; gap: 14px; padding-block: 8px }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; min-width: 0 }
@@ -245,3 +245,13 @@ pre.order { background: var(--mist); border: 1px solid var(--line); border-radiu
 .sz.dim { opacity: .55 } .sz b { font: 800 14.5px var(--sans); display: block } .sz small { font: 500 12px ui-monospace, Menlo, monospace; color: var(--muted) }
 .sz .r { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end } .sz .p { font: 900 18px var(--sans); color: var(--navy-2) }
 .sz .qty { grid-template-columns: 32px 34px 32px; height: 40px } .sz .add { height: 40px; padding: 0 12px }
+
+/* ---------- featured lines ---------- */
+.lines { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px }
+.linecard { background: var(--grad-band); color: #fff; border-radius: var(--radius); padding: 0 16px 16px; text-decoration: none; display: grid; gap: 6px; align-content: start; box-shadow: var(--shadow); border-bottom: 5px solid var(--red); overflow: hidden }
+.linecard:hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(7,20,51,.3) }
+.lc-art { display: flex; justify-content: center; align-items: center; gap: 8px; background: #fff; margin: 0 -16px 8px; padding: 14px; height: 150px }
+.lc-art img { height: 100%; flex: 1 1 0; min-width: 0; max-width: 48%; object-fit: contain }
+.linecard b { font: 400 22px/1.05 var(--slab); text-transform: uppercase; background: var(--chrome-text); -webkit-background-clip: text; background-clip: text; color: transparent }
+.linecard span { font: 600 14px/1.4 var(--sans); color: #DCE7FF }
+.linecard em { font: 900 13px var(--sans); letter-spacing: .1em; text-transform: uppercase; font-style: normal; color: #fff; margin-top: 4px }

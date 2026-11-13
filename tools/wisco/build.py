@@ -169,16 +169,17 @@ SAWSEC = [
     ("STIHL", "Stihl Cutquik Saws"), ("HILTI", "Hilti Gas Saws"), ("DEWALT", 'DeWalt 9" Battery Saw'),
     ("BR/CC", "Walk-Behind & Early-Entry Saws"), ("SOFF", "Walk-Behind & Early-Entry Saws"),
 ]
-POPULAR = ["Super G", "Superblade G3", "Dragon Supreme", "Blue Tornado", "T-Rex", "Eagle Premium", "Blacksmyth",
-           "Superblade Arrow", "Dragon", "Swordfish", "Superblade Extreme", "Eagle - Small Diameter", "Jaguar",
-           "Wolverine Premium", "Viper General Purpose", "Turbo Cup - Premium", "Blue Cheetah", "V-Shape Wet Corebit",
-           "Green Kut Purple", "Eagle Supreme", "Hybrid", "Tornado", "Double Row", "Segmented Dry Corebit"]
+POPULAR = ["Dragon Supreme", "Dragon", "Superblade G3", "Superblade Extreme", "Superblade Arrow", "Zenesis Green Kut Purple",
+           "Punisher", "Wolv", "Sabertooth", "Super G", "Blue Tornado", "T-Rex", "Eagle Premium", "Blacksmyth", "Swordfish",
+           "Eagle - Small Diameter", "Jaguar", "Wolverine Premium", "Viper General Purpose", "Turbo Cup - Premium", "Blue Cheetah",
+           "V-Shape Wet Corebit", "Green Kut Purple", "Eagle Supreme", "Hybrid", "Tornado", "Double Row", "Segmented Dry Corebit"]
 
 
 def main():
     xlsx = sys.argv[1]
     imgdir = sys.argv[sys.argv.index("--images") + 1] if "--images" in sys.argv else None
     rows = PL.load(xlsx)
+    if "--master" in sys.argv: rows += PL.load_master_extra(sys.argv[sys.argv.index("--master") + 1])
     site = json.load(open(os.path.join(HERE, "dbw_site_catalog.json")))
     report = []
 
@@ -246,7 +247,9 @@ def main():
             if "chain" in cats and k in chainskus: continue
             row = plmap.get(k)
             if row: used.add(id(row))
-            addvar(f, o["sku"] or "ASK", o["size"].replace("◊", "DM").replace(" - 7/8", ", 7/8"), row["p"] if row else None)
+            size = o["size"].replace("◊", "DM").replace(" - 7/8", ", 7/8")
+            if row and row["sheet"] == "MASTER": size = row["extra"]["size"]
+            addvar(f, o["sku"] or "ASK", size, row["p"] if row else None)
 
     # ---- 2. price-list rows the site doesn't show ----
     for r in rows:
@@ -259,6 +262,9 @@ def main():
             target = next((n for k, n in CHAINSEC if k in sec), None) or next((n for k, n in CHAINSEC if k in r["sheet"]), nice(r["sheet"]))
             cats = ["chain"]
             if r["extra"].get("saw") and "POWERHEAD" not in r["desc"]: note = note
+        elif r["sheet"] == "MASTER":
+            target, size, note = r["section"], r["extra"]["size"], ""
+            cats = ["core"] if not target.startswith("Zenesis") else ["green"]
         elif r["sheet"] == "SAWS":
             sec = r["section"].upper()
             target = next((n for rx, n in RULES if re.search(rx, sku)), None) or next((n for k, n in SAWSEC if k in sec), "Grinders & Circular Saws")
@@ -337,6 +343,7 @@ def main():
         if not d["img"]:
             b = by.get(d["borrow"] or "")
             if not b and "chain" in d["cats"]: b = chainimg
+            if not b and d["n"].startswith("Zenesis"): b = by.get("Zenesis Green Kut Purple")
             if not b and d["n"].startswith("Green Kut"): b = by.get("Green Kut Green")
             if b and b["img"]: d["img"] = b["img"]
     if imgdir:

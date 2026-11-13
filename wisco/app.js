@@ -43,6 +43,13 @@
     { k: "price", n: "Lowest Price", s: "Keep the cost-in down" },
     { k: "frank", n: "Just Tell Me", s: FRANK + " picks, I cut" }
   ];
+  /* The lines Wisco leads with. ids = blade ids from the catalog. */
+  var LINES = [
+    { k: "dragons", n: "The Dragons", s: "Our baddest multi-purpose blades. Red for life, Purple for everything.", ids: ["dragon-supreme", "dragon"], img: ["dragon-supreme", "dragon"] },
+    { k: "superblades", n: "The Superblades", s: "G3, Extreme and Arrow. Built to drop your cost per cut.", ids: ["superblade-g3", "superblade-extreme", "superblade-arrow", "super-g"], img: ["superblade-g3", "superblade-arrow"] },
+    { k: "zenesis", n: "Zenesis Green Kut", s: "Early-entry blades with Zenesis diamond alignment. More footage, chip-free joints.", ids: ["zenesis-green-kut-purple", "zenesis-green-kut-orange", "zenesis-green-kut-green", "zenesis-green-kut-red", "zenesis-green-kut-yellow"], img: ["zenesis-green-kut-purple"] },
+    { k: "4-core", n: "4-Core Bits", s: "Punisher, Wolv and Sabertooth. Pro Series bits for the holes nobody else wants.", ids: ["punisher", "wolv", "sabertooth"], img: ["punisher", "wolv", "sabertooth"] }
+  ];
   var byK = function (arr, k) { return arr.filter(function (x) { return x.k === k; })[0]; };
 
   var FAM = {}, SKU = {}, MATNAME = {}, SAWNAME = {};
@@ -120,11 +127,16 @@
   function setNav(h) { $$(".nav a").forEach(function (a) { a.classList.toggle("on", a.getAttribute("href") === h); }); }
 
   function home() {
-    var top = C.families.filter(function (f) { return f.rank < 99; }).slice(0, 8);
-    var line = ["dragon", "superblade-extreme", "super-g", "dragon-supreme", "blue-tornado"];
+    var top = C.families.filter(function (f) { return f.rank >= 9 && f.rank < 99; }).slice(0, 8);
+    var line = ["dragon", "superblade-g3", "dragon-supreme", "superblade-arrow", "zenesis-green-kut-purple"];
+    var lines = LINES.map(function (L) {
+      var fs = L.ids.map(function (id) { return FAM[id]; }).filter(Boolean); if (!fs.length) return "";
+      var from = Math.min.apply(null, fs.map(function (f) { return f.min; }));
+      return '<a class="linecard" href="#line-' + L.k + '"><span class="lc-art">' + L.img.map(function (id) { return FAM[id] && FAM[id].img ? '<img alt="" loading="lazy" src="img/' + esc(FAM[id].img) + '">' : ""; }).join("") + "</span><b>" + esc(L.n) + "</b><span>" + esc(L.s) + '</span><em>From ' + money(from) + " →</em></a>";
+    }).join("");
     app.innerHTML =
       '<section class="hero"><div class="wrap"><div>' +
-      '<span class="pill"><i>★</i> Diamond Blade Warehouse · Wisconsin <i>★</i></span>' +
+      '<span class="pill"><i>★</i> A division of Diamond Blade Warehouse <i>★</i></span>' +
       "<h1>Wisco cuts different.</h1>" +
       '<p class="sub">All-American attitude. Milwaukee hustle. <b>Your blades, your price, 60 seconds.</b></p>' +
       '<div class="doors">' +
@@ -135,7 +147,8 @@
       '<div class="tiny">Got an account? <a href="#" data-pricing>Get your account pricing</a> · or <a href="#shop">shop everything</a></div>' +
       '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="Diamond Blade Warehouse Wisconsin" width="430" height="458">' +
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
-      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>What Wisco runs</h2><p>The blades our contractors reorder the most.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a></div></div></section>' +
+      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Wisco’s heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + '</div></div></section>' +
+      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What Wisco runs</h2><p>The everyday blades our contractors reorder the most.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a></div></div></section>' +
       '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>How we do it</h2><p>No runaround. No shopping cart games.</p></div><div class="three">' +
       '<div class="point"><b>A real rep, every order</b><p>Nothing here charges a card. Your order hits your Wisco rep, who confirms price, freight and ship date before it moves.</p></div>' +
       '<div class="point"><b>List price is the ceiling</b><p>Account, quantity and Platinum pricing still apply. One button gets you your real numbers.</p></div>' +
@@ -236,16 +249,23 @@
     setNav("#shop");
   }
 
+  function lineScreen(k) {
+    var L = byK(LINES, k); if (!L) return home();
+    var fs = L.ids.map(function (id) { return FAM[id]; }).filter(Boolean);
+    app.innerHTML = shell("Wisco’s heavy hitters", 0, 0, "<h1>" + esc(L.n) + ".</h1>" + '<p class="lead">' + esc(L.s) + '</p><div class="results">' + fs.map(function (f) { return cardHTML(f); }).join("") + "</div>" + frankBox(""));
+  }
+
   function route() {
     var h = location.hash || "#home";
     if (h.indexOf("#blade-") === 0) { var f = FAM[h.slice(7)]; if (!app.innerHTML) home(); if (f) openDetail(f); return; }
     window.scrollTo(0, 0);
     if (h === "#finder" || h === "#ask-frank") {
       var mode = h === "#finder" ? "finder" : "ask";
-      if (wiz.mode !== mode && !wiz.keep) { wiz.mat = wiz.saw = null; }
+      if (!wiz.keep) { wiz.mat = wiz.saw = null; }
       wiz.keep = false; wiz.mode = mode; wiz.want = null; wiz.all = false; wizard(); setNav(h);
     } else if (h === "#reorder") { reorder(); setNav(h); }
     else if (h === "#shop") { app.innerHTML = ""; shopScreen(); }
+    else if (h.indexOf("#line-") === 0) { lineScreen(h.slice(6)); setNav(""); }
     else home();
   }
 

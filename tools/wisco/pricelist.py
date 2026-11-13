@@ -54,3 +54,35 @@ def load(path):
         if isinstance(r[0],(str,int)) and isinstance(r[1],str) and num(r[4]):
             add('DUSTLESS','DUSTLESS',r[0],r[1],r[4],None,None,{'app':str(r[2] or ''),'saw':str(r[3] or '')})
     return rows
+
+
+FOURCORE = {"BLACKCAT": "Blackcat", "PUNISHER": "Punisher", "SABERTOOTH": "Sabertooth", "SMASH": "Smash", "VALKYRIE": "Valkyrie", "WOLVERINE": "Wolv"}
+ZCOLOR = {"G": "Green", "O": "Orange", "P": "Purple", "R": "Red", "Y": "Yellow"}
+def load_master_extra(path):
+    """Lines the monthly list leaves out: 4-Core Pro Series core bits and Zenesis Green Kut.
+    Core bits are priced 3.0 x cost (same as the monthly list's core bit sheet).
+    Zenesis uses the book's own top column (2.2M), which sits just above standard Green Kut MSRP."""
+    wb = openpyxl.load_workbook(path, data_only=True); rows = []
+    num = lambda x: isinstance(x, (int, float)) and not isinstance(x, bool)
+    fam = None; on = False
+    for r in wb["Core Bits"].iter_rows(values_only=True):
+        r = list(r) + [None] * 6; a = r[0]
+        if isinstance(a, str) and r[3] is None:
+            t = a.upper()
+            if "4-CORE" in t: on = True
+            elif t.startswith("MISC BITS"): on = False
+            hit = [v for k, v in FOURCORE.items() if t.startswith(k)]
+            if hit: fam = hit[0]
+            continue
+        if on and fam and isinstance(a, str) and num(r[3]) and r[3] > 0:
+            rows.append(dict(sheet="MASTER", section=fam, sku=a.strip(), desc=str(r[2] or ""), cost=r[3], price=float(int(r[3] * 3 + 0.5)), basis="x", extra={"size": re.sub(r"\s+", " ", re.sub(r"\s*X\s*", " x ", str(r[2] or "")).replace("MM", "mm")).strip()}))
+    on = False
+    for r in wb["Green Kut"].iter_rows(values_only=True):
+        r = list(r) + [None] * 6; a = r[0]
+        if isinstance(a, str) and "ZENESIS" in a.upper() and r[2] is None: on = True; continue
+        if on and isinstance(a, str) and num(r[2]) and num(r[3]):
+            m = re.match(r"^GKZ.*-([GOPRY])$", a.strip())
+            if not m: continue
+            size = re.sub(r"\s*ZENESIS.*$", "", str(r[1]), flags=re.I).replace("x", " x ")
+            rows.append(dict(sheet="MASTER", section="Zenesis Green Kut " + ZCOLOR[m.group(1)], sku=a.strip(), desc=str(r[1]), cost=r[2], price=float(r[3]), basis="x", extra={"size": re.sub(r"\s+", " ", size)}))
+    return rows

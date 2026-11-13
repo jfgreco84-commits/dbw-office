@@ -195,7 +195,7 @@ fam("Green Kut Next Day", "premium", dict(g=4.5, c=3.5),
     [("Next-day bond", "Stands up to the extra hardness of an overnight pour."),
      ("Laser-fused segments", "Crisp joint channels without spalling."),
      ("Deep cooling gullets", "Clears dust and controls heat on long dry runs.")], cat="green")
-for _c in ["Green", "Orange", "Purple"]:
+for _c in ["Green", "Orange", "Purple", "Red", "Yellow"]:
     fam("Zenesis Green Kut " + _c, "supreme", dict(g=5),
         "Zenesis diamond alignment for more footage per blade and chip-free joints.",
         [("Zenesis diamond alignment", "Evenly placed diamond gives you speed and life together."),
@@ -397,3 +397,22 @@ new("Core Bit Extensions & Adaptors", "core", "standard", {},
     "Extensions, thread adaptors and Hilti adaptors so your bit fits your drill.", img="V-Shape Wet Corebit", saws=["core"])
 new("Husqvarna 10.5\" Battery Saw Blades", "highspeed", "premium", dict(b=4, x=4),
     'Masonry and rescue blades for the Husqvarna 10.5" battery saw.', saws=["cutoff"])
+
+# ---------------- 4-Core Pro Series core bits ----------------
+fam("Punisher", "pro", dict(r=5, pc=5, c=4.5),
+    "Shotcrete, bridge deck, lift stations. When the job is the hardest thing on the schedule, send the Punisher.",
+    [("Pro Series segment", "Built for very heavily reinforced concrete. It keeps cutting where other bits glaze and quit."),
+     ("Heavy rebar bond", "Chews through steel without stripping segments."),
+     ('15", 18" and 24" barrels', "Pick the depth the hole needs.")], cat="core")
+fam("Wolv", "pro", dict(r=5, c=5, pc=4.5, s=4.5),
+    "The original super core bit. Top-shelf patterned diamond with cobalt and tungsten.",
+    [("35/45 mesh patterned diamond", "Every diamond is placed to work. Fast holes from the first inch to the last."),
+     ("Cobalt and tungsten bond", "Holds up in reinforced concrete, granite and hard aggregate."),
+     ('2" to 9", three barrel lengths', "One bit line for the whole coring truck.")], cat="core")
+fam("Sabertooth", "pro", dict(r=5, c=5, a=4, b=4.5, pc=4.5),
+    "The highest quality core bit we sell. It performs in every aggregate and every job condition.",
+    [("Years of segment R&D", "You stop matching bits to aggregate. This one just works."),
+     ("Multi-use bond", "Concrete, block, asphalt. Same bit, same speed."),
+     ('15", 18" and 24" barrels', "Covers shallow slabs to deep walls.")], cat="core")
+new("Zenesis Green Kut Red", "green", "supreme", dict(g=5), "Zenesis diamond alignment for more footage per blade and chip-free joints.", img="Zenesis Green Kut Purple")
+new("Zenesis Green Kut Yellow", "green", "supreme", dict(g=5), "Zenesis diamond alignment for more footage per blade and chip-free joints.", img="Zenesis Green Kut Purple")
