@@ -253,7 +253,7 @@
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Starter orders</h2><p>One tap loads a first order. Change anything before you send it. Twelve or more pieces puts you in price-break territory.</p></div>' + startersHTML() + "</div></section>" +
 
-      '<section class="sec deal"><div class="wrap two-col"><div><div class="sec-head left"><h2>Stack blades, score a saw</h2><p>Bundle 15, 25 or 36 blades with a gas saw and the saw price drops hard. Stack enough and it’s free. Pick your saw, stack your blades, see your package.</p></div><a class="btn chrome shine" href="#saw-deal">Build my saw deal</a></div>' +
+      '<section class="sec deal"><div class="wrap two-col"><div><div class="sec-head left"><h2>Need a saw?</h2><p>Bundle it with 15, 25 or 36 blades and the saw price drops. Stack enough and it’s free. Renting now? There’s a calculator for that too.</p></div><a class="btn chrome shine" href="#saw-deal">Build my saw deal</a></div>' +
       '<div><div class="sec-head left"><h2>If they make it, we can get it</h2><p>Don’t sleep on the equipment deals. Tell your rep the make and model and they’ll hunt down the best deal out there. Buy blades in bulk and we can often eat most of the cost. It works like Costco: the more you buy, the better the deal.</p></div><a class="btn red" href="#equipment">Find me equipment</a></div></div></section>' +
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><div class="three people">' +
@@ -346,7 +346,7 @@
   function runSearch(q) {
     var hits = searchVars(q.trim(), 40), box = $("#rhits");
     $("#rhints").hidden = !!q.trim();
-    box.innerHTML = !q.trim() ? "" : hits.length ? hits.map(function (h) { return hitHTML(h[0], h[1]); }).join("") : '<div class="empty">No match for “' + esc(q) + "”. Try the blade name or fewer words, or ask " + esc(FRANK) + ".</div>";
+    box.innerHTML = !q.trim() ? "" : hits.length ? hits.map(function (h) { return hitHTML(h[0], h[1]); }).join("") : '<div class="empty">No match for “' + esc(q) + "”. Try the blade name or fewer words." + (W.textNumber ? ' <button class="btn chrome sm" data-photo style="margin-top:10px">Text ' + esc(FRANK) + " a photo of it</button>" : "") + "</div>";
   }
 
   function shopScreen() {
@@ -488,6 +488,17 @@
       (price ? "<strong>A " + money(price) + " saw pays for itself in about " + (price / mo < 1 ? "under a month" : (price / mo).toFixed(1) + " months") + ". After that it’s yours.</strong>" : "<strong>Pick a saw above to see how fast it pays for itself.</strong>");
   }
 
+  function repTools() {
+    var cur = me().rep || "", base = location.origin + location.pathname;
+    app.innerHTML = shell("For the sales team", 0, 0,
+      "<h1>Your own link.</h1>" + '<p class="lead">Text customers a link with your name on it. When they order, it comes in marked as yours.</p>' +
+      '<div class="frank"><b class="h">1. Pick your name</b><div class="reps" id="rtreps">' + (W.reps || []).map(function (r) { var sl = slug(r.name); return '<button type="button" class="rep' + (cur === sl ? " on" : "") + '" data-rtrep="' + sl + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>"; }).join("") + "</div></div>" +
+      '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? base + "?rep=" + cur : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
+      '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy, open Send my order, and tap “Copy a reorder link for this cart.” Text that link. It opens with their blades already loaded.</p><div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a></div></div>' +
+      '<div class="frank"><b class="h">Texts that work</b><p class="tpl">Running low on blades? Reorder in 60 seconds, no phone tag: [your link]</p><p class="tpl">I loaded your usual order. Change the quantities if you need to and hit send: [reorder link]</p><p class="tpl">Not sure what to run on that job? Tap Ask Frank, 3 questions, one answer: [your link]</p></div>');
+    setNav("");
+  }
+
   function route() {
     var h = location.hash || "#home";
     if (h.indexOf("#blade-") === 0) { var f = FAM[h.slice(7)]; if (!app.innerHTML) home(); if (f) openDetail(f); return; }
@@ -501,6 +512,7 @@
     else if (h === "#saw-deal") { sawDeal(); bfShow("equipment"); }
     else if (h === "#equipment") { equipment(); bfShow("equipment"); }
     else if (h === "#depth") { depth(); bfShow("depth"); }
+    else if (h === "#team") { repTools(); bfShow("home"); }
     else if (h === "#fix") { fixSel = ""; fixScreen(); bfShow("fix"); }
     else if (h === "#cost") { costScreen(); bfShow("cost"); }
     else if (h.indexOf("#line-") === 0) { lineScreen(h.slice(6)); setNav(""); bfShow("line"); }
@@ -690,6 +702,8 @@
     if (t.closest("[data-bftoggle]")) { bfOpen(!$("#bf").classList.contains("open")); return; }
     if (t.closest("[data-bfhide]")) { bfOpen(false); return; }
     if (t.closest("[data-bfnext]")) { bfI++; bfShow(); return; }
+    if ((el = t.closest("[data-rtrep]"))) { var inf = me(); inf.rep = el.dataset.rtrep; store.set("me", inf); repTools(); return; }
+    if (t.closest("[data-rtcopy]")) { var lk = $("#rtlink").textContent; if (/^http|^file/.test(lk)) copyText(lk, function () { toast("Link copied. Text it to a customer."); }); else toast("Pick your name first"); return; }
     if ((el = t.closest("[data-starter]"))) { var st = byK(STARTERS, el.dataset.starter); starterLines(st).forEach(function (l) { addToCart(l.f.id, vkey(l.v), l.q); }); renderCart(); $("#cart").showModal(); return; }
     if (t.closest("[data-photo]")) { sms("Hey " + FRANK + ", here’s a picture of my blade. I need more of these. Name / company: "); return; }
     if ((el = t.closest("[data-mat]"))) { wiz.mat = byK(MATS, el.dataset.mat); wizard(); window.scrollTo(0, 0); bfShow(wiz.saw ? "results" : "saw"); return; }

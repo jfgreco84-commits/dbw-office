@@ -376,3 +376,6 @@ body:has(dialog[open]) .bf { display: none }
 .st-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 4px } .st-foot em { font: 800 13px var(--sans); font-style: normal; color: var(--navy-2) }
 .shopbar select { height: 48px; border-radius: 12px; border: 1.5px solid var(--line); padding: 0 10px; font-weight: 700; background: #fff }
 ol.next { margin: 0; padding: 12px 12px 12px 32px; background: var(--mist); border: 1px solid var(--line); border-radius: 12px; font: 500 14px/1.45 var(--sans); display: grid; gap: 4px } ol.next b { color: var(--navy-2) }
+
+.tpl { background: var(--mist); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 600 14.5px/1.4 var(--sans); user-select: all; margin: 0 }
+.frank .tpl + .tpl { margin-top: 0 }
