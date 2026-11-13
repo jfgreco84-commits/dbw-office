@@ -68,7 +68,7 @@ window.WISCO = {
     "My account-level pricing",
     "Quantity price breaks",
     "Platinum account pricing",
-    "A saw deal (blades + free saw)",
+    "A saw package (blades plus a saw)",
     "I want to open an account"
   ],
 

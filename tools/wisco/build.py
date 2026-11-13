@@ -176,6 +176,8 @@ POPULAR = ["Dragon Supreme", "Dragon", "Superblade Extreme", "Super G", "T-Rex",
            "Hybrid", "Tornado", "Double Row", "Segmented Dry Corebit"]
 
 
+# On the corporate price list but not part of the WISCO offering. Add names here to drop them.
+NOT_WISCO = {"Wood Blades"}
 TOTALS = False
 HOOKS = {
     "Dr. Schulze Core Drill Motors, Stands & Packages": "German-built core drill motors, stands and ready-to-run packages.",
@@ -215,8 +217,12 @@ def main():
     # this file, because this repo is public.  See README.md for the command.
     def arg(name, cast=float):
         return cast(sys.argv[sys.argv.index(name) + 1]) if name in sys.argv else None
-    MARKUP = arg("--markup")
-    if not MARKUP: sys.exit("Pass the Buy It Now multiplier:  --markup N   (see tools/wisco/README.md)")
+    # --tiers: six multipliers, one per quantity bracket (1-11, 12-23, 24-35, 36-49, 50-99, 100+).
+    # --equip: one multiplier for saws and equipment sold outright.
+    TIERS = [float(x) for x in (arg("--tiers", str) or "").split(",") if x]
+    EQUIP = arg("--equip")
+    if len(TIERS) != 6 or not EQUIP: sys.exit("Pass the multipliers:  --tiers a,b,c,d,e,f --equip N   (see tools/wisco/README.md)")
+    MARKUP = TIERS[0]
     DEAL_MULT, DEAL_PACK, DEAL_SAW = arg("--deal-mult"), arg("--deal-pack", int) or 15, arg("--deal-saw", str)
     COST = {}
     for r in rows:
@@ -349,6 +355,11 @@ def main():
             desc = " ".join(keep[:2])[:520]
             if desc == hook: desc = ""
         for v in f["vars"]:
+            # Quantity pricing. v[3] = price each at 1-11. v[6] = price each at the five higher brackets.
+            # Saws and equipment get one price and no brackets.
+            c0 = COST.get(v[0]) or (v[3] / MARKUP if v[3] else None)   # v[3] is still cost x the first bracket here
+            if c0 and "equip" in cats: v[3] = round(c0 * EQUIP, 2)
+            elif c0: v[3] = round(c0 * TIERS[0], 2); v.append([round(c0 * t, 2) for t in TIERS[1:]])
             # Saw-deal-ready pricing: a 14" to 20" high-speed blade is priced at what it costs per blade
             # inside a DEAL_PACK-blade package with the reference saw.  price = mult x (blade + saw / pack)
             if DEAL_MULT and DEAL_SAW in COST and "highspeed" in cats and v[2] in (14, 16, 18, 20) and v[0] in COST:
@@ -361,8 +372,9 @@ def main():
         d = dict(id=f["id"], n=name, cats=cats, tier=tier, hook=hook, ben=ben, desc=desc,
                  apps=[a.strip() for a in apps.split(",") if a.strip()][:12], m=mats, saws=saws,
                  img="", imgsrc=(p["imgs"][0] if p and p["imgs"] else ""), borrow=cur.get("img"),
-                 rank=(POPULAR.index(name) if name in POPULAR else 99), min=min(prices) if prices else None,
+                 rank=(POPULAR.index(name) if name in POPULAR else 99), min=min(prices) if prices else None, lo=min([v[6][-1] if len(v) > 6 and isinstance(v[6], list) else v[3] for v in f["vars"] if v[3]] or [0]) or None,
                  vars=f["vars"])
+        if name in NOT_WISCO: continue
         out.append(d)
 
     # ---- 4. images ----

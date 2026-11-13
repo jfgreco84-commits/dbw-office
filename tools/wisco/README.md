@@ -16,7 +16,7 @@ Customer-facing reorder site for the Wisconsin branch. Static files, no server, 
 ```
 python3 tools/wisco/build.py "/path/to/FINAL DECEMBER 2026 PRICE LIST.xlsx" \
     --master "/path/to/2026_DBW_MASTER_PRICE_BOOK.xlsx" \
-    --markup <N> --deal-mult <M> --deal-pack 15 --deal-saw <saw part number>
+    --tiers <six multipliers, comma separated> --equip <N>
 python3 tools/wisco/assemble.py
 ```
 
@@ -27,13 +27,14 @@ public price gives away cost. The owner has the numbers. Pass them on the comman
 
 **Pricing rules** (set by the owner):
 
-- Buy It Now = standard cost x `--markup`, on everything.
-- Saw-deal-ready pricing: every 14", 16", 18" and 20" high-speed blade is priced at its per-blade price
-  inside a `--deal-pack` blade package with the `--deal-saw` saw:
-  `--deal-mult` x (blade cost + saw cost / pack). Buy a pack at Buy It Now and that saw is covered.
-- "1 item at our cost", stock-up pricing, account pricing and quantity price breaks are offers only.
-  The rep gives the number.
+- Blades, bits, cups, chain and wheels: six quantity brackets (1-11, 12-23, 24-35, 36-49, 50-99, 100+),
+  one multiplier each, passed as `--tiers`. The site shows the range and prices the order by bracket.
+- Saws and equipment sold outright: one multiplier, `--equip`.
+- Small months: a line reaches a bracket on its own quantity. Big months (set in `config.js`): blades in the
+  same size group count together.
+- Account pricing, package pricing and anything negotiated come from the rep, not the site.
 - The saw maker's name is stripped from saw names (model numbers only). Part numbers are left alone.
+- `NOT_WISCO` in `build.py` lists price-list products the WISCO site does not sell.
 - `--master` adds 4-Core Pro Series core bits and Zenesis Green Kut from the master price book.
 
 No price list or price book is ever committed. Both hold cost.
@@ -62,3 +63,13 @@ The blade id is the end of its link, e.g. `.../wisco/#blade-super-g` -> `super-g
 `SITE_URL` at the top of `assemble.py` is the full web address of the store. The picture that shows
 up when the link is texted (`wisco/brand/share.jpg`) needs it. Change it and run `assemble.py` again
 if the store moves to its own domain.
+
+## Test the whole site
+
+```
+node tools/wisco/test_site.js
+```
+
+Needs Playwright. It walks the store at phone, tablet and desktop sizes: every screen, every
+material and saw combination, the quantity price brackets (1, 11, 12, 23, 24, 35, 36, 49, 50, 99, 100),
+small-month and big-month rules, checkout, rep links, and a clipped-button check. It prints PASSED and FAILED.

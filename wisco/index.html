@@ -19,19 +19,19 @@
 <meta name="apple-mobile-web-app-title" content="DBW Wisco">
 <meta name="theme-color" content="#071433">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Montserrat:wght@500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="app.css?v=1794590802">
+<link rel="stylesheet" href="app.css?v=1794596897">
 </head>
 <body>
-<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Ships same day or next</span><span>Buy It Now ships free</span><span>A real rep on every order ★</span></div>
+<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Ships same day or next</span><span>The more you buy, the better the price ★</span></div>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#home" aria-label="DBW Wisco home"><img src="brand/logo-sm.webp" alt="" width="52" height="55"><span><b>DBW WISCO</b><small>A division of Diamond Blade Warehouse, LLC</small></span></a>
-    <nav class="nav" aria-label="Main">
-      <a href="#finder">Blade Finder</a><a href="#reorder">Fast Reorder</a><a href="#ask-frank">Ask Frank</a><a href="#saw-deal">Saw Deals</a><a href="#equipment">Equipment</a><a href="#shop">Shop All</a>
-    </nav>
     <button class="cartbtn" data-cart aria-label="Open cart">Cart <span class="n" id="cartn">0</span></button>
   </div>
 </header>
+<nav class="tools" aria-label="Quick access"><div class="wrap">
+  <a href="#finder">Blade Finder</a><a href="#reorder">Fast Reorder</a><a class="gold" href="#ask-frank">Ask Frank</a><a href="#saw-deal">Saw Packages</a><a href="#equipment">Equipment</a><a href="#shop">Shop All</a><a href="#fix">Blade Trouble</a><a href="#cost">Cost Per Cut</a><a href="#depth">Depth Chart</a><a href="#stone">Stone Shop</a><a href="#" data-terms>Net 30</a><a href="#" data-account>Open an Account</a>
+</div></nav>
 <div class="stripes" aria-hidden="true"></div>
 
 <main id="app"></main>
@@ -39,19 +39,21 @@
 
 <footer class="foot">
   <div class="wrap">
-    <img src="brand/logo-sm.webp" alt="" width="64" height="68">
+    <img class="footlogo" src="brand/logo.webp" alt="DBW Wisco" width="200" height="213" loading="lazy">
     <div>
-      <b>DBW Wisco</b> · a division of Diamond Blade Warehouse, LLC
-      <div>You’re welcome to text or email <b data-mgr></b>: <a data-text href="#"></a> · <a data-oemail-link href="#"></a></div>
-      <div><a href="#fix">Blade trouble?</a> · <a href="#cost">Cost per cut</a> · <a href="#depth">Depth chart</a> · <a href="#saw-deal">Saw deals</a> · <a href="#" data-terms>Apply for Net 30</a> · <a href="https://www.diamondbladewarehouse.com/company-info/credit-application" target="_blank" rel="noopener">Credit application</a> · <a href="#team">Sales team</a></div>
-      <div class="fine">Buy It Now prices from <span data-pl></span> pricing, before quantity price breaks. Prices and availability can change. Your rep confirms every order. Nothing is charged on this site.</div>
+      <b class="footname">DBW Wisco</b><span class="footsub">A division of Diamond Blade Warehouse, LLC</span>
+      <p class="footmgr">Text, call or email <b data-mgr></b>. He answers.</p>
+      <div class="footact"><a class="btn gold" data-text-btn href="#">Text Frank</a><a class="btn gold" data-call-btn href="#">Call Frank</a><a class="btn gold" data-mail-btn href="#">Email Frank</a></div>
+      <div class="footnum"><a data-text href="#"></a> · <a data-oemail-link href="#"></a></div>
+      <div class="footlinks"><a href="#fix">Blade trouble</a><a href="#cost">Cost per cut</a><a href="#depth">Depth chart</a><a href="#saw-deal">Saw packages</a><a href="#stone">Stone shop</a><a href="#" data-terms>Apply for Net 30</a><a href="#" data-account>Open an account</a><a href="https://www.diamondbladewarehouse.com/company-info/credit-application" target="_blank" rel="noopener">Credit application</a><a href="#team">Sales team</a></div>
+      <div class="fine">Prices from <span data-pl></span> pricing and drop with quantity. Prices and availability can change. Your rep confirms every order and adds freight and tax. Nothing is charged on this site.</div>
     </div>
   </div>
 </footer>
 
 <aside class="bf" id="bf" aria-label="Big Frank says">
-  <div class="bf-bub" id="bfbub"><b>Big Frank says</b><p id="bfp"></p><div class="bf-act"><a href="#ask-frank">Ask Frank</a><button type="button" data-bfnext>Another one</button><button type="button" data-bfhide aria-label="Hide Big Frank">✕</button></div></div>
-  <button class="bf-av" type="button" data-bftoggle aria-label="Big Frank says"><img src="brand/frank-cool-sm.webp" alt="" width="64" height="71"><i></i></button>
+  <div class="bf-bub" id="bfbub"><b>Big Frank says</b><p id="bfp"></p><div class="bf-act"><a href="#ask-frank">Ask Frank</a><a data-text-btn href="#">Text him</a><button type="button" data-bfnext>Another one</button><button type="button" data-bfhide aria-label="Hide Big Frank">✕</button></div></div>
+  <button class="bf-av" type="button" data-bftoggle aria-label="Big Frank says"><img src="brand/frank-cool-sm.webp" alt="" width="64" height="71"><i></i><em>Ask Frank</em></button>
 </aside>
 
 <div class="dock" id="dock" hidden>
@@ -85,7 +87,7 @@
     <p class="note" id="sendintro"></p>
     <div class="seg" id="intentseg" role="group" aria-label="How to send it">
       <button type="button" data-intent="quote" aria-pressed="true"><b>Get my price first</b><span>Send as a quote request</span></button>
-      <button type="button" data-intent="buy" aria-pressed="false"><b>Buy It Now</b><span>This price, free shipping</span></button>
+      <button type="button" data-intent="buy" aria-pressed="false"><b>Buy at this price</b><span>Send it as an order</span></button>
     </div>
     <input type="hidden" name="intent" id="f-intent" value="quote">
     <p class="note" id="intentnote"></p>
@@ -165,8 +167,8 @@
   <div class="d-foot"><div class="row-between"><button class="btn ghost-d sm" data-close>Back</button><button class="btn chrome sm" data-cart>Review order</button></div></div>
 </dialog>
 
-<script src="config.js?v=1794590802"></script>
-<script src="catalog.js?v=1794590802"></script>
-<script src="app.js?v=1794590802"></script>
+<script src="config.js?v=1794596897"></script>
+<script src="catalog.js?v=1794596897"></script>
+<script src="app.js?v=1794596897"></script>
 </body>
 </html>
