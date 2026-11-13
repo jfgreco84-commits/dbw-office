@@ -130,7 +130,7 @@
   ];
   function starterLines(st) { return st.items.map(function (it) { var f = FAM[it[0]], v = f && f.vars.filter(function (x) { return x[2] === it[1]; })[0]; return v ? { f: f, v: v, q: it[2] } : null; }).filter(Boolean); }
   function startersHTML() {
-    return '<div class="starters">' + STARTERS.map(function (st) { var L = starterLines(st); if (!L.length) return ""; var tot = L.reduce(function (n, l) { return n + l.v[3] * l.q; }, 0), cnt = L.reduce(function (n, l) { return n + l.q; }, 0);
+    return '<div class="starters swipe">' + STARTERS.map(function (st) { var L = starterLines(st); if (!L.length) return ""; var tot = L.reduce(function (n, l) { return n + l.v[3] * l.q; }, 0), cnt = L.reduce(function (n, l) { return n + l.q; }, 0);
       return '<div class="starter"><b>' + esc(st.n) + "</b><span>" + esc(st.s) + "</span><ul>" + L.map(function (l) { return "<li>" + l.q + " x " + esc(l.f.n) + " " + esc(String(l.v[2])) + '"</li>'; }).join("") + '</ul><div class="st-foot"><em>' + cnt + " pieces · " + money(tot) + ' Buy It Now</em><button class="add" data-starter="' + st.k + '">Load it</button></div></div>'; }).join("") + "</div>";
   }
   var HDEPTH = { 12: '4"', 14: '5"', 16: '6"' }, GDEPTH = { 4: '1"', 4.5: '1-1/4"', 5: '1-1/2"', 7: '2-1/4"', 9: '3-1/4"' };
@@ -151,7 +151,8 @@
   var cart = store.get("cart", []);
   var isPreview = !/^https?:$/.test(location.protocol) || /claude|anthropic/.test(location.hostname);
   var wiz = { mode: "finder", mat: null, saw: null, want: null, all: false };
-  var shop = { cat: "all", q: "", sort: "pop" };
+  var SHOPPAGE = 24, ordRef = "";
+  var shop = { cat: "all", q: "", sort: "pop", n: SHOPPAGE };
   var deal = store.get("deal", { saw: "", lines: [] });
   var extras = { free: "", stock: false, breaks: [] };
 
@@ -180,7 +181,7 @@
     return '<article class="card' + (o.pick ? " pick" : "") + '" data-f="' + f.id + '">' +
       (o.ribbon ? '<div class="ribbon ' + (o.rc || "") + '"><span>' + o.ribbon + "</span>" + (o.ribbon2 ? "<span>" + o.ribbon2 + "</span>" : "") + "</div>" : "") +
       '<button class="c-top" data-open aria-label="Details for ' + esc(f.n) + '">' + pic(f) + "<span>" +
-      (f.tier ? '<span class="tier ' + f.tier + '">' + TIER[f.tier] + "</span>" : "") + "<h3>" + esc(f.n) + "</h3>" +
+      (f.tier ? '<span class="tier ' + f.tier + '">' + (o.ribbon ? TIER[f.tier].split(" · ").pop() : TIER[f.tier]) + "</span>" : "") + "<h3>" + esc(f.n) + "</h3>" +
       (r ? '<span class="rate">' + stars(r) + "<span><b>" + r.toFixed(1) + "</b> on " + esc(o.mat.n) + "</span></span>" : "") + "</span></button>" +
       (f.hook ? '<p class="hook">' + esc(f.hook) + "</p>" : "") +
       '<div class="buy">' + size + buyRow(first) + '<button class="more" data-open>Details, ratings and all ' + f.vars.length + (f.vars.length === 1 ? " size" : " sizes") + "</button></div></article>";
@@ -225,6 +226,11 @@
   function go(hash) { if (location.hash === hash) route(); else location.hash = hash; }
   function setNav(h) { $$(".nav a").forEach(function (a) { a.classList.toggle("on", a.getAttribute("href") === h); }); }
 
+  function welcomeBack() {
+    var last = store.get("last", null), n = last && last.items ? last.items.filter(function (c) { return FAM[c.f] && findVar(FAM[c.f], c.v); }).length : 0, who = (me().name || "").split(/\s+/)[0];
+    if (!n) return "";
+    return '<div class="last wb"><div><b>Welcome back' + (who ? ", " + esc(who) : "") + '.</b><span>Same as last time? ' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>';
+  }
   function home() {
     var top = C.families.filter(function (f) { return f.rank < 99; }).slice(0, 8);
     var line = ["dragon", "superblade-g3", "dragon-supreme", "superblade-arrow", "zenesis-green-kut-purple"];
@@ -239,6 +245,7 @@
       (function () { var r = repBySlug(me().rep); var rf = store.get("ref", ""); return '<span class="pill"><i>★</i> ' + (r ? "Your salesman: " + esc(r.name) : rf ? "Referred by " + esc(rf) : "A division of Diamond Blade Warehouse, LLC") + " <i>★</i></span>"; })() +
       "<h1>The right blade. Right now.</h1>" +
       '<p class="sub">Tell us what you cut. We ship it anywhere in the USA. <b>Your blades, your price, 60 seconds.</b></p>' +
+      welcomeBack() +
       '<div class="doors">' +
       '<a class="door d1 shine" href="#finder"><div><b>Blade Finder</b><span>Two taps. We line up the right blade.</span></div><em>→</em></a>' +
       '<a class="door d2" href="#reorder"><div><b>Fast Reorder</b><span>Know what you run? Punch it in and go.</span></div><em>→</em></a>' +
@@ -257,7 +264,7 @@
       '<section class="sec deal"><div class="wrap two-col"><div><div class="sec-head left"><h2>Need a saw?</h2><p>Bundle it with 15, 25 or 36 blades and the saw price drops. Stack enough and it’s free. Renting now? There’s a calculator for that too.</p></div><a class="btn chrome shine" href="#saw-deal">Build my saw deal</a></div>' +
       '<div><div class="sec-head left"><h2>If they make it, we can get it</h2><p>Don’t sleep on the equipment deals. Tell your rep the make and model and they’ll hunt down the best deal out there. Buy blades in bulk and we can often eat most of the cost. It works like Costco: the more you buy, the better the deal.</p></div><a class="btn red" href="#equipment">Find me equipment</a></div></div></section>' +
 
-      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><div class="three people">' +
+      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><div class="three people swipe">' +
       "<div class=\"point l\"><b>A real person, every order</b><p>You should never have to fight an automated maze just to reorder. Every order on this site lands with a human who knows your account. Nothing here charges a card.</p></div>" +
       "<div class=\"point l\"><b>One hand washes the other</b><p>We sell blades and equipment to put food on our families’ tables. You and your crews use them to put food on yours. One good American company doing good business with another.</p></div>" +
       "<div class=\"point l\"><b>We obsess so you don’t have to</b><p>You’re the one sweating behind the saw. We sweat the blades, the bonds and the freight, and we’re here for you every day of the week.</p></div>" +
@@ -361,12 +368,13 @@
     if (shop.sort === "low") list.sort(function (a, b) { return a.min - b.min; });
     else if (shop.sort === "high") list.sort(function (a, b) { return b.min - a.min; });
     else if (shop.sort === "az") list.sort(function (a, b) { return a.n.localeCompare(b.n); });
-    var grid = list.length ? list.map(function (f) { return cardHTML(f); }).join("") : '<div class="empty d" style="grid-column:1/-1">Nothing matches. Try fewer words, or ask ' + esc(FRANK) + ".</div>";
+    var left = list.length - shop.n;
+    var grid = list.length ? list.slice(0, shop.n).map(function (f) { return cardHTML(f); }).join("") + (left > 0 ? '<div class="center" style="grid-column:1/-1"><button class="btn blue" data-shopmore>Show ' + Math.min(left, SHOPPAGE) + " more (" + left + " left)</button></div>" : "") : '<div class="empty d" style="grid-column:1/-1">Nothing matches. Try fewer words, or ask ' + esc(FRANK) + ".</div>";
     if ($("#shopgrid")) { $("#shopgrid").innerHTML = grid; $("#shopn").textContent = list.length + " products"; $$(".cat").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.cat === shop.cat); }); return; }
     app.innerHTML = '<section class="sec"><div class="wrap"><div class="sec-head"><h2>Shop everything</h2><p>Every blade, bit, chain and saw, with a Buy It Now price on it.</p></div>' +
       '<div class="cats">' + cats.map(function (c) { return '<button class="cat" data-cat="' + c.k + '" aria-pressed="' + (shop.cat === c.k) + '">' + esc(c.n) + "</button>"; }).join("") + "</div>" +
       '<div class="shopbar"><input id="sq" type="search" placeholder="Search blade, size or part #" aria-label="Search" value="' + esc(shop.q) + '"><select id="ssort" aria-label="Sort"><option value="pop">Most popular</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">A to Z</option></select><b id="shopn">' + list.length + ' products</b></div><div class="grid" id="shopgrid">' + grid + "</div></div></section>";
-    $("#sq").addEventListener("input", function (e) { shop.q = e.target.value.trim(); shopScreen(); });
+    $("#sq").addEventListener("input", function (e) { shop.q = e.target.value.trim(); shop.n = SHOPPAGE; shopScreen(); });
     $("#ssort").value = shop.sort; $("#ssort").addEventListener("change", function (e) { shop.sort = e.target.value; shopScreen(); });
     setNav("#shop");
   }
@@ -437,8 +445,8 @@
     app.innerHTML = shell("Equipment deals", 0, 0,
       "<h1>If they make it, we can get it.</h1>" + says(QUIP.equipment[0]) +
       '<div class="frank"><b class="h">Tell us what you’re looking for</b><p>Make, model, size, new or used, how soon. The more you give us, the better the deal we can chase. Buying blades in bulk? We can often eat most or all of the equipment cost.</p><div class="sendrow"><button class="btn chrome sm shine" data-equip>Have my rep hunt it down</button><a class="btn blue sm" href="#saw-deal">Build a free-saw deal</a></div></div>' +
-      '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><div class="tablewrap"><table class="cmp"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th><th class="num">Buy It Now</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buy It Now is the one-saw price. Bundle it with blades and the number drops fast.</p></div>' +
-      '<h2 class="wiz-h2">Equipment on the shelf</h2><div class="results two-up">' + eq.map(function (f) { return cardHTML(f); }).join("") + "</div>", true);
+      '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><div class="tablewrap"><table class="cmp saws"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th><th class="num">Buy It Now</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buy It Now is the one-saw price. Bundle it with blades and the number drops fast.</p></div>' +
+      '<h2 class="wiz-h2">Equipment on the shelf</h2><div class="results two-up swipe">' + eq.map(function (f) { return cardHTML(f); }).join("") + "</div>", true);
     setNav("#equipment");
   }
   function depth() {
@@ -505,7 +513,7 @@
   }
 
   function route() {
-    var h = location.hash || "#home";
+    var h = location.hash || "#home"; document.body.dataset.r = h.slice(1).split("-")[0];
     if (h.indexOf("#blade-") === 0) { var f = FAM[h.slice(7)]; if (!app.innerHTML) home(); if (f) openDetail(f); return; }
     window.scrollTo(0, 0);
     if (h === "#finder" || h === "#ask-frank") {
@@ -533,6 +541,7 @@
     return a;
   }
   function bfShow(ctx) { if (ctx) { bfCtx = ctx; bfI = 0; } var a = bfLines(); $("#bfp").textContent = a[bfI % a.length]; }
+  var lastY = 0; window.addEventListener("scroll", function () { var y = window.scrollY, el = $("#bf"); if (Math.abs(y - lastY) < 12) return; el.classList.toggle("away", y > lastY && y > 160); lastY = y; }, { passive: true });
   function bfOpen(open) { $("#bf").classList.toggle("open", open); store.set("bf", open ? 1 : 0); }
 
   /* ---------- cart ---------- */
@@ -546,7 +555,7 @@
   }
   function saveCart() { store.set("cart", cart); badge(); bfI = 0; bfShow(); }
   function badge() {
-    var t = totals(); $("#cartn").textContent = t.units; $("#dock").hidden = !t.units; $("#fab").hidden = !!t.units;
+    var t = totals(); $("#cartn").textContent = t.units; $("#dock").hidden = !t.units;
     if (t.units) $("#dockinfo").innerHTML = "<b>" + t.units + (t.units === 1 ? " item" : " items") + " · " + money(t.total) + "</b><span>Buy It Now total, before your price breaks</span>";
   }
   function renderCart() {
@@ -611,7 +620,7 @@
     preview();
   }
   function openSend(m) {
-    mode = m; var M = MODES[m], info = me(), f = $("#sendform"), order = m === "order" || m === "saw";
+    mode = m; ordRef = newRef(); var M = MODES[m], info = me(), f = $("#sendform"), order = m === "order" || m === "saw";
     $("#sendtitle").textContent = M.title; $("#sendintro").textContent = M.intro;
     $("#discwrap").hidden = m !== "pricing";
     $("#msgwrap").hidden = !M.msg; if (M.msg) $("#msglabel").textContent = M.msg;
@@ -633,10 +642,19 @@
     setAcct(info.acct === "new" && !info.sent ? "new" : (info.sent ? "existing" : (info.acct || "existing")));
     ["cart", "detail", "extras"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); $("#send").showModal(); $("#sendform").scrollTop = 0;
   }
+  function newRef() { var d = new Date(), a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = ""; for (var i = 0; i < 4; i++) r += a[Math.floor(Math.random() * a.length)]; return "W" + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2) + "-" + r; }
+  function remind() {
+    var d = new Date(Date.now() + 30 * 864e5), p = function (n) { return ("0" + n).slice(-2); }, day = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate());
+    var last = store.get("last", null), items = last && last.items ? last.items.map(function (c) { var v = FAM[c.f] && findVar(FAM[c.f], c.v); return v ? encodeURIComponent(v[0]) + "*" + c.q : ""; }).filter(Boolean) : [];
+    var link = location.origin + location.pathname + (items.length ? "?cart=" + items.join(",") : "") + (me().rep ? (items.length ? "&" : "?") + "rep=" + me().rep : "");
+    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//DBW Wisco//Reorder//EN", "BEGIN:VEVENT", "UID:" + Date.now() + "@dbwwisco", "DTSTAMP:" + new Date().toISOString().replace(/[-:]|\.\d+/g, ""), "DTSTART:" + day + "T090000", "DTEND:" + day + "T091500", "SUMMARY:Reorder blades from DBW Wisco", "DESCRIPTION:Running low? Your last order is one tap away: " + link.replace(/,/g, "\\,") + "\\nOr text " + FRANK + ": " + (W.textDisplay || W.phone || ""), "URL:" + link, "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:Reorder blades from DBW Wisco", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    var a = document.createElement("a"); a.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics); a.download = "reorder-dbw-wisco.ics"; document.body.appendChild(a); a.click(); a.remove();
+    toast("Reminder made for " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ". Add it to your calendar.");
+  }
   function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
   function buildText(o) {
     var t = totals(), rep = repBySlug(o.rep), L = [], M = MODES[mode], items = mode === "order" || mode === "pricing";
-    L.push(M.head);
+    L.push(M.head + (ordRef ? "  ·  Ref " + ordRef : ""));
     L.push("From: " + (o.name || "(name)") + (o.company ? ", " + o.company : ""));
     if (o.phone) L.push("Phone: " + o.phone);
     if (o.email) L.push("Email: " + o.email);
@@ -679,11 +697,12 @@
     var o = formData(), t = totals();
     store.set("me", { name: o.name, company: o.company, phone: o.phone, email: o.email, rep: o.rep, pay: o.pay, fav: o.fav, acct: o.acct, addr: o.addr, city: o.city, state: o.state, zip: o.zip, sent: mode === "order" || me().sent ? 1 : 0 });
     if (mode === "order" && t.lines.length) store.set("last", { date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }), items: cart.slice() });
-    var m = $("#sentmsg"); m.hidden = false;
-    m.innerHTML = how === "posted" ? "<b>Sent.</b><span>A real person has it. Expect a call or text back.</span>"
-      : how === "copied" ? "<b>Copied.</b><span>Paste it into a text or email to " + esc(FRANK) + ".</span>"
-        : "<b>Last step: hit send in your " + (how === "sms" ? "messages" : "email") + " app.</b><span>It’s already written for you. If nothing opened, tap Copy and paste it to " + esc(how === "sms" ? (W.textDisplay || "") : (W.orderEmail || "")) + ".</span>";
+    var m = $("#sentmsg"); m.hidden = false; var refLine = ordRef && (mode === "order" || mode === "saw" || mode === "pricing") ? " Your reference: <b class=\"sel\">" + ordRef + "</b>." : "";
+    m.innerHTML = how === "posted" ? "<b>Sent.</b><span>A real person has it. Expect a call or text back." + refLine + "</span>"
+      : how === "copied" ? "<b>Copied.</b><span>Paste it into a text or email to " + esc(FRANK) + "." + refLine + "</span>"
+        : "<b>Last step: hit send in your " + (how === "sms" ? "messages" : "email") + " app.</b><span>It’s already written for you. If nothing opened, tap Copy and paste it to " + esc(how === "sms" ? (W.textDisplay || "") : (W.orderEmail || "")) + "." + refLine + "</span>";
     if (mode === "order" || mode === "saw") m.innerHTML += '<div class="aftersend"><span>Want ' + esc(RW.review) + '?</span><button type="button" class="btn blue sm" data-review>Leave a review</button><button type="button" class="btn ghost-d sm" data-refer>Refer a contractor</button></div>';
+    if (mode === "order" && t.lines.length) m.innerHTML += '<div class="aftersend"><span>Don’t run out mid-job.</span><button type="button" class="btn ghost-d sm" data-remind>Remind me to reorder in 30 days</button></div>';
     m.scrollIntoView({ block: "nearest" });
   }
   function friendLink() { var o = formData(), who = (o.company || o.name || "").slice(0, 60); return location.origin + location.pathname + "?ref=" + encodeURIComponent(who); }
@@ -703,8 +722,8 @@
   function sendEmail() {
     if (needName()) return;
     var o = formData(), rep = repBySlug(o.rep), body = buildText(o);
-    var subj = MODES[mode].subj + " from " + (o.company || o.name) + (rep ? " (salesman: " + rep.name + ")" : "") + (o.po ? " PO " + o.po : "");
-    var viaMail = function () { mailto(W.orderEmail, subj, body); afterSend("email"); };
+    var subj = MODES[mode].subj + " from " + (o.company || o.name) + (rep ? " (salesman: " + rep.name + ")" : "") + (o.po ? " PO " + o.po : "") + (ordRef ? " [" + ordRef + "]" : "");
+    var viaMail = function () { try { navigator.clipboard.writeText(body).catch(function () {}); } catch (e) {} mailto(W.orderEmail, subj, body); afterSend("email"); };
     if (W.formEndpoint && !isPreview) {
       fetch(W.formEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ _subject: subj, name: o.name, company: o.company, phone: o.phone, email: o.email, salesman: rep ? rep.name : "", message: body }) })
         .then(function (r) { if (!r.ok) throw 0; afterSend("posted"); }).catch(viaMail);
@@ -760,7 +779,9 @@
       return go("#home");
     }
     if ((el = t.closest("[data-fix]"))) { fixSel = el.dataset.fix; fixScreen(); window.scrollTo(0, 0); return; }
-    if ((el = t.closest("[data-cat]"))) { shop.cat = el.dataset.cat; shopScreen(); return; }
+    if ((el = t.closest("[data-cat]"))) { shop.cat = el.dataset.cat; shop.n = SHOPPAGE; shopScreen(); return; }
+    if (t.closest("[data-shopmore]")) { shop.n += SHOPPAGE; shopScreen(); return; }
+    if (t.closest("[data-remind]")) { remind(); return; }
     if ((el = t.closest("[data-hint]"))) { $("#rq").value = el.dataset.hint; runSearch(el.dataset.hint); return; }
     if ((el = t.closest("[data-q]"))) { var inp = $("input", el.parentNode); inp.value = Math.max(1, (parseInt(inp.value, 10) || 1) + parseInt(el.dataset.q, 10)); inp.dispatchEvent(new Event("change", { bubbles: true })); return; }
     if ((el = t.closest("[data-dealadd]"))) {
@@ -795,7 +816,7 @@
     if (t.closest("[data-tosend]")) { extras.free = $("#xfree").value; extras.stock = $("#xstock").checked; openSend("order"); return; }
     if (t.closest("[data-backcart]")) { $("#extras").close(); renderCart(); $("#cart").showModal(); return; }
     if ((el = t.closest("[data-xbreak]"))) { var qn = parseInt(el.dataset.xbreak, 10), ix = extras.breaks.indexOf(qn); if (ix >= 0) extras.breaks.splice(ix, 1); else extras.breaks.push(qn); extras.breaks.sort(function (a, b) { return a - b; }); el.setAttribute("aria-pressed", ix < 0); return; }
-    if ((el = t.closest("[data-xcat]"))) { $("#extras").close(); shop.cat = el.dataset.xcat; shop.q = ""; app.innerHTML = ""; go("#shop"); return; }
+    if ((el = t.closest("[data-xcat]"))) { $("#extras").close(); shop.cat = el.dataset.xcat; shop.q = ""; shop.n = SHOPPAGE; app.innerHTML = ""; go("#shop"); return; }
     if ((el = t.closest("[data-rep]"))) { renderReps(el.dataset.rep); preview(); return; }
     if ((el = t.closest("[data-close]"))) { el.closest("dialog").close(); return; }
     if ((el = t.closest("[data-rm]"))) { cart.splice(parseInt(el.closest(".line").dataset.i, 10), 1); saveCart(); renderCart(); return; }

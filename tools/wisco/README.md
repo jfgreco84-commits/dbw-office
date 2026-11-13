@@ -51,3 +51,9 @@ The blade id is the end of its link, e.g. `.../wisco/#blade-super-g` -> `super-g
 
 `python3 tools/wisco/crawl_dbw_site.py <work_dir>` (needs `<work_dir>/sitemap.xml`), then copy
 `dbw_products.json` over `tools/wisco/dbw_site_catalog.json` and rebuild with `--images <cache_dir>`.
+
+## If the store moves
+
+`SITE_URL` at the top of `assemble.py` is the full web address of the store. The picture that shows
+up when the link is texted (`wisco/brand/share.jpg`) needs it. Change it and run `assemble.py` again
+if the store moves to its own domain.
