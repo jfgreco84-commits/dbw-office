@@ -3,3 +3,4 @@
 *PRICE LIST*.xlsx
 tools/wisco/*.xlsx
 wisco/*.xlsx
+tools/wisco/__pycache__/

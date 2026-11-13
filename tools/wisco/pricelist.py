@@ -75,7 +75,7 @@ def load_master_extra(path):
             if hit: fam = hit[0]
             continue
         if on and fam and isinstance(a, str) and num(r[3]) and r[3] > 0:
-            rows.append(dict(sheet="MASTER", section=fam, sku=a.strip(), desc=str(r[2] or ""), cost=r[3], price=float(int(r[3] * 3 + 0.5)), basis="x", extra={"size": re.sub(r"\s+", " ", re.sub(r"\s*X\s*", " x ", str(r[2] or "")).replace("MM", "mm")).strip()}))
+            rows.append(dict(sheet="MASTER", section=fam, sku=a.strip(), desc=str(r[2] or ""), cost=r[3], price=None, basis="x", extra={"size": re.sub(r"\s+", " ", re.sub(r"\s*X\s*", " x ", str(r[2] or "")).replace("MM", "mm")).strip()}))
     on = False
     for r in wb["Green Kut"].iter_rows(values_only=True):
         r = list(r) + [None] * 6; a = r[0]
@@ -84,5 +84,5 @@ def load_master_extra(path):
             m = re.match(r"^GKZ.*-([GOPRY])$", a.strip())
             if not m: continue
             size = re.sub(r"\s*ZENESIS.*$", "", str(r[1]), flags=re.I).replace("x", " x ")
-            rows.append(dict(sheet="MASTER", section="Zenesis Green Kut " + ZCOLOR[m.group(1)], sku=a.strip(), desc=str(r[1]), cost=r[2], price=float(r[3]), basis="x", extra={"size": re.sub(r"\s+", " ", size)}))
+            rows.append(dict(sheet="MASTER", section="Zenesis Green Kut " + ZCOLOR[m.group(1)], sku=a.strip(), desc=str(r[1]), cost=r[2], price=None, basis="x", extra={"size": re.sub(r"\s+", " ", size)}))
     return rows

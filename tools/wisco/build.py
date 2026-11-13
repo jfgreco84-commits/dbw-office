@@ -11,7 +11,7 @@ Output
   * wisco/catalog.js   customer prices only. Cost is never written.
   * wisco/img/*.webp   (only with --images)
 """
-import json, os, re, sys, statistics, datetime, hashlib, subprocess
+import json, os, re, sys, datetime, hashlib, subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -40,7 +40,7 @@ def nice(s):
             out.append(w[:1].upper() + w[1:].lower())
     s = " ".join(out)
     s = re.sub(r"\bThrd\b|\bThd\b|\bTh\b", "thread", s)
-    s = re.sub(r"\s*-\s*", " - ", s)
+    s = re.sub(r"\s+-\s*|\s*-\s+", " - ", s)
     return re.sub(r"\s+", " ", s).replace("W/ ", "w/ ").replace(" X ", " x ")
 
 
@@ -169,39 +169,53 @@ SAWSEC = [
     ("STIHL", "Stihl Cutquik Saws"), ("HILTI", "Hilti Gas Saws"), ("DEWALT", 'DeWalt 9" Battery Saw'),
     ("BR/CC", "Walk-Behind & Early-Entry Saws"), ("SOFF", "Walk-Behind & Early-Entry Saws"),
 ]
-POPULAR = ["Dragon Supreme", "Dragon", "Superblade G3", "Superblade Extreme", "Superblade Arrow", "Zenesis Green Kut Purple",
-           "Punisher", "Wolv", "Sabertooth", "Super G", "Blue Tornado", "T-Rex", "Eagle Premium", "Blacksmyth", "Swordfish",
-           "Eagle - Small Diameter", "Jaguar", "Wolverine Premium", "Viper General Purpose", "Turbo Cup - Premium", "Blue Cheetah",
-           "V-Shape Wet Corebit", "Green Kut Purple", "Eagle Supreme", "Hybrid", "Tornado", "Double Row", "Segmented Dry Corebit"]
+POPULAR = ["Dragon Supreme", "Dragon", "Superblade Extreme", "Super G", "T-Rex", "Viper General Purpose", "Eagle Premium",
+           "Superblade G3", "Superblade Arrow", "Zenesis Green Kut Purple", "Punisher", "Wolv", "Sabertooth", "Viper Premium",
+           "Eagle Heavy Duty", "Eagle Standard", "Blue Tornado", "Blacksmyth", "Swordfish", "Eagle - Small Diameter", "Jaguar",
+           "Wolverine Premium", "Turbo Cup - Premium", "Blue Cheetah", "V-Shape Wet Corebit", "Green Kut Purple", "Eagle Supreme",
+           "Hybrid", "Tornado", "Double Row", "Segmented Dry Corebit"]
+
+
+TOTALS = False
+HOOKS = {
+    "Dr. Schulze Core Drill Motors, Stands & Packages": "German-built core drill motors, stands and ready-to-run packages.",
+    "Grinders & Circular Saws": "Makita and Milwaukee grinders plus the Skil mag saw. The tools your small blades run on.",
+    "Hilti Gas Saws": "Hilti gas hand-held saws, 14 and 16 inch.",
+    "Husqvarna K4000 Electric Saws": "The K4000 electric wet saw, the vac reducer and the Cut-n-Break.",
+    "Husqvarna Power Cutters & Batteries": "K970 power cutters, ring saws, battery saws, chargers and batteries.",
+    'Makita 9" Battery Saw': "Makita 9 inch battery saw: full package, bare tool, batteries and charger.",
+    "Stihl Cutquik Saws": "The Stihl Cutquik lineup, carts, the battery saw and its batteries.",
+    "Walk-Behind & Early-Entry Saws": "Walk-behind flat saws and early-entry saws.",
+    "Dustless Technologies Shrouds & Vacs": "Shrouds, vacs and hoses that keep you silica-compliant without water.",
+}
+# families with no photo of their own borrow one from a related DBW product
+BORROW = {
+    "Dr. Schulze Core Drill Motors, Stands & Packages": "Dr. Schulze DK 32", "Husqvarna Power Cutters & Batteries": "Husqvarna K 970",
+    "Husqvarna K4000 Electric Saws": "Husqvarna K 770", "Walk-Behind & Early-Entry Saws": "Husqvarna FS400",
+    "3MLB Low-HP Concrete": "Americut Pro Series", "KMLB Low-HP Asphalt & Green": "Americut Pro Series",
+    "Cut-n-Break Blade Set": "Husqvarna K 760 Cut-n-Break", 'Husqvarna 10.5" Battery Saw Blades': "Eagle Supreme Masonry",
+    "Dry Tile Blade": "Alpha PT Cutter", "Dry Tile Supreme": "Alpha PT Cutter", "Razor Porcelain Blade": "Alpha PT Cutter",
+    "Turbo Superblade": "Alpha PT Cutter", "Wet Tile Blade": "Alpha PT Cutter", "J-Slot Granite Blade": "Alpha PT Cutter",
+    "Dustless Technologies Shrouds & Vacs": "PRO-176 PULSEBAC",
+}
 
 
 def main():
     xlsx = sys.argv[1]
     imgdir = sys.argv[sys.argv.index("--images") + 1] if "--images" in sys.argv else None
+    global TOTALS
+    TOTALS = "--sawdeal-totals" in sys.argv   # off by default: keeps cost-based figures out of the public repo
     rows = PL.load(xlsx)
     if "--master" in sys.argv: rows += PL.load_master_extra(sys.argv[sys.argv.index("--master") + 1])
     site = json.load(open(os.path.join(HERE, "dbw_site_catalog.json")))
     report = []
 
     # ---- customer price for every price-list row (cost is dropped right here) ----
-    groups = {}
+    MARKUP = 2.5          # Buy It Now = standard cost x 2.5, on everything
     for r in rows:
-        if r["price"] and r["cost"]:
-            groups.setdefault((r["sheet"], r["section"], r["basis"]), []).append((r["price"] / r["cost"], r["price"], r["cost"]))
-    for r in rows:
-        p = r["price"]
-        if p and r["cost"] and r["basis"] in ("3.0", "top", "2.1"):
-            g = groups[(r["sheet"], r["section"], r["basis"])]
-            med = round(statistics.median(x[0] for x in g), 1)
-            add = statistics.median(x[1] - x[2] * med for x in g)   # the sheet's ".49" habit
-            ratio = p / r["cost"]
-            if ratio > med * 1.12:
-                fixed = round(r["cost"] * med + add, 2)
-                report.append(f"FIXED  {r['sku']:<16} sheet says ${p:,.2f}, looks like a typo, using ${fixed:,.2f}")
-                p = fixed
-            elif ratio < med * 0.93:
-                report.append(f"LOWER  {r['sku']:<16} sheet price ${p:,.2f} is below the column's normal markup (kept as-is)")
-        r["p"] = round(p, 2) if p else None
+        c = r["cost"] if isinstance(r["cost"], (int, float)) and r["cost"] > 0 else None
+        r["p"] = round(c * MARKUP, 2) if c else None
+        r["sd"] = round(c * 1.7, 2) if c else None      # saw-deal base (the 36-pack level)
         r["chain"] = "CHAIN" in r["sheet"]
         if r["sheet"] == "WET BLADES" and "MLB" in r["section"]:
             pre = "3MLB" if "3MLB" in r["section"] else "KMLB"
@@ -230,10 +244,10 @@ def main():
         fams.append(f); byname[name] = f
         return f
 
-    def addvar(f, sku, size, price, note=""):
+    def addvar(f, sku, size, price, note="", sd=None):
         if (sku, size) in f["_seen"]: return
         f["_seen"].add((sku, size))
-        f["vars"].append([sku, size, dia_of(size), price, note])
+        f["vars"].append([sku, size, dia_of(size), price, note, sd])
 
     # ---- 1. families straight off the DBW site ----
     for p in site:
@@ -249,7 +263,7 @@ def main():
             if row: used.add(id(row))
             size = o["size"].replace("◊", "DM").replace(" - 7/8", ", 7/8")
             if row and row["sheet"] == "MASTER": size = row["extra"]["size"]
-            addvar(f, o["sku"] or "ASK", size, row["p"] if row else None)
+            addvar(f, o["sku"] or "ASK", size, row["p"] if row else None, "", row["sd"] if row else None)
 
     # ---- 2. price-list rows the site doesn't show ----
     for r in rows:
@@ -294,7 +308,7 @@ def main():
             nd = FA.NEW.get(target, {})
             f = mkfam(target, cats or [nd.get("cat") or FA.F.get(target, {}).get("cat") or "highspeed"])
         if not size and f["src"] is None and not note: note = nice(r["desc"])
-        addvar(f, sku.strip(), size, r["p"], note)
+        addvar(f, sku.strip(), size, r["p"], note, r["sd"])
 
     # ---- 3. dress every family ----
     out = []
@@ -314,7 +328,7 @@ def main():
         dias = [v[2] for v in f["vars"]]
         saws = cur.get("saws") or auto_saws(cats, dias, name)
         paras = [x for x in (p.get("paras") or []) if x] if p else []
-        hook = cur.get("h") or (paras[0] if paras else "")
+        hook = cur.get("h") or (paras[0] if paras else "") or HOOKS.get(name, "")
         if not hook and "chain" in cats: hook = "Chains, bars, sprockets and powerheads matched to your saw. Reorder by the exact part number."
         if len(hook) > 190 and not cur.get("h"): hook = re.split(r"(?<=[.!?])\s", hook)[0][:190]
         ben = [list(x) for x in cur.get("b", [])]
@@ -325,6 +339,10 @@ def main():
             keep = [x for x in paras if not re.match(r"(?i)(unleash|choosing|order |contact|upgrade|equip your|invest|browse|shop |whether)", x)]
             desc = " ".join(keep[:2])[:520]
             if desc == hook: desc = ""
+        for v in f["vars"]:
+            ok = "highspeed" in cats and v[2] and 12 <= v[2] <= 16 and v[5]
+            # v[5] marks a blade as saw-deal eligible. It only carries a cost-based figure with --sawdeal-totals.
+            v[5] = (v[5] if TOTALS else 1) if ok else None
         f["vars"].sort(key=lambda v: (v[2] is None, v[2] or 0, v[1], v[0]))
         prices = [v[3] for v in f["vars"] if v[3]]
         d = dict(id=f["id"], n=name, cats=cats, tier=tier, hook=hook, ben=ben, desc=desc,
@@ -336,6 +354,13 @@ def main():
 
     # ---- 4. images ----
     by = {d["n"]: d for d in out}
+    siteimg = {p["name"]: p["imgs"][0] for p in site if p["imgs"]}
+    extra = {}
+    for d in out:
+        want = BORROW.get(d["n"]) or ("Gas Diamond Chain" if "chain" in d["cats"] else None)
+        if not d["imgsrc"] and want and want not in by and want in siteimg:
+            extra[slug(want)] = siteimg[want]; d["img"] = slug(want) + ".webp"
+        elif not d["imgsrc"] and want and want in by: d["borrow"] = want
     chainimg = next((d for d in out if d["imgsrc"] and "chain" in d["cats"] and "Chain" in d["n"]), None)
     for d in out:
         if d["imgsrc"]: d["img"] = d["id"] + ".webp"
@@ -349,9 +374,9 @@ def main():
     if imgdir:
         from PIL import Image
         os.makedirs(imgdir, exist_ok=True); os.makedirs(os.path.join(ROOT, "wisco", "img"), exist_ok=True)
-        for d in out:
-            if not d["imgsrc"]: continue
-            src = d["imgsrc"].replace("_1000_1000_", "_800_800_")
+        jobs = [(d["id"], d["imgsrc"], d) for d in out if d["imgsrc"]] + [(k, v, None) for k, v in extra.items()]
+        for iid, isrc, d in jobs:
+            src = isrc.replace("_1000_1000_", "_800_800_")
             raw = os.path.join(imgdir, hashlib.md5(src.encode()).hexdigest())
             if not os.path.exists(raw) or os.path.getsize(raw) < 500:
                 subprocess.run(["curl", "-sS", "-L", "-m", "40", "-A", "Mozilla/5.0", "-o", raw, src])
@@ -359,16 +384,21 @@ def main():
                 im = Image.open(raw).convert("RGBA")
                 bg = Image.new("RGBA", im.size, (255, 255, 255, 255)); bg.alpha_composite(im)
                 im = bg.convert("RGB"); im.thumbnail((440, 440))
-                im.save(os.path.join(ROOT, "wisco", "img", d["id"] + ".webp"), "WEBP", quality=74)
+                im.save(os.path.join(ROOT, "wisco", "img", iid + ".webp"), "WEBP", quality=74)
             except Exception as e:
-                report.append(f"IMAGE FAILED {d['n']}: {e}"); d["img"] = ""
+                report.append(f"IMAGE FAILED {iid}: {e}")
+                if d: d["img"] = ""
     for d in out:
         del d["imgsrc"], d["borrow"]
 
     catorder = {k: i for i, (k, _, _) in enumerate(FA.CATS)}
     out.sort(key=lambda d: (d["rank"], catorder.get(d["cats"][0], 50), d["min"] is None, d["n"]))
     m = re.search(r"(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)\s+(\d{4})", os.path.basename(xlsx).upper())
-    data = dict(
+    SAWS = ["K770-12", "K770-14", "K970A-14", "K970A-16", "TS410", "TS420", "TS500-14", "TS710I", "TS910I", "DSH700", "900X14", "900X16"]
+    sawrows = {r["sku"]: r for r in rows if r["sheet"] == "SAWS" and r["sd"]}
+    sawdeal = dict(totals=TOTALS, tiers=[[15, 2.0], [25, 1.8], [36, 1.7]] if TOTALS else [[15, 0], [25, 0], [36, 0]],
+                   saws=[dict(sku=k, n=nice(sawrows[k]["desc"]), b=sawrows[k]["sd"] if TOTALS else 0) for k in SAWS if k in sawrows])
+    data = dict(sawdeal=sawdeal,
         priceList=(m.group(1).title() + " " + m.group(2)) if m else "", built=datetime.date.today().isoformat(),
         materials=[dict(k=k, n=n) for k, n in FA.MATERIALS], saws=[dict(k=k, n=n, s=s) for k, n, s in FA.SAWS],
         cats=[dict(k=k, n=n, s=s) for k, n, s in FA.CATS], families=out)

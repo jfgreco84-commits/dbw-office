@@ -21,12 +21,20 @@ python3 tools/wisco/assemble.py
 Then commit `wisco/`. **Never commit the price list itself. It contains cost.** `build.py` reads cost only
 to sanity-check the sheet and writes customer prices only.
 
-Price shown = the price list's own customer column:
-blades, bits, grinders = the **3.0** column. Chain and core rigs = the sheet's top column (1.7 / 1.8).
-Prestress and wall saw = 2.1. Green Kut = MSRP. Abrasives = LIST. Items with cost only (gas saws, Dustless, skid plates) are left off the site.
+**Pricing rules** (set by the owner, all in `build.py`):
 
-`--master` adds two lines the monthly list leaves out, from the master price book: 4-Core Pro Series
-core bits (priced 3.0 x cost) and Zenesis Green Kut (the book's 2.2 column). Neither file is ever committed.
+- Buy It Now = standard cost x 2.5 on everything that has a cost on the price list.
+- "1 item at our cost", stock-up pricing and quantity price breaks are offers only. The rep gives the number.
+- Saw deal builder: counts blades toward the 15 / 25 / 36 tiers and sends the build to the rep, who prices it.
+  Building with `--sawdeal-totals` makes it show the package total on the page
+  ((saw cost + blade costs) x 2.0 / 1.8 / 1.7). That puts a cost-based figure for each saw and blade into
+  `catalog.js`, which is public, so it is off by default.
+- `--master` adds 4-Core Pro Series core bits and Zenesis Green Kut from the master price book.
+
+No price list or price book is ever committed. Both hold cost.
+
+**No card or bank numbers.** Checkout only records how the customer wants to pay (terms, card on file,
+call me, ACH, check by phone). Do not add card-number fields to this site.
 
 ## Add a blade video
 

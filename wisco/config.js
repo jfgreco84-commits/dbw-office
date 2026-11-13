@@ -1,7 +1,7 @@
 /* DBW Wisco store settings. Edit this file to change contact info, reps and videos.
    Nothing here needs a rebuild: save, commit, done. */
 window.WISCO = {
-  // Where orders and pricing requests go
+  // Every order, pricing request and question lands here.
   orderEmail: "fgreco@diamondbladewarehouse.com",
   managerName: "Frank Greco",
   managerTitle: "General Sales Manager",
@@ -10,46 +10,64 @@ window.WISCO = {
   phone: "(800) 325-2337",
   // Shown next to "Text Frank".
   textDisplay: "(414) 213-0084",
-
-  // Cell number that receives TEXTED orders, digits only with country code, e.g. "+14145551234".
-  // Leave "" to hide the "Text my order" button.
+  // Cell that receives texted orders, digits only with country code. "" hides the Text button.
   textNumber: "+14142130084",
 
-  // Optional: a Formspree form URL (same service bestsolutionpolish.com uses), e.g. "https://formspree.io/f/abcdwxyz".
-  // When set, "Send order" posts straight to your inbox instead of opening the customer's email app.
+  // Optional Formspree form URL (what bestsolutionpolish.com uses). When set, "Send" posts
+  // straight to your inbox instead of opening the customer's email app.
   formEndpoint: "",
 
-  // Sales reps. Add each rep's email and their orders CC them directly.
-  // A rep with no email still shows in the list: the order goes to orderEmail with their name on it.
-  // Text a customer  .../wisco/?rep=adam-misurek  and that rep is pre-selected.
+  // "Pick your salesman". name = the PHONE NAME customers know. photo = file in wisco/brand/reps/ (optional).
+  // Replace this list with the real phone-name roster. No real last names unless they sell under them.
+  // Text a customer  .../wisco/?rep=snacks  and that rep is pre-picked.
   reps: [
-    { name: "Adam Misurek", email: "" },
-    { name: "Adam West", email: "" },
-    { name: "Anessa Balistreri", email: "" },
-    { name: "Anthony Sutton", email: "" },
-    { name: "Cassie Kolhouse", email: "" },
-    { name: "Chris Kussrow", email: "" },
-    { name: "Geoff Nurse", email: "" },
-    { name: "John Baemmert", email: "" },
-    { name: "Kerry Smith", email: "" },
-    { name: "Leslie Kubeny", email: "" },
-    { name: "Luis Millan", email: "" },
-    { name: "Paul Zillette", email: "" },
-    { name: "Ronald Bonich", email: "" },
-    { name: "Scott Toporsh", email: "" }
+    { name: "Frank", photo: "" },
+    { name: "Batman", photo: "" },
+    { name: "Miz", photo: "" },
+    { name: "Cutty", photo: "" },
+    { name: "Snacks", photo: "" },
+    { name: "Ronny B", photo: "" },
+    { name: "TJ", photo: "" },
+    { name: "Kerry", photo: "" },
+    { name: "JB", photo: "" },
+    { name: "Les", photo: "" },
+    { name: "Cassie", photo: "" },
+    { name: "Anessa", photo: "" },
+    { name: "Luis", photo: "" },
+    { name: "Paul Z", photo: "" },
+    { name: "Blake", photo: "" },
+    { name: "Jeff", photo: "" }
   ],
 
-  // The discount types a customer can ask for from the pricing button.
+  // How the customer wants to pay. No card or bank numbers are ever typed into the site.
+  payments: [
+    "Net 30 terms",
+    "Net 45 terms",
+    "Card on file",
+    "Call me for a new card",
+    "ACH",
+    "Check by phone",
+    "Not sure, have my rep call"
+  ],
+
+  // Quantity price breaks a customer can ask for.
+  breaks: [6, 12, 25, 36, 50, 100, 200, 500],
+
+  // What a customer can ask to have checked from the pricing button.
   discounts: [
     "My account-level pricing",
-    "Quantity break on this order",
+    "Quantity price breaks",
     "Platinum account pricing",
-    "Package deal (blades + saw)",
+    "A saw deal (blades + free saw)",
     "I want to open an account"
   ],
 
-  // Blade videos. Key = the blade's id (the part after #blade- in its link), value = YouTube link.
-  // Example:  "super-g": "https://www.youtube.com/watch?v=XXXXXXXXXXX"
+  // Real customer quotes only. Add them as { quote: "...", who: "Name, Company, City ST" }.
+  // The section stays hidden until there is at least one.
+  testimonials: [
+  ],
+
+  // Blade videos. Key = blade id (the part after #blade- in its link), value = YouTube link.
   videos: {
   }
 };

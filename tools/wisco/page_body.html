@@ -1,9 +1,9 @@
-<div class="trust"><span>★ A division of Diamond Blade Warehouse</span><span>Shipping nationwide</span><span>A real rep on every order</span><span>No card needed online ★</span></div>
+<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Shipping nationwide</span><span>A real rep on every order</span><span>No card needed online ★</span></div>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#home" aria-label="DBW Wisco home"><img src="brand/logo-sm.webp" alt="" width="52" height="55"><span><b>DBW WISCO</b><small>A division of Diamond Blade Warehouse</small></span></a>
+    <a class="brand" href="#home" aria-label="DBW Wisco home"><img src="brand/logo-sm.webp" alt="" width="52" height="55"><span><b>DBW WISCO</b><small>A division of Diamond Blade Warehouse, LLC</small></span></a>
     <nav class="nav" aria-label="Main">
-      <a href="#finder">Blade Finder</a><a href="#reorder">Fast Reorder</a><a href="#ask-frank">Ask Frank</a><a href="#shop">Shop All</a>
+      <a href="#finder">Blade Finder</a><a href="#reorder">Fast Reorder</a><a href="#ask-frank">Ask Frank</a><a href="#saw-deal">Saw Deals</a><a href="#equipment">Equipment</a><a href="#shop">Shop All</a>
     </nav>
     <button class="cartbtn" data-cart aria-label="Open cart">Cart <span class="n" id="cartn">0</span></button>
   </div>
@@ -16,12 +16,14 @@
   <div class="wrap">
     <img src="brand/logo-sm.webp" alt="" width="64" height="68">
     <div>
-      <b>DBW Wisco</b> · a division of Diamond Blade Warehouse
+      <b>DBW Wisco</b> · a division of Diamond Blade Warehouse, LLC
       <div>Text Frank: <a data-text href="#"></a> · Call: <a data-phone href="#"></a> · <span class="sel" data-oemail></span></div>
-      <div class="fine">List prices from the <span data-pl></span> price list, before account discounts. Prices and availability can change. Your rep confirms every order. Nothing is charged on this site.</div>
+      <div class="fine">Buy It Now prices from <span data-pl></span> pricing, before quantity price breaks. Prices and availability can change. Your rep confirms every order. Nothing is charged on this site.</div>
     </div>
   </div>
 </footer>
+
+<button class="fab" id="fab" data-cart aria-label="Open cart">Cart</button>
 
 <div class="dock" id="dock" hidden>
   <div id="dockinfo"></div>
@@ -34,8 +36,17 @@
   <div class="d-foot" id="cartfoot">
     <div class="tot" id="carttot"></div>
     <p class="note" id="cartnote"></p>
-    <button class="btn chrome block shine" data-checkout>Send order to my rep</button>
+    <button class="btn chrome block shine" data-checkout>Send my order</button>
     <div class="row-between"><button class="link" data-close>Keep shopping</button><button class="link" data-emptycart>Empty cart</button></div>
+  </div>
+</dialog>
+
+<dialog id="extras" class="sheet" aria-labelledby="extrastitle">
+  <div class="d-head"><h2 id="extrastitle">Before you send it</h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <div class="d-body" id="extrasbody"></div>
+  <div class="d-foot">
+    <button class="btn chrome block shine" data-tosend>Continue to send</button>
+    <button class="link" data-backcart>Back to my order</button>
   </div>
 </dialog>
 
@@ -44,19 +55,24 @@
   <form class="d-body" id="sendform" novalidate>
     <p class="note" id="sendintro"></p>
     <div id="discwrap" hidden><div class="field"><label>Which pricing should we check?</label></div><div class="checks" id="discs"></div></div>
+    <div class="field" id="msgwrap" hidden><label for="f-msg" id="msglabel">What are you looking for?</label><textarea id="f-msg" name="msg"></textarea></div>
     <div class="two">
       <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" autocomplete="name" required></div>
       <div class="field"><label for="f-company">Company</label><input id="f-company" name="company" autocomplete="organization"></div>
     </div>
     <div class="two">
       <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel"></div>
-      <div class="field"><label for="f-rep">Your sales rep</label><select id="f-rep" name="rep"></select></div>
-    </div>
-    <div class="two">
-      <div class="field"><label for="f-po">PO # (optional)</label><input id="f-po" name="po"></div>
       <div class="field"><label for="f-email">Email (optional)</label><input id="f-email" name="email" type="email" autocomplete="email"></div>
     </div>
+    <div class="field"><label>Pick your salesman</label><div class="reps" id="reps"></div><input type="hidden" name="rep" id="f-rep"></div>
+    <div class="two" id="paywrap">
+      <div class="field"><label for="f-pay">How do you want to pay?</label><select id="f-pay" name="pay"></select></div>
+      <div class="field"><label for="f-po">PO # (optional)</label><input id="f-po" name="po"></div>
+    </div>
+    <p class="note" id="paynote">We never ask for card or bank numbers on this site. Your rep handles that by phone.</p>
     <div class="field"><label for="f-notes">Notes: ship-to, need-by date, questions</label><textarea id="f-notes" name="notes"></textarea></div>
+    <div class="field"><label for="f-fav">Favorite team, athlete or school (optional, trust us)</label><input id="f-fav" name="fav" placeholder="Packers, Badgers, Harley..."></div>
+    <div class="field" id="fbwrap"><label for="f-feedback">How are we doing? (optional)</label><textarea id="f-feedback" name="feedback" placeholder="Good, bad or ugly. Frank reads every one."></textarea></div>
     <details class="peek"><summary>See exactly what gets sent</summary><pre class="order" id="preview"></pre></details>
     <div class="callout" id="sentmsg" hidden></div>
   </form>
