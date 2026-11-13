@@ -8,7 +8,14 @@
   var money = function (n) { return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
   var slug = function (s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); };
   var store = {
-    get: function (k, d) { try { var v = localStorage.getItem("wisco." + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    get: function (k, d) {
+      try {
+        var v = localStorage.getItem("wisco." + k); if (!v) return d; v = JSON.parse(v);
+        if (v == null) return d;
+        if (d != null && typeof d === "object" && (typeof v !== "object" || Array.isArray(v) !== Array.isArray(d))) return d;
+        return v;
+      } catch (e) { return d; }
+    },
     set: function (k, v) { try { localStorage.setItem("wisco." + k, JSON.stringify(v)); } catch (e) { } }
   };
   var FRANK = (W.managerName || "Frank").split(" ")[0];
@@ -148,6 +155,7 @@
     f.vars.forEach(function (v, vi) { var k = v[0].toUpperCase().replace(/[^A-Z0-9.]/g, ""); if (!SKU[k]) SKU[k] = [f, vi]; });
   });
 
+  function lastOrder() { var l = store.get("last", null); return l && Array.isArray(l.items) ? l : null; }
   var cart = store.get("cart", []);
   var isPreview = !/^https?:$/.test(location.protocol) || /claude|anthropic/.test(location.hostname);
   var wiz = { mode: "finder", mat: null, saw: null, want: null, all: false };
@@ -227,7 +235,7 @@
   function setNav(h) { $$(".nav a").forEach(function (a) { a.classList.toggle("on", a.getAttribute("href") === h); }); }
 
   function welcomeBack() {
-    var last = store.get("last", null), n = last && last.items ? last.items.filter(function (c) { return FAM[c.f] && findVar(FAM[c.f], c.v); }).length : 0, who = (me().name || "").split(/\s+/)[0];
+    var last = lastOrder(), n = last && last.items ? last.items.filter(function (c) { return FAM[c.f] && findVar(FAM[c.f], c.v); }).length : 0, who = (me().name || "").split(/\s+/)[0];
     if (!n) return "";
     return '<div class="last wb"><div><b>Welcome back' + (who ? ", " + esc(who) : "") + '.</b><span>Same as last time? ' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>';
   }
@@ -343,7 +351,7 @@
     return out.sort(function (a, b) { return a[2] - b[2]; }).slice(0, limit);
   }
   function reorder() {
-    var last = store.get("last", null), n = last && last.items ? last.items.length : 0;
+    var last = lastOrder(), n = last && last.items ? last.items.length : 0;
     app.innerHTML = shell("Fast Reorder", 0, 0,
       "<h1>Know what you run?</h1>" + says(QUIP.reorder[0]) +
       (n ? '<div class="last"><div><b>Same as last time?</b><span>' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>' : "") +
@@ -645,7 +653,7 @@
   function newRef() { var d = new Date(), a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = ""; for (var i = 0; i < 4; i++) r += a[Math.floor(Math.random() * a.length)]; return "W" + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2) + "-" + r; }
   function remind() {
     var d = new Date(Date.now() + 30 * 864e5), p = function (n) { return ("0" + n).slice(-2); }, day = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate());
-    var last = store.get("last", null), items = last && last.items ? last.items.map(function (c) { var v = FAM[c.f] && findVar(FAM[c.f], c.v); return v ? encodeURIComponent(v[0]) + "*" + c.q : ""; }).filter(Boolean) : [];
+    var last = lastOrder(), items = last && last.items ? last.items.map(function (c) { var v = FAM[c.f] && findVar(FAM[c.f], c.v); return v ? encodeURIComponent(v[0]) + "*" + c.q : ""; }).filter(Boolean) : [];
     var link = location.origin + location.pathname + (items.length ? "?cart=" + items.join(",") : "") + (me().rep ? (items.length ? "&" : "?") + "rep=" + me().rep : "");
     var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//DBW Wisco//Reorder//EN", "BEGIN:VEVENT", "UID:" + Date.now() + "@dbwwisco", "DTSTAMP:" + new Date().toISOString().replace(/[-:]|\.\d+/g, ""), "DTSTART:" + day + "T090000", "DTEND:" + day + "T091500", "SUMMARY:Reorder blades from DBW Wisco", "DESCRIPTION:Running low? Your last order is one tap away: " + link.replace(/,/g, "\\,") + "\\nOr text " + FRANK + ": " + (W.textDisplay || W.phone || ""), "URL:" + link, "BEGIN:VALARM", "TRIGGER:PT0M", "ACTION:DISPLAY", "DESCRIPTION:Reorder blades from DBW Wisco", "END:VALARM", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
     var a = document.createElement("a"); a.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics); a.download = "reorder-dbw-wisco.ics"; document.body.appendChild(a); a.click(); a.remove();
@@ -820,7 +828,7 @@
     if ((el = t.closest("[data-rep]"))) { renderReps(el.dataset.rep); preview(); return; }
     if ((el = t.closest("[data-close]"))) { el.closest("dialog").close(); return; }
     if ((el = t.closest("[data-rm]"))) { cart.splice(parseInt(el.closest(".line").dataset.i, 10), 1); saveCart(); renderCart(); return; }
-    if (t.closest("[data-reorder]")) { var last = store.get("last", null); if (last) { last.items.forEach(function (c) { if (FAM[c.f] && findVar(FAM[c.f], c.v)) addToCart(c.f, c.v, c.q); }); renderCart(); $("#cart").showModal(); } return; }
+    if (t.closest("[data-reorder]")) { var last = lastOrder(); if (last) { last.items.forEach(function (c) { if (FAM[c.f] && findVar(FAM[c.f], c.v)) addToCart(c.f, c.v, c.q); }); renderCart(); $("#cart").showModal(); } return; }
     if (t.closest("[data-email]")) { sendEmail(); return; }
     if (t.closest("[data-sms]")) { if (needName()) return; sms(buildText(formData())); afterSend("sms"); return; }
     if (t.closest("[data-copy]")) { if (needName()) return; copyText(buildText(formData()), function () { afterSend("copied"); }); return; }
@@ -862,7 +870,7 @@
     P.get("cart").split(",").forEach(function (x) { var a = x.split("*"), hit = SKU[(a[0] || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")]; if (hit) cart.push({ f: hit[0].id, v: vkey(hit[0].vars[hit[1]]), q: Math.max(1, parseInt(a[1], 10) || 1) }); });
     store.set("cart", cart);
   }
-  deal.lines = (deal.lines || []).filter(function (l) { return FAM[l.f] && findVar(FAM[l.f], l.v); });
+  deal.lines = (Array.isArray(deal.lines) ? deal.lines : []).filter(function (l) { return FAM[l.f] && findVar(FAM[l.f], l.v); });
   route(); badge();
   bfOpen(store.get("bf", 0) === 1);
   if (P.get("cart") && cart.length) { renderCart(); $("#cart").showModal(); }
