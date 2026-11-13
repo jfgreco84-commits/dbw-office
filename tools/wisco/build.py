@@ -293,6 +293,7 @@ def main():
     # ---- 3. dress every family ----
     out = []
     for f in fams:
+        f["vars"] = [v for v in f["vars"] if v[3]]      # store only shows what a customer can price and order
         if not f["vars"]: continue
         name, p = f["n"], f["src"]
         cur = FA.F.get(name) or FA.NEW.get(name) or {}

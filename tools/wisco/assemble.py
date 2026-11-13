@@ -6,7 +6,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SITE = os.path.join(os.path.dirname(os.path.dirname(HERE)), "wisco")
 TITLE = "DBW Wisco Blade Shop"
 DESC = "Reorder diamond blades, core bits and chain from Diamond Blade Warehouse Wisconsin. Pick your material, pick your saw, send the order to your rep."
-FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=Big+Shoulders+Display:wght@800;900&display=swap">'
+FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Montserrat:wght@500;600;700;800;900&display=swap">'
 body = open(os.path.join(HERE, "page_body.html"), encoding="utf8").read()
 ver = str(int(max(os.path.getmtime(os.path.join(SITE, f)) for f in ("app.js", "app.css", "catalog.js", "config.js"))))
 
@@ -17,9 +17,11 @@ full = f"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{TITLE}</title>
 <meta name="description" content="{DESC}">
-<meta property="og:title" content="DBW Wisco: reorder your blades in 60 seconds">
+<meta property="og:title" content="DBW Wisco: your blades, your price, 60 seconds">
 <meta property="og:description" content="{DESC}">
-<meta name="theme-color" content="#14181C">
+<meta property="og:image" content="brand/logo.webp">
+<link rel="icon" href="brand/logo-sm.webp">
+<meta name="theme-color" content="#071433">
 {FONTS}
 <link rel="stylesheet" href="app.css?v={ver}">
 </head>

@@ -3,15 +3,17 @@
 window.WISCO = {
   // Where orders and pricing requests go
   orderEmail: "fgreco@diamondbladewarehouse.com",
-  managerName: "Froggy Greco",
+  managerName: "Frank Greco",
   managerTitle: "General Sales Manager",
 
   // Shown on the site as the number to call. Tap-to-call on phones.
   phone: "(800) 325-2337",
+  // Shown next to "Text Frank".
+  textDisplay: "(414) 213-0084",
 
   // Cell number that receives TEXTED orders, digits only with country code, e.g. "+14145551234".
   // Leave "" to hide the "Text my order" button.
-  textNumber: "",
+  textNumber: "+14142130084",
 
   // Optional: a Formspree form URL (same service bestsolutionpolish.com uses), e.g. "https://formspree.io/f/abcdwxyz".
   // When set, "Send order" posts straight to your inbox instead of opening the customer's email app.
