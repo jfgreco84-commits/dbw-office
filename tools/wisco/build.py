@@ -211,9 +211,17 @@ def main():
     report = []
 
     # ---- customer price for every price-list row (cost is dropped right here) ----
-    MARKUP = 2.5          # Buy It Now = standard cost x 2.5, on everything
+    # The multipliers are passed in when you run the build. They are deliberately NOT written in
+    # this file, because this repo is public.  See README.md for the command.
+    def arg(name, cast=float):
+        return cast(sys.argv[sys.argv.index(name) + 1]) if name in sys.argv else None
+    MARKUP = arg("--markup")
+    if not MARKUP: sys.exit("Pass the Buy It Now multiplier:  --markup N   (see tools/wisco/README.md)")
+    DEAL_MULT, DEAL_PACK, DEAL_SAW = arg("--deal-mult"), arg("--deal-pack", int) or 15, arg("--deal-saw", str)
+    COST = {}
     for r in rows:
         c = r["cost"] if isinstance(r["cost"], (int, float)) and r["cost"] > 0 else None
+        if c: COST[r["sku"]] = c
         r["p"] = round(c * MARKUP, 2) if c else None
         r["sd"] = round(c * 1.7, 2) if c else None      # saw-deal base (the 36-pack level)
         r["chain"] = "CHAIN" in r["sheet"]
@@ -234,6 +242,7 @@ def main():
     plmap, chainskus = {}, set()
     for r in rows:
         for k in keys(r["sku"]):
+            if r["sku"] in COST: COST.setdefault(k, COST[r["sku"]])
             if r["chain"]: chainskus.add(k)
             elif k not in plmap or (r["p"] and not plmap[k]["p"]): plmap[k] = r
 
@@ -340,6 +349,10 @@ def main():
             desc = " ".join(keep[:2])[:520]
             if desc == hook: desc = ""
         for v in f["vars"]:
+            # Saw-deal-ready pricing: a 14" to 20" high-speed blade is priced at what it costs per blade
+            # inside a DEAL_PACK-blade package with the reference saw.  price = mult x (blade + saw / pack)
+            if DEAL_MULT and DEAL_SAW in COST and "highspeed" in cats and v[2] in (14, 16, 18, 20) and v[0] in COST:
+                v[3] = round(DEAL_MULT * (COST[v[0]] + COST[DEAL_SAW] / DEAL_PACK), 2); v.append(1)
             ok = "highspeed" in cats and v[2] and 12 <= v[2] <= 16 and v[5]
             # v[5] marks a blade as saw-deal eligible. It only carries a cost-based figure with --sawdeal-totals.
             v[5] = (v[5] if TOTALS else 1) if ok else None
@@ -396,8 +409,20 @@ def main():
     m = re.search(r"(JANUARY|FEBRUARY|MARCH|APRIL|MAY|JUNE|JULY|AUGUST|SEPTEMBER|OCTOBER|NOVEMBER|DECEMBER)\s+(\d{4})", os.path.basename(xlsx).upper())
     SAWS = ["K770-12", "K770-14", "K970A-14", "K970A-16", "TS410", "TS420", "TS500-14", "TS710I", "TS910I", "DSH700", "900X14", "900X16"]
     sawrows = {r["sku"]: r for r in rows if r["sheet"] == "SAWS" and r["sd"]}
+    def unbrand(t):
+        """The saw maker does not allow its name in our saw deals: model numbers only."""
+        if not isinstance(t, str): return t
+        t = re.sub(r"(?i)\bTS[- ]?(\d{3})(?:[- ]?(i)\b)?", lambda m: m.group(1) + ("i" if m.group(2) else ""), t)
+        t = re.sub(r"(?i)\bstihl\b", "", t).replace("Cutquik", "Gas Cut-Off")
+        return re.sub(r"\s{2,}", " ", t).replace(" /", "/").strip(" -")
+    for d in out:
+        for k in ("n", "hook", "desc"): d[k] = unbrand(d.get(k))
+        d["ben"] = [[unbrand(a), unbrand(b)] for a, b in d.get("ben") or []]
+        for v in d["vars"]: v[1], v[4] = unbrand(v[1]), unbrand(v[4])
+        if "hay" in d: d["hay"] = re.sub(r"\s{2,}", " ", d["hay"].replace("stihl", ""))
     sawdeal = dict(totals=TOTALS, tiers=[[15, 2.0], [25, 1.8], [36, 1.7]] if TOTALS else [[15, 0], [25, 0], [36, 0]],
-                   saws=[dict(sku=k, n=nice(sawrows[k]["desc"]), b=sawrows[k]["sd"] if TOTALS else 0) for k in SAWS if k in sawrows])
+                   saws=[dict(sku=k, n=unbrand(nice(sawrows[k]["desc"])) + ("" if "saw" in nice(sawrows[k]["desc"]).lower() else " Saw"), b=sawrows[k]["sd"] if TOTALS else 0) for k in SAWS if k in sawrows],
+                   ref=DEAL_SAW if DEAL_MULT else "", pack=DEAL_PACK)
     data = dict(sawdeal=sawdeal,
         priceList=(m.group(1).title() + " " + m.group(2)) if m else "", built=datetime.date.today().isoformat(),
         materials=[dict(k=k, n=n) for k, n in FA.MATERIALS], saws=[dict(k=k, n=n, s=s) for k, n, s in FA.SAWS],

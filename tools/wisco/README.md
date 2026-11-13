@@ -14,21 +14,26 @@ Customer-facing reorder site for the Wisconsin branch. Static files, no server, 
 ## New price list each month
 
 ```
-python3 tools/wisco/build.py "/path/to/FINAL DECEMBER 2026 PRICE LIST.xlsx" --master "/path/to/2026_DBW_MASTER_PRICE_BOOK.xlsx"
+python3 tools/wisco/build.py "/path/to/FINAL DECEMBER 2026 PRICE LIST.xlsx" \
+    --master "/path/to/2026_DBW_MASTER_PRICE_BOOK.xlsx" \
+    --markup <N> --deal-mult <M> --deal-pack 15 --deal-saw <saw part number>
 python3 tools/wisco/assemble.py
 ```
 
-Then commit `wisco/`. **Never commit the price list itself. It contains cost.** `build.py` reads cost only
-to sanity-check the sheet and writes customer prices only.
+Then commit `wisco/`. **Never commit the price list itself. It contains cost.**
 
-**Pricing rules** (set by the owner, all in `build.py`):
+**The multipliers are not written anywhere in this repo.** This repo is public, and a multiplier next to a
+public price gives away cost. The owner has the numbers. Pass them on the command line each month.
 
-- Buy It Now = standard cost x 2.5 on everything that has a cost on the price list.
-- "1 item at our cost", stock-up pricing and quantity price breaks are offers only. The rep gives the number.
-- Saw deal builder: counts blades toward the 15 / 25 / 36 tiers and sends the build to the rep, who prices it.
-  Building with `--sawdeal-totals` makes it show the package total on the page
-  ((saw cost + blade costs) x 2.0 / 1.8 / 1.7). That puts a cost-based figure for each saw and blade into
-  `catalog.js`, which is public, so it is off by default.
+**Pricing rules** (set by the owner):
+
+- Buy It Now = standard cost x `--markup`, on everything.
+- Saw-deal-ready pricing: every 14", 16", 18" and 20" high-speed blade is priced at its per-blade price
+  inside a `--deal-pack` blade package with the `--deal-saw` saw:
+  `--deal-mult` x (blade cost + saw cost / pack). Buy a pack at Buy It Now and that saw is covered.
+- "1 item at our cost", stock-up pricing, account pricing and quantity price breaks are offers only.
+  The rep gives the number.
+- The saw maker's name is stripped from saw names (model numbers only). Part numbers are left alone.
 - `--master` adds 4-Core Pro Series core bits and Zenesis Green Kut from the master price book.
 
 No price list or price book is ever committed. Both hold cost.

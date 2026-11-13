@@ -20,7 +20,7 @@
   };
   var FRANK = (W.managerName || "Frank").split(" ")[0];
   var RW = W.rewards || { review: "10% off your next order", referrer: "10% off their next order" };
-  var BREAKS = W.breaks || [6, 12, 25, 36, 50, 100, 200, 500];
+  var BREAKS = W.breaks || [12, 24, 36, 50, 100, 150, 200, 500];
   var TIER = { supreme: "Best · Supreme grade", premium: "Better · Premium grade", standard: "Good · Standard grade", economy: "Value · Economy grade", pro: "Pro Series" };
   var TR = { supreme: 4, pro: 4, premium: 3, standard: 2, economy: 1, "": 0 };
   var SAWDIA = { grinder: [3, 9], cutoff: [12, 16], walk: [14, 99] };
@@ -191,17 +191,18 @@
   function qtyHTML(n) { return '<span class="qty"><button type="button" data-q="-1" aria-label="Fewer">−</button><input type="number" inputmode="numeric" min="1" max="9999" value="' + n + '" aria-label="Quantity"><button type="button" data-q="1" aria-label="More">+</button></span>'; }
   function toast(msg) { var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2400); }
   function buyRow(v) { return '<div class="buy-row" data-row><div class="price">' + money(v[3]) + "<small>Buy It Now · " + esc(v[0]) + '</small></div><div class="act">' + qtyHTML(1) + '<button class="add" data-add>Add to order</button></div></div>'; }
-  var MIXM = W.mixMonths || [3, 5, 8, 10], ONEMIN = W.singleItemMin || 25, MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var MIXM = W.mixMonths || [3, 5, 8, 10], ONEMIN = W.singleItemMin || 24, QUICK = W.quickQty || [12, 24, 36, 50, 100], MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   function mixOn() { return MIXM.indexOf(new Date().getMonth() + 1) >= 0; }
   function breakList() { return BREAKS.slice(0, -1).join(", ") + " and " + BREAKS[BREAKS.length - 1]; }
   function mixNames() { var a = MIXM.map(function (m) { return MONTHS[m - 1]; }); return a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
-  function mixLine() { return mixOn() ? "Mix and match is on this month: every piece on the order counts toward your price break." : "Mix and match pricing runs in " + mixNames() + ". This month, special pricing starts at " + ONEMIN + " of one item."; }
+  function mixLine() { return mixOn() ? "Mix and match is on this month: blades in the same size group count together toward your price break." : "Mix and match pricing runs in " + mixNames() + ". This month, special pricing takes " + ONEMIN + " of the same item."; }
   /* Where the order stands against the price breaks. Mix months count the whole order; other months count the biggest single line. */
   function breakState(t) {
-    var mix = mixOn(), big = null; t.lines.forEach(function (l) { if (!big || l.c.q > big.c.q) big = l; });
-    var n = mix ? t.units : (big ? big.c.q : 0), list = mix ? BREAKS : BREAKS.filter(function (q) { return q >= ONEMIN; });
+    var mix = mixOn(), big = null, lg = 0, sm = 0;
+    t.lines.forEach(function (l) { if (!big || l.c.q > big.c.q) big = l; if (l.v[2] && l.v[2] < 12) sm += l.c.q; else lg += l.c.q; });
+    var n = mix ? Math.max(lg, sm) : (big ? big.c.q : 0), list = mix ? BREAKS : BREAKS.filter(function (q) { return q >= ONEMIN; });
     var nb = list.filter(function (q) { return q > n; })[0], pb = list.filter(function (q) { return q <= n; }).pop();
-    return { mix: mix, n: n, nb: nb, pb: pb, of: mix ? "" : (big ? " of " + big.f.n : " of one item"), need: nb ? nb - n : 0 };
+    return { mix: mix, n: n, nb: nb, pb: pb, of: mix ? (lg >= sm ? " large blades" : " small blades") : (big ? " of " + big.f.n : " of one item"), need: nb ? nb - n : 0 };
   }
   function breaksLine() { return 'Buying more? <button class="more" data-breaks>Ask for ' + BREAKS.join(", ") + " piece price breaks</button>"; }
 
@@ -290,14 +291,15 @@
       '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="DBW Wisco, a division of Diamond Blade Warehouse" width="430" height="458">' +
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
 
+      '<section class="costco"><div class="wrap"><div><b>We work like Costco. The more you buy, the better the price.</b><span>Buy It Now ships free. Or send your order as a quote and we text back the price your account gets. Price breaks at ' + breakList() + ' pieces.</span></div><button class="btn chrome shine" data-pricing>Get my price</button></div></section>' +
+
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Our heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + "</div></div></section>" +
 
-      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What the crews run</h2><p>Dragon first. Then Extreme, Super G, T-Rex and Viper. Our most common blades, in the order our reps quote them.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a></div></div></section>' +
+      '<section class="sec deal"><div class="wrap"><div class="sec-head"><h2>If they make it, we can get it</h2><p>Saws, compactors, mixers, pumps, vacs. Tap what you need and ' + esc(FRANK) + " goes hunting for the best price out there.</p></div>" + equipPicker("Go find me the best price", 1) + "</div></section>" +
 
-      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Starter orders</h2><p>One tap loads a first order. Change anything before you send it. Price breaks at ' + breakList() + ' pieces.</p><p class="mixnote">' + esc(mixLine()) + "</p></div>" + startersHTML() + "</div></section>" +
+      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What the crews run</h2><p>Dragon first. Then Extreme, Super G, T-Rex and Viper. Our most common blades, in the order our reps quote them.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a><button class="btn ghost-d" data-pricing>Get my account price</button></div></div></section>' +
 
-      '<section class="sec deal"><div class="wrap two-col"><div><div class="sec-head left"><h2>Need a saw?</h2><p>Bundle it with 15, 25 or 36 blades and the saw price drops. Stack enough and it’s free. Renting now? There’s a calculator for that too.</p></div><a class="btn chrome shine" href="#saw-deal">Build my saw deal</a></div>' +
-      '<div><div class="sec-head left"><h2>If they make it, we can get it</h2><p>Don’t sleep on the equipment deals. Tell your rep the make and model and they’ll hunt down the best deal out there. Buy blades in bulk and we can often eat most of the cost. It works like Costco: the more you buy, the better the deal.</p></div><a class="btn red" href="#equipment">Find me equipment</a></div></div></section>' +
+      '<section class="sec deal"><div class="wrap narrow"><div class="sec-head"><h2>Need a saw?</h2><p>Every 14" to 20" blade here is priced saw-deal ready. Stack 15 and the saw is covered. Stack 25 or 36 and the price per blade drops.</p></div><div class="center"><a class="btn chrome shine" href="#saw-deal">Build my saw deal</a><a class="btn ghost" href="#cost">Renting? Run the math</a></div></div></section>' +
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><div class="three people swipe">' +
       "<div class=\"point l\"><b>A real person, every order</b><p>You should never have to fight an automated maze just to reorder. Every order on this site lands with a human who knows your account. Nothing here charges a card.</p></div>" +
@@ -305,19 +307,19 @@
       "<div class=\"point l\"><b>We obsess so you don’t have to</b><p>You’re the one sweating behind the saw. We sweat the blades, the bonds and the freight, and we’re here for you every day of the week.</p></div>" +
       '</div><div class="bribe"><b>We remember who you are.</b><span>Tell your salesman your favorite team, athlete or school. We make a point of remembering, and it has a way of showing up in the box.</span></div></div></section>' +
 
-      '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>Buy It Now is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three">' +
-      '<div class="lvl"><em>1</em><b>Buy It Now</b><p>The price on every blade here. No account needed. Order today.</p></div>' +
+      '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>Buy It Now is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three swipe">' +
+      '<div class="lvl"><em>1</em><b>Buy It Now</b><p>The price on every blade here. No account needed, and it ships free.</p></div>' +
       '<div class="lvl"><em>2</em><b>Quantity breaks</b><p>' + breakList() + " pieces. " + esc(mixLine()) + "</p></div>" +
-      '<div class="lvl top"><em>3</em><b>Account pricing</b><p>Steady customers earn a pricing level on their account, and it applies to every order. Ask where you stand and what moves you up.</p></div>' +
+      '<div class="lvl top"><em>3</em><b>Account pricing</b><p>Every account has a level, and the price drops at each one. One quick text or email and we send back what your level gets you.</p><div class="lvls">' + (W.levels || ["Contractor", "Pro", "Gold", "Distributor", "Platinum"]).map(function (x, i, a) { return "<span" + (i === a.length - 1 ? ' class="top"' : "") + ">" + esc(x) + "</span>"; }).join("<i>›</i>") + "</div></div>" +
       '</div><div class="center"><button class="btn chrome shine" data-pricing>Check my account pricing</button><button class="btn ghost-d" data-terms>Apply for Net 30 terms</button></div></div></section>' +
 
       '<section class="sec"><div class="wrap narrow"><div class="sec-head"><h2>Straight answers</h2><p>The questions we hear every day.</p></div><div class="qa">' + ANSWERS.map(function (x) { return "<details><summary>" + esc(x[0]) + "</summary><p>" + esc(x[1]) + "</p></details>"; }).join("") + '</div><div class="promise"><b>Our word</b><span>You’re never stuck with a blade you’re not happy with. We’ll swap it or take it back.</span></div><div class="center"><a class="btn blue" href="#cost">Run the cost-per-cut math</a><a class="btn ghost-d" href="#fix">Blade giving you trouble?</a></div></div></section>' +
 
       (T.length ? '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Straight from the jobsite</h2><p>Real customers. Their words.</p></div><div class="three">' + T.map(function (t) { return '<figure class="quote"><blockquote>' + esc(t.quote) + "</blockquote><figcaption>" + esc(t.who || "") + "</figcaption></figure>"; }).join("") + "</div></div></section>" : "") +
 
-      '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>Two ways to save</h2><p>No points, no fine print. Your rep applies it to your next order.</p></div><div class="three">' +
+      '<section class="sec dark"><div class="wrap"><div class="sec-head"><h2>Two ways to save</h2><p>No points, no fine print. Your rep applies it to your next order.</p></div><div class="three swipe">' +
       '<div class="point"><b>Leave a review</b><p>Tell us how the blades held up, good or bad. An honest review earns you ' + esc(RW.review) + '.</p><button class="btn chrome sm" data-review style="margin-top:12px">Leave a review</button></div>' +
-      '<div class="point"><b>Refer a contractor</b><p>Send someone our way. When they place a first order and name you, you get ' + esc(RW.review) + '.</p><button class="btn chrome sm" data-refer style="margin-top:12px">Refer a contractor</button></div>' +
+      '<div class="point"><b>Refer a contractor</b><p>Send someone our way. When they place a first order and name you, you get ' + esc(RW.referrer) + '.</p><button class="btn chrome sm" data-refer style="margin-top:12px">Refer a contractor</button></div>' +
       '<div class="point"><b>Just tell us</b><p>Something off with an order, a blade or a rep? ' + esc(FRANK) + ' reads every note.</p><button class="btn ghost sm" data-feedback style="margin-top:12px">Send ' + esc(FRANK) + " a note</button></div>" +
       "</div></div></section>";
     setNav("#home");
@@ -342,11 +344,12 @@
     var list = candidates(wiz.mat, wiz.saw), o = { mat: wiz.mat, saw: wiz.saw }, h = chosen();
     if (!list.length) { app.innerHTML = shell(kick, 0, 0, h + "<h1>That one’s a phone call.</h1>" + '<div class="empty">Nothing on the shelf matches that combo. ' + esc(FRANK) + " will spec it for you.</div>" + frankBox("")); return; }
     if (ask) {
-      var r = rank(list, wiz.mat, wiz.saw, wiz.want.k), top = r[0], alts = r.slice(1, 3);
-      var why = { speed: "it’s the fastest thing we’ve got for that job", life: "it’ll outlast anything else on that saw", price: "it’s the lowest cost-in that still does the job right", frank: "it’s what I’d put on my own saw" }[wiz.want.k];
-      h += says("Run the " + top.n + ". For " + wiz.mat.n.toLowerCase() + " on a " + wiz.saw.n.toLowerCase() + ", " + why + ".", true) +
-        '<div class="results">' + cardHTML(top, { mat: wiz.mat, saw: wiz.saw, pick: 1, ribbon: "★ " + esc(FRANK) + "’s Pick", ribbon2: esc(wiz.want.n) }) +
-        alts.map(function (f, i) { return cardHTML(f, { mat: wiz.mat, saw: wiz.saw, ribbon: i ? "Also solid" : "Runner-up", rc: i ? "g" : "b" }); }).join("") + "</div>" + frankBox(top.n);
+      var r = rank(list, wiz.mat, wiz.saw, wiz.want.k), ladA = ladder(list), picksA = ladA.length >= 3 ? ladA : bestBetterGood(list, wiz.mat, wiz.saw);
+      var top = r.filter(function (f) { return picksA.some(function (p) { return p.f === f; }); })[0] || r[0];
+      if (!picksA.some(function (p) { return p.f === top; })) picksA = [{ f: top, label: "Best", rc: "b" }].concat(picksA).slice(0, 4);
+      var why = { speed: "it’s the fastest of the three for that job", life: "it’ll outlast the others on that saw", price: "it’s the lowest cost-in that still does the job right", frank: "it’s what I’d put on my own saw" }[wiz.want.k];
+      h += says("Good, better, best. My pick is the " + top.n + ". For " + wiz.mat.n.toLowerCase() + " on a " + wiz.saw.n.toLowerCase() + ", " + why + ".", true) +
+        '<div class="results">' + picksA.map(function (p) { var mine = p.f === top; return cardHTML(p.f, { mat: wiz.mat, saw: wiz.saw, pick: mine, ribbon: p.label, ribbon2: mine ? "★ " + esc(FRANK) + "’s Pick" : "", rc: p.rc }); }).join("") + "</div>" + frankBox(top.n);
     } else {
       var lad = ladder(list), picks = lad.length >= 3 ? lad : bestBetterGood(list, wiz.mat, wiz.saw);
       h += "<h1>Here’s your lineup.</h1>" + says((MATQUIP[wiz.mat.k] || "Start at the top and work down.") + " " + list.length + (list.length === 1 ? " blade fits." : " fit. Start with these.")) +
@@ -362,7 +365,7 @@
     return "Hey " + FRANK + ", question from the Wisco site." + (wiz.mat ? " I’m cutting " + wiz.mat.n.toLowerCase() : "") + (wiz.saw ? " with a " + wiz.saw.n.toLowerCase() : "") + (wiz.want ? ". Priority: " + wiz.want.n.toLowerCase() : "") + "." + (pickName ? " The site says run the " + pickName + "." : "") + " My question: ";
   }
   function frankBox(pickName) {
-    return '<div class="frank" data-frank="' + esc(pickName) + '"><b class="h">Want to talk it through with ' + esc(FRANK) + "?</b><p>Send your setup straight to him. A real person answers.</p>" +
+    return '<div class="frank" data-frank="' + esc(pickName) + '"><b class="h">Want to talk it through with ' + esc(FRANK) + "?</b><p>25 years in this industry. “I’m not always right, but I’m not wrong very often.” Send your setup straight to him. A real person answers.</p>" +
       '<div class="sendrow">' + (W.textNumber ? '<button class="btn chrome sm" data-fsms>Text ' + esc(FRANK) + "</button>" : "") + '<button class="btn blue sm" data-femail>Email ' + esc(FRANK) + '</button><button class="btn ghost-d sm" data-fcopy>Copy my question</button></div>' +
       '<p class="note">' + (W.textDisplay ? "Text: <b style=\"user-select:all\">" + esc(W.textDisplay) + "</b> · " : "") + 'Email: <b style="user-select:all">' + esc(W.orderEmail || "") + "</b></p></div>";
   }
@@ -383,12 +386,22 @@
     });
     return out.sort(function (a, b) { return a[2] - b[2]; }).slice(0, limit);
   }
+  function quickRows() {
+    var fs = C.families.filter(function (f) { return f.rank < 99 && f.id.indexOf("eagle") !== 0; }).slice(0, 12);
+    return '<div class="qrows">' + fs.map(function (f) {
+      var vs = f.vars, d = defVar(f, vs);
+      return '<div class="qrow" data-f="' + f.id + '">' + pic(f) + '<div class="qmain"><b>' + esc(f.n) + "</b>" +
+        (vs.length > 1 ? '<select aria-label="Size" data-qsize>' + vs.map(function (v) { return '<option value="' + esc(vkey(v)) + '"' + (v === d ? " selected" : "") + ">" + esc(vlabel(v)) + " · " + money(v[3]) + "</option>"; }).join("") + "</select>" : '<span class="one">' + esc(vlabel(d)) + " · " + money(d[3]) + "</span>") +
+        '</div><div class="qchips" role="group" aria-label="Quantity">' + QUICK.map(function (q) { return '<button type="button" data-qadd="' + q + '">' + q + "</button>"; }).join("") + "</div></div>";
+    }).join("") + "</div>";
+  }
   function reorder() {
     var last = lastOrder(), n = last && last.items ? last.items.length : 0;
     app.innerHTML = shell("Fast Reorder", 0, 0,
       "<h1>Know what you run?</h1>" + says(QUIP.reorder[0]) +
       (n ? '<div class="last"><div><b>Same as last time?</b><span>' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>' : "") +
-      '<input class="search-big" id="rq" type="search" placeholder="Dragon 14   or   AES14SGC1" autocomplete="off" aria-label="Search by blade, size or part number">' +
+      '<h2 class="wiz-h2">Tap a quantity</h2><p class="lead sm">Our most common blades. Tap how many and it’s on your order. ' + esc(mixLine()) + "</p>" + quickRows() +
+      '<h2 class="wiz-h2">Or search for it</h2><input class="search-big" id="rq" type="search" placeholder="Dragon 14   or   AES14SGC1" autocomplete="off" aria-label="Search by blade, size or part number">' +
       '<div class="hintchips" id="rhints">' + ["Dragon 14", "Superblade Extreme 14", "Super G 14", "T-Rex 14", "Viper 14", "Blue Tornado 7"].map(function (x) { return '<button data-hint="' + esc(x) + '">' + esc(x) + "</button>"; }).join("") + "</div>" +
       '<div class="hits" id="rhits"></div>' +
       '<h2 class="wiz-h2">Or load a starter order</h2>' + startersHTML() +
@@ -438,6 +451,7 @@
     var base = saw.b; deal.lines.forEach(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); if (v && v[5]) base += v[5] * l.q; });
     return Math.round(base * t[1] / 1.7);
   }
+  function dealReady() { return deal.lines.length && deal.lines.every(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); return v && v[6]; }); }
   function dealBIN() {
     var hit = SKU[(deal.saw || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")], sawP = hit ? hit[0].vars[hit[1]][3] : 0, blades = 0;
     deal.lines.forEach(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); if (v) blades += v[3] * l.q; });
@@ -450,7 +464,7 @@
     var saw = SD.saws.filter(function (s) { return s.sku === deal.saw; })[0];
     var bin = dealBIN(), sawNet = tot ? tot - bin.blades : 0, save = tot ? bin.saw + bin.blades - tot : 0;
     var dq = !saw ? "Pick the saw. Then stack blades until the numbers work." : !t ? (SD.tiers[0][0] - n) + " more blades and it’s a saw deal." : next ? "You’re in. " + (next[0] - n) + " more gets you the " + next[0] + "-pack and a better number." : "That’s the top tier. Send it and I’ll get you a number today.";
-    var h = "<h1>Build your saw deal.</h1>" + says(dq) + '<p class="lead">Pick a gas saw. Stack 15, 25 or 36 blades, any 12" to 16" blade, mix and match. Every tier knocks the saw price down. Stack enough and the saw is free.</p>' +
+    var h = "<h1>Build your saw deal.</h1>" + says(dq) + '<p class="lead">We work like Costco: the more you buy, the better the price. Every 14" to 20" blade is already priced saw-deal ready. Stack ' + (SD.pack || 15) + ' and the saw is covered. Stack 25 or 36 and the price per blade drops.</p>' +
       '<div class="frank"><b class="h">1. Pick your saw</b><select id="dsaw" class="bigsel" aria-label="Saw"><option value="">Choose a saw…</option>' + SD.saws.map(function (s) { return '<option value="' + esc(s.sku) + '"' + (s.sku === deal.saw ? " selected" : "") + ">" + esc(s.n) + "</option>"; }).join("") + "</select></div>" +
       '<div class="frank"><b class="h">2. Stack your blades</b><div class="dealadd"><select id="dfam" aria-label="Blade">' + fams.map(function (f) { return '<option value="' + f.id + '">' + esc(f.n) + "</option>"; }).join("") + '</select><select id="dvar" aria-label="Size"></select>' + qtyHTML(5) + '<button class="add" data-dealadd>Add</button></div>' +
       (deal.lines.length ? '<div class="deallines">' + deal.lines.map(function (l, i) { var f = FAM[l.f], v = f && findVar(f, l.v); return v ? '<div class="dl" data-i="' + i + '"><span><b>' + l.q + " x " + esc(f.n) + "</b><small>" + esc(vlabel(v)) + '</small></span><button class="link" data-dealrm>Remove</button></div>' : ""; }).join("") + "</div>" : '<p class="note">No blades yet. Add at least 15 to unlock a saw deal.</p>') + "</div>" +
@@ -458,6 +472,7 @@
       '<div class="meterline"><b>' + n + (n === 1 ? " blade" : " blades") + "</b>" + (next ? "<span>Add " + (next[0] - n) + " more to hit the " + next[0] + "-pack" + (t ? " and a better deal" : " and unlock a saw deal") + "</span>" : "<span>Top tier. That’s the best deal we publish.</span>") + "</div></div>" +
       (tot ? '<div class="dealtotal"><span>' + (sawNet <= 0 ? "FREE SAW UNLOCKED" : "SAW DEAL UNLOCKED") + " · " + t[0] + '-pack</span><b>' + money(tot) + "</b><small>Complete package: " + n + " blades plus the " + esc(saw.n) + ".</small>" +
           (save > 0 ? "<strong>You save " + money(save) + " vs Buy It Now." + (sawNet <= 0 ? " The saw is free." : " The saw works out to " + money(sawNet) + ", down from " + money(bin.saw) + ".") + "</strong>" : "") + "<small>Freight and tax confirmed by your rep.</small></div>"
+        : (saw && t && SD.ref && saw.sku === SD.ref && dealReady()) ? '<div class="dealtotal"><span>SAW DEAL UNLOCKED · ' + t[0] + '-pack · SAW INCLUDED</span><b>' + money(bin.blades) + (n > (SD.pack || 15) ? " or less" : "") + "</b><small>" + n + " blades at Buy It Now, and the " + esc(saw.n) + " comes with them. Before freight and tax." + (n > (SD.pack || 15) ? " Past " + (SD.pack || 15) + " blades the price per blade drops. Send it and your rep comes back with the lower number." : " Stack 25 or 36 and the price per blade drops.") + "</small></div>"
         : (saw && t) ? '<div class="dealtotal"><span>SAW DEAL UNLOCKED · ' + t[0] + '-pack</span><b class="sm">Your rep sends the package price</b><small>' + n + " blades plus the " + esc(saw.n) + ". Send it over and you’ll have a number back fast. Bigger stack, better deal.</small></div>"
         : '<div class="dealtotal off"><span>' + (!saw ? "Pick a saw to see your package" : "Add " + (SD.tiers[0][0] - n) + " more blades to unlock a saw deal") + "</span></div>") +
       '<div class="center"><button class="btn chrome shine" data-dealsend' + (saw && t ? "" : " disabled") + ">Send this saw deal to my rep</button>" + (deal.lines.length ? '<button class="btn ghost" data-dealclear>Start over</button>' : "") + "</div>" +
@@ -481,12 +496,19 @@
   }
 
   /* ---------- equipment + depth chart ---------- */
+  var EQUIP = ["Hand-held cut-off saws", "Walk-behind saws", "Core drills & rigs", "Wall, ring & chain saws", "Diamond wire", "Grinders", "Circular saws", "Floor grinders & scarifiers", "Plate compactors & rammers", "Mortar & concrete mixers", "Trash pumps (dirty water)", "Clean water pumps", "Vacuums & dust control", "Power trowels & screeds", "Generators", "Something else"], eqSel = [];
+  function equipPicker(cta, short) {
+    var list = short ? ["Hand-held cut-off saws", "Walk-behind saws", "Core drills & rigs", "Plate compactors & rammers", "Mortar & concrete mixers", "Trash pumps (dirty water)", "Vacuums & dust control", "Something else"] : EQUIP;
+    return '<div class="eqchips">' + list.map(function (x) { return '<button type="button" class="eqchip" data-eqpick="' + esc(x) + '" aria-pressed="' + (eqSel.indexOf(x) >= 0) + '">' + esc(x) + "</button>"; }).join("") + "</div>" + (short ? '<p class="eqbrands"><a href="#equipment">See everything we can get →</a></p>' : "") +
+      '<p class="eqbrands">Pulse-Bac, Husqvarna, Diamond Products, Core Cut and every other major brand.</p>' +
+      '<div class="center"><button class="btn chrome shine" data-equip>' + cta + "</button></div>";
+  }
   function equipment() {
     var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td><td class=\"num\">" + money(v[3]) + '</td><td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button></td></tr>' : ""; }).join("");
     var eq = C.families.filter(function (f) { return f.cats.indexOf("equip") >= 0 || f.cats.indexOf("dust") >= 0; });
     app.innerHTML = shell("Equipment deals", 0, 0,
       "<h1>If they make it, we can get it.</h1>" + says(QUIP.equipment[0]) +
-      '<div class="frank"><b class="h">Tell us what you’re looking for</b><p>Make, model, size, new or used, how soon. The more you give us, the better the deal we can chase. Buying blades in bulk? We can often eat most or all of the equipment cost.</p><div class="sendrow"><button class="btn chrome sm shine" data-equip>Have my rep hunt it down</button><a class="btn blue sm" href="#saw-deal">Build a free-saw deal</a></div></div>' +
+      '<div class="frank"><b class="h">Tap what you need</b><p>Pick as many as you want. ' + esc(FRANK) + " goes hunting and comes back with the best price out there. It works like Costco: the more you buy, the better the price. Buying blades in bulk? We can often eat most or all of the equipment cost.</p>" + equipPicker("Go find me the best price") + '<div class="center"><a class="btn blue sm" href="#saw-deal">Build a saw deal</a></div></div>' +
       '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><div class="tablewrap"><table class="cmp saws"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th><th class="num">Buy It Now</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buy It Now is the one-saw price. Bundle it with blades and the number drops fast.</p></div>' +
       '<h2 class="wiz-h2">Equipment on the shelf</h2><div class="results two-up swipe">' + eq.map(function (f) { return cardHTML(f); }).join("") + "</div>", true);
     setNav("#equipment");
@@ -612,7 +634,7 @@
       return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · " + money(l.v[3]) + ' each</div></div><div class="lp">' + money(l.v[3] * l.c.q) + "</div><div>" + qtyHTML(l.c.q) + '</div><button class="rm" data-rm>Remove</button></div>';
     }).join("") + '<div class="callout"><b>That’s Buy It Now. Buy more, pay less.</b><span>Price breaks at ' + breakList() + ' pieces, plus your account pricing.</span><button class="btn blue sm" data-breaks>Get my price breaks</button></div>';
     $("#carttot").innerHTML = "<span>Buy It Now total</span><span>" + money(t.total) + "</span>";
-    $("#cartnote").textContent = "Freight and tax are confirmed by your rep. Nothing is charged on this site.";
+    $("#cartnote").textContent = "Buy It Now ships free. Want your account price instead? Send it as a quote request on the next screen. Nothing is charged on this site.";
   }
 
   /* ---------- before you send it ---------- */
@@ -642,14 +664,21 @@
     refer: { title: "Refer a contractor", intro: "Send a contractor our way. When they place their first order and name you, you get " + RW.review.replace("your", "your") + ".", head: "DBW WISCO REFERRAL", subj: "Referral" }
   };
   function me() { return store.get("me", {}); }
-  function repBySlug(s) { return (W.reps || []).filter(function (r) { return slug(r.name) === s; })[0]; }
+  function repBySlug(s) { if (!s) return undefined; return (W.reps || []).filter(function (r) { return slug(r.name) === s || (r.aka || []).indexOf(s) >= 0; })[0]; }
   function initials(n) { return n.split(/\s+/).map(function (x) { return x[0]; }).join("").slice(0, 2).toUpperCase(); }
   function renderReps(cur) {
+    var lockR = store.get("replock", 0) === 1 && repBySlug(cur);
+    if (lockR) { $("#reps").innerHTML = '<div class="replock"><span class="av">' + (lockR.photo ? '<img alt="" src="brand/reps/' + esc(lockR.photo) + '">' : esc(initials(lockR.name))) + "</span><div><b>" + esc(lockR.name) + '</b><small>Your salesman. This goes straight to them.</small></div><button type="button" class="link" data-repchange>Not your rep?</button></div>'; $("#f-rep").value = slug(lockR.name); $("#replabel").textContent = "Your salesman"; return; }
     $("#reps").innerHTML = '<button type="button" class="rep' + (!cur ? " on" : "") + '" data-rep=""><span class="av q">?</span><b>Not sure</b></button>' + (W.reps || []).map(function (r) {
       var s = slug(r.name);
       return '<button type="button" class="rep' + (cur === s ? " on" : "") + '" data-rep="' + s + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>";
     }).join("");
     $("#f-rep").value = cur || "";
+  }
+  function setIntent(v) {
+    $("#f-intent").value = v; $$("#intentseg [data-intent]").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.intent === v); });
+    $("#intentnote").textContent = v === "buy" ? "You pay the Buy It Now total and shipping is free. Your rep confirms it and it ships." : "Nothing is billed. We send back your account price, then you say go. Freight is on the invoice unless your rep agrees otherwise.";
+    preview();
   }
   function setAcct(v) {
     var f = $("#sendform"), order = mode === "order" || mode === "saw";
@@ -667,6 +696,7 @@
     $("#sendtitle").textContent = M.title; $("#sendintro").textContent = M.intro;
     $("#discwrap").hidden = m !== "pricing";
     $("#msgwrap").hidden = !M.msg; if (M.msg) $("#msglabel").textContent = M.msg;
+    $("#intentseg").hidden = $("#intentnote").hidden = m !== "order"; setIntent("quote");
     $("#acctseg").hidden = !(order || terms); $("#orderwrap").hidden = !(order || terms || m === "pricing");
     $("#paywrap").hidden = $("#paynote").hidden = !order; $("#creditwrap").hidden = !(order || terms);
     $("#reviewwrap").hidden = m !== "review"; $("#referwrap").hidden = m !== "refer";
@@ -694,10 +724,10 @@
     var a = document.createElement("a"); a.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics); a.download = "reorder-dbw-wisco.ics"; document.body.appendChild(a); a.click(); a.remove();
     toast("Reminder made for " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ". Add it to your calendar.");
   }
-  function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
+  function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco", "intent"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
   function buildText(o) {
     var t = totals(), rep = repBySlug(o.rep), L = [], M = MODES[mode], items = mode === "order" || mode === "pricing";
-    L.push(M.head + (ordRef ? "  ·  Ref " + ordRef : ""));
+    L.push((mode === "order" ? (o.intent === "buy" ? "DBW WISCO ORDER: BUY IT NOW (free shipping)" : "DBW WISCO QUOTE REQUEST: send my account price first") : M.head) + (ordRef ? "  ·  Ref " + ordRef : ""));
     L.push("From: " + (o.name || "(name)") + (o.company ? ", " + o.company : ""));
     if (o.phone) L.push("Phone: " + o.phone);
     if (o.email) L.push("Email: " + o.email);
@@ -713,14 +743,14 @@
       refs.forEach(function (x, i) { L.push("  Ref " + (i + 1) + ": " + [x[0], x[1]].filter(Boolean).join(" · ")); });
     }
     if (mode === "review") { L.push(""); L.push("RATING: " + (o.stars ? "★★★★★".slice(0, +o.stars) + "☆☆☆☆☆".slice(0, 5 - o.stars) + " (" + o.stars + " of 5)" : "(not rated)")); if (o.review) L.push(o.review); L.push("OK to post on the site: " + (o.pub ? "YES" : "NO")); L.push("Reward owed: " + RW.review); }
-    if (mode === "refer") { L.push(""); L.push("REFERRING: " + [o.fname, o.fco].filter(Boolean).join(" · ")); L.push("Reward when they order: " + RW.review.replace(/your/i, "the referrer’s")); }
+    if (mode === "refer") { L.push(""); L.push("REFERRING: " + [o.fname, o.fco].filter(Boolean).join(" · ")); L.push("Reward when they order: " + RW.referrer + " for the referrer"); }
     if (mode === "pricing" && o.disc.length) { L.push(""); L.push("Please check: " + o.disc.join("; ")); }
     if (M.msg && o.msg) { L.push(""); L.push(o.msg); }
     if (mode === "saw") { L.push(""); L.push(dealText()); }
     if (items) {
       L.push(""); L.push(t.lines.length ? "ITEMS" : "(no items in cart yet)");
       t.lines.forEach(function (l) { L.push(l.c.q + " x " + l.v[0] + "  " + l.f.n + " " + vlabel(l.v) + "  @ " + money(l.v[3]) + " = " + money(l.v[3] * l.c.q)); });
-      if (t.lines.length) { L.push(""); L.push("Buy It Now total: " + money(t.total) + "  (before price breaks)"); }
+      if (t.lines.length) { L.push(""); L.push("Buy It Now total: " + money(t.total) + (mode === "order" && o.intent === "buy" ? "  (customer is buying at this price, free shipping)" : "  (list price, customer wants their account price)")); }
     }
     if (mode === "order") {
       var x = [];
@@ -771,7 +801,7 @@
   function sendEmail() {
     if (needName()) return;
     var o = formData(), rep = repBySlug(o.rep), body = buildText(o);
-    var subj = MODES[mode].subj + " from " + (o.company || o.name) + (rep ? " (salesman: " + rep.name + ")" : "") + (o.po ? " PO " + o.po : "") + (ordRef ? " [" + ordRef + "]" : "");
+    var subj = (mode === "order" && o.intent !== "buy" ? "Quote request" : MODES[mode].subj) + " from " + (o.company || o.name) + (rep ? " (salesman: " + rep.name + ")" : "") + (o.po ? " PO " + o.po : "") + (ordRef ? " [" + ordRef + "]" : "");
     var viaMail = function () { try { navigator.clipboard.writeText(body).catch(function () {}); } catch (e) {} var rt = route2(o.rep); mailto(rt.to, subj, body, rt.cc); afterSend("email"); };
     if (W.formEndpoint && !isPreview) {
       fetch(W.formEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ _subject: subj, name: o.name, company: o.company, phone: o.phone, email: o.email, salesman: rep ? rep.name : "", message: body }) })
@@ -829,6 +859,10 @@
     }
     if ((el = t.closest("[data-fix]"))) { fixSel = el.dataset.fix; fixScreen(); window.scrollTo(0, 0); return; }
     if ((el = t.closest("[data-cat]"))) { shop.cat = el.dataset.cat; shop.n = SHOPPAGE; shopScreen(); return; }
+    if ((el = t.closest("[data-qadd]"))) { var qr = el.closest(".qrow"), qf = FAM[qr.dataset.f], qs = $("[data-qsize]", qr), qk = qs ? qs.value : vkey(defVar(qf, qf.vars)), qn = parseInt(el.dataset.qadd, 10); addToCart(qf.id, qk, qn); flash(el, "✓"); toast(qn + " x " + qf.n + " added to your order"); return; }
+    if ((el = t.closest("[data-eqpick]"))) { var on = el.getAttribute("aria-pressed") !== "true"; el.setAttribute("aria-pressed", on); var ix2 = eqSel.indexOf(el.dataset.eqpick); if (on && ix2 < 0) eqSel.push(el.dataset.eqpick); if (!on && ix2 >= 0) eqSel.splice(ix2, 1); $$("[data-eqpick]").forEach(function (b) { b.setAttribute("aria-pressed", eqSel.indexOf(b.dataset.eqpick) >= 0); }); return; }
+    if ((el = t.closest("[data-intent]"))) { setIntent(el.dataset.intent); return; }
+    if (t.closest("[data-repchange]")) { store.set("replock", 0); renderReps($("#f-rep").value); return; }
     if (t.closest("[data-shopmore]")) { shop.n += SHOPPAGE; shopScreen(); return; }
     if (t.closest("[data-remind]")) { remind(); return; }
     if ((el = t.closest("[data-hint]"))) { $("#rq").value = el.dataset.hint; runSearch(el.dataset.hint); return; }
@@ -853,7 +887,7 @@
     }
     if ((el = t.closest("[data-open]"))) { openDetail(FAM[el.closest(".card").dataset.f]); return; }
     if (t.closest("[data-pricing]") || t.closest("[data-breaks]")) { e.preventDefault(); openSend("pricing"); return; }
-    if (t.closest("[data-equip]")) { openSend("equip"); return; }
+    if (t.closest("[data-equip]")) { openSend("equip"); if (eqSel.length) { $("#f-msg").value = "Looking for: " + eqSel.join(", ") + ".\nMake / model / size / how soon: "; preview(); } return; }
     if (t.closest("[data-terms]")) { e.preventDefault(); openSend("terms"); return; }
     if (t.closest("[data-review]")) { openSend("review"); return; }
     if (t.closest("[data-refer]")) { openSend("refer"); return; }
@@ -906,7 +940,7 @@
   $$("[data-oemail]").forEach(function (a) { a.textContent = W.orderEmail || ""; });
   $$("[data-pl]").forEach(function (a) { a.textContent = C.priceList || "current"; });
   var P = new URLSearchParams(location.search);
-  if (P.get("rep")) { var info = me(); info.rep = slug(P.get("rep")); store.set("me", info); }
+  if (P.get("rep")) { var info = me(), rr = repBySlug(slug(P.get("rep"))); if (rr) { info.rep = slug(rr.name); store.set("me", info); store.set("replock", 1); } }
   if (P.get("ref")) store.set("ref", P.get("ref").replace(/[<>]/g, "").slice(0, 60));
   if (P.get("cart")) {
     cart = [];

@@ -19,10 +19,10 @@
 <meta name="apple-mobile-web-app-title" content="DBW Wisco">
 <meta name="theme-color" content="#071433">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Montserrat:wght@500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="app.css?v=1794586371">
+<link rel="stylesheet" href="app.css?v=1794590802">
 </head>
 <body>
-<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Ships same day or next</span><span>A real rep on every order</span><span>Fast checkout ★</span></div>
+<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Ships same day or next</span><span>Buy It Now ships free</span><span>A real rep on every order ★</span></div>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#home" aria-label="DBW Wisco home"><img src="brand/logo-sm.webp" alt="" width="52" height="55"><span><b>DBW WISCO</b><small>A division of Diamond Blade Warehouse, LLC</small></span></a>
@@ -83,6 +83,12 @@
   <div class="d-head"><h2 id="sendtitle">Send order to my rep</h2><button class="x" data-close aria-label="Close">✕</button></div>
   <form class="d-body" id="sendform" novalidate>
     <p class="note" id="sendintro"></p>
+    <div class="seg" id="intentseg" role="group" aria-label="How to send it">
+      <button type="button" data-intent="quote" aria-pressed="true"><b>Get my price first</b><span>Send as a quote request</span></button>
+      <button type="button" data-intent="buy" aria-pressed="false"><b>Buy It Now</b><span>This price, free shipping</span></button>
+    </div>
+    <input type="hidden" name="intent" id="f-intent" value="quote">
+    <p class="note" id="intentnote"></p>
     <div class="seg" id="acctseg" role="group" aria-label="Account type">
       <button type="button" data-acct="existing" aria-pressed="true"><b>I’m a customer</b><span>Reorder on my account</span></button>
       <button type="button" data-acct="new" aria-pressed="false"><b>New account</b><span>First order with DBW</span></button>
@@ -159,8 +165,8 @@
   <div class="d-foot"><div class="row-between"><button class="btn ghost-d sm" data-close>Back</button><button class="btn chrome sm" data-cart>Review order</button></div></div>
 </dialog>
 
-<script src="config.js?v=1794586371"></script>
-<script src="catalog.js?v=1794586371"></script>
-<script src="app.js?v=1794586371"></script>
+<script src="config.js?v=1794590802"></script>
+<script src="catalog.js?v=1794590802"></script>
+<script src="app.js?v=1794590802"></script>
 </body>
 </html>
