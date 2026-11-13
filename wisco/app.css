@@ -559,3 +559,11 @@ table.cmp .add.pk { margin-left: 6px; background: var(--gold); color: var(--gold
 .tile:hover, .tile:focus-visible, .linecard:hover, .agg:hover { transform: none } .tile:hover, .tile:focus-visible { box-shadow: 0 10px 24px rgba(7,20,51,.35) } .linecard:hover { box-shadow: 0 16px 34px rgba(7,20,51,.4) }
 .dealtotal .drow.good b, .dealtotal .drow.good i { color: #0B7A3B }
 .aggmap + .agglegend + * , table.cmp td { white-space: normal } table.cmp { table-layout: auto } .frank table.cmp { width: 100% }
+
+/* strip arrows */
+.tools::after { display: none }
+.tsc { position: absolute; top: 0; bottom: 0; z-index: 3; border: 0; padding: 0 12px; font: 900 13px var(--sans); letter-spacing: .04em; color: var(--gold-ink); cursor: pointer; display: flex; align-items: center }
+.tsc.r { right: 0; background: linear-gradient(90deg, rgba(11,29,74,0), #0B1D4A 26%); padding-left: 34px } .tsc.l { left: 0; background: linear-gradient(270deg, rgba(11,29,74,0), #0B1D4A 26%); padding-right: 30px; font-size: 20px }
+.tsc.r::after, .tsc.l::after { content: ""; position: absolute; z-index: -1; top: 8px; bottom: 8px; border-radius: 999px; background: var(--gold); box-shadow: 0 2px 8px rgba(0,0,0,.35) } .tsc.r::after { left: 26px; right: 6px } .tsc.l::after { left: 6px; right: 22px }
+.tsc[hidden] { display: none } .tools .wrap { scroll-padding-inline: 60px; padding-right: 84px }
+@media (prefers-reduced-motion: no-preference) { .tsc.r { animation: nudge 2.2s ease-in-out 3 } @keyframes nudge { 50% { transform: translateX(-5px) } } }

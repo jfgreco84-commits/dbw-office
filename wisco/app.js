@@ -1121,6 +1121,13 @@
   });
   $("#sendform").addEventListener("change", function (e) { if (e.target.id === "f-pay" && /terms/i.test(e.target.value) && $("#f-acct").value === "new") $("#creditwrap").open = true; preview(); });
   $("#sendform").addEventListener("submit", function (e) { e.preventDefault(); });
+  /* Quick-access strip: arrows show there is more to the side, and move it. */
+  (function () {
+    var w = $("#toolswrap"), L = $(".tsc.l"), R = $(".tsc.r"); if (!w) return;
+    var upd = function () { var max = w.scrollWidth - w.clientWidth; L.hidden = w.scrollLeft < 8; R.hidden = max < 8 || w.scrollLeft > max - 8; };
+    w.addEventListener("scroll", upd, { passive: true }); window.addEventListener("resize", upd); setTimeout(upd, 60); setTimeout(upd, 800);
+    document.addEventListener("click", function (e) { var b = e.target.closest("[data-tsc]"); if (b) w.scrollBy({ left: parseInt(b.dataset.tsc, 10) * Math.max(180, w.clientWidth * 0.7), behavior: "smooth" }); });
+  })();
   window.addEventListener("hashchange", route);
 
   /* ---------- boot ---------- */
