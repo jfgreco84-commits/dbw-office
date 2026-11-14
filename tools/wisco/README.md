@@ -16,7 +16,11 @@ Customer-facing reorder site for the Wisconsin branch. Static files, no server, 
 ```
 python3 tools/wisco/build.py "/path/to/FINAL DECEMBER 2026 PRICE LIST.xlsx" \
     --master "/path/to/2026_DBW_MASTER_PRICE_BOOK.xlsx" \
-    --tiers <six multipliers, comma separated> --equip <N>
+    --range <low,high> --equip <N>
+
+`--range` is the current mode (`priceMode: "range"` in `wisco/config.js`): every blade shows a low-to-high
+price range, the site never commits to a price, and the rep sets the number. `--tiers` with six
+multipliers still builds quantity brackets (`priceMode: "brackets"`).
 python3 tools/wisco/assemble.py
 ```
 

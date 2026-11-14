@@ -228,7 +228,10 @@ def main():
     # --equip: one multiplier for saws and equipment sold outright.
     TIERS = [float(x) for x in (arg("--tiers", str) or "").split(",") if x]
     EQUIP = arg("--equip")
-    if len(TIERS) != 6 or not EQUIP: sys.exit("Pass the multipliers:  --tiers a,b,c,d,e,f --equip N   (see tools/wisco/README.md)")
+    # --range lo,hi: every blade shows a price range and the rep sets the number. Replaces --tiers.
+    RANGE = [float(x) for x in (arg("--range", str) or "").split(",") if x]
+    if len(RANGE) == 2: TIERS = [max(RANGE)] * 6
+    if len(TIERS) != 6 or not EQUIP: sys.exit("Pass the multipliers:  --range lo,hi  or  --tiers a,b,c,d,e,f   plus  --equip N   (see tools/wisco/README.md)")
     MARKUP = TIERS[0]
     DEAL_MULT, DEAL_PACK, DEAL_SAW = arg("--deal-mult"), arg("--deal-pack", int) or 15, arg("--deal-saw", str)
     COST = {}
@@ -370,6 +373,11 @@ def main():
                 v[3] = whole(c0 * TIERS[0])
                 # Six equal multipliers = one list price, no quantity prices in the public file.
                 if len(set(TIERS)) > 1: v.append([whole(c0 * t) for t in TIERS[1:]])
+                elif len(RANGE) == 2:
+                    lo = whole(c0 * min(RANGE))
+                    if lo < v[3]:
+                        while len(v) < 6: v.append("" if len(v) == 4 else 0)
+                        v.append(lo)          # v[6] as a plain number = low end of the range
             # Saw-deal-ready pricing: a 14" to 20" high-speed blade is priced at what it costs per blade
             # inside a DEAL_PACK-blade package with the reference saw.  price = mult x (blade + saw / pack)
             if DEAL_MULT and DEAL_SAW in COST and "highspeed" in cats and v[2] in (14, 16, 18, 20) and v[0] in COST:

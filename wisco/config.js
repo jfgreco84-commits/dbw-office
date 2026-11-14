@@ -13,7 +13,9 @@ window.WISCO = {
   //                that customer's own prices.
   //   "brackets" = the site shows quantity prices and prices the order itself. (Needs a catalog built
   //                with six different --tiers.)
-  priceMode: "brackets",
+  //   "range"    = every blade shows a price range. The site never commits to a price. The rep sets the
+  //                number and confirms it before it ships. (Needs a catalog built with --range.)
+  priceMode: "range",
 
   // Who an order goes to.
   //   "manager" = every text and every email comes to you. The customer's rep is copied on the email.
