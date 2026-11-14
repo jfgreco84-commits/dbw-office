@@ -301,6 +301,32 @@
     if (!n) return "";
     return '<div class="last wb"><div><b>Welcome back' + (who ? ", " + esc(who) : "") + '.</b><span>Same as last time? ' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>';
   }
+  /* A rep's own page: their face, their name, their phone. */
+  function isBoss(r) { return (r.aka || []).indexOf("frank") >= 0; }
+  function repFirst(r) { return isBoss(r) ? "Big Frank" : r.name.replace(/[“"].*?[”"]\s*/, "").split(" ")[0]; }
+  function mineCard(r) {
+    var cell = r.cell || W.textNumber || "", who = repFirst(r);
+    return '<div class="mine">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : '<span class="av">' + esc(initials(r.name)) + "</span>") +
+      "<div><b>" + esc(isBoss(r) ? "Big Frank" : r.name) + "</b><span>Your Blade Guy</span></div>" +
+      (cell ? '<div class="mine-act"><a class="btn chrome sm" href="sms:' + esc(cell) + '">Text ' + esc(who) + '</a><a class="btn ghost sm" href="tel:' + esc(cell) + '">Call</a></div>' : "") + "</div>";
+  }
+  var WHY = [
+    ["Deep warehouse.", "Stock on the shelf means it ships same day or next. I’ll put our warehouse up against anybody’s."],
+    ["We can get our hands on anything.", "If it cuts, cores or grinds, we either stock it or we know who does."],
+    ["We’ve been at this a long time.", "We were here before most of the outfits calling you, and we’ll be here after."],
+    ["Our own engineers.", "Manufacturing engineers and developers who build blades for a living. Built up to a standard, not down to a cost."],
+    ["Reps who stay.", "The guy who sold you your first blade still answers his phone. Our people don’t leave."],
+    ["Customers who reorder.", "Crews come back. That’s the whole business, and it’s why this site exists."]
+  ];
+  function bigFrank() {
+    var cell = W.textNumber || "";
+    return '<section class="sec bfsec"><div class="wrap narrow"><div class="bfhero"><img alt="Big Frank" loading="lazy" src="brand/frank-cool.webp"><div>' +
+      '<span class="kick">30 years in the business</span><h2>Big Frank, Your Blade Guy!</h2>' +
+      '<p class="bfline">“Selling blades ain’t glamorous, but someone has to do it. I’m your guy.”</p>' +
+      "<p>I’ve been selling blades since I was a kid. I know a lot. I also know enough to know when I don’t know something, and I know the right people to get the right answer. That’s how I dial you into the best savings, the best quality, the most bang for your buck, and service that’s second to none.</p>" +
+      (cell ? '<div class="mine-act"><a class="btn gold shine" href="sms:' + esc(cell) + '">Text Big Frank</a><a class="btn chrome" href="tel:' + esc(cell) + '">Call ' + esc(W.textDisplay || "") + "</a></div>" : "") +
+      '</div></div><ul class="why">' + WHY.map(function (x) { return "<li><b>" + x[0] + "</b> " + x[1] + "</li>"; }).join("") + "</ul></div></section>";
+  }
   function home() {
     var top = C.families.filter(function (f) { return f.rank < 99 && f.id.indexOf("eagle") !== 0 && f.cats.indexOf("core") < 0; }).slice(0, 16);
     var line = ["dragon", "superblade-g3", "dragon-supreme", "superblade-arrow", "zenesis-green-kut-purple"];
@@ -314,7 +340,7 @@
     app.innerHTML =
       '<section class="hero"><div class="wrap"><div>' +
       (function () { var r = repBySlug(me().rep); var rf = store.get("ref", ""); return '<span class="pill"><i>★</i> ' + (r ? "Your salesman: " + esc(r.name) : rf ? "Referred by " + esc(rf) : "A division of Diamond Blade Warehouse, LLC") + " <i>★</i></span>"; })() +
-      (r0 ? '<span class="kick rep">Your salesman: ' + esc(r0.name) + "</span>" : "") + '<span class="kick">Simplified reorder</span>' +
+      (r0 ? mineCard(r0) : "") + '<span class="kick">Simplified reorder</span>' +
       "<h1>The right blade. Right now.</h1>" +
       '<p class="sub">Tell us what you cut. We ship it anywhere in the USA, same day or next. <b>Your blades, your price, 60 seconds.</b></p>' +
       welcomeBack() +
@@ -337,6 +363,7 @@
 
       '<section class="sec deal"><div class="wrap narrow"><div class="sec-head"><h2>Need a saw?</h2><p>Buy your blades and your saw together and we sharpen the pencil on both. Stack 15, 25 or 36 blades and your rep builds the package.</p></div><div class="center"><a class="btn chrome shine" href="#saw-deal">Build my saw package</a><a class="btn ghost" href="#cost">Renting? Run the math</a></div></div></section>' +
 
+      bigFrank() +
       '<section class="sec alt"><div class="wrap narrow"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><ul class="ppl">' +
       "<li><b>A real person on every order.</b> Someone who knows your account picks it up. Nothing here charges a card.</li>" +
       "<li><b>One hand washes the other.</b> We sell blades to feed our families. You run them to feed yours.</li>" +
@@ -744,7 +771,7 @@
     app.innerHTML = shell("For the sales team", 0, 0,
       "<h1>Your own link.</h1>" + '<p class="lead">Text customers a link with your name on it. When they order, it comes in marked as yours.</p>' +
       '<div class="frank"><b class="h">1. Pick your name</b><div class="reps" id="rtreps">' + (W.reps || []).map(function (r) { var sl = slug(r.name); return '<button type="button" class="rep' + (cur === sl ? " on" : "") + '" data-rtrep="' + sl + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>"; }).join("") + "</div></div>" +
-      '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? base + "?rep=" + cur : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
+      '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? repLink(base, cur) : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
       '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy. Because you picked your name above, each line in the cart has a box for <b>this customer’s price</b>. Type their real price, then open Send my order and tap “Copy a reorder link for this cart.” Text that link. It opens with their blades and their prices, and only they see it.</p><p class="note">Done building links on this phone? <button class="link" data-repoff>Turn rep mode off</button></p><div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a></div></div>' +
       '<div class="frank"><b class="h">Texts that work</b><p class="tpl">Running low on blades? Reorder in 60 seconds, no phone tag: [your link]</p><p class="tpl">I loaded your usual order. Change the quantities if you need to and hit send: [reorder link]</p><p class="tpl">Not sure what to run on that job? Tap Ask Frank. Three questions and you get good, better and best: [your link]</p></div>');
     setNav("");
@@ -851,6 +878,8 @@
     refer: { title: "Refer a contractor", intro: "Send a contractor our way. When they place their first order and name you, you get " + RW.review.replace("your", "your") + ".", head: "DBW WISCO REFERRAL", subj: "Referral" }
   };
   function me() { return store.get("me", {}); }
+  /* On the live site a rep's link is their own short address (…/wisco/miz/). Opened as a file, fall back to ?rep=. */
+  function repLink(base, s) { var r = repBySlug(s), nick = r && r.aka && r.aka[0]; return /\/$/.test(base) && nick ? base + nick + "/" : base + "?rep=" + s; }
   function repBySlug(s) { if (!s) return undefined; return (W.reps || []).filter(function (r) { return slug(r.name) === s || (r.aka || []).indexOf(s) >= 0; })[0]; }
   function initials(n) { return n.split(/\s+/).map(function (x) { return x[0]; }).join("").slice(0, 2).toUpperCase(); }
   function renderReps(cur) {

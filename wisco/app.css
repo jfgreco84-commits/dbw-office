@@ -579,3 +579,17 @@ table.cmp .add.pk { margin-left: 6px; background: var(--gold); color: var(--gold
 #intentseg { display: grid }
 
 .line .lp small { font: 700 11px var(--sans); color: var(--muted, #5b6785); text-transform: uppercase; letter-spacing: .04em }
+
+/* v24: a rep's own page, Big Frank section */
+.mine { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: rgba(7,20,51,.62); border: 1px solid rgba(255,255,255,.45); border-radius: 16px; padding: 10px 14px; margin: 0 0 14px; max-width: 520px }
+.mine img, .mine .av { width: 64px; height: 64px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; flex: none; display: grid; place-items: center; background: var(--royal); color: #fff; font: 900 22px var(--sans) }
+.mine b { display: block; font: 900 19px/1.15 var(--sans); color: #fff } .mine span { font: 900 12px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: #F7C948 }
+.mine > div:first-of-type { flex: 1; min-width: 130px }
+.mine-act { display: flex; gap: 8px; flex-wrap: wrap } .btn.ghost.sm { color: #fff; border: 2px solid rgba(255,255,255,.7); background: transparent }
+.bfsec { background: linear-gradient(160deg, #071433, #12307a); color: #fff }
+.bfhero { display: grid; grid-template-columns: 150px 1fr; gap: 18px; align-items: center } .bfhero img { width: 150px; height: auto; filter: drop-shadow(0 8px 18px rgba(0,0,0,.45)) }
+.bfhero h2 { font: 400 clamp(26px, 6vw, 40px)/1.05 var(--slab); color: #fff; margin: 0 0 8px; text-transform: uppercase }
+.bfhero p { font: 600 15px/1.5 var(--sans); color: #dbe4ff; margin: 0 0 12px } .bfhero .bfline { font: 800 18px/1.35 var(--sans); color: #fff }
+.why { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) }
+.why li { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.2); border-left: 5px solid #F7C948; border-radius: 12px; padding: 11px 13px; font: 600 14px/1.45 var(--sans); color: #dbe4ff } .why b { color: #fff }
+@media (max-width: 520px) { .bfhero { grid-template-columns: 1fr; text-align: left } .bfhero img { width: 120px } }
