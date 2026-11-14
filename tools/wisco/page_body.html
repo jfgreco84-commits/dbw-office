@@ -1,0 +1,145 @@
+<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Ships same day or next</span><span>The more you buy, the better the price ★</span></div>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#home" aria-label="DBW WISCO home"><img src="brand/logo.webp" alt="" width="120" height="128"><span><b>DBW WISCO</b><small>A division of Diamond Blade Warehouse, LLC</small></span></a>
+    <button class="cartbtn" data-cart aria-label="Open cart">Cart <span class="n" id="cartn">0</span></button>
+  </div>
+</header>
+<nav class="tools" aria-label="Quick access"><button type="button" class="tsc l" data-tsc="-1" aria-label="Scroll back" hidden>‹</button><button type="button" class="tsc r" data-tsc="1" aria-label="More buttons">More ›</button><div class="wrap" id="toolswrap">
+  <a class="homeb" href="#home"><span aria-hidden="true">⌂</span> Home</a><a href="#finder">Blade Finder</a><a href="#reorder">Fast Reorder</a><a class="gold" href="#ask-frank">Ask Frank</a><a href="#saw-deal">Saw Packages</a><a href="#equipment">Equipment</a><a href="#shop">Shop All</a><a href="#core">Core Bits</a><a href="#early">Early-Entry Colors</a><a href="#fix">Blade Trouble</a><a href="#cost">Cost Per Cut</a><a href="#depth">Depth Chart</a><a href="#stone">Stone Shop</a><a href="#" data-terms>Net 30</a><a href="#" data-account>Open an Account</a>
+</div></nav>
+<div class="stripes" aria-hidden="true"></div>
+
+<main id="app"></main>
+<noscript><div style="padding:28px 16px;color:#fff;background:#071433;font:700 17px/1.5 sans-serif;text-align:center">This store needs JavaScript turned on. Or skip it: text (414) 213-0084 or email fgreco@diamondbladewarehouse.com and a real person will take your order.</div></noscript>
+
+<footer class="foot">
+  <div class="wrap">
+    <img class="footlogo" src="brand/logo.webp" alt="DBW WISCO" width="200" height="213" loading="lazy">
+    <div>
+      <b class="footname">DBW WISCO</b><span class="footsub">A division of Diamond Blade Warehouse, LLC</span>
+      <p class="footmgr">Text, call or email <b data-mgr></b>. He answers.</p>
+      <div class="footact"><a class="btn gold" data-text-btn href="#">Text Frank</a><a class="btn gold" data-call-btn href="#">Call Frank</a><a class="btn gold" data-mail-btn href="#">Email Frank</a></div>
+      <div class="footnum"><a data-text href="#"></a> · <a data-oemail-link href="#"></a></div>
+      <div class="footlinks"><a href="#fix">Blade trouble</a><a href="#cost">Cost per cut</a><a href="#depth">Depth chart</a><a href="#saw-deal">Saw packages</a><a href="#stone">Stone shop</a><a href="#" data-terms>Apply for Net 30</a><a href="#" data-account>Open an account</a><a href="https://www.diamondbladewarehouse.com/company-info/credit-application" target="_blank" rel="noopener">Credit application</a><a href="#team">Sales team</a></div>
+      <div class="fine">Prices from <span data-pl></span> pricing and drop with quantity. Prices and availability can change. Your rep confirms every order and adds freight and tax. Nothing is charged on this site.</div>
+    </div>
+  </div>
+</footer>
+
+<aside class="bf" id="bf" aria-label="Big Frank says">
+  <div class="bf-bub" id="bfbub"><b>Big Frank says</b><p id="bfp"></p><div class="bf-act"><a href="#ask-frank">Ask Frank</a><a data-text-btn href="#">Text him</a><button type="button" data-bfnext>Another one</button><button type="button" data-bfhide aria-label="Hide Big Frank">✕</button></div></div>
+  <button class="bf-av" type="button" data-bftoggle aria-label="Big Frank says"><img src="brand/frank-cool-sm.webp" alt="" width="64" height="71"><i></i><em>Ask Frank</em></button>
+</aside>
+
+<div class="dock" id="dock" hidden>
+  <div id="dockinfo"></div>
+  <button class="btn chrome sm" data-cart>Review order</button>
+</div>
+
+<dialog id="cart" class="sheet" aria-labelledby="carttitle">
+  <div class="d-head"><h2 id="carttitle">Your order</h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <div class="d-body" id="cartbody"></div>
+  <div class="d-foot" id="cartfoot">
+    <div class="tot" id="carttot"></div>
+    <p class="note" id="cartnote"></p>
+    <button class="btn chrome block shine" data-checkout>Send my order</button>
+    <div class="row-between"><button class="link" data-close>Keep shopping</button><button class="link" data-emptycart>Empty cart</button></div>
+  </div>
+</dialog>
+
+<dialog id="extras" class="sheet" aria-labelledby="extrastitle">
+  <div class="d-head"><h2 id="extrastitle">Before you send it</h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <div class="d-body" id="extrasbody"></div>
+  <div class="d-foot">
+    <button class="btn chrome block shine" data-tosend>Continue to send</button>
+    <button class="link" data-backcart>Back to my order</button>
+  </div>
+</dialog>
+
+<dialog id="send" class="sheet" aria-labelledby="sendtitle">
+  <div class="d-head"><h2 id="sendtitle">Send order to my rep</h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <form class="d-body" id="sendform" novalidate>
+    <p class="note" id="sendintro"></p>
+    <div class="seg" id="intentseg" role="group" aria-label="How to send it">
+      <button type="button" data-intent="quote" aria-pressed="true"><b>Get my price first</b><span>Send as a quote request</span></button>
+      <button type="button" data-intent="buy" aria-pressed="false"><b>Buy at this price</b><span>Send it as an order</span></button>
+    </div>
+    <input type="hidden" name="intent" id="f-intent" value="quote">
+    <p class="note" id="intentnote"></p>
+    <div class="seg" id="acctseg" role="group" aria-label="Account type">
+      <button type="button" data-acct="existing" aria-pressed="true"><b>I’m a customer</b><span>Reorder on my account</span></button>
+      <button type="button" data-acct="new" aria-pressed="false"><b>New account</b><span>First order with DBW</span></button>
+    </div>
+    <input type="hidden" name="acct" id="f-acct" value="existing">
+    <div id="discwrap" hidden><div class="field"><label>Which pricing should we check?</label></div><div class="checks" id="discs"></div></div>
+    <div class="field" id="msgwrap" hidden><label for="f-msg" id="msglabel">What are you looking for?</label><textarea id="f-msg" name="msg"></textarea></div>
+    <div id="reviewwrap" hidden>
+      <div class="field"><label>Your rating</label><div class="starpick" id="starpick" role="radiogroup" aria-label="Rating"><button type="button" data-star="1" aria-label="1 star">★</button><button type="button" data-star="2" aria-label="2 stars">★</button><button type="button" data-star="3" aria-label="3 stars">★</button><button type="button" data-star="4" aria-label="4 stars">★</button><button type="button" data-star="5" aria-label="5 stars">★</button></div><input type="hidden" name="stars" id="f-stars" value=""></div>
+      <div class="field"><label for="f-review">Your review, in your own words</label><textarea id="f-review" name="review" placeholder="Which blade, what you cut, how it held up."></textarea></div>
+      <label class="xcheck"><input type="checkbox" name="pub" id="f-pub" checked> OK to post this on the site with my first name and company</label>
+    </div>
+    <div id="referwrap" hidden>
+      <div class="two">
+        <div class="field"><label for="f-fname">Who are you referring?</label><input id="f-fname" name="fname" placeholder="Their name"></div>
+        <div class="field"><label for="f-fco">Their company or phone</label><input id="f-fco" name="fco" placeholder="So we know them when they order"></div>
+      </div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" autocomplete="name" autocapitalize="words" enterkeyhint="next" required></div>
+      <div class="field"><label for="f-company">Company</label><input id="f-company" name="company" autocomplete="organization" autocapitalize="words" enterkeyhint="next"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="next"></div>
+      <div class="field"><label for="f-email">Email (optional)</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" enterkeyhint="next"></div>
+    </div>
+    <div id="newwrap" hidden>
+      <div class="field"><label for="f-addr">Ship-to street address</label><input id="f-addr" name="addr" autocomplete="shipping street-address" enterkeyhint="next"></div>
+      <div class="three-in">
+        <div class="field"><label for="f-city">City</label><input id="f-city" name="city" autocomplete="shipping address-level2" enterkeyhint="next"></div>
+        <div class="field"><label for="f-state">State</label><input id="f-state" name="state" autocomplete="shipping address-level1" maxlength="2" autocapitalize="characters" enterkeyhint="next"></div>
+        <div class="field"><label for="f-zip">ZIP</label><input id="f-zip" name="zip" autocomplete="shipping postal-code" inputmode="numeric" maxlength="10" enterkeyhint="next"></div>
+      </div>
+    </div>
+    <div id="orderwrap">
+      <div class="field"><label id="replabel">Pick your salesman</label><div class="reps" id="reps"></div><input type="hidden" name="rep" id="f-rep"></div>
+      <div class="two" id="paywrap">
+        <div class="field"><label for="f-pay">How do you want to pay?</label><select id="f-pay" name="pay"></select></div>
+        <div class="field"><label for="f-po">PO # (optional)</label><input id="f-po" name="po" enterkeyhint="next"></div>
+      </div>
+      <p class="promonote" id="promonote" hidden></p>
+      <p class="note" id="paynote">We never ask for card or bank numbers on this site. Your rep handles that by phone.</p>
+      <div class="field"><label for="f-ref">Who referred you? (optional)</label><input id="f-ref" name="ref" autocapitalize="words" placeholder="Name or company" enterkeyhint="next"><small class="hint" id="refhint"></small></div>
+      <details class="credit" id="creditwrap">
+        <summary id="creditsum">Add trade references</summary>
+        <p class="note" id="creditnote"></p>
+        <div class="field"><label for="f-limit">Credit limit you’re asking for (optional)</label><input id="f-limit" name="limit" inputmode="numeric" placeholder="e.g. $10,000"></div>
+        <div class="refrow"><div class="field"><label for="f-r1">Reference 1: company</label><input id="f-r1" name="r1" autocapitalize="words"></div><div class="field"><label for="f-r1p">Phone or email</label><input id="f-r1p" name="r1p"></div></div>
+        <div class="refrow"><div class="field"><label for="f-r2">Reference 2: company</label><input id="f-r2" name="r2" autocapitalize="words"></div><div class="field"><label for="f-r2p">Phone or email</label><input id="f-r2p" name="r2p"></div></div>
+        <div class="refrow"><div class="field"><label for="f-r3">Reference 3: company</label><input id="f-r3" name="r3" autocapitalize="words"></div><div class="field"><label for="f-r3p">Phone or email</label><input id="f-r3p" name="r3p"></div></div>
+        <p class="note">Suppliers you already buy from on terms work best. Prefer the full form? <a href="https://www.diamondbladewarehouse.com/company-info/credit-application" target="_blank" rel="noopener">DBW credit application</a>.</p>
+      </details>
+      <div class="field"><label for="f-notes">Notes: need-by date, delivery instructions, questions</label><textarea id="f-notes" name="notes"></textarea></div>
+      <div class="field"><label for="f-fav">Favorite team, athlete or school (optional)</label><input id="f-fav" name="fav" placeholder="Packers, Badgers, Harley..."></div>
+    </div>
+    <input type="hidden" name="feedback" value="">
+    <ol class="next"><li><b>You send it.</b> It goes straight to a person, not a queue.</li><li><b>We confirm.</b> Your price breaks, freight and ship date.</li><li><b>It ships.</b> Nothing is charged until you’ve said yes.</li></ol>
+    <details class="peek"><summary>See exactly what gets sent</summary><pre class="order" id="preview"></pre></details>
+    <div class="callout" id="sentmsg" hidden></div>
+  </form>
+  <div class="d-foot">
+    <div class="sendrow">
+      <button class="btn chrome shine" data-sms id="textbtn">Text it to Frank</button>
+      <button class="btn blue" data-email>Email it</button>
+      <button class="btn ghost-d" data-copy>Copy</button>
+    </div>
+    <button class="btn red block" data-friend id="friendbtn" type="button" hidden>Text my friend the link</button>
+    <button class="link" data-share id="sharebtn">Copy a reorder link for this cart</button>
+  </div>
+</dialog>
+
+<dialog id="detail" class="modal" aria-labelledby="detailtitle">
+  <div class="d-head"><h2 id="detailtitle"></h2><button class="x" data-close aria-label="Close">✕</button></div>
+  <div class="d-body" id="detailbody"></div>
+  <div class="d-foot"><div class="row-between"><button class="btn ghost-d sm" data-close>Back</button><button class="btn chrome sm" data-cart>Review order</button></div></div>
+</dialog>

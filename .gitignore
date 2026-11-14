@@ -1,0 +1,6 @@
+
+# DBW price lists hold cost. Never commit them.
+*PRICE LIST*.xlsx
+tools/wisco/*.xlsx
+wisco/*.xlsx
+tools/wisco/__pycache__/

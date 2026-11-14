@@ -1,0 +1,22 @@
+{
+ "name": "DBW WISCO Blade Shop",
+ "short_name": "DBW WISCO",
+ "description": "Reorder diamond blades, core bits and chain from DBW WISCO, a division of Diamond Blade Warehouse, LLC.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#071433",
+ "theme_color": "#071433",
+ "icons": [
+  {
+   "src": "brand/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "brand/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}

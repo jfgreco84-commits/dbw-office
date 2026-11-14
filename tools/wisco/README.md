@@ -1,0 +1,79 @@
+# DBW Wisco store (`/wisco/`)
+
+Customer-facing reorder site for the Wisconsin branch. Static files, no server, no card data.
+
+| File | What it is |
+|---|---|
+| `wisco/index.html`, `app.css`, `app.js` | The store |
+| `wisco/config.js` | **Edit this by hand**: order email, phone, text number, rep list, video links |
+| `wisco/catalog.js` | Generated. Products, sizes, list prices. Do not hand-edit |
+| `wisco/img/` | Product photos (from diamondbladewarehouse.com) |
+| `tools/wisco/families.py` | Blade copy, Best/Better/Good grades, star ratings per material |
+| `tools/wisco/build.py` | Builds `catalog.js` from the monthly price list |
+
+## New price list each month
+
+```
+python3 tools/wisco/build.py "/path/to/FINAL DECEMBER 2026 PRICE LIST.xlsx" \
+    --master "/path/to/2026_DBW_MASTER_PRICE_BOOK.xlsx" \
+    --range <low,high> --equip <N>
+
+`--range` is the current mode (`priceMode: "range"` in `wisco/config.js`): every blade shows a low-to-high
+price range, the site never commits to a price, and the rep sets the number. `--tiers` with six
+multipliers still builds quantity brackets (`priceMode: "brackets"`).
+python3 tools/wisco/assemble.py
+```
+
+Then commit `wisco/`. **Never commit the price list itself. It contains cost.**
+
+**The multipliers are not written anywhere in this repo.** This repo is public, and a multiplier next to a
+public price gives away cost. The owner has the numbers. Pass them on the command line each month.
+
+**Pricing rules** (set by the owner):
+
+- Blades, bits, cups, chain and wheels: six quantity brackets (1-11, 12-23, 24-35, 36-49, 50-99, 100+),
+  one multiplier each, passed as `--tiers`. The site shows the range and prices the order by bracket.
+- Saws and equipment sold outright: one multiplier, `--equip`.
+- Small months: a line reaches a bracket on its own quantity. Big months (set in `config.js`): blades in the
+  same size group count together.
+- Account pricing, package pricing and anything negotiated come from the rep, not the site.
+- The saw maker's name is stripped from saw names (model numbers only). Part numbers are left alone.
+- `NOT_WISCO` in `build.py` lists price-list products the WISCO site does not sell.
+- `--master` adds 4-Core Pro Series core bits and Zenesis Green Kut from the master price book.
+
+No price list or price book is ever committed. Both hold cost.
+
+**No card or bank numbers.** Checkout only records how the customer wants to pay (terms, card on file,
+call me, ACH, check by phone). Do not add card-number fields to this site.
+
+## Add a blade video
+
+In `wisco/config.js`, under `videos`, add `"blade-id": "https://www.youtube.com/watch?v=..."`.
+The blade id is the end of its link, e.g. `.../wisco/#blade-super-g` -> `super-g`.
+
+## Links a rep can text
+
+- A rep's own link: `.../wisco/?rep=adam-misurek`
+- A pre-filled cart: `.../wisco/?cart=AES14SGC1*10,AGT7B7*24` (or use "Copy a reorder link" in the cart)
+- Straight to a material: `.../wisco/?m=a` (asphalt). Keys are in `families.py`.
+
+## Refresh product data from the DBW site
+
+`python3 tools/wisco/crawl_dbw_site.py <work_dir>` (needs `<work_dir>/sitemap.xml`), then copy
+`dbw_products.json` over `tools/wisco/dbw_site_catalog.json` and rebuild with `--images <cache_dir>`.
+
+## If the store moves
+
+`SITE_URL` at the top of `assemble.py` is the full web address of the store. The picture that shows
+up when the link is texted (`wisco/brand/share.jpg`) needs it. Change it and run `assemble.py` again
+if the store moves to its own domain.
+
+## Test the whole site
+
+```
+node tools/wisco/test_site.js
+```
+
+Needs Playwright. It walks the store at phone, tablet and desktop sizes: every screen, every
+material and saw combination, the quantity price brackets (1, 11, 12, 23, 24, 35, 36, 49, 50, 99, 100),
+small-month and big-month rules, checkout, rep links, and a clipped-button check. It prints PASSED and FAILED.
