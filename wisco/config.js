@@ -18,9 +18,10 @@ window.WISCO = {
   priceMode: "range",
 
   // Who an order goes to.
+  //   "both"    = every email and every text goes to you AND the customer's rep, together.
   //   "manager" = every text and every email comes to you. The customer's rep is copied on the email.
   //   "rep"     = it goes to the rep. You are copied on the email, and texts go to the rep's cell.
-  ordersTo: "manager",
+  ordersTo: "both",
   // Accounts with no activity for this many days are yours to reassign. Printed on every order as a reminder.
   inactiveDays: 18,
 

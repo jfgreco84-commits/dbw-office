@@ -984,12 +984,20 @@
   /* Who gets it. A rep with an email in config.js gets the order; Frank and the rep's manager are copied. No rep email = it goes to Frank. */
   function route2(slugv) {
     var r = repBySlug(slugv) || {}, main = W.orderEmail || "", toRep = W.ordersTo === "rep", uniq = function (a) { var seen = {}; return a.filter(function (x) { x = (x || "").toLowerCase(); if (!x || seen[x]) return false; seen[x] = 1; return true; }); };
-    var to = toRep && r.email ? r.email : main, cc = uniq([main, r.email, r.manager].concat(W.alsoCopy || [])).filter(function (x) { return x.toLowerCase() !== to.toLowerCase(); });
-    var repText = toRep && r.cell;
-    return { to: to, cc: cc, cell: repText ? r.cell : (W.textNumber || ""), who: repText || (toRep && r.email) ? r.name : FRANK };
+    var both = W.ordersTo === "both";
+    /* "both": the manager AND the customer's rep each get the email (both on the To line) and the text (one group text). */
+    var tos = both ? uniq([main, r.email]) : [toRep && r.email ? r.email : main], to = tos.join(",");
+    var cc = uniq([main, r.email, r.manager].concat(W.alsoCopy || [])).filter(function (x) { return tos.map(function (y) { return y.toLowerCase(); }).indexOf(x.toLowerCase()) < 0; });
+    var repText = toRep && r.cell, cells = both ? uniq([W.textNumber, r.cell]) : [repText ? r.cell : (W.textNumber || "")];
+    var first = function (n) { return (n || "").replace(/^Big /, "").split(" ")[0]; };
+    return { to: to, cc: cc, cell: cells.join(","), who: both && cells.length > 1 ? FRANK + " and " + first(r.name) : repText || (toRep && r.email) ? r.name : FRANK };
   }
-  function mailto(to, subj, body, cc) { location.href = "mailto:" + encodeURIComponent(to || "") + "?" + (cc && cc.length ? "cc=" + encodeURIComponent(cc.join(",")) + "&" : "") + "subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body); }
-  function sms(body, cell) { location.href = "sms:" + (cell || W.textNumber) + "?&body=" + encodeURIComponent(body); }
+  function mailto(to, subj, body, cc) { location.href = "mailto:" + (to || "").split(",").map(encodeURIComponent).join(",") + "?" + (cc && cc.length ? "cc=" + encodeURIComponent(cc.join(",")) + "&" : "") + "subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body); }
+  function sms(body, cell) {
+    cell = cell || W.textNumber; var many = cell.indexOf(",") > 0, ios = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    /* Group text: iPhone needs the /open?addresses= form, Android takes a comma list. */
+    location.href = many && ios ? "sms:/open?addresses=" + cell + "&body=" + encodeURIComponent(body) : "sms:" + cell + "?&body=" + encodeURIComponent(body);
+  }
   function sendEmail() {
     if (needName()) return;
     var o = formData(), rep = repBySlug(o.rep), body = buildText(o);
@@ -1061,7 +1069,7 @@
     if ((el = t.closest("[data-fix]"))) { fixSel = el.dataset.fix; fixScreen(); window.scrollTo(0, 0); return; }
     if ((el = t.closest("[data-cat]"))) { shop.cat = el.dataset.cat; shop.n = SHOPPAGE; shopScreen(); return; }
     if ((el = t.closest("[data-crew]"))) { wiz.mat = byK(MATS, el.dataset.crew); wiz.saw = null; wiz.keep = true; go("#finder"); return; }
-    if (t.closest("[data-photomail]")) { var pm = route2(me().rep); location.href = "mailto:" + encodeURIComponent(pm.to) + "?" + (pm.cc.length ? "cc=" + encodeURIComponent(pm.cc.join(",")) + "&" : "") + "subject=" + encodeURIComponent("Blade photo for a reorder") + "&body=" + encodeURIComponent("Attach the picture of your blade label to this email.\n\nName / company: \nPhone: \nHow many do you need: "); return; }
+    if (t.closest("[data-photomail]")) { var pm = route2(me().rep); location.href = "mailto:" + pm.to.split(",").map(encodeURIComponent).join(",") + "?" + (pm.cc.length ? "cc=" + encodeURIComponent(pm.cc.join(",")) + "&" : "") + "subject=" + encodeURIComponent("Blade photo for a reorder") + "&body=" + encodeURIComponent("Attach the picture of your blade label to this email.\n\nName / company: \nPhone: \nHow many do you need: "); return; }
     if (t.closest("[data-account]")) { openSend("account"); return; }
     if ((el = t.closest("[data-stonepick]"))) { var on3 = el.getAttribute("aria-pressed") !== "true"; el.setAttribute("aria-pressed", on3); var ix3 = stSel.indexOf(el.dataset.stonepick); if (on3 && ix3 < 0) stSel.push(el.dataset.stonepick); if (!on3 && ix3 >= 0) stSel.splice(ix3, 1); return; }
     if (t.closest("[data-stone]")) { openSend("stone"); if (stSel.length) { $("#f-msg").value = "Helix products I need: " + stSel.join(", ") + ".\nMaterial (granite, marble, quartzite, engineered stone, porcelain, glass): \nMachine or tool: "; preview(); } return; }
