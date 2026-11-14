@@ -203,11 +203,14 @@
   var PROMO = (W.promos || {}).cardFreeBlade || {}, PROMO_ON = !!PROMO.on;
   function isCard(pay) { return /card/i.test(pay || ""); }
   function promoBar() { return PROMO_ON ? '<div class="promo"><b>' + esc(PROMO.title || "Free blade when you pay this order by card") + "</b><span>" + esc(PROMO.text || "") + "</span></div>" : ""; }
+  /* priceMode "account": the site shows one list price. Nobody is charged list. The rep bills the account price.
+     priceMode "brackets": the site shows quantity prices and prices the order itself. */
+  var ACCT = W.priceMode !== "brackets";
   var BRK = [12, 24, 36, 50, 100];
   function tiered(v) { return v && Array.isArray(v[6]); }
   function eachAt(v, q) { if (!tiered(v)) return v[3]; var i = 0; BRK.forEach(function (b, k) { if (q >= b) i = k + 1; }); return i ? v[6][i - 1] : v[3]; }
   function rangeTxt(v) { return tiered(v) ? money(v[6][4]) + " to " + money(v[3]) : money(v[3]); }
-  function buyRow(v) { return '<div class="buy-row" data-row><div class="price' + (tiered(v) ? " rng" : "") + '">' + rangeTxt(v) + "<small>" + (tiered(v) ? "each, by quantity · " : "") + esc(v[0]) + '</small></div><div class="act">' + qtyHTML(1) + '<button class="add" data-add>Add to order</button></div></div>'; }
+  function buyRow(v) { return '<div class="buy-row" data-row><div class="price' + (tiered(v) ? " rng" : "") + '">' + rangeTxt(v) + "<small>" + (tiered(v) ? "each, by quantity · " : ACCT ? "list price · " : "") + esc(v[0]) + '</small></div><div class="act">' + qtyHTML(1) + '<button class="add" data-add>Add to order</button></div></div>'; }
   var MIXM = W.mixMonths || [3, 5, 8, 10], ONEMIN = W.singleItemMin || 24, QUICK = W.quickQty || [12, 24, 36, 50, 100], MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   function mixOn() { return MIXM.indexOf(new Date().getMonth() + 1) >= 0; }
   function breakList() { return BREAKS.slice(0, -1).join(", ") + " and " + BREAKS[BREAKS.length - 1]; }
@@ -313,7 +316,7 @@
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
 
       (PROMO_ON ? '<section class="promoband"><div class="wrap">' + promoBar() + "</div></section>" : "") +
-      '<section class="costco"><div class="wrap"><div><b>The more you buy, the better the price.</b><span>We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
+      '<section class="costco"><div class="wrap"><div><b>The more you buy, the better the price.</b><span>' + (ACCT ? "The price you see is list. Nobody pays list. Send your order and it’s billed at your account price, and that drops again at 12, 24, 36, 50 and 100." : "We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.") + '</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Our heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + "</div></div></section>" +
 
@@ -331,7 +334,7 @@
       "</ul></div></section>" +
 
       '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>The site price is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three swipe">' +
-      '<div class="lvl"><em>1</em><b>Site price</b><p>What you see here. No account needed. It drops as the quantity goes up.</p></div>' +
+      '<div class="lvl"><em>1</em><b>' + (ACCT ? "List price" : "Site price") + "</b><p>" + (ACCT ? "What you see here. It’s the ceiling. Nobody with an account pays it." : "What you see here. No account needed. It drops as the quantity goes up.") + "</p></div>" +
       '<div class="lvl"><em>2</em><b>Quantity breaks</b><p>' + breakList() + " pieces. " + esc(mixLine()) + "</p></div>" +
       '<div class="lvl top"><em>3</em><b>Account pricing</b><p>Every account has a level, and the price drops at each one. One quick text or email and we send back what your level gets you.</p><div class="lvls">' + (W.levels || ["Contractor", "Pro", "Gold", "Distributor", "Platinum"]).map(function (x, i, a) { return "<span" + (i === a.length - 1 ? ' class="top"' : "") + ">" + esc(x) + "</span>"; }).join("<i>›</i>") + "</div></div>" +
       '</div><div class="center"><button class="btn gold shine" data-account>Open a free account</button><button class="btn chrome" data-pricing>Check my account pricing</button><button class="btn ghost-d" data-terms>Apply for Net 30 terms</button></div></div></section>' +
@@ -604,7 +607,7 @@
       (d.save > 0.005 ? '<div class="drow good"><i>Quantity pricing took off</i><b>− ' + money(d.save) + "</b></div>" : "") +
       '<div class="drow"><i>' + esc(saw.n) + "</i><b>" + money(d.sawP) + "</b></div>" +
       '<div class="drow big"><i>Package total</i><b>' + money(d.total) + "</b></div>" +
-      (d.n ? '<strong>' + (d.net <= 0 ? "Your blade savings cover the whole saw." : d.save > 0.005 ? "After your blade savings, the saw works out to " + money(d.net) + ", down from " + money(d.sawP) + "." : "Add blades and watch the saw get cheaper. The price drops at 12.") + "</strong>" : "<strong>Slide the blades up and watch the price move.</strong>") +
+      (d.n ? '<strong>' + (d.net <= 0 ? "Your blade savings cover the whole saw." : d.save > 0.005 ? "After your blade savings, the saw works out to " + money(d.net) + ", down from " + money(d.sawP) + "." : ACCT ? "That’s at list. Your rep prices the package on your account, and every blade you add brings the saw down." : "Add blades and watch the saw get cheaper. The price drops at 12.") + "</strong>" : "<strong>Slide the blades up and watch the price move.</strong>") +
       "<small>Before freight and tax. Your rep can sharpen this further on a real package.</small></div>";
     var sb = $("[data-dealsend]"); if (sb) sb.disabled = !(saw && d.n);
     var rp = $("#r-price"); if (rp) { rp.value = d.sawP || ""; rentCalc(); }
@@ -730,7 +733,7 @@
       "<h1>Your own link.</h1>" + '<p class="lead">Text customers a link with your name on it. When they order, it comes in marked as yours.</p>' +
       '<div class="frank"><b class="h">1. Pick your name</b><div class="reps" id="rtreps">' + (W.reps || []).map(function (r) { var sl = slug(r.name); return '<button type="button" class="rep' + (cur === sl ? " on" : "") + '" data-rtrep="' + sl + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>"; }).join("") + "</div></div>" +
       '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? base + "?rep=" + cur : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
-      '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy, open Send my order, and tap “Copy a reorder link for this cart.” Text that link. It opens with their blades already loaded.</p><div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a></div></div>' +
+      '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy. Because you picked your name above, each line in the cart has a box for <b>this customer’s price</b>. Type their real price, then open Send my order and tap “Copy a reorder link for this cart.” Text that link. It opens with their blades and their prices, and only they see it.</p><p class="note">Done building links on this phone? <button class="link" data-repoff>Turn rep mode off</button></p><div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a></div></div>' +
       '<div class="frank"><b class="h">Texts that work</b><p class="tpl">Running low on blades? Reorder in 60 seconds, no phone tag: [your link]</p><p class="tpl">I loaded your usual order. Change the quantities if you need to and hit send: [reorder link]</p><p class="tpl">Not sure what to run on that job? Tap Ask Frank. Three questions and you get good, better and best: [your link]</p></div>');
     setNav("");
   }
@@ -777,8 +780,8 @@
   function totals() {
     var L = cartLines(), t = 0, n = 0, list = 0, mix = mixOn(), grp = { lg: 0, sm: 0 };
     L.forEach(function (l) { l.g = l.v[2] && l.v[2] < 12 ? "sm" : "lg"; if (tiered(l.v)) grp[l.g] += l.c.q; });
-    L.forEach(function (l) { l.bq = mix && tiered(l.v) ? grp[l.g] : l.c.q; l.each = eachAt(l.v, l.bq); n += l.c.q; t += l.each * l.c.q; list += l.v[3] * l.c.q; });
-    return { lines: L, total: t, units: n, list: list, save: list - t };
+    L.forEach(function (l) { l.bq = mix && tiered(l.v) ? grp[l.g] : l.c.q; l.each = l.c.p > 0 ? l.c.p : eachAt(l.v, l.bq); n += l.c.q; t += l.each * l.c.q; list += l.v[3] * l.c.q; });
+    return { lines: L, total: t, units: n, list: list, save: list - t, quoted: L.length > 0 && L.every(function (l) { return l.c.p > 0; }), anyQuoted: L.some(function (l) { return l.c.p > 0; }) };
   }
   function addToCart(fid, key, q) {
     q = Math.max(1, Math.min(9999, parseInt(q, 10) || 1));
@@ -789,7 +792,7 @@
   function saveCart() { store.set("cart", cart); badge(); bfI = 0; bfShow(); }
   function badge() {
     var t = totals(); $("#cartn").textContent = t.units; $("#dock").hidden = !t.units;
-    if (t.units) $("#dockinfo").innerHTML = "<b>" + t.units + (t.units === 1 ? " item" : " items") + " · " + money(t.total) + "</b><span>Priced by quantity. Your account may do better.</span>";
+    if (t.units) $("#dockinfo").innerHTML = "<b>" + t.units + (t.units === 1 ? " item" : " items") + " · " + money(t.total) + "</b><span>" + (t.quoted ? "Your price, from your rep." : ACCT ? "List total. You pay your account price." : "Priced by quantity. Your account may do better.") + "</span>";
   }
   function renderCart() {
     var t = totals(), b = $("#cartbody");
@@ -800,10 +803,11 @@
     var cq = nb && bs.need <= 6 ? "You’re " + bs.need + " away" + bs.of + " from the " + nb + "-piece price." : !hasCat.core ? "No core bits on here? It’s the same freight bill either way." : !hasCat.small && !hasCat.cup ? "Running grinders? Small blades and cup wheels ship on this same order." : "Good order. Ask for your price break before you send it.";
     var nudge = '<div class="nudge">' + says(cq) + (nb ? '<div class="nbar"><i style="width:' + Math.min(100, bs.n / nb * 100) + '%"></i></div><span>' + (pb ? "You’ve hit the " + pb + "-piece price. " : "") + bs.need + " more" + esc(bs.of) + " to the " + nb + "-piece price break.</span>" : "<span>You’ve hit our biggest listed break. Your rep takes it from here.</span>") + '<small class="mixnote">' + esc(mixLine()) + "</small></div>";
     b.innerHTML = nudge + t.lines.map(function (l, i) {
-      return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · <b>" + money(l.each) + " each</b>" + (l.each < l.v[3] ? " <s>" + money(l.v[3]) + "</s>" : "") + '</div></div><div class="lp">' + money(l.each * l.c.q) + "</div><div>" + qtyHTML(l.c.q) + '</div><button class="rm" data-rm>Remove</button></div>';
-    }).join("") + '<div class="callout"><b>The more you buy, the better the price.</b><span>' + (t.save > 0.005 ? "Quantity pricing is already saving you " + money(t.save) + " on this order. " : "") + 'Have an account price, or want a package deal? Ask.</span><button class="btn gold sm" data-breaks>Negotiate with ' + esc(FRANK) + "</button></div>";
-    $("#carttot").innerHTML = "<span>Order total</span><span>" + money(t.total) + "</span>";
-    $("#cartnote").textContent = "Priced by quantity. Freight and tax are added by your rep. Nothing is charged on this site.";
+      return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · <b>" + (l.c.p > 0 ? "Your price " : ACCT ? "List " : "") + money(l.each) + " each</b>" + (l.each < l.v[3] ? " <s>" + money(l.v[3]) + "</s>" : "") + '</div></div><div class="lp">' + money(l.each * l.c.q) + "</div><div>" + qtyHTML(l.c.q) + "</div>" +
+        (repMode() ? '<label class="rp">This customer’s price each $<input type="number" inputmode="decimal" min="0" step="1" data-rp value="' + (l.c.p > 0 ? l.c.p : "") + '" placeholder="' + l.v[3] + '"></label>' : "") + '<button class="rm" data-rm>Remove</button></div>';
+    }).join("") + '<div class="callout"><b>' + (t.quoted ? "These are your prices." : ACCT ? "You don’t pay list." : "The more you buy, the better the price.") + "</b><span>" + (t.quoted ? "Your rep set them for your account. Change a quantity and send it." : ACCT ? "Send the order and your rep bills it at your account price. They confirm the number before it ships. Bigger order or a saw with it? Ask." : (t.save > 0.005 ? "Quantity pricing is already saving you " + money(t.save) + " on this order. " : "") + "Have an account price, or want a package deal? Ask.") + '</span><button class="btn gold sm" data-breaks>Negotiate with ' + esc(FRANK) + "</button></div>";
+    $("#carttot").innerHTML = "<span>" + (t.quoted ? "Your total" : ACCT ? "List total" : "Order total") + "</span><span>" + money(t.total) + "</span>";
+    $("#cartnote").textContent = (t.quoted ? "Priced for your account." : ACCT ? "List is the ceiling. Your account price is what you’re billed." : "Priced by quantity.") + " Freight and tax are added by your rep. Nothing is charged on this site.";
   }
 
   /* ---------- before you send it ---------- */
@@ -849,7 +853,7 @@
   }
   function setIntent(v) {
     $("#f-intent").value = v; $$("#intentseg [data-intent]").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.intent === v); });
-    $("#intentnote").textContent = v === "buy" ? "You’re buying at the order total. Your rep confirms it, adds freight and tax, and it ships." : "Nothing is billed. We send back your account price, then you say go. Freight is on the invoice unless your rep agrees otherwise.";
+    $("#intentnote").textContent = v === "buy" ? (ACCT ? "It ships at your account price. Your rep confirms the number, adds freight and tax, and sends it." : "You’re buying at the order total. Your rep confirms it, adds freight and tax, and it ships.") : "Nothing ships and nothing is billed until you see your price and say go.";
     preview();
   }
   function setAcct(v) {
@@ -868,7 +872,8 @@
     $("#sendtitle").textContent = M.title; $("#sendintro").textContent = M.intro;
     $("#discwrap").hidden = m !== "pricing";
     $("#msgwrap").hidden = !M.msg; if (M.msg) $("#msglabel").textContent = M.msg;
-    $("#intentseg").hidden = $("#intentnote").hidden = m !== "order"; setIntent("quote");
+    $("#intentseg").hidden = $("#intentnote").hidden = m !== "order"; setIntent(ACCT ? "buy" : "quote");
+    if (ACCT) { var ib = $$("#intentseg [data-intent]"); ib.forEach(function (x) { var buy = x.dataset.intent === "buy"; x.innerHTML = buy ? "<b>Order it</b><span>Bill my account price</span>" : "<b>Price it first</b><span>Show me before it ships</span>"; x.style.order = buy ? 0 : 1; }); }
     $("#acctseg").hidden = !(order || terms); $("#orderwrap").hidden = !(order || terms || m === "pricing");
     $("#paywrap").hidden = $("#paynote").hidden = !order; $("#creditwrap").hidden = !(order || terms);
     $("#reviewwrap").hidden = m !== "review"; $("#referwrap").hidden = m !== "refer";
@@ -901,7 +906,7 @@
   function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco", "intent"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
   function buildText(o) {
     var t = totals(), rep = repBySlug(o.rep), L = [], M = MODES[mode], items = mode === "order" || mode === "pricing";
-    L.push((mode === "order" ? (o.intent === "buy" ? "DBW WISCO ORDER: BUY AT SITE PRICE" : "DBW WISCO QUOTE REQUEST: send my account price first") : M.head) + (ordRef ? "  ·  Ref " + ordRef : ""));
+    L.push((mode === "order" ? (o.intent === "buy" ? (ACCT ? "DBW WISCO ORDER: BILL AT ACCOUNT PRICE" : "DBW WISCO ORDER: BUY AT SITE PRICE") : "DBW WISCO QUOTE REQUEST: send my account price first") : M.head) + (ordRef ? "  ·  Ref " + ordRef : ""));
     L.push("From: " + (o.name || "(name)") + (o.company ? ", " + o.company : ""));
     if (o.phone) L.push("Phone: " + o.phone);
     if (o.email) L.push("Email: " + o.email);
@@ -926,8 +931,8 @@
     if (mode === "saw") { L.push(""); L.push(dealText()); }
     if (items) {
       L.push(""); L.push(t.lines.length ? "ITEMS" : "(no items in cart yet)");
-      t.lines.forEach(function (l) { L.push(l.c.q + " x " + l.v[0] + "  " + l.f.n + " " + vlabel(l.v) + "  @ " + money(l.each) + " = " + money(l.each * l.c.q)); });
-      if (t.lines.length) { L.push(""); L.push("Site total: " + money(t.total) + "  (quantity pricing, before freight and tax)" + (mode === "order" && o.intent === "buy" ? "  CUSTOMER IS BUYING AT THIS PRICE" : "  customer wants their account price or a better deal")); }
+      t.lines.forEach(function (l) { L.push(l.c.q + " x " + l.v[0] + "  " + l.f.n + " " + vlabel(l.v) + "  @ " + (l.c.p > 0 ? "rep-link price " : ACCT ? "list " : "") + money(l.each) + " = " + money(l.each * l.c.q)); });
+      if (t.lines.length) { L.push(""); L.push(t.quoted ? "Total at the prices on the customer’s rep link: " + money(t.total) + "  (VERIFY against the account before billing)" : ACCT ? "List total: " + money(t.total) + "  (reference only. The site did not quote this customer a price. Bill at their account price.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : "Site total: " + money(t.total) + "  (quantity pricing, before freight and tax)" + (mode === "order" && o.intent === "buy" ? "  CUSTOMER IS BUYING AT THIS PRICE" : "  customer wants their account price or a better deal")); }
     }
     if (mode === "order") {
       var x = [];
@@ -990,7 +995,8 @@
     var fb = function () { toast("Couldn’t copy automatically. Press and hold the text to copy."); };
     try { navigator.clipboard.writeText(txt).then(function () { done && done(); }, fb); } catch (e) { fb(); }
   }
-  function shareLink() { var o = formData(); return location.origin + location.pathname + "?cart=" + cartLines().map(function (l) { return encodeURIComponent(l.v[0]) + "*" + l.c.q; }).join(",") + (o.rep ? "&rep=" + o.rep : ""); }
+  function shareLink() { var o = formData(); return location.origin + location.pathname + "?cart=" + cartLines().map(function (l) { return encodeURIComponent(l.v[0]) + "*" + l.c.q + (l.c.p > 0 ? "@" + l.c.p : ""); }).join(",") + (o.rep ? "&rep=" + o.rep : ""); }
+  function repMode() { return store.get("repmode", 0) === 1; }
 
   /* ---------- product detail ---------- */
   function openDetail(f) {
@@ -1024,7 +1030,8 @@
     if (t.closest("[data-bftoggle]")) { bfOpen(!$("#bf").classList.contains("open")); return; }
     if (t.closest("[data-bfhide]")) { bfOpen(false); return; }
     if (t.closest("[data-bfnext]")) { bfI++; bfShow(); return; }
-    if ((el = t.closest("[data-rtrep]"))) { var inf = me(); inf.rep = el.dataset.rtrep; store.set("me", inf); repTools(); return; }
+    if ((el = t.closest("[data-rtrep]"))) { var inf = me(); inf.rep = el.dataset.rtrep; store.set("me", inf); store.set("repmode", 1); repTools(); return; }
+    if (t.closest("[data-repoff]")) { store.set("repmode", 0); cart.forEach(function (c) { delete c.p; }); saveCart(); repTools(); toast("Rep mode is off on this phone"); return; }
     if (t.closest("[data-rtcopy]")) { var lk = $("#rtlink").textContent; if (/^http|^file/.test(lk)) copyText(lk, function () { toast("Link copied. Text it to a customer."); }); else toast("Pick your name first"); return; }
     if ((el = t.closest("[data-starter]"))) { var st = byK(STARTERS, el.dataset.starter); starterLines(st).forEach(function (l) { addToCart(l.f.id, vkey(l.v), l.q); }); renderCart(); $("#cart").showModal(); return; }
     if (t.closest("[data-photo]")) { var pr = route2(me().rep); sms("Hey " + pr.who + ", here’s a picture of my blade. I need more of these. Name / company: ", pr.cell); return; }
@@ -1049,7 +1056,7 @@
     if (t.closest("[data-account]")) { openSend("account"); return; }
     if ((el = t.closest("[data-stonepick]"))) { var on3 = el.getAttribute("aria-pressed") !== "true"; el.setAttribute("aria-pressed", on3); var ix3 = stSel.indexOf(el.dataset.stonepick); if (on3 && ix3 < 0) stSel.push(el.dataset.stonepick); if (!on3 && ix3 >= 0) stSel.splice(ix3, 1); return; }
     if (t.closest("[data-stone]")) { openSend("stone"); if (stSel.length) { $("#f-msg").value = "Helix products I need: " + stSel.join(", ") + ".\nMaterial (granite, marble, quartzite, engineered stone, porcelain, glass): \nMachine or tool: "; preview(); } return; }
-    if ((el = t.closest("[data-qadd]"))) { var qr = el.closest(".qrow"), qf = FAM[qr.dataset.f], qs = $("[data-qsize]", qr), qk = qs ? qs.value : vkey(defVar(qf, qf.vars)), qn = parseInt(el.dataset.qadd, 10), qv = findVar(qf, qk); addToCart(qf.id, qk, qn); flash(el, "✓"); toast(qn + " x " + qf.n + " added at " + money(eachAt(qv, qn)) + " each"); return; }
+    if ((el = t.closest("[data-qadd]"))) { var qr = el.closest(".qrow"), qf = FAM[qr.dataset.f], qs = $("[data-qsize]", qr), qk = qs ? qs.value : vkey(defVar(qf, qf.vars)), qn = parseInt(el.dataset.qadd, 10), qv = findVar(qf, qk); addToCart(qf.id, qk, qn); flash(el, "✓"); toast(qn + " x " + qf.n + (ACCT ? " added to your order" : " added at " + money(eachAt(qv, qn)) + " each")); return; }
     if ((el = t.closest("[data-eqpick]"))) { var on = el.getAttribute("aria-pressed") !== "true"; el.setAttribute("aria-pressed", on); var ix2 = eqSel.indexOf(el.dataset.eqpick); if (on && ix2 < 0) eqSel.push(el.dataset.eqpick); if (!on && ix2 >= 0) eqSel.splice(ix2, 1); $$("[data-eqpick]").forEach(function (b) { b.setAttribute("aria-pressed", eqSel.indexOf(b.dataset.eqpick) >= 0); }); return; }
     if ((el = t.closest("[data-intent]"))) { setIntent(el.dataset.intent); return; }
     if (t.closest("[data-repchange]")) { store.set("replock", 0); renderReps($("#f-rep").value); return; }
@@ -1113,6 +1120,7 @@
     if (t.tagName === "DIALOG") t.close();
   });
   document.addEventListener("change", function (e) {
+    if (e.target.matches && e.target.matches("[data-rp]")) { var li = parseInt(e.target.closest(".line").dataset.i, 10), pv = parseFloat(e.target.value); if (cart[li]) { if (pv > 0) cart[li].p = Math.round(pv * 100) / 100; else delete cart[li].p; saveCart(); renderCart(); } return; }
     if (e.target.matches && e.target.matches("[data-qsize]")) { var qr2 = e.target.closest(".qrow"), qv2 = findVar(FAM[qr2.dataset.f], e.target.value); if (qv2) $("[data-qrng]", qr2).textContent = rangeTxt(qv2) + " each"; }
     var t = e.target, card = t.closest(".card"), line = t.closest(".line");
     if (t.matches("[data-size]") && card) { var f = FAM[card.dataset.f], keep = $(".qty input", card).value; $("[data-row]", card).outerHTML = buyRow(findVar(f, t.value)); $(".qty input", card).value = keep; }
@@ -1156,7 +1164,7 @@
   if (P.get("ref")) store.set("ref", P.get("ref").replace(/[<>]/g, "").slice(0, 60));
   if (P.get("cart")) {
     cart = [];
-    P.get("cart").split(",").forEach(function (x) { var a = x.split("*"), hit = SKU[(a[0] || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")]; if (hit) cart.push({ f: hit[0].id, v: vkey(hit[0].vars[hit[1]]), q: Math.max(1, parseInt(a[1], 10) || 1) }); });
+    P.get("cart").split(",").forEach(function (x) { var a = x.split("*"), hit = SKU[(a[0] || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var qp = (a[1] || "").split("@"), pr = parseFloat(qp[1]); if (hit) { var it = { f: hit[0].id, v: vkey(hit[0].vars[hit[1]]), q: Math.max(1, parseInt(qp[0], 10) || 1) }; if (pr > 0 && pr < 100000) it.p = Math.round(pr * 100) / 100; cart.push(it); } });
     store.set("cart", cart);
   }
   deal.lines = (Array.isArray(deal.lines) ? deal.lines : []).filter(function (l) { return FAM[l.f] && findVar(FAM[l.f], l.v); });

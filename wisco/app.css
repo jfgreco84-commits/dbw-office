@@ -573,3 +573,7 @@ table.cmp .add.pk { margin-left: 6px; background: var(--gold); color: var(--gold
 .promoband { background: #0B1D4A; padding: 12px 0 } #extrasbody .promo { margin-bottom: 12px }
 .promonote { margin: 6px 0 4px; font: 800 13.5px/1.4 var(--sans); color: #8A5A00; background: #FFF6E5; border-left: 5px solid #E0A020; border-radius: 8px; padding: 8px 12px } .promonote.won { color: #0B5A2B; background: #E7F7EC; border-left-color: #0B7A3B }
 .ppl { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px } .ppl li { background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--royal); border-radius: 12px; padding: 12px 14px; font: 600 15px/1.45 var(--sans); color: var(--ink) } .ppl b { color: var(--navy-2) }
+
+/* ---------- v22: account pricing, rep price links ---------- */
+.line .rp { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; font: 800 12.5px var(--sans); color: #8A5A00; background: #FFF6E5; border-radius: 10px; padding: 6px 10px } .line .rp input { width: 110px; height: 40px; border: 1.5px solid #E0A020; border-radius: 8px; padding: 0 8px; font: 800 15px var(--sans) }
+#intentseg { display: grid }

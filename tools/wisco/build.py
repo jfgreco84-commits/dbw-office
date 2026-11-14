@@ -366,7 +366,10 @@ def main():
             # Saws and equipment get one price and no brackets.
             c0 = COST.get(v[0]) or (v[3] / MARKUP if v[3] else None)   # v[3] is still cost x the first bracket here
             if c0 and "equip" in cats: v[3] = whole(c0 * EQUIP)
-            elif c0: v[3] = whole(c0 * TIERS[0]); v.append([whole(c0 * t) for t in TIERS[1:]])
+            elif c0:
+                v[3] = whole(c0 * TIERS[0])
+                # Six equal multipliers = one list price, no quantity prices in the public file.
+                if len(set(TIERS)) > 1: v.append([whole(c0 * t) for t in TIERS[1:]])
             # Saw-deal-ready pricing: a 14" to 20" high-speed blade is priced at what it costs per blade
             # inside a DEAL_PACK-blade package with the reference saw.  price = mult x (blade + saw / pack)
             if DEAL_MULT and DEAL_SAW in COST and "highspeed" in cats and v[2] in (14, 16, 18, 20) and v[0] in COST:

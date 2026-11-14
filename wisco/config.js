@@ -5,6 +5,15 @@ window.WISCO = {
   orderEmail: "fgreco@diamondbladewarehouse.com",
   managerName: "Frank Greco",
   managerTitle: "General Manager of the Wisconsin division",
+  salesManager: "Adam West, Sales Manager",
+
+  // How prices work on the site.
+  //   "account"  = the site shows one list price. Nobody is charged list: the order is billed at the
+  //                customer's account price, and the rep confirms it. A rep's reorder link can carry
+  //                that customer's own prices.
+  //   "brackets" = the site shows quantity prices and prices the order itself. (Needs a catalog built
+  //                with six different --tiers.)
+  priceMode: "brackets",
 
   // Who an order goes to.
   //   "manager" = every text and every email comes to you. The customer's rep is copied on the email.
@@ -14,7 +23,7 @@ window.WISCO = {
   inactiveDays: 18,
 
   // Extra people copied on every emailed order (optional), e.g. ["someone@diamondbladewarehouse.com"].
-  alsoCopy: [],
+  alsoCopy: ["awest@diamondbladewarehouse.com"],   // Adam West, Sales Manager
   // Shown next to "Text Frank".
   textDisplay: "(414) 213-0084",
   // Cell that receives texted orders, digits only with country code. "" hides the Text button.
