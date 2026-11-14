@@ -43,7 +43,7 @@ window.WISCO = {
   // aka     = old nicknames, so links already texted out keep working.
   reps: [
     { name: "Big Frank Greco", photo: "frank.webp", email: "", cell: "", manager: "", aka: ["frank"] },
-    { name: "John Anthony", photo: "", email: "janthony@diamondbladewarehouse.com", cell: "+14143630323", manager: "", aka: ["ronny-b"] },
+    { name: "John Anthony", photo: "john-anthony.webp", email: "janthony@diamondbladewarehouse.com", cell: "+14143630323", manager: "", aka: ["ronny-b"] },
     { name: "Adam West", photo: "batman.webp", email: "awest@diamondbladewarehouse.com", cell: "+14143665237", manager: "", aka: ["batman"] },
     { name: "Adam Misurek", photo: "miz.webp", email: "amisurek@diamondbladewarehouse.com", cell: "+14145207257", manager: "", aka: ["miz"] },
     { name: "Joey “The Stinger” DeRuki", photo: "snacks.webp", email: "jderuki@diamondbladewarehouse.com", cell: "+12629579839", manager: "", aka: ["snacks", "joey-deruki"] },
