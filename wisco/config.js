@@ -54,7 +54,7 @@ window.WISCO = {
     { name: "Adam Misurek", photo: "miz.webp", email: "amisurek@diamondbladewarehouse.com", cell: "+14145207257", manager: "", aka: ["miz"] },
     { name: "Joey “The Stinger” DeRuki", photo: "snacks.webp", email: "jderuki@diamondbladewarehouse.com", cell: "+12629579839", manager: "", aka: ["snacks", "joey-deruki"] },
     { name: "T.J. Sutton", photo: "tj.webp", email: "tsutton@diamondbladewarehouse.com", cell: "+12624200326", manager: "", aka: ["tj"] },
-    { name: "JB Baemert", photo: "", email: "jbaemert@diamondbladewarehouse.com", cell: "+14149168672", manager: "", aka: ["jb", "jb-bammert", "jb-baemmert"] },
+    { name: "JB Baemert", photo: "jb.webp", email: "jbaemert@diamondbladewarehouse.com", cell: "+14149168672", manager: "", aka: ["jb", "jb-bammert", "jb-baemmert"] },
     { name: "Robert Redman", photo: "cutty.webp", email: "rredman@diamondbladewarehouse.com", cell: "+14145731192", manager: "", aka: ["cutty", "rob-redman"] },
     { name: "Kerry Smith", photo: "kerry.webp", email: "ksmith@diamondbladewarehouse.com", cell: "+14144037004", manager: "", aka: ["kerry"] },
     { name: "Geoff Nurse", photo: "geoff.webp", email: "gnurse@diamondbladewarehouse.com", cell: "+14142544197", manager: "", aka: ["geoff", "jeff"] },
