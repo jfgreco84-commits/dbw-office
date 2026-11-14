@@ -412,7 +412,7 @@
   function hitHTML(f, v) {
     return '<div class="hit" data-f="' + f.id + '" data-v="' + esc(vkey(v)) + '">' + pic(f) + "<div><h4>" + esc(f.n) + '</h4><div class="meta">' + esc(vlabel(v)) + "<br>" + esc(v[0]) + '</div></div><div class="r"><span class="p">' + rangeTxt(v) + '</span><span class="act">' + qtyHTML(1) + '<button class="add" data-add>Add</button></span></div></div>';
   }
-  function searchVars(q, limit) {
+  function searchVars(q, limit, fuzzy) {
     var t = q.toLowerCase().replace(/["”]/g, "").split(/\s+/).filter(Boolean), out = [];
     if (!t.length) return out;
     C.families.forEach(function (f) {
@@ -423,8 +423,14 @@
         if (ok) out.push([f, v, (v[0].toLowerCase().indexOf(t[0]) === 0 ? 0 : 1) * 1000 + f.rank * 5 + f.i / 100]);
       });
     });
+    if (!out.length && !fuzzy) {
+      var words = {}; C.families.forEach(function (f) { f.n.toLowerCase().split(/[^a-z0-9]+/).forEach(function (w) { if (w.length > 3) words[w] = 1; }); });
+      var fixed = t.map(function (x) { if (x.length < 4 || /^\d/.test(x)) return x; var best = x, bd = 3; Object.keys(words).forEach(function (w) { var d = lev(x, w); if (d < bd) { bd = d; best = w; } }); return best; });
+      if (fixed.join(" ") !== t.join(" ")) return searchVars(fixed.join(" "), limit, true);
+    }
     return out.sort(function (a, b) { return a[2] - b[2]; }).slice(0, limit);
   }
+  function lev(a, b) { if (Math.abs(a.length - b.length) > 2) return 9; var p = [], i, j; for (j = 0; j <= b.length; j++) p[j] = j; for (i = 1; i <= a.length; i++) { var q = [i]; for (j = 1; j <= b.length; j++) q[j] = Math.min(p[j] + 1, q[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); p = q; } return p[b.length]; }
   function quickRows() {
     var fs = C.families.filter(function (f) { return f.rank < 99 && f.id.indexOf("eagle") !== 0; }).slice(0, 12);
     return '<div class="qrows">' + fs.map(function (f) {
@@ -556,15 +562,10 @@
 
   /* ---------- saw package calculator ---------- */
   var SD = C.sawdeal || { tiers: [], saws: [] };
-  function dealBlades() { return C.families.filter(function (f) { return f.vars.some(function (v) { return v[5]; }); }); }
+  function dealBlades() { return C.families.filter(function (f) { return f.id.indexOf("eagle") !== 0 && f.vars.some(function (v) { return v[5]; }); }); }
   function dealCount() { return deal.lines.reduce(function (n, l) { return n + l.q; }, 0); }
   function dealTier(n) { var t = null; SD.tiers.forEach(function (x) { if (n >= x[0]) t = x; }); return t; }
-  function dealTotal() {
-    var saw = SD.saws.filter(function (s) { return s.sku === deal.saw; })[0], n = dealCount(), t = dealTier(n);
-    if (!saw || !t || !SD.totals) return null;
-    var base = saw.b; deal.lines.forEach(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); if (v && v[5]) base += v[5] * l.q; });
-    return Math.round(base * t[1] / 1.7);
-  }
+  function dealTotal() { return null; }
   function dealReady() { return false && deal.lines.every(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); return v && v[6]; }); }
   function dealBIN() {
     var hit = SKU[(deal.saw || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")], sawP = hit ? hit[0].vars[hit[1]][3] : 0, blades = 0;
@@ -693,7 +694,7 @@
       '<div class="frank cc"><div class="ccgrid"><div><b class="h">Blade A (what you run now)</b><div class="field"><label for="ca-p">What you pay per blade ($)</label><input id="ca-p" type="number" inputmode="decimal" min="0" placeholder="e.g. 110"></div><div class="field"><label for="ca-f">Feet you get out of one</label><input id="ca-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div>' +
       '<div><b class="h">Blade B (the one you’re considering)</b><div class="field"><label for="cb-p">What it costs per blade ($)</label><input id="cb-p" type="number" inputmode="decimal" min="0" value="' + (dv ? dv[3] : "") + '"></div><div class="field"><label for="cb-f">Feet you’d get out of one</label><input id="cb-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div></div>' +
       '<div class="field"><label for="c-ft">Feet you cut in a month</label><input id="c-ft" type="number" inputmode="decimal" min="0" placeholder="e.g. 5000"></div><div id="ccout" class="ccout">Fill in both blades to see the cost per foot.</div></div>' +
-      '<p class="note light">Blade B starts at the ' + (d ? esc(d.n) + " 14\" Buy It Now price" : "price you enter") + '. Change it to any blade. We don’t fill in blade life for you, because it depends on your material, your saw and your operator.</p>' +
+      '<p class="note light">Blade B starts at the ' + (d ? esc(d.n) + " 14\" single-blade price" : "price you enter") + '. Change it to any blade. We don’t fill in blade life for you, because it depends on your material, your saw and your operator.</p>' +
       '<div class="center"><a class="btn chrome" href="#finder">Find the right blade</a><button class="btn ghost" data-breaks>Get my price breaks</button></div>');
     setNav("");
     costCalc();
@@ -725,7 +726,7 @@
       '<div class="frank"><b class="h">1. Pick your name</b><div class="reps" id="rtreps">' + (W.reps || []).map(function (r) { var sl = slug(r.name); return '<button type="button" class="rep' + (cur === sl ? " on" : "") + '" data-rtrep="' + sl + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>"; }).join("") + "</div></div>" +
       '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? base + "?rep=" + cur : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
       '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy, open Send my order, and tap “Copy a reorder link for this cart.” Text that link. It opens with their blades already loaded.</p><div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a></div></div>' +
-      '<div class="frank"><b class="h">Texts that work</b><p class="tpl">Running low on blades? Reorder in 60 seconds, no phone tag: [your link]</p><p class="tpl">I loaded your usual order. Change the quantities if you need to and hit send: [reorder link]</p><p class="tpl">Not sure what to run on that job? Tap Ask Frank, 3 questions, one answer: [your link]</p></div>');
+      '<div class="frank"><b class="h">Texts that work</b><p class="tpl">Running low on blades? Reorder in 60 seconds, no phone tag: [your link]</p><p class="tpl">I loaded your usual order. Change the quantities if you need to and hit send: [reorder link]</p><p class="tpl">Not sure what to run on that job? Tap Ask Frank. Three questions and you get good, better and best: [your link]</p></div>');
     setNav("");
   }
 
@@ -997,9 +998,9 @@
     if (tiered(tv)) h += '<div class="blk"><h4>The more you buy, the better the price</h4><div class="tiers">' + ["1 to 11", "12+", "24+", "36+", "50+", "100+"].map(function (lab, i) { return "<div><span>" + lab + "</span><b>" + money(i ? tv[6][i - 1] : tv[3]) + "</b></div>"; }).join("") + '</div><p class="note">Each, for the ' + esc(vlabel(tv)) + ". " + esc(mixLine()) + " Your account may do better.</p></div>";
     h += '<div class="callout"><b>Want a better number?</b><span>Bigger order, a saw to go with it, or an account price you already have. Ask.</span><button class="btn gold sm" data-pricing>Negotiate with ' + esc(FRANK) + "</button></div>";
     if (mats.length) h += '<div class="blk"><h4>How it rates</h4><div class="rates">' + mats.map(function (k) { return '<div class="' + (cur.indexOf(k) >= 0 ? "on" : "") + '"><span>' + esc(MATNAME[k]) + "</span><span>" + stars(f.m[k]) + " " + f.m[k].toFixed(1) + "</span></div>"; }).join("") + "</div></div>";
-    h += '<div class="blk"><h4>Watch it cut</h4>' + (vurl
+    if (vurl) {h += '<div class="blk"><h4>Watch it cut</h4>' + (vurl
       ? '<a class="video" href="' + esc(vurl) + '" target="_blank" rel="noopener"><span class="play"></span><span><b>See the ' + esc(f.n) + " in action</b><span>Opens the video in a new tab</span></span></a>"
-      : '<div class="video soon"><span class="play"></span><span><b>Video coming soon</b><span>Want to see it cut first? Ask ' + esc(FRANK) + " for a demo.</span></span></div>") + "</div>";
+      : '<div class="video soon"><span class="play"></span><span><b>Video coming soon</b><span>Want to see it cut first? Ask ' + esc(FRANK) + " for a demo.</span></span></div>") + "</div>"; }
     if (f.saws.length) h += '<div class="blk"><h4>Runs on</h4><div class="tags">' + f.saws.map(function (k) { return "<span>" + esc(SAWNAME[k]) + "</span>"; }).join("") + "</div></div>";
     $("#detailtitle").textContent = f.n;
     var b = $("#detailbody"); b.innerHTML = h; b.dataset.f = f.id; b.scrollTop = 0;

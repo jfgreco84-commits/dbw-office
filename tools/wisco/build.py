@@ -213,7 +213,7 @@ def main():
     xlsx = sys.argv[1]
     imgdir = sys.argv[sys.argv.index("--images") + 1] if "--images" in sys.argv else None
     global TOTALS
-    TOTALS = "--sawdeal-totals" in sys.argv   # off by default: keeps cost-based figures out of the public repo
+    TOTALS = False
     rows = PL.load(xlsx)
     if "--master" in sys.argv: rows += PL.load_master_extra(sys.argv[sys.argv.index("--master") + 1])
     site = json.load(open(os.path.join(HERE, "dbw_site_catalog.json")))
@@ -236,7 +236,7 @@ def main():
         c = r["cost"] if isinstance(r["cost"], (int, float)) and r["cost"] > 0 else None
         if c: COST[r["sku"]] = c
         r["p"] = round(c * MARKUP, 2) if c else None
-        r["sd"] = round(c * 1.7, 2) if c else None      # saw-deal base (the 36-pack level)
+        r["sd"] = 1 if c else None      # marks a row that has a price, so it can go in a saw package
         r["chain"] = "CHAIN" in r["sheet"]
         if r["sheet"] == "WET BLADES" and "MLB" in r["section"]:
             pre = "3MLB" if "3MLB" in r["section"] else "KMLB"
@@ -373,7 +373,7 @@ def main():
                 v[3] = round(DEAL_MULT * (COST[v[0]] + COST[DEAL_SAW] / DEAL_PACK), 2); v.append(1)
             ok = "highspeed" in cats and v[2] and 12 <= v[2] <= 16 and v[5]
             # v[5] marks a blade as saw-deal eligible. It only carries a cost-based figure with --sawdeal-totals.
-            v[5] = (v[5] if TOTALS else 1) if ok else None
+            v[5] = 1 if ok else None
         f["vars"].sort(key=lambda v: (v[2] is None, v[2] or 0, v[1], v[0]))
         prices = [v[3] for v in f["vars"] if v[3]]
         d = dict(id=f["id"], n=name, cats=cats, tier=tier, hook=hook, ben=ben, desc=desc,
@@ -439,8 +439,8 @@ def main():
         d["ben"] = [[unbrand(a), unbrand(b)] for a, b in d.get("ben") or []]
         for v in d["vars"]: v[1], v[4] = unbrand(v[1]), unbrand(v[4])
         if "hay" in d: d["hay"] = re.sub(r"\s{2,}", " ", d["hay"].replace("stihl", ""))
-    sawdeal = dict(totals=TOTALS, tiers=[[15, 2.0], [25, 1.8], [36, 1.7]] if TOTALS else [[15, 0], [25, 0], [36, 0]],
-                   saws=[dict(sku=k, n=unbrand(nice(sawrows[k]["desc"])) + ("" if "saw" in nice(sawrows[k]["desc"]).lower() else " Saw"), b=sawrows[k]["sd"] if TOTALS else 0) for k in SAWS if k in sawrows],
+    sawdeal = dict(totals=TOTALS, tiers=[[15, 0], [25, 0], [36, 0]],
+                   saws=[dict(sku=k, n=unbrand(nice(sawrows[k]["desc"])) + ("" if "saw" in nice(sawrows[k]["desc"]).lower() else " Saw"), b=0) for k in SAWS if k in sawrows],
                    ref=DEAL_SAW if DEAL_MULT else "", pack=DEAL_PACK)
     data = dict(sawdeal=sawdeal,
         priceList=(m.group(1).title() + " " + m.group(2)) if m else "", built=datetime.date.today().isoformat(),
