@@ -1185,6 +1185,8 @@
     store.set("cart", cart);
   }
   deal.lines = (Array.isArray(deal.lines) ? deal.lines : []).filter(function (l) { return FAM[l.f] && findVar(FAM[l.f], l.v); });
+  /* Any link somebody taps opens on the home page, even if it was copied from deep inside the site. */
+  if (location.hash && location.hash !== "#home") { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { location.hash = ""; } }
   route(); badge();
   bfOpen(store.get("bf", 0) === 1);
   if (P.get("cart") && cart.length) { renderCart(); $("#cart").showModal(); }
