@@ -382,6 +382,14 @@ def main():
                  rank=(POPULAR.index(name) if name in POPULAR else 99), min=min(prices) if prices else None, lo=min([v[6][-1] if len(v) > 6 and isinstance(v[6], list) else v[3] for v in f["vars"] if v[3]] or [0]) or None,
                  vars=f["vars"])
         if name in NOT_WISCO: continue
+        # One-liners that were shared word for word across a whole line get their own.
+        mcol = re.match(r"^(Zenesis )?Green Kut (Yellow|Orange|Red|Green|Purple|Black|Next Day)$", name)
+        if mcol:
+            agg = {"Yellow": "soft", "Orange": "medium soft", "Red": "medium", "Green": "medium hard", "Purple": "hard", "Black": "critically hard"}.get(mcol.group(2))
+            what = "bonded for %s aggregate" % agg if agg else "with a harder bond for slabs you cut the next day"
+            d["hook"] = ("Zenesis diamond alignment, %s. More footage per blade and chip-free joints." % what) if mcol.group(1) else ("Early-entry blade %s. Our premium alternative to Soff-Cut." % what)
+        elif "chain" in cats and d["hook"].startswith("Chains, bars, sprockets and powerheads"):
+            d["hook"] = "Chains, bars and sprockets for the %s. Reorder by the exact part number." % re.sub(r"\s+Systems?$", "", name)
         out.append(d)
 
     # ---- 4. images ----
@@ -434,6 +442,10 @@ def main():
         t = re.sub(r"(?i)\bTS[- ]?(\d{3})(?:[- ]?(i)\b)?", lambda m: m.group(1) + ("i" if m.group(2) else ""), t)
         t = re.sub(r"(?i)\bstihl\b", "", t).replace("Cutquik", "Gas Cut-Off")
         return re.sub(r"\s{2,}", " ", t).replace(" /", "/").strip(" -")
+    # Photos supplied by hand (from the owner's own files) for products the DBW site has no picture of.
+    LOCALIMG = {"Hilti Gas Saws": "hilti-gas-saws.webp", "Grinders & Circular Saws": "grinders-circular-saws.webp", 'Makita 9" Battery Saw': "makita-9-battery-saw.webp"}
+    for d in out:
+        if not d.get("img") and d["n"] in LOCALIMG and os.path.exists(os.path.join(ROOT, "wisco", "img", LOCALIMG[d["n"]])): d["img"] = LOCALIMG[d["n"]]
     for d in out:
         for k in ("n", "hook", "desc"): d[k] = unbrand(d.get(k))
         d["ben"] = [[unbrand(a), unbrand(b)] for a, b in d.get("ben") or []]

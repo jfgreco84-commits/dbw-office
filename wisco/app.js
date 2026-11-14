@@ -200,6 +200,9 @@
   function pic(f) { return '<span class="pic ' + (f.img ? "" : "none") + '">' + (f.img ? '<img loading="lazy" alt="" src="img/' + esc(f.img) + '">' : "") + "</span>"; }
   function qtyHTML(n) { return '<span class="qty"><button type="button" data-q="-1" aria-label="Fewer">−</button><input type="number" inputmode="numeric" min="1" max="9999" value="' + n + '" aria-label="Quantity"><button type="button" data-q="1" aria-label="More">+</button></span>'; }
   function toast(msg) { var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2400); }
+  var PROMO = (W.promos || {}).cardFreeBlade || {}, PROMO_ON = !!PROMO.on;
+  function isCard(pay) { return /card/i.test(pay || ""); }
+  function promoBar() { return PROMO_ON ? '<div class="promo"><b>' + esc(PROMO.title || "Free blade when you pay this order by card") + "</b><span>" + esc(PROMO.text || "") + "</span></div>" : ""; }
   var BRK = [12, 24, 36, 50, 100];
   function tiered(v) { return v && Array.isArray(v[6]); }
   function eachAt(v, q) { if (!tiered(v)) return v[3]; var i = 0; BRK.forEach(function (b, k) { if (q >= b) i = k + 1; }); return i ? v[6][i - 1] : v[3]; }
@@ -309,6 +312,7 @@
       '</div><div class="art"><img class="logo" src="brand/logo.webp" alt="DBW WISCO, a division of Diamond Blade Warehouse" width="430" height="458">' +
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
 
+      (PROMO_ON ? '<section class="promoband"><div class="wrap">' + promoBar() + "</div></section>" : "") +
       '<section class="costco"><div class="wrap"><div><b>The more you buy, the better the price.</b><span>We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Our heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + "</div></div></section>" +
@@ -319,11 +323,12 @@
 
       '<section class="sec deal"><div class="wrap narrow"><div class="sec-head"><h2>Need a saw?</h2><p>Buy your blades and your saw together and we sharpen the pencil on both. Stack 15, 25 or 36 blades and your rep builds the package.</p></div><div class="center"><a class="btn chrome shine" href="#saw-deal">Build my saw package</a><a class="btn ghost" href="#cost">Renting? Run the math</a></div></div></section>' +
 
-      '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><div class="three people swipe">' +
-      "<div class=\"point l\"><b>A real person, every order</b><p>You should never have to fight an automated maze just to reorder. Every order on this site lands with a human who knows your account. Nothing here charges a card.</p></div>" +
-      "<div class=\"point l\"><b>One hand washes the other</b><p>We sell blades and equipment to put food on our families’ tables. You and your crews use them to put food on yours. One good American company doing good business with another.</p></div>" +
-      "<div class=\"point l\"><b>We obsess so you don’t have to</b><p>You’re the one sweating behind the saw. We sweat the blades, the bonds and the freight, and we’re here for you every day of the week.</p></div>" +
-      '</div><div class="bribe"><b>We remember who you are.</b><span>Tell your salesman your favorite team, athlete or school. We make a point of remembering, and it has a way of showing up in the box.</span></div></div></section>' +
+      '<section class="sec alt"><div class="wrap narrow"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><ul class="ppl">' +
+      "<li><b>A real person on every order.</b> Someone who knows your account picks it up. Nothing here charges a card.</li>" +
+      "<li><b>One hand washes the other.</b> We sell blades to feed our families. You run them to feed yours.</li>" +
+      "<li><b>We obsess so you don’t have to.</b> You sweat behind the saw. We sweat the blades, the bonds and the freight.</li>" +
+      "<li><b>We remember who you are.</b> Tell your salesman your team. It has a way of showing up in the box.</li>" +
+      "</ul></div></section>" +
 
       '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>The site price is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three swipe">' +
       '<div class="lvl"><em>1</em><b>Site price</b><p>What you see here. No account needed. It drops as the quantity goes up.</p></div>' +
@@ -808,6 +813,7 @@
     var miss = DONTFORGET.filter(function (d) { return !have[d.cat]; });
     extras = { free: "", stock: false, breaks: [] };
     $("#extrasbody").innerHTML =
+      promoBar() +
       '<div class="xcard gift"><b>With every order: 1 item at our cost.</b><span>Our way of saying thanks for the business. Pick the one you want at our cost and your rep sends back the number.</span><select id="xfree" aria-label="Item at cost"><option value="">Let my rep pick the best one</option>' + t.lines.map(function (l, i) { return '<option value="' + i + '">' + esc(l.f.n + " " + vlabel(l.v)) + "</option>"; }).join("") + "</select></div>" +
       '<div class="xcard"><b>Stock up and save.</b><span>We keep deep inventory on Dragon, Superblade Extreme, Super G, T-Rex and Viper. Want our stock-up pricing on those?</span><label class="xcheck"><input type="checkbox" id="xstock"> Yes, have my rep quote stock-up pricing</label></div>' +
       '<div class="xcard"><b>Buying in quantity?</b><span>Tap the price breaks you want quoted.</span><div class="xchips" id="xbreaks">' + BREAKS.map(function (q) { return '<button type="button" data-xbreak="' + q + '" aria-pressed="false">' + q + "</button>"; }).join("") + "</div></div>" +
@@ -880,6 +886,7 @@
     $("#sharebtn").hidden = !(m === "order"); $("#friendbtn").hidden = m !== "refer";
     setAcct(m === "account" ? "new" : info.acct === "new" && !info.sent ? "new" : (info.sent ? "existing" : (info.acct || "existing")));
     if (m === "account") { $("#newwrap").hidden = false; $("#orderwrap").hidden = false; }
+    payNote();
     ["cart", "detail", "extras"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); $("#send").showModal(); $("#sendform").scrollTop = 0;
   }
   function newRef() { var d = new Date(), a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = ""; for (var i = 0; i < 4; i++) r += a[Math.floor(Math.random() * a.length)]; return "W" + ("0" + (d.getMonth() + 1)).slice(-2) + ("0" + d.getDate()).slice(-2) + "-" + r; }
@@ -904,6 +911,7 @@
     if ((order || terms) && o.acct === "new" && (o.addr || o.city || o.zip)) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · "));
     if (order || terms || mode === "pricing") L.push("Salesman: " + (rep ? rep.name : (o.acct === "new" ? "None yet. Assign a rep." : "Not sure. Look this account up in Sage / Zoho by phone or company.")));
     if (order) { L.push("Pay by: " + o.pay); if (o.po) L.push("PO #: " + o.po); }
+    if (mode === "order" && PROMO_ON && isCard(o.pay)) L.push("PROMO: FREE BLADE for paying this order by card. Rep confirms which blade.");
     if ((order || mode === "pricing") && o.ref) L.push("REFERRED BY: " + o.ref + "  (they earn " + RW.referrer + ")");
     var refs = [[o.r1, o.r1p], [o.r2, o.r2p], [o.r3, o.r3p]].filter(function (x) { return x[0] || x[1]; });
     if ((order || terms) && (refs.length || o.limit || terms)) {
@@ -1120,7 +1128,8 @@
     ["name", "company", "phone", "email", "addr", "city", "state", "zip", "fav"].forEach(function (k) { info[k] = f.elements[k].value.trim(); });
     info.acct = f.elements.acct.value; store.set("me", info);
   });
-  $("#sendform").addEventListener("change", function (e) { if (e.target.id === "f-pay" && /terms/i.test(e.target.value) && $("#f-acct").value === "new") $("#creditwrap").open = true; preview(); });
+  function payNote() { var el = $("#promonote"); if (!el) return; var on = PROMO_ON && mode === "order", card = isCard($("#f-pay").value); el.hidden = !on; el.className = "promonote" + (card ? " won" : ""); el.textContent = card ? "You’re paying by card, so this order gets a free blade. Your rep confirms which one." : (PROMO.title || "Free blade when you pay this order by card") + ". Pick a card option above to get it."; }
+  $("#sendform").addEventListener("change", function (e) { payNote(); if (e.target.id === "f-pay" && /terms/i.test(e.target.value) && $("#f-acct").value === "new") $("#creditwrap").open = true; preview(); });
   $("#sendform").addEventListener("submit", function (e) { e.preventDefault(); });
   /* Quick-access strip: arrows show there is more to the side, and move it. */
   (function () {

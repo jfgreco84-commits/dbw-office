@@ -567,3 +567,9 @@ table.cmp .add.pk { margin-left: 6px; background: var(--gold); color: var(--gold
 .tsc.r::after, .tsc.l::after { content: ""; position: absolute; z-index: -1; top: 8px; bottom: 8px; border-radius: 999px; background: var(--gold); box-shadow: 0 2px 8px rgba(0,0,0,.35) } .tsc.r::after { left: 26px; right: 6px } .tsc.l::after { left: 6px; right: 22px }
 .tsc[hidden] { display: none } .tools .wrap { scroll-padding-inline: 60px; padding-right: 84px }
 @media (prefers-reduced-motion: no-preference) { .tsc.r { animation: nudge 2.2s ease-in-out 3 } @keyframes nudge { 50% { transform: translateX(-5px) } } }
+
+/* ---------- v20: card promo, compact People ---------- */
+.promo { display: grid; gap: 2px; background: var(--gold); color: var(--gold-ink); border: 1px solid #FFF2C4; border-radius: 14px; padding: 12px 16px; box-shadow: 0 6px 18px rgba(224,163,19,.35) } .promo b { font: 900 16px/1.2 var(--sans); letter-spacing: .02em; text-transform: uppercase } .promo span { font: 700 13.5px/1.4 var(--sans) }
+.promoband { background: #0B1D4A; padding: 12px 0 } #extrasbody .promo { margin-bottom: 12px }
+.promonote { margin: 6px 0 4px; font: 800 13.5px/1.4 var(--sans); color: #8A5A00; background: #FFF6E5; border-left: 5px solid #E0A020; border-radius: 8px; padding: 8px 12px } .promonote.won { color: #0B5A2B; background: #E7F7EC; border-left-color: #0B7A3B }
+.ppl { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px } .ppl li { background: #fff; border: 1px solid var(--line); border-left: 5px solid var(--royal); border-radius: 12px; padding: 12px 14px; font: 600 15px/1.45 var(--sans); color: var(--ink) } .ppl b { color: var(--navy-2) }

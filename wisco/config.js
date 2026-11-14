@@ -74,6 +74,15 @@ window.WISCO = {
     "I want to open an account"
   ],
 
+  // Promotions. Set on: false to turn one off everywhere.
+  promos: {
+    cardFreeBlade: {
+      on: true,
+      title: "Free blade when you pay this order by card",
+      text: "Pick Card on file or Call me for a new card at checkout. Your rep confirms the blade."
+    }
+  },
+
   // Rewards. Change the wording here and it changes everywhere on the site.
   rewards: {
     review: "10% off your next order",       // for leaving an honest review, good or bad
