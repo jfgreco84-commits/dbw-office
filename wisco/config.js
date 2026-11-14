@@ -6,6 +6,13 @@ window.WISCO = {
   managerName: "Frank Greco",
   managerTitle: "General Manager of the Wisconsin division",
 
+  // Who an order goes to.
+  //   "manager" = every text and every email comes to you. The customer's rep is copied on the email.
+  //   "rep"     = it goes to the rep. You are copied on the email, and texts go to the rep's cell.
+  ordersTo: "manager",
+  // Accounts with no activity for this many days are yours to reassign. Printed on every order as a reminder.
+  inactiveDays: 18,
+
   // Extra people copied on every emailed order (optional), e.g. ["someone@diamondbladewarehouse.com"].
   alsoCopy: [],
   // Shown next to "Text Frank".
@@ -32,11 +39,11 @@ window.WISCO = {
     { name: "Adam Misurek", photo: "miz.webp", email: "amisurek@diamondbladewarehouse.com", cell: "+14145207257", manager: "", aka: ["miz"] },
     { name: "Joey “The Stinger” DeRuki", photo: "snacks.webp", email: "jderuki@diamondbladewarehouse.com", cell: "+12629579839", manager: "", aka: ["snacks", "joey-deruki"] },
     { name: "T.J. Sutton", photo: "tj.webp", email: "tsutton@diamondbladewarehouse.com", cell: "+12624200326", manager: "", aka: ["tj"] },
-    { name: "JB Baemmert", photo: "", email: "jbaemert@diamondbladewarehouse.com", cell: "+14149168672", manager: "", aka: ["jb", "jb-bammert"] },
+    { name: "JB Baemert", photo: "", email: "jbaemert@diamondbladewarehouse.com", cell: "+14149168672", manager: "", aka: ["jb", "jb-bammert", "jb-baemmert"] },
     { name: "Rob Redman", photo: "", email: "rredman@diamondbladewarehouse.com", cell: "+14145731192", manager: "", aka: ["cutty"] },
     { name: "Kerry Smith", photo: "", email: "ksmith@diamondbladewarehouse.com", cell: "+14144037004", manager: "", aka: ["kerry"] },
     { name: "Geoff Nurse", photo: "", email: "gnurse@diamondbladewarehouse.com", cell: "+14142544197", manager: "", aka: ["jeff", "geoff"] },
-    { name: "Luis Millan", photo: "", email: "lmillan@diamondbladewarehouse.com", cell: "", manager: "", aka: ["luis", "luis-milan"] },
+    { name: "Luis Millan", photo: "", email: "lmillan@diamondbladewarehouse.com", cell: "+14142161941", manager: "", aka: ["luis", "luis-milan"] },
     { name: "Les", photo: "les.webp", email: "lkubeny@diamondbladewarehouse.com", cell: "+14142072487", manager: "", aka: ["les"] }
   ],
 

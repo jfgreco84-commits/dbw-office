@@ -909,6 +909,7 @@
     if (mode === "account") { L.push("Wants a new account set up."); if (o.addr || o.city || o.zip) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · ")); L.push("Salesman: " + (rep ? rep.name : "None yet. Assign a rep.")); }
     if (order || terms) L.push("Account: " + (o.acct === "new" ? "NEW ACCOUNT" : "Existing customer"));
     if ((order || terms) && o.acct === "new" && (o.addr || o.city || o.zip)) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · "));
+    if (order && o.acct !== "new" && W.inactiveDays) L.push("Account check: confirm the date of last activity. Over " + W.inactiveDays + " days, or an old rep’s account, is " + FRANK + "’s to assign.");
     if (order || terms || mode === "pricing") L.push("Salesman: " + (rep ? rep.name : (o.acct === "new" ? "None yet. Assign a rep." : "Not sure. Look this account up in Sage / Zoho by phone or company.")));
     if (order) { L.push("Pay by: " + o.pay); if (o.po) L.push("PO #: " + o.po); }
     if (mode === "order" && PROMO_ON && isCard(o.pay)) L.push("PROMO: FREE BLADE for paying this order by card. Rep confirms which blade.");
@@ -968,9 +969,10 @@
   }
   /* Who gets it. A rep with an email in config.js gets the order; Frank and the rep's manager are copied. No rep email = it goes to Frank. */
   function route2(slugv) {
-    var r = repBySlug(slugv) || {}, main = W.orderEmail || "", uniq = function (a) { var seen = {}; return a.filter(function (x) { x = (x || "").toLowerCase(); if (!x || seen[x]) return false; seen[x] = 1; return true; }); };
-    var to = r.email || main, cc = uniq([main, r.manager].concat(W.alsoCopy || [])).filter(function (x) { return x.toLowerCase() !== to.toLowerCase(); });
-    return { to: to, cc: cc, cell: r.cell || W.textNumber || "", who: r.email || r.cell ? r.name : FRANK };
+    var r = repBySlug(slugv) || {}, main = W.orderEmail || "", toRep = W.ordersTo === "rep", uniq = function (a) { var seen = {}; return a.filter(function (x) { x = (x || "").toLowerCase(); if (!x || seen[x]) return false; seen[x] = 1; return true; }); };
+    var to = toRep && r.email ? r.email : main, cc = uniq([main, r.email, r.manager].concat(W.alsoCopy || [])).filter(function (x) { return x.toLowerCase() !== to.toLowerCase(); });
+    var repText = toRep && r.cell;
+    return { to: to, cc: cc, cell: repText ? r.cell : (W.textNumber || ""), who: repText || (toRep && r.email) ? r.name : FRANK };
   }
   function mailto(to, subj, body, cc) { location.href = "mailto:" + encodeURIComponent(to || "") + "?" + (cc && cc.length ? "cc=" + encodeURIComponent(cc.join(",")) + "&" : "") + "subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body); }
   function sms(body, cell) { location.href = "sms:" + (cell || W.textNumber) + "?&body=" + encodeURIComponent(body); }
