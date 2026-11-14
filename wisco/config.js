@@ -15,7 +15,10 @@ window.WISCO = {
   //                with six different --tiers.)
   //   "range"    = every blade shows a price range. The site never commits to a price. The rep sets the
   //                number and confirms it before it ships. (Needs a catalog built with --range.)
-  priceMode: "range",
+  //   "private"  = no price is shown anywhere. The customer picks blades and sends the order; the rep sets
+  //                the price. A rep link can still carry one customer's own prices. (Needs a catalog built
+  //                with --private, so no price is in the public files at all.)
+  priceMode: "private",
 
   // Who an order goes to.
   //   "both"    = every email and every text goes to you AND the customer's rep, together.
