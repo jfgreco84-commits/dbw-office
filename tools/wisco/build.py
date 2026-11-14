@@ -465,6 +465,18 @@ def main():
     sawdeal = dict(totals=TOTALS, tiers=[[15, 0], [25, 0], [36, 0]],
                    saws=[dict(sku=k, n=unbrand(nice(sawrows[k]["desc"])) + ("" if "saw" in nice(sawrows[k]["desc"]).lower() else " Saw"), b=0) for k in SAWS if k in sawrows],
                    ref=DEAL_SAW if DEAL_MULT else "", pack=DEAL_PACK)
+    # --private: no price leaves the building. Every price in the public file is replaced by its rank
+    # among items of the same diameter (1 = cheapest), which is all the "lowest price" sort needs.
+    if "--private" in sys.argv:
+        by = {}
+        for d in out:
+            for v in d["vars"]: by.setdefault(v[2], set()).add(v[3])
+        rk = {k: {p: i + 1 for i, p in enumerate(sorted(x))} for k, x in by.items()}
+        for d in out:
+            for v in d["vars"]:
+                v[3] = rk[v[2]][v[3]]; del v[6:]
+            d["min"] = min(v[3] for v in d["vars"]) if d["vars"] else 0
+            d.pop("lo", None)
     data = dict(sawdeal=sawdeal,
         priceList=(m.group(1).title() + " " + m.group(2)) if m else "", built=datetime.date.today().isoformat(),
         materials=[dict(k=k, n=n) for k, n in FA.MATERIALS], saws=[dict(k=k, n=n, s=s) for k, n, s in FA.SAWS],

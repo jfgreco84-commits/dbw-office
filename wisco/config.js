@@ -15,7 +15,10 @@ window.WISCO = {
   //                with six different --tiers.)
   //   "range"    = every blade shows a price range. The site never commits to a price. The rep sets the
   //                number and confirms it before it ships. (Needs a catalog built with --range.)
-  priceMode: "range",
+  //   "private"  = no price is shown anywhere. The customer picks blades and sends the order; the rep sets
+  //                the price. A rep link can still carry one customer's own prices. (Needs a catalog built
+  //                with --private, so no price is in the public files at all.)
+  priceMode: "private",
 
   // Who an order goes to.
   //   "both"    = every email and every text goes to you AND the customer's rep, together.
@@ -46,15 +49,15 @@ window.WISCO = {
   // aka     = old nicknames, so links already texted out keep working.
   reps: [
     { name: "Big Frank Greco", photo: "frank.webp", email: "", cell: "", manager: "", aka: ["frank"] },
-    { name: "John Anthony", photo: "john-anthony.webp", email: "janthony@diamondbladewarehouse.com", cell: "+14143630323", manager: "", aka: ["ronny-b"] },
+    { name: "John Anthony", photo: "john-anthony.webp", email: "janthony@diamondbladewarehouse.com", cell: "+14143630323", manager: "", aka: ["ronny", "ronny-b"] },
     { name: "Adam West", photo: "batman.webp", email: "awest@diamondbladewarehouse.com", cell: "+14143665237", manager: "", aka: ["batman"] },
     { name: "Adam Misurek", photo: "miz.webp", email: "amisurek@diamondbladewarehouse.com", cell: "+14145207257", manager: "", aka: ["miz"] },
     { name: "Joey “The Stinger” DeRuki", photo: "snacks.webp", email: "jderuki@diamondbladewarehouse.com", cell: "+12629579839", manager: "", aka: ["snacks", "joey-deruki"] },
     { name: "T.J. Sutton", photo: "tj.webp", email: "tsutton@diamondbladewarehouse.com", cell: "+12624200326", manager: "", aka: ["tj"] },
     { name: "JB Baemert", photo: "", email: "jbaemert@diamondbladewarehouse.com", cell: "+14149168672", manager: "", aka: ["jb", "jb-bammert", "jb-baemmert"] },
-    { name: "Rob Redman", photo: "", email: "rredman@diamondbladewarehouse.com", cell: "+14145731192", manager: "", aka: ["cutty"] },
+    { name: "Robert Redman", photo: "", email: "rredman@diamondbladewarehouse.com", cell: "+14145731192", manager: "", aka: ["cutty", "rob-redman"] },
     { name: "Kerry Smith", photo: "kerry.webp", email: "ksmith@diamondbladewarehouse.com", cell: "+14144037004", manager: "", aka: ["kerry"] },
-    { name: "Geoff Nurse", photo: "geoff.webp", email: "gnurse@diamondbladewarehouse.com", cell: "+14142544197", manager: "", aka: ["jeff", "geoff"] },
+    { name: "Geoff Nurse", photo: "geoff.webp", email: "gnurse@diamondbladewarehouse.com", cell: "+14142544197", manager: "", aka: ["geoff", "jeff"] },
     { name: "Luis Millan", photo: "luis.webp", email: "lmillan@diamondbladewarehouse.com", cell: "+14142161941", manager: "", aka: ["luis", "luis-milan"] },
     { name: "Les", photo: "les.webp", email: "lkubeny@diamondbladewarehouse.com", cell: "+14142072487", manager: "", aka: ["les"] }
   ],

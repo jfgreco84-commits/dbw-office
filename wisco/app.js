@@ -167,7 +167,7 @@
   function starterLines(st) { return st.items.map(function (it) { var f = FAM[it[0]], v = f && f.vars.filter(function (x) { return x[2] === it[1]; })[0]; return v ? { f: f, v: v, q: it[2] } : null; }).filter(Boolean); }
   function startersHTML() {
     return '<div class="starters swipe">' + STARTERS.map(function (st) { var L = starterLines(st); if (!L.length) return ""; var tot = L.reduce(function (n, l) { return n + l.v[3] * l.q; }, 0), cnt = L.reduce(function (n, l) { return n + l.q; }, 0);
-      return '<div class="starter"><b>' + esc(st.n) + "</b><span>" + esc(st.s) + "</span><ul>" + L.map(function (l) { return "<li>" + l.q + " x " + esc(l.f.n) + " " + esc(String(l.v[2])) + '"</li>'; }).join("") + '</ul><div class="st-foot"><em>' + cnt + " pieces · " + money(tot) + ' Buy It Now</em><button class="add" data-starter="' + st.k + '">Load it</button></div></div>'; }).join("") + "</div>";
+      return '<div class="starter"><b>' + esc(st.n) + "</b><span>" + esc(st.s) + "</span><ul>" + L.map(function (l) { return "<li>" + l.q + " x " + esc(l.f.n) + " " + esc(String(l.v[2])) + '"</li>'; }).join("") + '</ul><div class="st-foot"><em>' + cnt + " pieces" + (HIDE ? "" : " · " + money(tot) + " Buy It Now") + '</em><button class="add" data-starter="' + st.k + '">Load it</button></div></div>'; }).join("") + "</div>";
   }
   var HDEPTH = { 12: '4"', 14: '5"', 16: '6"' }, GDEPTH = { 4: '1"', 4.5: '1-1/4"', 5: '1-1/2"', 7: '2-1/4"', 9: '3-1/4"' };
   function depthFor(f, v) { if (!v[2]) return ""; if (f.saws.indexOf("cutoff") >= 0 && HDEPTH[v[2]]) return HDEPTH[v[2]]; if (f.saws.indexOf("grinder") >= 0 && GDEPTH[v[2]] && f.cats.indexOf("cup") < 0) return GDEPTH[v[2]]; return ""; }
@@ -213,15 +213,15 @@
   function promoBar() { return PROMO_ON ? '<div class="promo"><b>' + esc(PROMO.title || "Free blade when you pay this order by card") + "</b><span>" + esc(PROMO.text || "") + "</span></div>" : ""; }
   /* priceMode "account": the site shows one list price. Nobody is charged list. The rep bills the account price.
      priceMode "brackets": the site shows quantity prices and prices the order itself. */
-  var ACCT = W.priceMode !== "brackets", RNG = W.priceMode === "range";
+  var ACCT = W.priceMode !== "brackets", RNG = W.priceMode === "range", HIDE = W.priceMode === "private";   /* "private": no price is shown anywhere unless a rep link carries the customer's own. */
   function lowOf(v) { return typeof v[6] === "number" && v[6] > 0 && v[6] < v[3] ? v[6] : v[3]; }
   function ranged(v) { return lowOf(v) < v[3]; }
   var BRK = [12, 24, 36, 50, 100];
   function tiered(v) { return v && Array.isArray(v[6]); }
   function eachAt(v, q) { if (!tiered(v)) return v[3]; var i = 0; BRK.forEach(function (b, k) { if (q >= b) i = k + 1; }); return i ? v[6][i - 1] : v[3]; }
-  function rangeTxt(v) { return tiered(v) ? money(v[6][4]) + " to " + money(v[3]) : ranged(v) ? money(lowOf(v)) + " to " + money(v[3]) : money(v[3]); }
-  function totTxt(t) { return RNG && !t.quoted && t.low < t.total - 0.005 ? money(t.low) + " to " + money(t.total) : money(t.total); }
-  function buyRow(v) { return '<div class="buy-row" data-row><div class="price' + (tiered(v) || ranged(v) ? " rng" : "") + '">' + rangeTxt(v) + "<small>" + (tiered(v) ? "each, by quantity · " : ranged(v) ? "each · your rep sets your price · " : RNG ? "each · " : ACCT ? "list price · " : "") + esc(v[0]) + '</small></div><div class="act">' + qtyHTML(1) + '<button class="add" data-add>Add to order</button></div></div>'; }
+  function rangeTxt(v) { if (HIDE) return "Your price"; return tiered(v) ? money(v[6][4]) + " to " + money(v[3]) : ranged(v) ? money(lowOf(v)) + " to " + money(v[3]) : money(v[3]); }
+  function totTxt(t) { if (HIDE && !t.quoted) return "Priced by your rep"; return RNG && !t.quoted && t.low < t.total - 0.005 ? money(t.low) + " to " + money(t.total) : money(t.total); }
+  function buyRow(v) { return '<div class="buy-row" data-row><div class="price' + (tiered(v) || ranged(v) ? " rng" : "") + '">' + rangeTxt(v) + "<small>" + (HIDE ? "confirmed by your rep before it ships · " : tiered(v) ? "each, by quantity · " : ranged(v) ? "each · your rep sets your price · " : RNG ? "each · " : ACCT ? "list price · " : "") + esc(v[0]) + '</small></div><div class="act">' + qtyHTML(1) + '<button class="add" data-add>Add to order</button></div></div>'; }
   var MIXM = W.mixMonths || [3, 5, 8, 10], ONEMIN = W.singleItemMin || 24, QUICK = W.quickQty || [12, 24, 36, 50, 100], MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   function mixOn() { return MIXM.indexOf(new Date().getMonth() + 1) >= 0; }
   function breakList() { return BREAKS.slice(0, -1).join(", ") + " and " + BREAKS[BREAKS.length - 1]; }
@@ -301,20 +301,46 @@
     if (!n) return "";
     return '<div class="last wb"><div><b>Welcome back' + (who ? ", " + esc(who) : "") + '.</b><span>Same as last time? ' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>';
   }
+  /* A rep's own page: their face, their name, their phone. */
+  function isBoss(r) { return (r.aka || []).indexOf("frank") >= 0; }
+  function repFirst(r) { return isBoss(r) ? "Big Frank" : r.name.replace(/[“"].*?[”"]\s*/, "").split(" ")[0]; }
+  function mineCard(r) {
+    var cell = r.cell || W.textNumber || "", who = repFirst(r);
+    return '<div class="mine">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : '<span class="av">' + esc(initials(r.name)) + "</span>") +
+      "<div><b>" + esc(isBoss(r) ? "Big Frank" : r.name) + "</b><span>Your Blade Guy</span></div>" +
+      (cell ? '<div class="mine-act"><a class="btn chrome sm" href="sms:' + esc(cell) + '">Text ' + esc(who) + '</a><a class="btn ghost sm" href="tel:' + esc(cell) + '">Call</a></div>' : "") + "</div>";
+  }
+  var WHY = [
+    ["Deep warehouse.", "Stock on the shelf means it ships same day or next. I’ll put our warehouse up against anybody’s."],
+    ["We can get our hands on anything.", "If it cuts, cores or grinds, we either stock it or we know who does."],
+    ["We’ve been at this a long time.", "We were here before most of the outfits calling you, and we’ll be here after."],
+    ["Our own engineers.", "Manufacturing engineers and developers who build blades for a living. Built up to a standard, not down to a cost."],
+    ["Reps who stay.", "The guy who sold you your first blade still answers his phone. Our people don’t leave."],
+    ["Customers who reorder.", "Crews come back. That’s the whole business, and it’s why this site exists."]
+  ];
+  function bigFrank() {
+    var cell = W.textNumber || "";
+    return '<section class="sec bfsec"><div class="wrap narrow"><div class="bfhero"><img alt="Big Frank" loading="lazy" src="brand/frank-cool.webp"><div>' +
+      '<span class="kick">30 years in the business</span><h2>Big Frank, Your Blade Guy!</h2>' +
+      '<p class="bfline">“Selling blades ain’t glamorous, but someone has to do it. I’m your guy.”</p>' +
+      "<p>I’ve been selling blades since I was a kid. I know a lot. I also know enough to know when I don’t know something, and I know the right people to get the right answer. That’s how I dial you into the best savings, the best quality, the most bang for your buck, and service that’s second to none.</p>" +
+      (cell ? '<div class="mine-act"><a class="btn gold shine" href="sms:' + esc(cell) + '">Text Big Frank</a><a class="btn chrome" href="tel:' + esc(cell) + '">Call ' + esc(W.textDisplay || "") + "</a></div>" : "") +
+      '</div></div><ul class="why">' + WHY.map(function (x) { return "<li><b>" + x[0] + "</b> " + x[1] + "</li>"; }).join("") + "</ul></div></section>";
+  }
   function home() {
     var top = C.families.filter(function (f) { return f.rank < 99 && f.id.indexOf("eagle") !== 0 && f.cats.indexOf("core") < 0; }).slice(0, 16);
     var line = ["dragon", "superblade-g3", "dragon-supreme", "superblade-arrow", "zenesis-green-kut-purple"];
     var lines = LINES.map(function (L) {
       var fs = lineFams(L); if (!fs.length) return "";
       var from = Math.min.apply(null, fs.map(function (f) { return f.min; }));
-      return '<a class="linecard" href="#line-' + L.k + '"><span class="lc-art">' + L.img.map(function (id) { return FAM[id] && FAM[id].img ? '<img alt="" loading="lazy" src="img/' + esc(FAM[id].img) + '">' : ""; }).join("") + "</span><b>" + esc(L.n) + "</b><span>" + esc(L.s) + "</span><em>From " + money(from) + " →</em></a>";
+      return '<a class="linecard" href="#line-' + L.k + '"><span class="lc-art">' + L.img.map(function (id) { return FAM[id] && FAM[id].img ? '<img alt="" loading="lazy" src="img/' + esc(FAM[id].img) + '">' : ""; }).join("") + "</span><b>" + esc(L.n) + "</b><span>" + esc(L.s) + "</span><em>" + (HIDE ? "See the line" : "From " + money(from)) + " →</em></a>";
     }).join("");
     var r0 = repBySlug(me().rep);
     var T = (W.testimonials || []).filter(function (t) { return t && t.quote; });
     app.innerHTML =
       '<section class="hero"><div class="wrap"><div>' +
       (function () { var r = repBySlug(me().rep); var rf = store.get("ref", ""); return '<span class="pill"><i>★</i> ' + (r ? "Your salesman: " + esc(r.name) : rf ? "Referred by " + esc(rf) : "A division of Diamond Blade Warehouse, LLC") + " <i>★</i></span>"; })() +
-      (r0 ? '<span class="kick rep">Your salesman: ' + esc(r0.name) + "</span>" : "") + '<span class="kick">Simplified reorder</span>' +
+      (r0 ? mineCard(r0) : "") + '<span class="kick">Simplified reorder</span>' +
       "<h1>The right blade. Right now.</h1>" +
       '<p class="sub">Tell us what you cut. We ship it anywhere in the USA, same day or next. <b>Your blades, your price, 60 seconds.</b></p>' +
       welcomeBack() +
@@ -327,7 +353,7 @@
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
 
       (PROMO_ON ? '<section class="promoband"><div class="wrap">' + promoBar() + "</div></section>" : "") +
-      '<section class="costco"><div class="wrap"><div><b>The more you buy, the better the price.</b><span>' + (RNG ? "Every blade shows a price range. Where you land depends on how many you buy and what you buy with it. Your rep sets your number and confirms it before anything ships." : ACCT ? "The price you see is list. Nobody pays list. Send your order and it’s billed at your account price, and that drops again at 12, 24, 36, 50 and 100." : "We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.") + '</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
+      '<section class="costco"><div class="wrap"><div><b>The more you buy, the better the price.</b><span>' + (HIDE ? "Your price is between you and your rep, and it stays that way. Pick your blades, send the order, and your rep confirms your number before anything ships. Buying a stack or adding a saw? That’s where the deals get good." : RNG ? "Every blade shows a price range. Where you land depends on how many you buy and what you buy with it. Your rep sets your number and confirms it before anything ships." : ACCT ? "The price you see is list. Nobody pays list. Send your order and it’s billed at your account price, and that drops again at 12, 24, 36, 50 and 100." : "We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.") + '</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Our heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + "</div></div></section>" +
 
@@ -337,6 +363,7 @@
 
       '<section class="sec deal"><div class="wrap narrow"><div class="sec-head"><h2>Need a saw?</h2><p>Buy your blades and your saw together and we sharpen the pencil on both. Stack 15, 25 or 36 blades and your rep builds the package.</p></div><div class="center"><a class="btn chrome shine" href="#saw-deal">Build my saw package</a><a class="btn ghost" href="#cost">Renting? Run the math</a></div></div></section>' +
 
+      bigFrank() +
       '<section class="sec alt"><div class="wrap narrow"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><ul class="ppl">' +
       "<li><b>A real person on every order.</b> Someone who knows your account picks it up. Nothing here charges a card.</li>" +
       "<li><b>One hand washes the other.</b> We sell blades to feed our families. You run them to feed yours.</li>" +
@@ -345,7 +372,7 @@
       "</ul></div></section>" +
 
       '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>The site price is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three swipe">' +
-      '<div class="lvl"><em>1</em><b>' + (RNG ? "Price range" : ACCT ? "List price" : "Site price") + "</b><p>" + (RNG ? "What you see here. Your price lands inside it. Your rep sets the number." : ACCT ? "What you see here. It’s the ceiling. Nobody with an account pays it." : "What you see here. No account needed. It drops as the quantity goes up.") + "</p></div>" +
+      '<div class="lvl"><em>1</em><b>' + (HIDE ? "Pick it" : RNG ? "Price range" : ACCT ? "List price" : "Site price") + "</b><p>" + (HIDE ? "Find your blade and tap a quantity. No account or login needed." : RNG ? "What you see here. Your price lands inside it. Your rep sets the number." : ACCT ? "What you see here. It’s the ceiling. Nobody with an account pays it." : "What you see here. No account needed. It drops as the quantity goes up.") + "</p></div>" +
       '<div class="lvl"><em>2</em><b>Quantity breaks</b><p>' + breakList() + " pieces. " + esc(mixLine()) + "</p></div>" +
       '<div class="lvl top"><em>3</em><b>Account pricing</b><p>Every account has a level, and the price drops at each one. One quick text or email and we send back what your level gets you.</p><div class="lvls">' + (W.levels || ["Contractor", "Pro", "Gold", "Distributor", "Platinum"]).map(function (x, i, a) { return "<span" + (i === a.length - 1 ? ' class="top"' : "") + ">" + esc(x) + "</span>"; }).join("<i>›</i>") + "</div></div>" +
       '</div><div class="center"><button class="btn gold shine" data-account>Open a free account</button><button class="btn chrome" data-pricing>Check my account pricing</button><button class="btn ghost-d" data-terms>Apply for Net 30 terms</button></div></div></section>' +
@@ -534,7 +561,7 @@
       '<b class="flabel">What are you looking for?</b><div class="cats wrapc">' + cats.map(function (c) { return '<button class="cat" data-cat="' + c.k + '" aria-pressed="' + (shop.cat === c.k) + '">' + esc(c.n) + "</button>"; }).join("") + "</div>" +
       '<p class="shopblurb" id="shopblurb">' + esc(curCat.s) + "</p>" +
       '<b class="flabel">Narrow it down (optional)</b><div class="cats wrapc tags">' + SHOPTAGS.map(function (g) { return '<button class="cat tagc" data-tag="' + g.k + '" aria-pressed="' + (shop.tag === g.k) + '">' + esc(g.n) + "</button>"; }).join("") + "</div>" +
-      '<div class="shopbar"><select id="ssort" aria-label="Sort"><option value="pop">Most popular</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="az">A to Z</option></select><b id="shopn">' + list.length + (list.length === 1 ? " product" : " products") + '</b></div><div class="grid" id="shopgrid">' + grid + "</div></div></section>";
+      '<div class="shopbar"><select id="ssort" aria-label="Sort"><option value="pop">Most popular</option>' + (HIDE ? "" : '<option value="low">Price: low to high</option><option value="high">Price: high to low</option>') + '<option value="az">A to Z</option></select><b id="shopn">' + list.length + (list.length === 1 ? " product" : " products") + '</b></div><div class="grid" id="shopgrid">' + grid + "</div></div></section>";
     $("#sq").addEventListener("input", function (e) { shop.q = e.target.value.trim(); shop.n = SHOPPAGE; shopScreen(); });
     $("#ssort").value = shop.sort; $("#ssort").addEventListener("change", function (e) { shop.sort = e.target.value; shopScreen(); });
     setNav("#shop");
@@ -611,8 +638,9 @@
   function dealRefresh() {
     var d = dealCalc(), saw = SD.saws.filter(function (x) { return x.sku === deal.saw; })[0], cur = dealLine(dealCur()), q = cur ? cur.q : 0;
     $("#dqout").textContent = q + (q === 1 ? " blade" : " blades"); if (document.activeElement !== $("#dqn")) $("#dqn").value = q; if (document.activeElement !== $("#dqty")) $("#dqty").value = Math.min(50, q);
-    $("#deallines").innerHTML = d.lines.length ? d.lines.map(function (x) { return '<div class="dl" data-i="' + deal.lines.indexOf(x.l) + '"><span><b>' + x.l.q + " x " + esc(x.f.n) + "</b><small>" + esc(vlabel(x.v)) + " · " + money(x.each) + ' each</small></span><button class="link" data-dealrm>Remove</button></div>'; }).join("") : "";
+    $("#deallines").innerHTML = d.lines.length ? d.lines.map(function (x) { return '<div class="dl" data-i="' + deal.lines.indexOf(x.l) + '"><span><b>' + x.l.q + " x " + esc(x.f.n) + "</b><small>" + esc(vlabel(x.v)) + (HIDE ? "" : " · " + money(x.each) + " each") + '</small></span><button class="link" data-dealrm>Remove</button></div>'; }).join("") : "";
     $("#dealout").innerHTML = !saw ? '<div class="dealtotal off"><span>Pick a saw to see your package</span></div>' :
+      HIDE ? '<div class="dealtotal"><span>Your package</span><div class="drow"><i>' + d.n + (d.n === 1 ? " blade" : " blades") + '</i><b>✓</b></div><div class="drow"><i>' + esc(saw.n) + '</i><b>✓</b></div><strong>One price for the whole package, saw included. Send it and your rep comes back with your number.</strong><small>Nothing is charged on this site.</small></div>' :
       '<div class="dealtotal"><span>Your package</span>' +
       '<div class="drow"><i>' + d.n + (d.n === 1 ? " blade" : " blades") + "</i><b>" + money(d.blades) + "</b></div>" +
       (d.save > 0.005 ? '<div class="drow good"><i>Quantity pricing took off</i><b>− ' + money(d.save) + "</b></div>" : "") +
@@ -621,7 +649,7 @@
       (d.n ? '<strong>' + (d.net <= 0 ? "Your blade savings cover the whole saw." : d.save > 0.005 ? "After your blade savings, the saw works out to " + money(d.net) + ", down from " + money(d.sawP) + "." : ACCT ? "That’s at list. Your rep prices the package on your account, and every blade you add brings the saw down." : "Add blades and watch the saw get cheaper. The price drops at 12.") + "</strong>" : "<strong>Slide the blades up and watch the price move.</strong>") +
       "<small>Before freight and tax. Your rep can sharpen this further on a real package.</small></div>";
     var sb = $("[data-dealsend]"); if (sb) sb.disabled = !(saw && d.n);
-    var rp = $("#r-price"); if (rp) { rp.value = d.sawP || ""; rentCalc(); }
+    var rp = $("#r-price"); if (rp) { rp.value = HIDE ? "" : d.sawP || ""; rentCalc(); }
   }
   function sawDeal() {
     var fams = dealBlades();
@@ -655,7 +683,7 @@
     L.push("SAW PACKAGE REQUEST (" + (t ? t[0] + "-pack" : n + " blades") + ")");
     if (saw) L.push("Saw: " + saw.n + " (" + saw.sku + ")");
     deal.lines.forEach(function (l) { var f = FAM[l.f], v = f && findVar(f, l.v); if (v) L.push(l.q + " x " + v[0] + "  " + f.n + " " + vlabel(v)); });
-    var dc = dealCalc(); if (dc.n) L.push("Site price: blades " + money(dc.blades) + " + saw " + money(dc.sawP) + " = " + money(dc.total) + "  (before freight and tax, customer wants your best package price)");
+    var dc = dealCalc(); if (dc.n && !HIDE) L.push("Site price: blades " + money(dc.blades) + " + saw " + money(dc.sawP) + " = " + money(dc.total) + "  (before freight and tax, customer wants your best package price)");
     return L.join("\n");
   }
 
@@ -676,7 +704,7 @@
     setNav("");
   }
   function equipment() {
-    var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td><td class=\"num\">" + money(v[3]) + '</td><td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button><button class="add pk" data-pkg="' + esc(s.sku) + '">+ Blades</button></td></tr>' : ""; }).join("");
+    var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td><td class=\"num\">" + (HIDE ? "Ask" : money(v[3])) + '</td><td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button><button class="add pk" data-pkg="' + esc(s.sku) + '">+ Blades</button></td></tr>' : ""; }).join("");
     var eq = C.families.filter(function (f) { return f.cats.indexOf("equip") >= 0 || f.cats.indexOf("dust") >= 0; });
     app.innerHTML = shell("Equipment deals", 0, 0,
       "<h1>If they make it, we can get it.</h1>" + says(QUIP.equipment[0]) +
@@ -711,7 +739,7 @@
       "<h1>Price per box or price per foot?</h1>" + says(QUIP.cost[0]) +
       '<p class="lead">A blade that costs more and lasts longer is the cheaper blade. Put in what you pay and how many feet you get. Use your own numbers.</p>' +
       '<div class="frank cc"><div class="ccgrid"><div><b class="h">Blade A (what you run now)</b><div class="field"><label for="ca-p">What you pay per blade ($)</label><input id="ca-p" type="number" inputmode="decimal" min="0" placeholder="e.g. 110"></div><div class="field"><label for="ca-f">Feet you get out of one</label><input id="ca-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div>' +
-      '<div><b class="h">Blade B (the one you’re considering)</b><div class="field"><label for="cb-p">What it costs per blade ($)</label><input id="cb-p" type="number" inputmode="decimal" min="0" value="' + (dv ? dv[3] : "") + '"></div><div class="field"><label for="cb-f">Feet you’d get out of one</label><input id="cb-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div></div>' +
+      '<div><b class="h">Blade B (the one you’re considering)</b><div class="field"><label for="cb-p">What it costs per blade ($)</label><input id="cb-p" type="number" inputmode="decimal" min="0" value="' + (dv && !HIDE ? dv[3] : "") + '"></div><div class="field"><label for="cb-f">Feet you’d get out of one</label><input id="cb-f" type="number" inputmode="decimal" min="0" placeholder="your number"></div></div></div>' +
       '<div class="field"><label for="c-ft">Feet you cut in a month</label><input id="c-ft" type="number" inputmode="decimal" min="0" placeholder="e.g. 5000"></div><div id="ccout" class="ccout">Fill in both blades to see the cost per foot.</div></div>' +
       '<p class="note light">Blade B starts at the ' + (d ? esc(d.n) + " 14\" single-blade price" : "price you enter") + '. Change it to any blade. We don’t fill in blade life for you, because it depends on your material, your saw and your operator.</p>' +
       '<div class="center"><a class="btn chrome" href="#finder">Find the right blade</a><button class="btn ghost" data-breaks>Get my price breaks</button></div>');
@@ -735,7 +763,7 @@
     var mo = day * days, yr = mo * 12;
     o.className = "ccout on";
     o.innerHTML = '<div class="ccrow"><span>Rental per month</span><b>' + money(mo) + '</b></div><div class="ccrow"><span>Rental per year</span><b>' + money(yr) + "</b></div>" +
-      (price ? "<strong>You’re renting " + days + " days a month. A " + money(price) + " saw pays for itself in about " + (price / mo < 1 ? "under a month" : (price / mo).toFixed(1) + " months") + ". After that it’s yours.</strong>" : "<strong>Pick a saw above to see how fast it pays for itself.</strong>");
+      (price ? "<strong>You’re renting " + days + " days a month. A " + money(price) + " saw pays for itself in about " + (price / mo < 1 ? "under a month" : (price / mo).toFixed(1) + " months") + ". After that it’s yours.</strong>" : "<strong>" + (HIDE ? "Ask your rep what the saw runs, then divide it by that monthly number. That’s how many months until it’s yours." : "Pick a saw above to see how fast it pays for itself.") + "</strong>");
   }
 
   function repTools() {
@@ -743,7 +771,7 @@
     app.innerHTML = shell("For the sales team", 0, 0,
       "<h1>Your own link.</h1>" + '<p class="lead">Text customers a link with your name on it. When they order, it comes in marked as yours.</p>' +
       '<div class="frank"><b class="h">1. Pick your name</b><div class="reps" id="rtreps">' + (W.reps || []).map(function (r) { var sl = slug(r.name); return '<button type="button" class="rep' + (cur === sl ? " on" : "") + '" data-rtrep="' + sl + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>"; }).join("") + "</div></div>" +
-      '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? base + "?rep=" + cur : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
+      '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? repLink(base, cur) : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
       '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy. Because you picked your name above, each line in the cart has a box for <b>this customer’s price</b>. Type their real price, then open Send my order and tap “Copy a reorder link for this cart.” Text that link. It opens with their blades and their prices, and only they see it.</p><p class="note">Done building links on this phone? <button class="link" data-repoff>Turn rep mode off</button></p><div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a></div></div>' +
       '<div class="frank"><b class="h">Texts that work</b><p class="tpl">Running low on blades? Reorder in 60 seconds, no phone tag: [your link]</p><p class="tpl">I loaded your usual order. Change the quantities if you need to and hit send: [reorder link]</p><p class="tpl">Not sure what to run on that job? Tap Ask Frank. Three questions and you get good, better and best: [your link]</p></div>');
     setNav("");
@@ -791,7 +819,7 @@
   function totals() {
     var L = cartLines(), t = 0, n = 0, list = 0, low = 0, mix = mixOn(), grp = { lg: 0, sm: 0 };
     L.forEach(function (l) { l.g = l.v[2] && l.v[2] < 12 ? "sm" : "lg"; if (tiered(l.v)) grp[l.g] += l.c.q; });
-    L.forEach(function (l) { l.bq = mix && tiered(l.v) ? grp[l.g] : l.c.q; l.each = l.c.p > 0 ? l.c.p : eachAt(l.v, l.bq); n += l.c.q; t += l.each * l.c.q; list += l.v[3] * l.c.q; low += (l.c.p > 0 ? l.c.p : lowOf(l.v)) * l.c.q; });
+    L.forEach(function (l) { l.bq = mix && tiered(l.v) ? grp[l.g] : l.c.q; l.each = l.c.p > 0 ? l.c.p : HIDE ? 0 : eachAt(l.v, l.bq); n += l.c.q; t += l.each * l.c.q; list += l.v[3] * l.c.q; low += (l.c.p > 0 ? l.c.p : lowOf(l.v)) * l.c.q; });
     return { lines: L, total: t, units: n, list: list, low: low, save: list - t, quoted: L.length > 0 && L.every(function (l) { return l.c.p > 0; }), anyQuoted: L.some(function (l) { return l.c.p > 0; }) };
   }
   function addToCart(fid, key, q) {
@@ -803,7 +831,7 @@
   function saveCart() { store.set("cart", cart); badge(); bfI = 0; bfShow(); }
   function badge() {
     var t = totals(); $("#cartn").textContent = t.units; $("#dock").hidden = !t.units;
-    if (t.units) $("#dockinfo").innerHTML = "<b>" + t.units + (t.units === 1 ? " item" : " items") + " · " + totTxt(t) + "</b><span>" + (t.quoted ? "Your price, from your rep." : RNG ? "Your rep sets the price." : ACCT ? "List total. You pay your account price." : "Priced by quantity. Your account may do better.") + "</span>";
+    if (t.units) $("#dockinfo").innerHTML = "<b>" + t.units + (t.units === 1 ? " item" : " items") + (HIDE && !t.quoted ? "" : " · " + totTxt(t)) + "</b><span>" + (t.quoted ? "Your price, from your rep." : HIDE ? "Your rep confirms your price." : RNG ? "Your rep sets the price." : ACCT ? "List total. You pay your account price." : "Priced by quantity. Your account may do better.") + "</span>";
   }
   function renderCart() {
     var t = totals(), b = $("#cartbody");
@@ -814,11 +842,11 @@
     var cq = nb && bs.need <= 6 ? "You’re " + bs.need + " away" + bs.of + " from the " + nb + "-piece price." : !hasCat.core ? "No core bits on here? It’s the same freight bill either way." : !hasCat.small && !hasCat.cup ? "Running grinders? Small blades and cup wheels ship on this same order." : "Good order. Ask for your price break before you send it.";
     var nudge = '<div class="nudge">' + says(cq) + (nb ? '<div class="nbar"><i style="width:' + Math.min(100, bs.n / nb * 100) + '%"></i></div><span>' + (pb ? "You’ve hit the " + pb + "-piece price. " : "") + bs.need + " more" + esc(bs.of) + " to the " + nb + "-piece price break.</span>" : "<span>You’ve hit our biggest listed break. Your rep takes it from here.</span>") + '<small class="mixnote">' + esc(mixLine()) + "</small></div>";
     b.innerHTML = nudge + t.lines.map(function (l, i) {
-      return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · <b>" + (l.c.p > 0 ? "Your price " + money(l.each) : RNG ? rangeTxt(l.v) : (ACCT ? "List " : "") + money(l.each)) + " each</b>" + (l.each < l.v[3] ? " <s>" + money(l.v[3]) + "</s>" : "") + '</div></div><div class="lp">' + (RNG && !(l.c.p > 0) && ranged(l.v) ? "<small>up to</small> " : "") + money(l.each * l.c.q) + "</div><div>" + qtyHTML(l.c.q) + "</div>" +
-        (repMode() ? '<label class="rp">This customer’s price each $<input type="number" inputmode="decimal" min="0" step="1" data-rp value="' + (l.c.p > 0 ? l.c.p : "") + '" placeholder="' + l.v[3] + '"></label>' : "") + '<button class="rm" data-rm>Remove</button></div>';
-    }).join("") + '<div class="callout"><b>' + (t.quoted ? "These are your prices." : RNG ? "Your rep sets your price." : ACCT ? "You don’t pay list." : "The more you buy, the better the price.") + "</b><span>" + (t.quoted ? "Your rep set them for your account. Change a quantity and send it." : RNG ? "Your order lands inside the range shown. Send it and your rep confirms your exact number before it ships. Bigger order or a saw with it gets you closer to the low end." : ACCT ? "Send the order and your rep bills it at your account price. They confirm the number before it ships. Bigger order or a saw with it? Ask." : (t.save > 0.005 ? "Quantity pricing is already saving you " + money(t.save) + " on this order. " : "") + "Have an account price, or want a package deal? Ask.") + '</span><button class="btn gold sm" data-breaks>Negotiate with ' + esc(FRANK) + "</button></div>";
-    $("#carttot").innerHTML = "<span>" + (t.quoted ? "Your total" : RNG ? "Order range" : ACCT ? "List total" : "Order total") + "</span><span>" + totTxt(t) + "</span>";
-    $("#cartnote").textContent = (t.quoted ? "Priced for your account." : RNG ? "Your rep confirms your exact price before it ships." : ACCT ? "List is the ceiling. Your account price is what you’re billed." : "Priced by quantity.") + " Freight and tax are added by your rep. Nothing is charged on this site.";
+      return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · <b>" + (l.c.p > 0 ? "Your price " + money(l.each) + " each" : HIDE ? "Your price, confirmed by your rep" : (RNG ? rangeTxt(l.v) : (ACCT ? "List " : "") + money(l.each)) + " each") + "</b>" + (!HIDE && l.each < l.v[3] ? " <s>" + money(l.v[3]) + "</s>" : "") + '</div></div><div class="lp">' + (RNG && !(l.c.p > 0) && ranged(l.v) ? "<small>up to</small> " : "") + (HIDE && !(l.c.p > 0) ? "" : money(l.each * l.c.q)) + "</div><div>" + qtyHTML(l.c.q) + "</div>" +
+        (repMode() ? '<label class="rp">This customer’s price each $<input type="number" inputmode="decimal" min="0" step="1" data-rp value="' + (l.c.p > 0 ? l.c.p : "") + '" placeholder="' + (HIDE ? "" : l.v[3]) + '"></label>' : "") + '<button class="rm" data-rm>Remove</button></div>';
+    }).join("") + '<div class="callout"><b>' + (t.quoted ? "These are your prices." : HIDE ? "Your price is your price." : RNG ? "Your rep sets your price." : ACCT ? "You don’t pay list." : "The more you buy, the better the price.") + "</b><span>" + (t.quoted ? "Your rep set them for your account. Change a quantity and send it." : HIDE ? "No hunting for a number. Send the order and your rep confirms your price before anything ships. Nothing is charged on this site." : RNG ? "Your order lands inside the range shown. Send it and your rep confirms your exact number before it ships. Bigger order or a saw with it gets you closer to the low end." : ACCT ? "Send the order and your rep bills it at your account price. They confirm the number before it ships. Bigger order or a saw with it? Ask." : (t.save > 0.005 ? "Quantity pricing is already saving you " + money(t.save) + " on this order. " : "") + "Have an account price, or want a package deal? Ask.") + '</span><button class="btn gold sm" data-breaks>Negotiate with ' + esc(FRANK) + "</button></div>";
+    $("#carttot").innerHTML = "<span>" + (t.quoted ? "Your total" : HIDE ? "Your price" : RNG ? "Order range" : ACCT ? "List total" : "Order total") + "</span><span>" + totTxt(t) + "</span>";
+    $("#cartnote").textContent = (t.quoted ? "Priced for your account." : RNG || HIDE ? "Your rep confirms your exact price before it ships." : ACCT ? "List is the ceiling. Your account price is what you’re billed." : "Priced by quantity.") + " Freight and tax are added by your rep. Nothing is charged on this site.";
   }
 
   /* ---------- before you send it ---------- */
@@ -850,6 +878,8 @@
     refer: { title: "Refer a contractor", intro: "Send a contractor our way. When they place their first order and name you, you get " + RW.review.replace("your", "your") + ".", head: "DBW WISCO REFERRAL", subj: "Referral" }
   };
   function me() { return store.get("me", {}); }
+  /* On the live site a rep's link is their own short address (…/wisco/miz/). Opened as a file, fall back to ?rep=. */
+  function repLink(base, s) { var r = repBySlug(s), nick = r && r.aka && r.aka[0]; return /\/$/.test(base) && nick ? base + nick + "/" : base + "?rep=" + s; }
   function repBySlug(s) { if (!s) return undefined; return (W.reps || []).filter(function (r) { return slug(r.name) === s || (r.aka || []).indexOf(s) >= 0; })[0]; }
   function initials(n) { return n.split(/\s+/).map(function (x) { return x[0]; }).join("").slice(0, 2).toUpperCase(); }
   function renderReps(cur) {
@@ -863,7 +893,7 @@
   }
   function setIntent(v) {
     $("#f-intent").value = v; $$("#intentseg [data-intent]").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.intent === v); });
-    $("#intentnote").textContent = v === "buy" ? (RNG ? "It ships at your price. Your rep sets the number inside the range, confirms it with you, adds freight and tax, and sends it." : ACCT ? "It ships at your account price. Your rep confirms the number, adds freight and tax, and sends it." : "You’re buying at the order total. Your rep confirms it, adds freight and tax, and it ships.") : "Nothing ships and nothing is billed until you see your price and say go.";
+    $("#intentnote").textContent = v === "buy" ? (HIDE ? "It ships at your price. Your rep confirms the number with you, adds freight and tax, and sends it." : RNG ? "It ships at your price. Your rep sets the number inside the range, confirms it with you, adds freight and tax, and sends it." : ACCT ? "It ships at your account price. Your rep confirms the number, adds freight and tax, and sends it." : "You’re buying at the order total. Your rep confirms it, adds freight and tax, and it ships.") : "Nothing ships and nothing is billed until you see your price and say go.";
     preview();
   }
   function setAcct(v) {
@@ -883,7 +913,7 @@
     $("#discwrap").hidden = m !== "pricing";
     $("#msgwrap").hidden = !M.msg; if (M.msg) $("#msglabel").textContent = M.msg;
     $("#intentseg").hidden = $("#intentnote").hidden = m !== "order"; setIntent(ACCT ? "buy" : "quote");
-    if (ACCT) { var ib = $$("#intentseg [data-intent]"); ib.forEach(function (x) { var buy = x.dataset.intent === "buy"; x.innerHTML = buy ? "<b>Order it</b><span>" + (RNG ? "My rep confirms my price" : "Bill my account price") + "</span>" : "<b>Price it first</b><span>Show me before it ships</span>"; x.style.order = buy ? 0 : 1; }); }
+    if (ACCT) { var ib = $$("#intentseg [data-intent]"); ib.forEach(function (x) { var buy = x.dataset.intent === "buy"; x.innerHTML = buy ? "<b>Order it</b><span>" + (RNG || HIDE ? "My rep confirms my price" : "Bill my account price") + "</span>" : "<b>Price it first</b><span>Show me before it ships</span>"; x.style.order = buy ? 0 : 1; }); }
     $("#acctseg").hidden = !(order || terms); $("#orderwrap").hidden = !(order || terms || m === "pricing");
     $("#paywrap").hidden = $("#paynote").hidden = !order; $("#creditwrap").hidden = !(order || terms);
     $("#reviewwrap").hidden = m !== "review"; $("#referwrap").hidden = m !== "refer";
@@ -916,7 +946,7 @@
   function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco", "intent"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
   function buildText(o) {
     var t = totals(), rep = repBySlug(o.rep), L = [], M = MODES[mode], items = mode === "order" || mode === "pricing";
-    L.push((mode === "order" ? (o.intent === "buy" ? (RNG ? "DBW WISCO ORDER: REP SETS THE PRICE" : ACCT ? "DBW WISCO ORDER: BILL AT ACCOUNT PRICE" : "DBW WISCO ORDER: BUY AT SITE PRICE") : "DBW WISCO QUOTE REQUEST: send my account price first") : M.head) + (ordRef ? "  ·  Ref " + ordRef : ""));
+    L.push((mode === "order" ? (o.intent === "buy" ? (RNG || HIDE ? "DBW WISCO ORDER: REP SETS THE PRICE" : ACCT ? "DBW WISCO ORDER: BILL AT ACCOUNT PRICE" : "DBW WISCO ORDER: BUY AT SITE PRICE") : "DBW WISCO QUOTE REQUEST: send my account price first") : M.head) + (ordRef ? "  ·  Ref " + ordRef : ""));
     L.push("From: " + (o.name || "(name)") + (o.company ? ", " + o.company : ""));
     if (o.phone) L.push("Phone: " + o.phone);
     if (o.email) L.push("Email: " + o.email);
@@ -941,8 +971,8 @@
     if (mode === "saw") { L.push(""); L.push(dealText()); }
     if (items) {
       L.push(""); L.push(t.lines.length ? "ITEMS" : "(no items in cart yet)");
-      t.lines.forEach(function (l) { L.push(l.c.q + " x " + l.v[0] + "  " + l.f.n + " " + vlabel(l.v) + "  @ " + (l.c.p > 0 ? "rep-link price " + money(l.each) + " = " + money(l.each * l.c.q) : RNG ? "site range " + rangeTxt(l.v) + " each" : (ACCT ? "list " : "") + money(l.each) + " = " + money(l.each * l.c.q))); });
-      if (t.lines.length) { L.push(""); L.push(t.quoted ? "Total at the prices on the customer’s rep link: " + money(t.total) + "  (VERIFY against the account before billing)" : RNG ? "Site range for this order: " + totTxt(t) + "  (the site did not commit to a price. REP SETS THE PRICE and confirms it with the customer before it ships.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : ACCT ? "List total: " + money(t.total) + "  (reference only. The site did not quote this customer a price. Bill at their account price.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : "Site total: " + money(t.total) + "  (quantity pricing, before freight and tax)" + (mode === "order" && o.intent === "buy" ? "  CUSTOMER IS BUYING AT THIS PRICE" : "  customer wants their account price or a better deal")); }
+      t.lines.forEach(function (l) { L.push(l.c.q + " x " + l.v[0] + "  " + l.f.n + " " + vlabel(l.v) + "  @ " + (l.c.p > 0 ? "rep-link price " + money(l.each) + " = " + money(l.each * l.c.q) : HIDE ? "price: rep sets it" : RNG ? "site range " + rangeTxt(l.v) + " each" : (ACCT ? "list " : "") + money(l.each) + " = " + money(l.each * l.c.q))); });
+      if (t.lines.length) { L.push(""); L.push(t.quoted ? "Total at the prices on the customer’s rep link: " + money(t.total) + "  (VERIFY against the account before billing)" : HIDE ? "No price was shown on the site. REP SETS THE PRICE and confirms it with the customer before it ships." + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : RNG ? "Site range for this order: " + totTxt(t) + "  (the site did not commit to a price. REP SETS THE PRICE and confirms it with the customer before it ships.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : ACCT ? "List total: " + money(t.total) + "  (reference only. The site did not quote this customer a price. Bill at their account price.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : "Site total: " + money(t.total) + "  (quantity pricing, before freight and tax)" + (mode === "order" && o.intent === "buy" ? "  CUSTOMER IS BUYING AT THIS PRICE" : "  customer wants their account price or a better deal")); }
     }
     if (mode === "order") {
       var x = [];
@@ -1093,7 +1123,7 @@
     }
     if ((el = t.closest("[data-dstep]"))) { var cl = dealLine(dealCur()); dealSetQty((cl ? cl.q : 0) + parseInt(el.dataset.dstep, 10)); return; }
     if ((el = t.closest("[data-pkg]"))) { deal.saw = el.dataset.pkg; store.set("deal2", deal); go("#saw-deal"); return; }
-    if (t.closest("[data-ccex]")) { [["ca-p", 110], ["ca-f", 1500], ["cb-f", 5000], ["c-ft", 10000]].forEach(function (x) { $("#" + x[0]).value = x[1]; }); costCalc(); toast("Example numbers. Put in your own."); return; }
+    if (t.closest("[data-ccex]")) { [["ca-p", 110], ["ca-f", 1500], ["cb-f", 5000], ["c-ft", 10000]].forEach(function (x) { $("#" + x[0]).value = x[1]; }); if (!(parseFloat($("#cb-p").value) > 0)) $("#cb-p").value = 240; costCalc(); toast("Example numbers. Put in your own."); return; }
     if ((el = t.closest("[data-dealrm]"))) { deal.lines.splice(parseInt(el.closest(".dl").dataset.i, 10), 1); store.set("deal2", deal); sawDeal(); return; }
     if (t.closest("[data-dealclear]")) { deal = { saw: "TS420", lines: [] }; store.set("deal2", deal); sawDeal(); return; }
     if (t.closest("[data-dealsend]")) { openSend("saw"); return; }
@@ -1185,6 +1215,8 @@
     store.set("cart", cart);
   }
   deal.lines = (Array.isArray(deal.lines) ? deal.lines : []).filter(function (l) { return FAM[l.f] && findVar(FAM[l.f], l.v); });
+  /* Any link somebody taps opens on the home page, even if it was copied from deep inside the site. */
+  if (location.hash && location.hash !== "#home") { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { location.hash = ""; } }
   route(); badge();
   bfOpen(store.get("bf", 0) === 1);
   if (P.get("cart") && cart.length) { renderCart(); $("#cart").showModal(); }

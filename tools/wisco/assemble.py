@@ -46,6 +46,8 @@ full = f"""<!DOCTYPE html>
 """
 open(os.path.join(SITE, "index.html"), "w", encoding="utf8").write(full)
 print("wrote wisco/index.html")
+import rep_pages
+print("rep pages:", ", ".join(rep_pages.build(SITE_URL)))
 
 if "--preview" in sys.argv:
     out = sys.argv[sys.argv.index("--preview") + 1]
