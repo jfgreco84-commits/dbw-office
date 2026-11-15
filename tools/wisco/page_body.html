@@ -1,4 +1,4 @@
-<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Ships same day or next</span><span>The more you buy, the better the price ★</span></div>
+<div class="trust"><span>★ A division of Diamond Blade Warehouse, LLC</span><span>Ships same day or next</span><span>A real rep on every order ★</span></div>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#home" aria-label="DBW WISCO home"><img src="brand/logo.webp" alt="" width="120" height="128"><span><b>DBW WISCO</b><small>A division of Diamond Blade Warehouse, LLC</small></span></a>
@@ -6,7 +6,7 @@
   </div>
 </header>
 <nav class="tools" aria-label="Quick access"><button type="button" class="tsc l" data-tsc="-1" aria-label="Scroll back" hidden>‹</button><button type="button" class="tsc r" data-tsc="1" aria-label="More buttons">More ›</button><div class="wrap" id="toolswrap">
-  <a class="homeb" href="#home"><span aria-hidden="true">⌂</span> Home</a><a href="#finder">Blade Finder</a><a href="#reorder">Fast Reorder</a><a class="gold" href="#ask-frank">Ask Frank</a><a href="#saw-deal">Saw Packages</a><a href="#equipment">Equipment</a><a href="#shop">Shop All</a><a href="#core">Core Bits</a><a href="#early">Early-Entry Colors</a><a href="#fix">Blade Trouble</a><a href="#cost">Cost Per Cut</a><a href="#depth">Depth Chart</a><a href="#stone">Stone Shop</a><a href="#" data-terms>Net 30</a><a href="#" data-account>Open an Account</a>
+  <a class="homeb" href="#home"><span aria-hidden="true">⌂</span> Home</a><a href="#reorder">Reorder</a><a href="#finder">Blade Finder</a><a class="gold" href="#ask-frank">Ask Frank</a><a href="#saw-deal">Saw Packages</a><a href="#equipment">Equipment</a><a href="#core">Core Bits</a><a href="#shop">Shop All</a><a href="#early">Early-Entry Colors</a><a href="#fix">Blade Trouble</a><a href="#cost">Cost Per Cut</a><a href="#depth">Depth Chart</a><a href="#stone">Stone Shop</a><a href="#" data-terms>Net 30</a><a href="#" data-account>Open an Account</a>
 </div></nav>
 <div class="stripes" aria-hidden="true"></div>
 
@@ -21,8 +21,8 @@
       <p class="footmgr">Text, call or email <b data-mgr></b>. He answers.</p>
       <div class="footact"><a class="btn gold" data-text-btn href="#">Text Frank</a><a class="btn gold" data-call-btn href="#">Call Frank</a><a class="btn gold" data-mail-btn href="#">Email Frank</a></div>
       <div class="footnum"><a data-text href="#"></a> · <a data-oemail-link href="#"></a></div>
-      <div class="footlinks"><a href="#fix">Blade trouble</a><a href="#cost">Cost per cut</a><a href="#depth">Depth chart</a><a href="#saw-deal">Saw packages</a><a href="#stone">Stone shop</a><a href="#" data-terms>Apply for Net 30</a><a href="#" data-account>Open an account</a><a href="https://www.diamondbladewarehouse.com/company-info/credit-application" target="_blank" rel="noopener">Credit application</a><a href="#team">Sales team</a></div>
-      <div class="fine">Prices from <span data-pl></span> pricing and drop with quantity. Prices and availability can change. Your rep confirms every order and adds freight and tax. Nothing is charged on this site.</div>
+      <div class="footlinks"><a href="#fix">Blade trouble</a><a href="#cost">Cost per cut</a><a href="#depth">Depth chart</a><a href="#saw-deal">Saw packages</a><a href="#stone">Stone shop</a><a href="#" data-terms>Apply for Net 30</a><a href="#" data-account>Open an account</a><a href="https://www.diamondbladewarehouse.com/company-info/credit-application" target="_blank" rel="noopener">Credit application</a></div>
+      <div class="fine">Your rep prices every order. Freight and tax are added at confirmation. Availability can change. Nothing is charged on this site.</div>
     </div>
   </div>
 </footer>
@@ -43,6 +43,7 @@
   <div class="d-foot" id="cartfoot">
     <div class="tot" id="carttot"></div>
     <p class="note" id="cartnote"></p>
+    <div id="quick"></div>
     <button class="btn chrome block shine" data-checkout>Send my order</button>
     <div class="row-between"><button class="link" data-close>Keep shopping</button><button class="link" data-emptycart>Empty cart</button></div>
   </div>
@@ -89,10 +90,7 @@
       <div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" autocomplete="name" autocapitalize="words" enterkeyhint="next" required></div>
       <div class="field"><label for="f-company">Company</label><input id="f-company" name="company" autocomplete="organization" autocapitalize="words" enterkeyhint="next"></div>
     </div>
-    <div class="two">
-      <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="next"></div>
-      <div class="field"><label for="f-email">Email (optional)</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" enterkeyhint="next"></div>
-    </div>
+    <div class="field"><label for="f-phone">Cell (so your rep can text your price)</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" enterkeyhint="next"></div>
     <div id="newwrap" hidden>
       <div class="field"><label for="f-addr">Ship-to street address</label><input id="f-addr" name="addr" autocomplete="shipping street-address" enterkeyhint="next"></div>
       <div class="three-in">
@@ -102,7 +100,11 @@
       </div>
     </div>
     <div id="orderwrap">
-      <div class="field"><label id="replabel">Pick your salesman</label><div class="reps" id="reps"></div><input type="hidden" name="rep" id="f-rep"></div>
+      <div class="field"><label id="replabel">Your salesman</label><details class="repd" id="repd"><summary id="repsum">Know your rep? Pick them (optional)</summary><div class="reps" id="reps"></div></details><input type="hidden" name="rep" id="f-rep"></div>
+      <div class="field"><label for="f-notes">Notes: need-by date, jobsite, questions (optional)</label><textarea id="f-notes" name="notes"></textarea></div>
+      <details class="more" id="morewrap">
+        <summary>Add more (optional): email, payment, PO, credit references</summary>
+        <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" inputmode="email" autocapitalize="off" enterkeyhint="next"></div>
       <div class="two" id="paywrap">
         <div class="field"><label for="f-pay">How do you want to pay?</label><select id="f-pay" name="pay"></select></div>
         <div class="field"><label for="f-po">PO # (optional)</label><input id="f-po" name="po" enterkeyhint="next"></div>
@@ -119,11 +121,9 @@
         <div class="refrow"><div class="field"><label for="f-r3">Reference 3: company</label><input id="f-r3" name="r3" autocapitalize="words"></div><div class="field"><label for="f-r3p">Phone or email</label><input id="f-r3p" name="r3p"></div></div>
         <p class="note">Suppliers you already buy from on terms work best. Prefer the full form? <a href="https://www.diamondbladewarehouse.com/company-info/credit-application" target="_blank" rel="noopener">DBW credit application</a>.</p>
       </details>
-      <div class="field"><label for="f-notes">Notes: need-by date, delivery instructions, questions</label><textarea id="f-notes" name="notes"></textarea></div>
-      <div class="field"><label for="f-fav">Favorite team, athlete or school (optional)</label><input id="f-fav" name="fav" placeholder="Packers, Badgers, Harley..."></div>
+      </details>
     </div>
     <input type="hidden" name="feedback" value="">
-    <ol class="next"><li><b>You send it.</b> It goes straight to a person, not a queue.</li><li><b>We confirm.</b> Your price breaks, freight and ship date.</li><li><b>It ships.</b> Nothing is charged until you’ve said yes.</li></ol>
     <details class="peek"><summary>See exactly what gets sent</summary><pre class="order" id="preview"></pre></details>
     <div class="callout" id="sentmsg" hidden></div>
   </form>

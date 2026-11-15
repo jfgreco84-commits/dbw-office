@@ -106,6 +106,7 @@
     send: ["Fill it in once. Next time it’s two taps."],
     line: ["These are the ones we put our name on."]
   };
+  function bigSaw(sw) { return !sw || ["cutoff", "walk"].indexOf(sw.k) >= 0; }
   var MATQUIP = {
     c: "Cured concrete: start with the Dragon. Tight budget, the T-Rex holds up.",
     r: "Rebar and river rock glaze a hard blade fast. You want a bond that stays open.",
@@ -213,7 +214,8 @@
   function promoBar() { return PROMO_ON ? '<div class="promo"><b>' + esc(PROMO.title || "Free blade when you pay this order by card") + "</b><span>" + esc(PROMO.text || "") + "</span></div>" : ""; }
   /* priceMode "account": the site shows one list price. Nobody is charged list. The rep bills the account price.
      priceMode "brackets": the site shows quantity prices and prices the order itself. */
-  var ACCT = W.priceMode !== "brackets", RNG = W.priceMode === "range", HIDE = W.priceMode === "private";   /* "private": no price is shown anywhere unless a rep link carries the customer's own. */
+  var PRIVCAT = C.private === true;   /* a catalog built with --private holds no prices: nothing can turn them back on */
+  var ACCT = PRIVCAT || W.priceMode !== "brackets", RNG = !PRIVCAT && W.priceMode === "range", HIDE = PRIVCAT || W.priceMode === "private";   /* "private": no price is shown anywhere unless a rep link carries the customer's own. */
   function lowOf(v) { return typeof v[6] === "number" && v[6] > 0 && v[6] < v[3] ? v[6] : v[3]; }
   function ranged(v) { return lowOf(v) < v[3]; }
   var BRK = [12, 24, 36, 50, 100];
@@ -226,7 +228,7 @@
   function mixOn() { return MIXM.indexOf(new Date().getMonth() + 1) >= 0; }
   function breakList() { return BREAKS.slice(0, -1).join(", ") + " and " + BREAKS[BREAKS.length - 1]; }
   function mixNames() { var a = MIXM.map(function (m) { return MONTHS[m - 1]; }); return a.slice(0, -1).join(", ") + " and " + a[a.length - 1]; }
-  function mixLine() { return mixOn() ? "Mix and match is on this month: blades in the same size group count together toward your price break." : "Mix and match pricing runs in " + mixNames() + ". This month, special pricing takes " + ONEMIN + " of the same item."; }
+  function mixLine() { if (HIDE) return ""; return mixOn() ? "Mix and match is on this month: blades in the same size group count together toward your price break." : "Mix and match pricing runs in " + mixNames() + ". This month, special pricing takes " + ONEMIN + " of the same item."; }
   /* Where the order stands against the price breaks. Mix months count the whole order; other months count the biggest single line. */
   function breakState(t) {
     var mix = mixOn(), big = null, lg = 0, sm = 0;
@@ -247,7 +249,7 @@
       (o.ribbon ? '<div class="ribbon ' + (o.rc || "") + '"><span>' + o.ribbon + "</span>" + (o.ribbon2 ? "<span>" + o.ribbon2 + "</span>" : "") + "</div>" : "") +
       '<button class="c-top" data-open aria-label="Details for ' + esc(f.n) + '">' + pic(f) + "<span>" +
       (f.tier ? '<span class="tier ' + f.tier + '">' + (o.ribbon ? TIER[f.tier].split(" · ").pop() : TIER[f.tier]) + "</span>" : "") + "<h3>" + esc(f.n) + "</h3>" +
-      (r ? '<span class="rate">' + stars(r) + "<span><b>" + r.toFixed(1) + "</b> on " + esc(o.mat.n) + "</span></span>" : "") + "</span></button>" +
+      (r ? '<span class="rate">' + stars(r) + "<span>Our rating <b>" + r.toFixed(1) + "</b> on " + esc(o.mat.n) + "</span></span>" : "") + "</span></button>" +
       (f.hook ? '<p class="hook">' + esc(f.hook) + "</p>" : "") +
       '<div class="buy">' + size + buyRow(first) + '<button class="more" data-open>Details, ratings and all ' + f.vars.length + (f.vars.length === 1 ? " size" : " sizes") + "</button>" + (f.cats.indexOf("equip") >= 0 ? '<button class="btn gold sm block" data-equip>Negotiate with your sales rep</button>' : "") + "</div></article>";
   }
@@ -343,7 +345,7 @@
       (r0 ? mineCard(r0) : "") + '<span class="kick">Simplified reorder</span>' +
       "<h1>The right blade. Right now.</h1>" +
       '<p class="sub">Tell us what you cut. We ship it anywhere in the USA, same day or next. <b>Your blades, your price, 60 seconds.</b></p>' +
-      welcomeBack() +
+      welcomeBack() + (!lastOrder() && !repBySlug(me().rep) ? '<div class="newhere"><b>New here?</b><span>Text a photo of your old blade, or tell us the size and how many. A real rep texts you back with your price.</span><div class="mine-act"><button class="btn gold sm" data-photo>Text a photo of my blade</button><button class="btn chrome sm" data-pricing>Get my price</button></div></div>' : "") +
       '<div class="doors">' +
       '<a class="door d1 shine" href="#finder"><div><b>Blade Finder</b><span>Two taps. We line up the right blade.</span></div><em>→</em></a>' +
       '<a class="door d2" href="#reorder"><div><b>Fast Reorder</b><span>Know what you run? Punch it in and go.</span></div><em>→</em></a>' +
@@ -353,31 +355,31 @@
       '<div class="stage"><div class="lineup">' + line.map(function (n) { return '<img alt="" src="brand/lineup/' + n + '.webp">'; }).join("") + "</div></div></div></div></section>" +
 
       (PROMO_ON ? '<section class="promoband"><div class="wrap">' + promoBar() + "</div></section>" : "") +
-      '<section class="costco"><div class="wrap"><div><b>The more you buy, the better the price.</b><span>' + (HIDE ? "Your price is between you and your rep, and it stays that way. Pick your blades, send the order, and your rep confirms your number before anything ships. Buying a stack or adding a saw? That’s where the deals get good." : RNG ? "Every blade shows a price range. Where you land depends on how many you buy and what you buy with it. Your rep sets your number and confirms it before anything ships." : ACCT ? "The price you see is list. Nobody pays list. Send your order and it’s billed at your account price, and that drops again at 12, 24, 36, 50 and 100." : "We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.") + '</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
+      '<section class="costco"><div class="wrap"><div><b>' + (HIDE ? "No login. No card. No runaround." : "The more you buy, the better the price.") + "</b><span>" + (HIDE ? "Pick your blades and send the order. A real rep confirms your price before anything ships. Nothing is charged on this site." : RNG ? "Every blade shows a price range. Where you land depends on how many you buy and what you buy with it. Your rep sets your number and confirms it before anything ships." : ACCT ? "The price you see is list. Nobody pays list. Send your order and it’s billed at your account price, and that drops again at 12, 24, 36, 50 and 100." : "We price like Costco. Build your order and the price drops at 12, 24, 36, 50 and 100. Have an account? Your rep’s number beats ours.") + '</span></div><button class="btn gold shine" data-pricing>Get my price</button></div></section>' +
 
       '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Our heavy hitters</h2><p>The blades and bits we put our name on.</p></div><div class="lines">' + lines + "</div></div></section>" +
 
-      '<section class="sec deal"><div class="wrap"><div class="sec-head"><h2>If they make it, we can get it</h2><p>Need a saw to go with your blades? Tell us what you’re after. We source it, build the package and work with you on price. The more you buy, the better the deal.</p></div>' + equipPicker("Go find me the best price", 1) + "</div></section>" +
+      '<section class="sec deal"><div class="wrap"><div class="sec-head"><h2>If they make it, we can get it</h2><p>Need a saw to go with your blades? Tell us what you’re after. We source it and your rep comes back with a price.</p></div>' + equipPicker("Go find me the best price", 1) + "</div></section>" +
 
-      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What the crews run</h2><p>Dragon first. Then Extreme, Super G, T-Rex and Viper. Our most common blades, in the order our reps quote them.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a><button class="btn gold" data-pricing>Negotiate with ' + esc(FRANK) + '</button></div></div></section>' +
+      '<section class="sec"><div class="wrap"><div class="sec-head"><h2>What the crews run</h2><p>Dragon first. Then Extreme, Super G, T-Rex and Viper. Our most common blades, in the order our reps quote them.</p></div><div class="rail">' + top.map(function (f) { return cardHTML(f); }).join("") + '</div><div class="center"><a class="btn blue" href="#shop">Shop everything</a><button class="btn gold" data-pricing>Ask ' + esc(WHO()) + " about pricing" + '</button></div></div></section>' +
 
-      '<section class="sec deal"><div class="wrap narrow"><div class="sec-head"><h2>Need a saw?</h2><p>Buy your blades and your saw together and we sharpen the pencil on both. Stack 15, 25 or 36 blades and your rep builds the package.</p></div><div class="center"><a class="btn chrome shine" href="#saw-deal">Build my saw package</a><a class="btn ghost" href="#cost">Renting? Run the math</a></div></div></section>' +
+      '<section class="sec deal"><div class="wrap narrow"><div class="sec-head"><h2>Need a saw?</h2><p>Bundle a saw with your blades. One package price, one invoice. Your rep builds it and confirms your total.</p></div><div class="center"><a class="btn chrome shine" href="#saw-deal">Build my saw package</a><a class="btn ghost" href="#cost">Renting? Run the math</a></div></div></section>' +
 
-      bigFrank() +
-      '<section class="sec alt"><div class="wrap narrow"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><ul class="ppl">' +
+      (myRep() ? "" : bigFrank()) +
+      '<section class="sec alt" hidden><div class="wrap narrow"><div class="sec-head"><h2>People buy from people</h2><p>No robots. No phone mazes. Relationships matter.</p></div><ul class="ppl">' +
       "<li><b>A real person on every order.</b> Someone who knows your account picks it up. Nothing here charges a card.</li>" +
       "<li><b>One hand washes the other.</b> We sell blades to feed our families. You run them to feed yours.</li>" +
       "<li><b>We obsess so you don’t have to.</b> You sweat behind the saw. We sweat the blades, the bonds and the freight.</li>" +
       "<li><b>We remember who you are.</b> Tell your salesman your team. It has a way of showing up in the box.</li>" +
       "</ul></div></section>" +
 
-      '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>The site price is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three swipe">' +
+      (HIDE ? "" : '<section class="sec levels"><div class="wrap"><div class="sec-head"><h2>Your account has a level</h2><p>The site price is the price with no account behind it. Your real price depends on your account level.</p></div><div class="three swipe">' +
       '<div class="lvl"><em>1</em><b>' + (HIDE ? "Pick it" : RNG ? "Price range" : ACCT ? "List price" : "Site price") + "</b><p>" + (HIDE ? "Find your blade and tap a quantity. No account or login needed." : RNG ? "What you see here. Your price lands inside it. Your rep sets the number." : ACCT ? "What you see here. It’s the ceiling. Nobody with an account pays it." : "What you see here. No account needed. It drops as the quantity goes up.") + "</p></div>" +
       '<div class="lvl"><em>2</em><b>Quantity breaks</b><p>' + breakList() + " pieces. " + esc(mixLine()) + "</p></div>" +
       '<div class="lvl top"><em>3</em><b>Account pricing</b><p>Every account has a level, and the price drops at each one. One quick text or email and we send back what your level gets you.</p><div class="lvls">' + (W.levels || ["Contractor", "Pro", "Gold", "Distributor", "Platinum"]).map(function (x, i, a) { return "<span" + (i === a.length - 1 ? ' class="top"' : "") + ">" + esc(x) + "</span>"; }).join("<i>›</i>") + "</div></div>" +
-      '</div><div class="center"><button class="btn gold shine" data-account>Open a free account</button><button class="btn chrome" data-pricing>Check my account pricing</button><button class="btn ghost-d" data-terms>Apply for Net 30 terms</button></div></div></section>' +
+      '</div><div class="center"><button class="btn gold shine" data-account>Open a free account</button><button class="btn chrome" data-pricing>Check my account pricing</button><button class="btn ghost-d" data-terms>Apply for Net 30 terms</button></div></div></section>') +
 
-      '<section class="sec"><div class="wrap narrow"><div class="sec-head"><h2>Straight answers</h2><p>The questions we hear every day.</p></div><div class="qa">' + ANSWERS.map(function (x) { return "<details><summary>" + esc(x[0]) + "</summary><p>" + esc(x[1]) + "</p></details>"; }).join("") + '</div><div class="promise"><b>Our word</b><span>We don’t build our blades down to a cost. We build them up to a standard. Got a problem with one? Call me direct.</span></div><div class="center"><a class="btn blue" href="#cost">Run the cost-per-cut math</a><a class="btn ghost-d" href="#fix">Blade giving you trouble?</a></div></div></section>' +
+      '<section class="sec"><div class="wrap narrow"><div class="sec-head"><h2>Straight answers</h2><p>The questions we hear every day.</p></div><div class="qa">' + ANSWERS.filter(function (x, i) { return !HIDE || [0, 2, 3, 5].indexOf(i) >= 0; }).map(function (x) { return "<details><summary>" + esc(x[0]) + "</summary><p>" + esc(x[1]) + "</p></details>"; }).join("") + '</div><div class="promise"><b>Our word</b><span>We don’t build our blades down to a cost. We build them up to a standard. Got a problem with one? Call me direct.</span></div><div class="center"><a class="btn blue" href="#cost">Run the cost-per-cut math</a><a class="btn ghost-d" href="#fix">Blade giving you trouble?</a></div></div></section>' +
 
       (T.length ? '<section class="sec alt"><div class="wrap"><div class="sec-head"><h2>Straight from the jobsite</h2><p>Real customers. Their words.</p></div><div class="three">' + T.map(function (t) { return '<figure class="quote"><blockquote>' + esc(t.quote) + "</blockquote><figcaption>" + esc(t.who || "") + "</figcaption></figure>"; }).join("") + "</div></div></section>" : "") +
 
@@ -430,7 +432,7 @@
       var top = r.filter(function (f) { return picksA.some(function (p) { return p.f === f; }); })[0] || r[0];
       if (!picksA.some(function (p) { return p.f === top; })) picksA = [{ f: top, label: "Best", rc: "b" }].concat(picksA).slice(0, 4);
       var why = { speed: "it’s the fastest of the three for that job", life: "it’ll outlast the others on that saw", price: "it’s the lowest cost-in that still does the job right", frank: "it’s what I’d put on my own saw" }[wiz.want.k];
-      h += says("Good, better, best. My pick is the " + top.n + ". For " + wiz.mat.n.toLowerCase() + " on a " + wiz.saw.n.toLowerCase() + ", " + why + ".", true) +
+      h += says("Good, better, best. My pick is the " + top.n + ". For " + wiz.mat.n.toLowerCase() + (/^[aeiou]/i.test(wiz.saw.n) ? " on an " : " on a ") + wiz.saw.n.toLowerCase() + ", " + why + ".", true) +
         '<div class="results">' + picksA.map(function (p) { var mine = p.f === top; return cardHTML(p.f, { mat: wiz.mat, saw: wiz.saw, pick: mine, ribbon: p.label, ribbon2: mine ? "★ " + esc(FRANK) + "’s Pick" : "", rc: p.rc }); }).join("") + "</div>" + frankBox(top.n);
     } else {
       var lad = ladder(list), picks = lad.length >= 3 ? lad : bestBetterGood(list, wiz.mat, wiz.saw), shown = {};
@@ -438,7 +440,7 @@
       picks = pre.map(function (f) { return { f: f, label: "Built for low horsepower", rc: "" }; }).concat(picks);
       picks.forEach(function (p) { shown[p.f.id] = 1; });
       var rest = rank(list, wiz.mat, wiz.saw).filter(function (f) { return !shown[f.id]; });
-      h += "<h1>Here’s your lineup.</h1>" + says((MATQUIP[wiz.mat.k] || "Start at the top and work down.") + " " + list.length + (list.length === 1 ? " blade fits." : " fit, best first.")) +
+      h += "<h1>Here’s your lineup.</h1>" + says(((bigSaw(wiz.saw) && MATQUIP[wiz.mat.k]) || "Start at the top and work down.") + " " + list.length + (list.length === 1 ? " blade fits." : " fit, best first.")) +
         '<div class="results">' + picks.map(function (p, i) { return cardHTML(p.f, { mat: wiz.mat, saw: wiz.saw, pick: i === 0, ribbon: p.label, rc: p.rc }); }).join("") + rest.map(function (f) { return cardHTML(f, o); }).join("") + "</div>" +
         '<div class="center"><a class="btn gold" href="#ask-frank" data-keep>Still not sure? Ask ' + esc(FRANK) + "</a></div>";
     }
@@ -499,8 +501,8 @@
       '<div class="hintchips gold" id="rhints">' + ["Dragon 14", "Superblade Extreme 14", "Super G 14", "T-Rex 14", "Viper 14", "Blue Tornado 7"].map(function (x) { return '<button data-hint="' + esc(x) + '">' + esc(x) + "</button>"; }).join("") + "</div>" +
       '<div class="hits" id="rhits"></div>' +
       (n ? '<div class="last"><div><b>Same as last time?</b><span>' + n + (n === 1 ? " line" : " lines") + " from " + esc(last.date) + '</span></div><button class="btn red sm" data-reorder>Reorder it</button></div>' : "") +
-      '<h2 class="wiz-h2">Tap a quantity</h2><p class="lead sm">Our most common blades. ' + (RNG ? "The more you buy, the closer you land to the low end of the range. " : "The price drops at every button. ") + esc(mixLine()) + "</p>" + quickRows() +
-      '<div class="center"><a class="btn gold" href="#shop">Browse our full catalog</a><button class="btn gold" data-pricing>Negotiate with ' + esc(FRANK) + "</button></div>" +
+      '<h2 class="wiz-h2">Tap a quantity</h2><p class="lead sm">Our most common blades. ' + (HIDE ? "Bigger quantities get better pricing. Your rep confirms the number. " : RNG ? "The more you buy, the closer you land to the low end of the range. " : "The price drops at every button. ") + esc(mixLine()) + "</p>" + quickRows() +
+      '<div class="center"><a class="btn gold" href="#shop">Browse our full catalog</a><button class="btn gold" data-pricing>Ask ' + esc(WHO()) + " about pricing" + "</button></div>" +
       (W.textNumber ? '<div class="frank photo"><b class="h">Easiest reorder there is</b><p>Snap a picture of your old blade and send it to ' + esc(FRANK) + '. We’ll read the label and write it up.</p><a class="bignum" href="#" data-photo>' + esc(W.textDisplay || "") + '</a><div class="sendrow"><button class="btn gold" data-photo>Text ' + esc(FRANK) + ' a photo</button><button class="btn blue" data-photomail>Email a photo</button></div></div>' : "") +
       '<h2 class="wiz-h2">Not sure what to reorder?</h2><p class="lead sm">Pick your crew and we walk you to the right blade.</p><div class="tiles">' + CREWS.map(function (c) { return '<button class="tile" data-crew="' + c.mat + '"><b>' + esc(c.n) + "</b><span>" + esc(c.s) + "</span></button>"; }).join("") + "</div>" +
       '<div class="frank"><b class="h">Your rep can build your list for you</b><p>Ask your rep to text you a reorder link. It opens with your usual blades already in the cart. You can change anything before you send it.</p></div>');
@@ -654,12 +656,12 @@
   function sawDeal() {
     var fams = dealBlades();
     if (!deal.saw && SD.saws.some(function (x) { return x.sku === "TS420"; })) deal.saw = "TS420";
-    var h = "<h1>Build your saw package.</h1>" + says("The more you buy, the better the price. Every blade you add lowers the price of the package.") +
+    var h = "<h1>Build your saw package.</h1>" + says(HIDE ? "Bundle a saw with your blades. One package price. Saw included. Your rep confirms your total." : "The more you buy, the better the price. Every blade you add lowers the price of the package.") +
       '<div class="frank"><b class="h">1. Pick your saw</b><select id="dsaw" class="bigsel" aria-label="Saw"><option value="">Choose a saw…</option>' + SD.saws.map(function (x) { return '<option value="' + esc(x.sku) + '"' + (x.sku === deal.saw ? " selected" : "") + ">" + esc(x.n) + "</option>"; }).join("") + "</select></div>" +
       '<div class="frank"><b class="h">2. Stack your blades</b><div class="dealadd two"><select id="dfam" aria-label="Blade">' + fams.map(function (f) { return '<option value="' + f.id + '"' + (f.id === "superblade-extreme" ? " selected" : "") + ">" + esc(f.n) + "</option>"; }).join("") + '</select><select id="dvar" aria-label="Size"></select></div>' +
       '<div class="slide"><div class="slidetop"><b id="dqout">0 blades</b><span>Slide it, or type a number</span></div><input id="dqty" type="range" min="0" max="50" step="1" value="0" aria-label="How many blades"><div class="ticks"><i>0</i><i>12</i><i>24</i><i>36</i><i>50+</i></div>' +
       '<div class="slidenum"><button type="button" class="stp" data-dstep="-1" aria-label="One fewer">−</button><input id="dqn" type="number" inputmode="numeric" min="0" max="9999" value="0" aria-label="Number of blades"><button type="button" class="stp" data-dstep="1" aria-label="One more">+</button></div></div>' +
-      '<p class="note">Pricing gets better at 12, 24, 36, 50 and 100 blades. Most crews package 15, 25, 36, 50 or 100. ' + esc(mixLine()) + '</p><div class="deallines" id="deallines"></div></div>' +
+      '<p class="note">' + (HIDE ? "Most crews package 15, 25, 36, 50 or 100 blades with a saw. " : "Pricing gets better at 12, 24, 36, 50 and 100 blades. Most crews package 15, 25, 36, 50 or 100. ") + esc(mixLine()) + '</p><div class="deallines" id="deallines"></div></div>' +
       '<div id="dealout"></div>' +
       '<div class="center"><button class="btn gold shine" data-dealsend disabled>Send this saw package to my rep</button><button class="btn ghost" data-dealclear>Start over</button></div>' +
       rentBox() +
@@ -704,12 +706,12 @@
     setNav("");
   }
   function equipment() {
-    var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td><td class=\"num\">" + (HIDE ? "Ask" : money(v[3])) + '</td><td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button><button class="add pk" data-pkg="' + esc(s.sku) + '">+ Blades</button></td></tr>' : ""; }).join("");
+    var rows = SD.saws.map(function (s) { var hit = SKU[s.sku.toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var v = hit && hit[0].vars[hit[1]]; var d = (s.n.match(/(\d+)"/) || [])[1]; var depth = { 12: '4"', 14: '5"', 16: '6"' }[d] || ""; return v ? "<tr><td>" + esc(s.n) + "</td><td>" + (d ? d + '"' : "") + "</td><td>" + depth + "</td>" + (HIDE ? "" : "<td class=\"num\">" + money(v[3]) + "</td>") + '<td><button class="add" data-eqadd="' + esc(s.sku) + '">Add</button><button class="add pk" data-pkg="' + esc(s.sku) + '">+ Blades</button></td></tr>' : ""; }).join("");
     var eq = C.families.filter(function (f) { return f.cats.indexOf("equip") >= 0 || f.cats.indexOf("dust") >= 0; });
     app.innerHTML = shell("Equipment deals", 0, 0,
       "<h1>If they make it, we can get it.</h1>" + says(QUIP.equipment[0]) +
-      '<div class="frank"><b class="h">Tap what you need</b><p>Pick as many as you want. ' + esc(FRANK) + " goes hunting and comes back with the best price out there. It works like Costco: the more you buy, the better the price. Buying blades in bulk? We can often eat most or all of the equipment cost.</p>" + equipPicker("Go find me the best price") + '<div class="center"><a class="btn blue sm" href="#saw-deal">Build a saw package</a></div></div>' +
-      '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><p class="pknote"><b>With every blade you add, it lowers the cost of the saw.</b> Tap <b>+ Blades</b> on any saw, slide the blade count up and watch the price move.</p><div class="tablewrap"><table class="cmp saws"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th><th class="num">Buy now</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buying blades with it? Your rep can do better on the saw.</p><div class="center"><button class="btn gold sm" data-equip>Negotiate with your sales rep</button></div></div>' +
+      '<div class="frank"><b class="h">Tap what you need</b><p>Pick as many as you want. ' + esc(FRANK) + " goes hunting and comes back with a price. Bundle a saw with your blades: one price, one invoice.</p>" + equipPicker("Go find me the best price") + '<div class="center"><a class="btn blue sm" href="#saw-deal">Build a saw package</a></div></div>' +
+      '<div class="frank"><b class="h">Gas cut-off saws, side by side</b><p class="pknote"><b>Bundle a saw with your blades. One package price, one invoice.</b> Tap <b>+ Blades</b> on any saw to build the package. Your rep confirms your total.</p><div class="tablewrap"><table class="cmp saws"><thead><tr><th>Saw</th><th>Blade</th><th>Max depth</th>' + (HIDE ? "" : '<th class="num">Buy now</th>') + '<th></th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="note">Depth is typical for that blade size. Buying blades with it? Your rep can do better on the saw.</p><div class="center"><button class="btn gold sm" data-equip>Negotiate with your sales rep</button></div></div>' +
       '<h2 class="wiz-h2">Equipment on the shelf</h2><div class="results two-up swipe">' + eq.map(function (f) { return cardHTML(f); }).join("") + "</div>", true);
     setNav("#equipment");
   }
@@ -772,7 +774,9 @@
       "<h1>Your own link.</h1>" + '<p class="lead">Text customers a link with your name on it. When they order, it comes in marked as yours.</p>' +
       '<div class="frank"><b class="h">1. Pick your name</b><div class="reps" id="rtreps">' + (W.reps || []).map(function (r) { var sl = slug(r.name); return '<button type="button" class="rep' + (cur === sl ? " on" : "") + '" data-rtrep="' + sl + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>"; }).join("") + "</div></div>" +
       '<div class="frank"><b class="h">2. Copy your link</b><pre class="order" id="rtlink">' + esc(cur ? repLink(base, cur) : "Pick your name first") + '</pre><div class="sendrow"><button class="btn chrome sm" data-rtcopy>Copy my link</button></div><p class="note">Customers who open it see “Your salesman: ' + esc(cur ? (repBySlug(cur) || {}).name || "" : "you") + '” and you’re pre-picked at checkout.</p></div>' +
-      '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy. Because you picked your name above, each line in the cart has a box for <b>this customer’s price</b>. Type their real price, then open Send my order and tap “Copy a reorder link for this cart.” Text that link. It opens with their blades and their prices, and only they see it.</p><p class="note">Done building links on this phone? <button class="link" data-repoff>Turn rep mode off</button></p><div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a></div></div>' +
+      '<div class="frank"><b class="h">3. Send a customer their usual order</b><p>Fill the cart with what they normally buy. Add their company and a one-line note if you want, then tap <b>Copy the reorder link</b> and text it. It opens with their blades and quantities already loaded. <b>No price rides in the link.</b> Put the price in your text, where it can’t be edited or passed around.</p>' +
+      '<div class="field"><label for="rt-co">Customer or company (optional)</label><input id="rt-co" maxlength="60" autocapitalize="words" placeholder="Acme Concrete"></div><div class="field"><label for="rt-note">One-line note they’ll see (optional)</label><input id="rt-note" maxlength="140" placeholder="Dragons are back in stock."></div>' +
+      '<div class="sendrow"><a class="btn blue sm" href="#reorder">Build a cart</a><button class="btn chrome sm" data-rtshare>Copy the reorder link</button></div></div>' +
       '<div class="frank"><b class="h">Texts that work</b><p class="tpl">Running low on blades? Reorder in 60 seconds, no phone tag: [your link]</p><p class="tpl">I loaded your usual order. Change the quantities if you need to and hit send: [reorder link]</p><p class="tpl">Not sure what to run on that job? Tap Ask Frank. Three questions and you get good, better and best: [your link]</p></div>');
     setNav("");
   }
@@ -804,7 +808,7 @@
   var bfCtx = "home", bfI = 0;
   function bfLines() {
     var t = totals(), a = bfCtx === "home" || !QUIP[bfCtx] ? [] : QUIP[bfCtx].slice();
-    if (bfCtx === "results" && wiz.mat && MATQUIP[wiz.mat.k]) a = [MATQUIP[wiz.mat.k]];
+    if (bfCtx === "results" && wiz.mat && MATQUIP[wiz.mat.k] && bigSaw(wiz.saw)) a = [MATQUIP[wiz.mat.k]];
     if (t.units) { var bs = breakState(t); if (bs.nb) a.unshift(bs.need + " more" + bs.of + " hits the " + bs.nb + "-piece price."); }
     return a;
   }
@@ -839,14 +843,19 @@
     $("#cartfoot").hidden = false;
     var bs = breakState(t), nb = bs.nb, pb = bs.pb;
     var hasCat = {}; t.lines.forEach(function (l) { l.f.cats.forEach(function (c) { hasCat[c] = 1; }); });
-    var cq = nb && bs.need <= 6 ? "You’re " + bs.need + " away" + bs.of + " from the " + nb + "-piece price." : !hasCat.core ? "No core bits on here? It’s the same freight bill either way." : !hasCat.small && !hasCat.cup ? "Running grinders? Small blades and cup wheels ship on this same order." : "Good order. Ask for your price break before you send it.";
-    var nudge = '<div class="nudge">' + says(cq) + (nb ? '<div class="nbar"><i style="width:' + Math.min(100, bs.n / nb * 100) + '%"></i></div><span>' + (pb ? "You’ve hit the " + pb + "-piece price. " : "") + bs.need + " more" + esc(bs.of) + " to the " + nb + "-piece price break.</span>" : "<span>You’ve hit our biggest listed break. Your rep takes it from here.</span>") + '<small class="mixnote">' + esc(mixLine()) + "</small></div>";
+    var cq = !HIDE && nb && bs.need <= 6 ? "You’re " + bs.need + " away" + bs.of + " from the " + nb + "-piece price." : !hasCat.core ? "No core bits on here? It’s the same freight bill either way." : !hasCat.small && !hasCat.cup ? "Running grinders? Small blades and cup wheels ship on this same order." : HIDE ? "Good order. Send it and " + WHO() + " confirms your price." : "Good order. Ask for your price break before you send it.";
+    var pk = isPackage(t), lr = repBySlug(me().rep);
+    var quote = linkFor || linkNote ? '<div class="quote"><b>' + esc((lr ? repFirst(lr) + "’s order" : "Your order") + (linkFor ? " for " + linkFor : "")) + "</b>" + (linkNote ? "<span>“" + esc(linkNote) + "”</span>" : "") + "<small>Change a quantity if you need to, then send it.</small></div>" : "";
+    var nudge = HIDE ? quote + '<div class="nudge">' + says(cq) + "</div>" : '<div class="nudge">' + says(cq) + (nb ? '<div class="nbar"><i style="width:' + Math.min(100, bs.n / nb * 100) + '%"></i></div><span>' + (pb ? "You’ve hit the " + pb + "-piece price. " : "") + bs.need + " more" + esc(bs.of) + " to the " + nb + "-piece price break.</span>" : "<span>You’ve hit our biggest listed break. Your rep takes it from here.</span>") + '<small class="mixnote">' + esc(mixLine()) + "</small></div>";
     b.innerHTML = nudge + t.lines.map(function (l, i) {
-      return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + " · <b>" + (l.c.p > 0 ? "Your price " + money(l.each) + " each" : HIDE ? "Your price, confirmed by your rep" : (RNG ? rangeTxt(l.v) : (ACCT ? "List " : "") + money(l.each)) + " each") + "</b>" + (!HIDE && l.each < l.v[3] ? " <s>" + money(l.v[3]) + "</s>" : "") + '</div></div><div class="lp">' + (RNG && !(l.c.p > 0) && ranged(l.v) ? "<small>up to</small> " : "") + (HIDE && !(l.c.p > 0) ? "" : money(l.each * l.c.q)) + "</div><div>" + qtyHTML(l.c.q) + "</div>" +
+      return '<div class="line" data-i="' + i + '"><div><h4>' + esc(l.f.n) + '</h4><div class="meta">' + esc(vlabel(l.v)) + "<br>" + esc(l.v[0]) + (HIDE ? "" : " · <b>" + (RNG ? rangeTxt(l.v) : (ACCT ? "List " : "") + money(l.each)) + " each</b>") + (!HIDE && l.each < l.v[3] ? " <s>" + money(l.v[3]) + "</s>" : "") + '</div></div><div class="lp">' + (RNG && !(l.c.p > 0) && ranged(l.v) ? "<small>up to</small> " : "") + (HIDE && !(l.c.p > 0) ? "" : money(l.each * l.c.q)) + "</div><div>" + qtyHTML(l.c.q) + "</div>" +
         (repMode() ? '<label class="rp">This customer’s price each $<input type="number" inputmode="decimal" min="0" step="1" data-rp value="' + (l.c.p > 0 ? l.c.p : "") + '" placeholder="' + (HIDE ? "" : l.v[3]) + '"></label>' : "") + '<button class="rm" data-rm>Remove</button></div>';
-    }).join("") + '<div class="callout"><b>' + (t.quoted ? "These are your prices." : HIDE ? "Your price is your price." : RNG ? "Your rep sets your price." : ACCT ? "You don’t pay list." : "The more you buy, the better the price.") + "</b><span>" + (t.quoted ? "Your rep set them for your account. Change a quantity and send it." : HIDE ? "No hunting for a number. Send the order and your rep confirms your price before anything ships. Nothing is charged on this site." : RNG ? "Your order lands inside the range shown. Send it and your rep confirms your exact number before it ships. Bigger order or a saw with it gets you closer to the low end." : ACCT ? "Send the order and your rep bills it at your account price. They confirm the number before it ships. Bigger order or a saw with it? Ask." : (t.save > 0.005 ? "Quantity pricing is already saving you " + money(t.save) + " on this order. " : "") + "Have an account price, or want a package deal? Ask.") + '</span><button class="btn gold sm" data-breaks>Negotiate with ' + esc(FRANK) + "</button></div>";
-    $("#carttot").innerHTML = "<span>" + (t.quoted ? "Your total" : HIDE ? "Your price" : RNG ? "Order range" : ACCT ? "List total" : "Order total") + "</span><span>" + totTxt(t) + "</span>";
-    $("#cartnote").textContent = (t.quoted ? "Priced for your account." : RNG || HIDE ? "Your rep confirms your exact price before it ships." : ACCT ? "List is the ceiling. Your account price is what you’re billed." : "Priced by quantity.") + " Freight and tax are added by your rep. Nothing is charged on this site.";
+    }).join("") + (HIDE ? '<div class="callout one"><b>' + esc(pk ? "One package price. Saw included." : WHO() + " confirms your price before it ships.") + "</b><span>" + (pk ? esc(WHO()) + " confirms your total. " : "") + 'Freight and tax are added then. Nothing is charged on this site.</span><button class="btn gold sm" data-breaks>Ask ' + esc(WHO()) + " about pricing</button></div>" : "") + (HIDE ? "" : '<div class="callout"><b>' + (t.quoted ? "These are your prices." : HIDE ? "Your price is your price." : RNG ? "Your rep sets your price." : ACCT ? "You don’t pay list." : "The more you buy, the better the price.") + "</b><span>" + (t.quoted ? "Your rep set them for your account. Change a quantity and send it." : HIDE ? "No hunting for a number. Send the order and your rep confirms your price before anything ships. Nothing is charged on this site." : RNG ? "Your order lands inside the range shown. Send it and your rep confirms your exact number before it ships. Bigger order or a saw with it gets you closer to the low end." : ACCT ? "Send the order and your rep bills it at your account price. They confirm the number before it ships. Bigger order or a saw with it? Ask." : (t.save > 0.005 ? "Quantity pricing is already saving you " + money(t.save) + " on this order. " : "") + "Have an account price, or want a package deal? Ask.") + '</span><button class="btn gold sm" data-breaks>Ask ' + esc(WHO()) + " about pricing" + "</button></div>");
+    $("#carttot").innerHTML = HIDE ? "<span>Total</span><span>" + esc(WHO()) + " confirms</span>" : "<span>" + (t.quoted ? "Your total" : HIDE ? "Your price" : RNG ? "Order range" : ACCT ? "List total" : "Order total") + "</span><span>" + totTxt(t) + "</span>";
+    $("#cartnote").textContent = HIDE ? "" : (t.quoted ? "Priced for your account." : RNG || HIDE ? "Your rep confirms your exact price before it ships." : ACCT ? "List is the ceiling. Your account price is what you’re billed." : "Priced by quantity.") + " Freight and tax are added by your rep. Nothing is charged on this site."; $("#cartnote").hidden = HIDE;
+    var known = !!(me().name), q = $("#quick"), rt = route2(repBySlug(me().rep) ? me().rep : "");
+    if (q) q.innerHTML = known && W.textNumber ? '<button class="btn gold block shine" data-quicksms>Text this order to ' + esc(rt.who) + '</button><p class="note" id="quickmsg" hidden></p>' : "";
+    $("[data-checkout]").textContent = known ? "Review, email or add a note" : "Send my order"; $("[data-checkout]").className = known ? "btn ghost-d block" : "btn chrome block shine";
   }
 
   /* ---------- before you send it ---------- */
@@ -875,20 +884,28 @@
     equip: { title: "Find me equipment", intro: "Give us as much as you can: make, model, size, new or used, how soon.", head: "DBW WISCO EQUIPMENT REQUEST", subj: "Equipment request", msg: "What are you looking for? Make, model, anything you know" },
     feedback: { title: "How’d we do?", intro: "Tell us what worked and what didn’t. " + FRANK + " reads every one.", head: "DBW WISCO FEEDBACK", subj: "Feedback", msg: "Tell us how we did" },
     review: { title: "Leave a review", intro: "An honest review, good or bad, earns you " + RW.review + ". Your rep applies it.", head: "DBW WISCO REVIEW", subj: "Review" },
-    refer: { title: "Refer a contractor", intro: "Send a contractor our way. When they place their first order and name you, you get " + RW.review.replace("your", "your") + ".", head: "DBW WISCO REFERRAL", subj: "Referral" }
+    refer: { title: "Refer a contractor", intro: "Send a contractor our way. When they place their first order and name you, you get " + (RW.referrerYou || RW.referrer) + ".", head: "DBW WISCO REFERRAL", subj: "Referral" }
   };
   function me() { return store.get("me", {}); }
+  function myRep() { var r = repBySlug(me().rep); return r && !isBoss(r) ? r : null; }
+  function WHO() { var r = myRep(); return r ? repFirst(r) : FRANK; }
+  function isPackage(t) { var saw = false, blade = false; t.lines.forEach(function (l) { if (l.f.cats.indexOf("equip") >= 0) saw = true; else blade = true; }); return saw && blade; }
+  /* The order text for someone whose name this phone already knows: no form. */
+  function quickOrder() { var i = me(); return { name: i.name || "", company: i.company || "", phone: i.phone || "", email: i.email || "", po: "", notes: "", rep: repBySlug(i.rep) ? i.rep : "", pay: i.pay || PAY0, feedback: "", msg: "", acct: i.acct || "existing", addr: i.addr || "", city: i.city || "", state: i.state || "", zip: i.zip || "", ref: "", limit: "", r1: "", r1p: "", r2: "", r2p: "", r3: "", r3p: "", stars: "", review: "", fname: "", fco: "", intent: "buy", pub: false, disc: [] }; }
+  var PAY0 = "Not sure, have my rep call";
   /* On the live site a rep's link is their own short address (…/wisco/miz/). Opened as a file, fall back to ?rep=. */
   function repLink(base, s) { var r = repBySlug(s), nick = r && r.aka && r.aka[0]; return /\/$/.test(base) && nick ? base + nick + "/" : base + "?rep=" + s; }
   function repBySlug(s) { if (!s) return undefined; return (W.reps || []).filter(function (r) { return slug(r.name) === s || (r.aka || []).indexOf(s) >= 0; })[0]; }
   function initials(n) { return n.split(/\s+/).map(function (x) { return x[0]; }).join("").slice(0, 2).toUpperCase(); }
   function renderReps(cur) {
     var lockR = store.get("replock", 0) === 1 && repBySlug(cur);
-    if (lockR) { $("#reps").innerHTML = '<div class="replock"><span class="av">' + (lockR.photo ? '<img alt="" src="brand/reps/' + esc(lockR.photo) + '">' : esc(initials(lockR.name))) + "</span><div><b>" + esc(lockR.name) + '</b><small>Your salesman. This goes straight to them.</small></div><button type="button" class="link" data-repchange>Not your rep?</button></div>'; $("#f-rep").value = slug(lockR.name); $("#replabel").textContent = "Your salesman"; return; }
+    if (lockR) { $("#reps").innerHTML = '<div class="replock"><span class="av">' + (lockR.photo ? '<img alt="" src="brand/reps/' + esc(lockR.photo) + '">' : esc(initials(lockR.name))) + "</span><div><b>" + esc(lockR.name) + '</b><small>Your salesman. This goes straight to them.</small></div><button type="button" class="link" data-repchange>Not your rep?</button></div>'; $("#f-rep").value = slug(lockR.name); $("#replabel").textContent = "Your salesman"; var rd0 = $("#repd"); if (rd0) { rd0.open = true; rd0.classList.add("locked"); } return; }
+    var rd = $("#repd"); if (rd) rd.classList.remove("locked");
     $("#reps").innerHTML = '<button type="button" class="rep' + (!cur ? " on" : "") + '" data-rep=""><span class="av q">?</span><b>Not sure</b></button>' + (W.reps || []).map(function (r) {
       var s = slug(r.name);
       return '<button type="button" class="rep' + (cur === s ? " on" : "") + '" data-rep="' + s + '"><span class="av">' + (r.photo ? '<img alt="" src="brand/reps/' + esc(r.photo) + '">' : esc(initials(r.name))) + "</span><b>" + esc(r.name) + "</b></button>";
     }).join("");
+    var cr = repBySlug(cur), rs = $("#repsum"); if (rs) rs.textContent = cr ? "Your rep: " + cr.name + " (tap to change)" : "Know your rep? Pick them (optional)";
     $("#f-rep").value = cur || "";
   }
   function setIntent(v) {
@@ -901,7 +918,7 @@
     $("#f-acct").value = v;
     $$("#acctseg [data-acct]").forEach(function (x) { x.setAttribute("aria-pressed", x.dataset.acct === v); });
     $("#newwrap").hidden = !(order && v === "new");
-    $("#replabel").textContent = v === "new" ? "Know who you want to work with? (optional)" : "Pick your salesman";
+    $("#replabel").textContent = v === "new" ? "New to DBW? We’ll match you with a rep." : "Your salesman";
     $("#creditsum").textContent = v === "new" ? "Want terms? Add trade references to set up credit" : "Need a higher credit limit? Add trade references";
     $("#creditnote").textContent = v === "new" ? "Three trade references get a Net 30 or Net 45 account moving. Skip this if you’re paying by card or check." : "Tell us the limit you need and give us current references. Your rep takes it to credit.";
     if (v === "new" && /terms/i.test(f.elements.pay.value)) $("#creditwrap").open = true;
@@ -912,18 +929,19 @@
     $("#sendtitle").textContent = M.title; $("#sendintro").textContent = M.intro;
     $("#discwrap").hidden = m !== "pricing";
     $("#msgwrap").hidden = !M.msg; if (M.msg) $("#msglabel").textContent = M.msg;
-    $("#intentseg").hidden = $("#intentnote").hidden = m !== "order"; setIntent(ACCT ? "buy" : "quote");
+    $("#intentseg").hidden = $("#intentnote").hidden = m !== "order" || HIDE; setIntent(ACCT ? "buy" : "quote");
     if (ACCT) { var ib = $$("#intentseg [data-intent]"); ib.forEach(function (x) { var buy = x.dataset.intent === "buy"; x.innerHTML = buy ? "<b>Order it</b><span>" + (RNG || HIDE ? "My rep confirms my price" : "Bill my account price") + "</span>" : "<b>Price it first</b><span>Show me before it ships</span>"; x.style.order = buy ? 0 : 1; }); }
     $("#acctseg").hidden = !(order || terms); $("#orderwrap").hidden = !(order || terms || m === "pricing");
     $("#paywrap").hidden = $("#paynote").hidden = !order; $("#creditwrap").hidden = !(order || terms);
     $("#reviewwrap").hidden = m !== "review"; $("#referwrap").hidden = m !== "refer";
     ["name", "company", "phone", "email", "addr", "city", "state", "zip"].forEach(function (k) { f.elements[k].value = info[k] || ""; });
     ["po", "notes", "msg", "review", "stars", "fname", "fco", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p"].forEach(function (k) { f.elements[k].value = ""; });
-    f.elements.fav.value = info.fav || ""; f.elements.ref.value = store.get("ref", "") || "";
+    f.elements.ref.value = store.get("ref", "") || "";
     $("#refhint").textContent = "They earn " + RW.referrer + " when you order.";
     $$("#starpick button").forEach(function (x) { x.classList.remove("on"); });
     $("#creditwrap").open = terms;
-    f.elements.pay.innerHTML = (W.payments || []).map(function (p) { return "<option>" + esc(p) + "</option>"; }).join("");
+    f.elements.pay.innerHTML = [PAY0].concat(W.payments || []).map(function (p) { return "<option>" + esc(p) + "</option>"; }).join("");
+    var mw = $("#morewrap"); if (mw) { mw.hidden = !(order || terms || m === "pricing"); mw.open = terms; }
     if (info.pay) f.elements.pay.value = info.pay;
     renderReps(repBySlug(info.rep) ? info.rep : "");
     $("#discs").innerHTML = (W.discounts || []).map(function (d, i) { return '<label><input type="checkbox" name="disc" value="' + esc(d) + '"' + (i < 2 ? " checked" : "") + "> " + esc(d) + "</label>"; }).join("");
@@ -943,20 +961,19 @@
     var a = document.createElement("a"); a.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics); a.download = "reorder-dbw-wisco.ics"; document.body.appendChild(a); a.click(); a.remove();
     toast("Reminder made for " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ". Add it to your calendar.");
   }
-  function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "fav", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco", "intent"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
+  function formData() { var f = $("#sendform"), o = {}; ["name", "company", "phone", "email", "po", "notes", "rep", "pay", "feedback", "msg", "acct", "addr", "city", "state", "zip", "ref", "limit", "r1", "r1p", "r2", "r2p", "r3", "r3p", "stars", "review", "fname", "fco", "intent"].forEach(function (k) { o[k] = (f.elements[k].value || "").trim(); }); o.pub = f.elements.pub.checked; o.disc = $$('input[name="disc"]:checked', f).map(function (x) { return x.value; }); return o; }
   function buildText(o) {
     var t = totals(), rep = repBySlug(o.rep), L = [], M = MODES[mode], items = mode === "order" || mode === "pricing";
-    L.push((mode === "order" ? (o.intent === "buy" ? (RNG || HIDE ? "DBW WISCO ORDER: REP SETS THE PRICE" : ACCT ? "DBW WISCO ORDER: BILL AT ACCOUNT PRICE" : "DBW WISCO ORDER: BUY AT SITE PRICE") : "DBW WISCO QUOTE REQUEST: send my account price first") : M.head) + (ordRef ? "  ·  Ref " + ordRef : ""));
+    L.push((mode === "order" ? (o.intent === "buy" ? (HIDE ? "DBW WISCO ORDER REQUEST: REP CONFIRMS THE PRICE FIRST" : RNG ? "DBW WISCO ORDER: REP SETS THE PRICE" : ACCT ? "DBW WISCO ORDER: BILL AT ACCOUNT PRICE" : "DBW WISCO ORDER: BUY AT SITE PRICE") : "DBW WISCO QUOTE REQUEST: send my account price first") : M.head) + (ordRef ? "  ·  Ref " + ordRef : ""));
     L.push("From: " + (o.name || "(name)") + (o.company ? ", " + o.company : ""));
     if (o.phone) L.push("Phone: " + o.phone);
     if (o.email) L.push("Email: " + o.email);
     var order = mode === "order" || mode === "saw", terms = mode === "terms";
-    if (mode === "account") { L.push("Wants a new account set up."); if (o.addr || o.city || o.zip) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · ")); L.push("Salesman: " + (rep ? rep.name : "None yet. Assign a rep.")); }
+    if (mode === "account") { L.push("Wants a new account set up."); if (o.addr || o.city || o.zip) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · ")); L.push("Salesman: " + (rep ? rep.name : "None yet")); }
     if (order || terms) L.push("Account: " + (o.acct === "new" ? "NEW ACCOUNT" : "Existing customer"));
     if ((order || terms) && o.acct === "new" && (o.addr || o.city || o.zip)) L.push("Ship to: " + [o.addr, [o.city, o.state].filter(Boolean).join(", "), o.zip].filter(Boolean).join(" · "));
-    if (order && o.acct !== "new" && W.inactiveDays) L.push("Account check: confirm the date of last activity. Over " + W.inactiveDays + " days, or an old rep’s account, is " + FRANK + "’s to assign.");
-    if (order || terms || mode === "pricing") L.push("Salesman: " + (rep ? rep.name : (o.acct === "new" ? "None yet. Assign a rep." : "Not sure. Look this account up in Sage / Zoho by phone or company.")));
-    if (order) { L.push("Pay by: " + o.pay); if (o.po) L.push("PO #: " + o.po); }
+    if (order || terms || mode === "pricing") L.push("Salesman: " + (rep ? rep.name : (o.acct === "new" ? "None yet" : "Not sure")));
+    if (order) { if (o.pay && o.pay !== PAY0) L.push("Pay by: " + o.pay); if (o.po) L.push("PO #: " + o.po); }
     if (mode === "order" && PROMO_ON && isCard(o.pay)) L.push("PROMO: FREE BLADE for paying this order by card. Rep confirms which blade.");
     if ((order || mode === "pricing") && o.ref) L.push("REFERRED BY: " + o.ref + "  (they earn " + RW.referrer + ")");
     var refs = [[o.r1, o.r1p], [o.r2, o.r2p], [o.r3, o.r3p]].filter(function (x) { return x[0] || x[1]; });
@@ -971,9 +988,10 @@
     if (mode === "saw") { L.push(""); L.push(dealText()); }
     if (items) {
       L.push(""); L.push(t.lines.length ? "ITEMS" : "(no items in cart yet)");
-      t.lines.forEach(function (l) { L.push(l.c.q + " x " + l.v[0] + "  " + l.f.n + " " + vlabel(l.v) + "  @ " + (l.c.p > 0 ? "rep-link price " + money(l.each) + " = " + money(l.each * l.c.q) : HIDE ? "price: rep sets it" : RNG ? "site range " + rangeTxt(l.v) + " each" : (ACCT ? "list " : "") + money(l.each) + " = " + money(l.each * l.c.q))); });
-      if (t.lines.length) { L.push(""); L.push(t.quoted ? "Total at the prices on the customer’s rep link: " + money(t.total) + "  (VERIFY against the account before billing)" : HIDE ? "No price was shown on the site. REP SETS THE PRICE and confirms it with the customer before it ships." + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : RNG ? "Site range for this order: " + totTxt(t) + "  (the site did not commit to a price. REP SETS THE PRICE and confirms it with the customer before it ships.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : ACCT ? "List total: " + money(t.total) + "  (reference only. The site did not quote this customer a price. Bill at their account price.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : "Site total: " + money(t.total) + "  (quantity pricing, before freight and tax)" + (mode === "order" && o.intent === "buy" ? "  CUSTOMER IS BUYING AT THIS PRICE" : "  customer wants their account price or a better deal")); }
+      t.lines.forEach(function (l) { L.push(l.c.q + " x " + l.v[0] + "  " + l.f.n + " " + vlabel(l.v) + (HIDE ? "" : "  @ ") + (l.c.p > 0 ? "rep-link price " + money(l.each) + " = " + money(l.each * l.c.q) : HIDE ? "" : RNG ? "site range " + rangeTxt(l.v) + " each" : (ACCT ? "list " : "") + money(l.each) + " = " + money(l.each * l.c.q))); });
+      if (t.lines.length) { L.push(""); L.push(t.quoted ? "Total at the prices on the customer’s rep link: " + money(t.total) + "  (VERIFY against the account before billing)" : HIDE ? (isPackage(t) ? "PACKAGE: one price for the whole package, saw included. " : "") + "No price was shown on the site. Rep confirms the price with the customer before it ships." : RNG ? "Site range for this order: " + totTxt(t) + "  (the site did not commit to a price. REP SETS THE PRICE and confirms it with the customer before it ships.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : ACCT ? "List total: " + money(t.total) + "  (reference only. The site did not quote this customer a price. Bill at their account price.)" + (t.anyQuoted ? "  Some lines carry a rep-link price: verify those." : "") : "Site total: " + money(t.total) + "  (quantity pricing, before freight and tax)" + (mode === "order" && o.intent === "buy" ? "  CUSTOMER IS BUYING AT THIS PRICE" : "  customer wants their account price or a better deal")); }
     }
+    if (mode === "order" && linkNote) { L.push(""); L.push("Rep’s note on the link: " + linkNote); }
     if (mode === "order") {
       var x = [];
       if (extras.stock) x.push("Wants stock-up pricing on the most common blades");
@@ -981,33 +999,32 @@
       if (x.length) { L.push(""); x.forEach(function (s) { L.push(s); }); }
     }
     if (o.notes) { L.push(""); L.push("Notes: " + o.notes); }
-    if (o.fav) L.push("Favorite team / athlete: " + o.fav);
     if (o.feedback) { L.push(""); L.push("FEEDBACK: " + o.feedback); }
-    L.push(""); L.push("Sent from the DBW WISCO site" + (C.priceList ? " · " + C.priceList + " pricing" : ""));
+    L.push(""); L.push("Sent from the DBW WISCO site");
     return L.join("\n");
   }
   function preview() { $("#preview").textContent = buildText(formData()); }
   function afterSend(how) {
     var o = formData(), t = totals();
-    store.set("me", { name: o.name, company: o.company, phone: o.phone, email: o.email, rep: o.rep, pay: o.pay, fav: o.fav, acct: o.acct, addr: o.addr, city: o.city, state: o.state, zip: o.zip, sent: mode === "order" || me().sent ? 1 : 0 });
+    store.set("me", { name: o.name, company: o.company, phone: o.phone, email: o.email, rep: o.rep, pay: o.pay === PAY0 ? "" : o.pay, acct: o.acct, addr: o.addr, city: o.city, state: o.state, zip: o.zip, sent: mode === "order" || me().sent ? 1 : 0 });
     if (mode === "order" && t.lines.length) store.set("last", { date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }), items: cart.slice() });
-    var m = $("#sentmsg"); m.hidden = false; var refLine = ordRef && (mode === "order" || mode === "saw" || mode === "pricing") ? " Your reference: <b class=\"sel\">" + ordRef + "</b>." : "";
+    var m = $("#sentmsg"); m.hidden = false; var refLine = ordRef && (mode === "order" || mode === "saw" || mode === "pricing") ? " <span class=\"bigref\">Reference <b class=\"sel\">" + ordRef + "</b> · screenshot this</span>" : "";
     m.innerHTML = how === "posted" ? "<b>Sent.</b><span>A real person has it. Expect a call or text back." + refLine + "</span>"
-      : how === "copied" ? "<b>Copied.</b><span>Paste it into a text or email to " + esc(FRANK) + "." + refLine + "</span>"
-        : "<b>Last step: hit send in your " + (how === "sms" ? "messages" : "email") + " app.</b><span>It’s already written for you. If nothing opened, tap Copy and paste it to " + esc(how === "sms" ? (W.textDisplay || "") : (W.orderEmail || "")) + "." + refLine + "</span>";
+      : how === "copied" ? "<b>Copied.</b><span>Paste it into a text or email to " + esc(WHO()) + "." + refLine + "</span>"
+        : "<b>Order prepared. It is not sent yet.</b><span>Hit Send in your " + (how === "sms" ? "messages" : "email") + " app. It’s already written for you. If nothing opened, tap Copy and paste it to " + esc(how === "sms" ? (W.textDisplay || "") : (W.orderEmail || "")) + "." + refLine + "</span>";
     if (mode === "order" || mode === "saw") m.innerHTML += '<div class="aftersend"><span>Want ' + esc(RW.review) + '?</span><button type="button" class="btn blue sm" data-review>Leave a review</button><button type="button" class="btn ghost-d sm" data-refer>Refer a contractor</button></div>';
     if (mode === "order" && t.lines.length) m.innerHTML += '<div class="aftersend"><span>Don’t run out mid-job.</span><button type="button" class="btn ghost-d sm" data-remind>Remind me to reorder in 30 days</button></div>';
     m.scrollIntoView({ block: "nearest" });
   }
   function friendLink() { var o = formData(), who = (o.company || o.name || "").slice(0, 60); return location.origin + location.pathname + "?ref=" + encodeURIComponent(who); }
-  function needName() {
+  function needName(how) {
     var f = $("#sendform"), M = MODES[mode];
     if (M.msg && !f.elements.msg.value.trim()) { f.elements.msg.focus(); toast("Tell us a little so we know what to chase"); return true; }
     if (!f.elements.name.value.trim()) { f.elements.name.focus(); toast("Add your name so we know who it’s from"); return true; }
     if (mode === "review" && !f.elements.stars.value) { toast("Tap a star rating first"); return true; }
     if (mode === "review" && !f.elements.review.value.trim()) { f.elements.review.focus(); toast("Tell us a little about how it went"); return true; }
     if (mode === "refer" && !f.elements.fname.value.trim()) { f.elements.fname.focus(); toast("Who are you referring?"); return true; }
-    if ((mode === "order" || mode === "saw" || mode === "terms" || mode === "account") && !f.elements.phone.value.trim()) { f.elements.phone.focus(); toast("Add a phone number so we can confirm the order"); return true; }
+    if (how !== "sms" && (mode === "order" || mode === "saw" || mode === "terms" || mode === "account") && !f.elements.phone.value.trim()) { f.elements.phone.focus(); toast("Add a phone number so we can confirm the order"); return true; }
     if ((mode === "order" || mode === "saw") && f.elements.acct.value === "new" && !f.elements.zip.value.trim()) { f.elements.zip.focus(); toast("Add your ship-to ZIP so we can quote freight"); return true; }
     return false;
   }
@@ -1016,11 +1033,11 @@
     var r = repBySlug(slugv) || {}, main = W.orderEmail || "", toRep = W.ordersTo === "rep", uniq = function (a) { var seen = {}; return a.filter(function (x) { x = (x || "").toLowerCase(); if (!x || seen[x]) return false; seen[x] = 1; return true; }); };
     var both = W.ordersTo === "both";
     /* "both": the manager AND the customer's rep each get the email (both on the To line) and the text (one group text). */
-    var tos = both ? uniq([main, r.email]) : [toRep && r.email ? r.email : main], to = tos.join(",");
+    var tos = both ? uniq([r.email, main]) : [toRep && r.email ? r.email : main], to = tos.join(",");
     var cc = uniq([main, r.email, r.manager].concat(W.alsoCopy || [])).filter(function (x) { return tos.map(function (y) { return y.toLowerCase(); }).indexOf(x.toLowerCase()) < 0; });
-    var repText = toRep && r.cell, cells = both ? uniq([W.textNumber, r.cell]) : [repText ? r.cell : (W.textNumber || "")];
+    var repText = toRep && r.cell, cells = both ? uniq([r.cell, W.textNumber]) : [repText ? r.cell : (W.textNumber || "")];
     var first = function (n) { return (n || "").replace(/^Big /, "").split(" ")[0]; };
-    return { to: to, cc: cc, cell: cells.join(","), who: both && cells.length > 1 ? FRANK + " and " + first(r.name) : repText || (toRep && r.email) ? r.name : FRANK };
+    return { to: to, cc: cc, cell: cells.join(","), who: both && cells.length > 1 ? first(r.name) + " and " + FRANK : repText || (toRep && r.email) ? r.name : FRANK };
   }
   function mailto(to, subj, body, cc) { location.href = "mailto:" + (to || "").split(",").map(encodeURIComponent).join(",") + "?" + (cc && cc.length ? "cc=" + encodeURIComponent(cc.join(",")) + "&" : "") + "subject=" + encodeURIComponent(subj) + "&body=" + encodeURIComponent(body); }
   function sms(body, cell) {
@@ -1042,8 +1059,11 @@
     var fb = function () { toast("Couldn’t copy automatically. Press and hold the text to copy."); };
     try { navigator.clipboard.writeText(txt).then(function () { done && done(); }, fb); } catch (e) { fb(); }
   }
-  function shareLink() { var o = formData(); return location.origin + location.pathname + "?cart=" + cartLines().map(function (l) { return encodeURIComponent(l.v[0]) + "*" + l.c.q + (l.c.p > 0 ? "@" + l.c.p : ""); }).join(",") + (o.rep ? "&rep=" + o.rep : ""); }
-  function repMode() { return store.get("repmode", 0) === 1; }
+  function shareLink() { var o = formData(); return location.origin + location.pathname + "?cart=" + cartLines().map(function (l) { return encodeURIComponent(l.v[0]) + "*" + l.c.q; }).join(",") + (o.rep ? "&rep=" + o.rep : "") + linkExtras(); }
+  function repMode() { return false; }   /* price entry on the site is gone: a price typed here could be edited or forwarded */
+  var linkFor = "", linkNote = "";
+  function clean(x, n) { return String(x || "").replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, n); }
+  function linkExtras() { var c = $("#rt-co"), n = $("#rt-note"), cv = clean(c ? c.value : linkFor, 60), nv = clean(n ? n.value : linkNote, 140); return (cv ? "&c=" + encodeURIComponent(cv) : "") + (nv ? "&note=" + encodeURIComponent(nv) : ""); }
 
   /* ---------- product detail ---------- */
   function openDetail(f) {
@@ -1059,7 +1079,7 @@
     }).join("") + "</div></div>";
     var tv = defVar(f, f.vars);
     if (tiered(tv)) h += '<div class="blk"><h4>The more you buy, the better the price</h4><div class="tiers">' + ["1 to 11", "12+", "24+", "36+", "50+", "100+"].map(function (lab, i) { return "<div><span>" + lab + "</span><b>" + money(i ? tv[6][i - 1] : tv[3]) + "</b></div>"; }).join("") + '</div><p class="note">Each, for the ' + esc(vlabel(tv)) + ". " + esc(mixLine()) + " Your account may do better.</p></div>";
-    h += '<div class="callout"><b>Want a better number?</b><span>Bigger order, a saw to go with it, or an account price you already have. Ask.</span><button class="btn gold sm" data-pricing>Negotiate with ' + esc(FRANK) + "</button></div>";
+    h += '<div class="callout"><b>Want a better number?</b><span>Bigger order, a saw to go with it, or an account price you already have. Ask.</span><button class="btn gold sm" data-pricing>Ask ' + esc(WHO()) + " about pricing" + "</button></div>";
     if (mats.length) h += '<div class="blk"><h4>How it rates</h4><div class="rates">' + mats.map(function (k) { return '<div class="' + (cur.indexOf(k) >= 0 ? "on" : "") + '"><span>' + esc(MATNAME[k]) + "</span><span>" + stars(f.m[k]) + " " + f.m[k].toFixed(1) + "</span></div>"; }).join("") + "</div></div>";
     if (vurl) {h += '<div class="blk"><h4>Watch it cut</h4>' + (vurl
       ? '<a class="video" href="' + esc(vurl) + '" target="_blank" rel="noopener"><span class="play"></span><span><b>See the ' + esc(f.n) + " in action</b><span>Opens the video in a new tab</span></span></a>"
@@ -1077,8 +1097,8 @@
     if (t.closest("[data-bftoggle]")) { bfOpen(!$("#bf").classList.contains("open")); return; }
     if (t.closest("[data-bfhide]")) { bfOpen(false); return; }
     if (t.closest("[data-bfnext]")) { bfI++; bfShow(); return; }
-    if ((el = t.closest("[data-rtrep]"))) { var inf = me(); inf.rep = el.dataset.rtrep; store.set("me", inf); store.set("repmode", 1); repTools(); return; }
-    if (t.closest("[data-repoff]")) { store.set("repmode", 0); cart.forEach(function (c) { delete c.p; }); saveCart(); repTools(); toast("Rep mode is off on this phone"); return; }
+    if ((el = t.closest("[data-rtrep]"))) { var inf = me(); inf.rep = el.dataset.rtrep; store.set("me", inf); repTools(); return; }
+    if (t.closest("[data-rtshare]")) { if (!cartLines().length) { toast("Build the cart first, then copy the link"); return; } if (!me().rep) { toast("Pick your name first"); return; } var rl = location.origin + location.pathname + "?cart=" + cartLines().map(function (l) { return encodeURIComponent(l.v[0]) + "*" + l.c.q; }).join(",") + "&rep=" + me().rep + linkExtras(); copyText(rl, function () { toast("Reorder link copied. Text it with your price."); }); return; }
     if (t.closest("[data-rtcopy]")) { var lk = $("#rtlink").textContent; if (/^http|^file/.test(lk)) copyText(lk, function () { toast("Link copied. Text it to a customer."); }); else toast("Pick your name first"); return; }
     if ((el = t.closest("[data-starter]"))) { var st = byK(STARTERS, el.dataset.starter); starterLines(st).forEach(function (l) { addToCart(l.f.id, vkey(l.v), l.q); }); renderCart(); $("#cart").showModal(); return; }
     if (t.closest("[data-photo]")) { var pr = route2(me().rep); sms("Hey " + pr.who + ", here’s a picture of my blade. I need more of these. Name / company: ", pr.cell); return; }
@@ -1106,7 +1126,7 @@
     if ((el = t.closest("[data-qadd]"))) { var qr = el.closest(".qrow"), qf = FAM[qr.dataset.f], qs = $("[data-qsize]", qr), qk = qs ? qs.value : vkey(defVar(qf, qf.vars)), qn = parseInt(el.dataset.qadd, 10), qv = findVar(qf, qk); addToCart(qf.id, qk, qn); flash(el, "✓"); toast(qn + " x " + qf.n + (ACCT ? " added to your order" : " added at " + money(eachAt(qv, qn)) + " each")); return; }
     if ((el = t.closest("[data-eqpick]"))) { var on = el.getAttribute("aria-pressed") !== "true"; el.setAttribute("aria-pressed", on); var ix2 = eqSel.indexOf(el.dataset.eqpick); if (on && ix2 < 0) eqSel.push(el.dataset.eqpick); if (!on && ix2 >= 0) eqSel.splice(ix2, 1); $$("[data-eqpick]").forEach(function (b) { b.setAttribute("aria-pressed", eqSel.indexOf(b.dataset.eqpick) >= 0); }); return; }
     if ((el = t.closest("[data-intent]"))) { setIntent(el.dataset.intent); return; }
-    if (t.closest("[data-repchange]")) { store.set("replock", 0); renderReps($("#f-rep").value); return; }
+    if (t.closest("[data-repchange]")) { store.set("replock", 0); renderReps($("#f-rep").value); var rdc = $("#repd"); if (rdc) rdc.open = true; return; }
     if ((el = t.closest("[data-tag]"))) { shop.tag = shop.tag === el.dataset.tag ? "" : el.dataset.tag; shop.n = SHOPPAGE; shopScreen(); return; }
     if ((el = t.closest("[data-agg]"))) { earlyPick(el.dataset.agg); return; }
     if (t.closest("[data-aggask]")) { var al = ($("#aggloc") ? $("#aggloc").value : "").trim(); if (!al) { $("#aggloc").focus(); toast("Type your city and state first"); return; } openSend("pricing"); $("#f-notes").value = "Blade recommendation for my aggregate. I cut in: " + al + "\nWhat I cut (concrete, asphalt, green): \nSaw and blade size: "; preview(); return; }
@@ -1144,10 +1164,16 @@
     if (t.closest("[data-refer]")) { openSend("refer"); return; }
     if ((el = t.closest("[data-acct]"))) { setAcct(el.dataset.acct); return; }
     if ((el = t.closest("[data-star]"))) { var sv = +el.dataset.star; $("#f-stars").value = sv; $$("#starpick button").forEach(function (x) { x.classList.toggle("on", +x.dataset.star <= sv); }); preview(); return; }
-    if (t.closest("[data-friend]")) { if (!$("#f-name").value.trim()) { $("#f-name").focus(); toast("Add your name so they know who sent them"); return; } location.href = "sms:?&body=" + encodeURIComponent("I get my diamond blades from DBW WISCO. Prices are on the site and a real person handles the order. Tell them I sent you: " + friendLink()); return; }
+    if (t.closest("[data-friend]")) { if (!$("#f-name").value.trim()) { $("#f-name").focus(); toast("Add your name so they know who sent them"); return; } location.href = "sms:?&body=" + encodeURIComponent("I get my diamond blades from DBW WISCO. A real rep prices every order and picks up the phone. Tell them I sent you: " + friendLink()); return; }
     if (t.closest("[data-feedback]")) { openSend("feedback"); return; }
     if (t.closest("[data-cart]")) { ["detail", "extras", "send"].forEach(function (id) { if ($("#" + id).open) $("#" + id).close(); }); renderCart(); $("#cart").showModal(); return; }
-    if (t.closest("[data-checkout]")) { openExtras(); return; }
+    if (t.closest("[data-checkout]")) { openSend("order"); return; }
+    if (t.closest("[data-quicksms]")) {
+      if (!cartLines().length) return; mode = "order"; ordRef = newRef(); var qo = quickOrder(), qt = buildText(qo), qr = route2(qo.rep);
+      sms(qt, qr.cell); store.set("last", { date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }), items: cart.slice() });
+      var qm = $("#quickmsg"); if (qm) { qm.hidden = false; qm.innerHTML = "<b>Order prepared. It is not sent yet.</b> Hit Send in your messages app. Your reference: <b class=\"sel\">" + ordRef + "</b>"; }
+      return;
+    }
     if (t.closest("[data-tosend]")) { extras.stock = $("#xstock").checked; openSend("order"); return; }
     if (t.closest("[data-backcart]")) { $("#extras").close(); renderCart(); $("#cart").showModal(); return; }
     if ((el = t.closest("[data-xbreak]"))) { var qn = parseInt(el.dataset.xbreak, 10), ix = extras.breaks.indexOf(qn); if (ix >= 0) extras.breaks.splice(ix, 1); else extras.breaks.push(qn); extras.breaks.sort(function (a, b) { return a - b; }); el.setAttribute("aria-pressed", ix < 0); return; }
@@ -1157,7 +1183,7 @@
     if ((el = t.closest("[data-rm]"))) { cart.splice(parseInt(el.closest(".line").dataset.i, 10), 1); saveCart(); renderCart(); return; }
     if (t.closest("[data-reorder]")) { var last = lastOrder(); if (last) { last.items.forEach(function (c) { if (FAM[c.f] && findVar(FAM[c.f], c.v)) addToCart(c.f, c.v, c.q); }); renderCart(); $("#cart").showModal(); } return; }
     if (t.closest("[data-email]")) { sendEmail(); return; }
-    if (t.closest("[data-sms]")) { if (needName()) return; var fo = formData(); sms(buildText(fo), route2(fo.rep).cell); afterSend("sms"); return; }
+    if (t.closest("[data-sms]")) { if (needName("sms")) return; var fo = formData(); sms(buildText(fo), route2(fo.rep).cell); afterSend("sms"); return; }
     if (t.closest("[data-copy]")) { if (needName()) return; copyText(buildText(formData()), function () { afterSend("copied"); }); return; }
     if (t.closest("[data-share]")) { copyText(shareLink(), function () { toast("Reorder link copied. Text it to anyone."); }); return; }
     if ((el = t.closest("[data-fsms]"))) { sms(frankMsg(el.closest("[data-frank]").dataset.frank)); return; }
@@ -1182,7 +1208,7 @@
   $("#sendform").addEventListener("input", function () {
     preview();
     var f = $("#sendform"), info = me();   // keep what they typed, even if they close the sheet
-    ["name", "company", "phone", "email", "addr", "city", "state", "zip", "fav"].forEach(function (k) { info[k] = f.elements[k].value.trim(); });
+    ["name", "company", "phone", "email", "addr", "city", "state", "zip"].forEach(function (k) { info[k] = f.elements[k].value.trim(); });
     info.acct = f.elements.acct.value; store.set("me", info);
   });
   function payNote() { var el = $("#promonote"); if (!el) return; var on = PROMO_ON && mode === "order", card = isCard($("#f-pay").value); el.hidden = !on; el.className = "promonote" + (card ? " won" : ""); el.textContent = card ? "You’re paying by card, so this order gets a free blade. Your rep confirms which one." : (PROMO.title || "Free blade when you pay this order by card") + ". Pick a card option above to get it."; }
@@ -1198,9 +1224,13 @@
   window.addEventListener("hashchange", route);
 
   /* ---------- boot ---------- */
-  $$("[data-text-btn]").forEach(function (a) { a.href = "sms:" + (W.textNumber || ""); });
-  $$("[data-call-btn]").forEach(function (a) { a.href = "tel:" + (W.textNumber || ""); });
-  $$("[data-mail-btn]").forEach(function (a) { a.href = "mailto:" + (W.orderEmail || ""); });
+  function contactWire() {
+    var r = myRep(), cell = (r && r.cell) || W.textNumber || "", mail = (r && r.email) || W.orderEmail || "", who = r ? repFirst(r) : FRANK;
+    $$("[data-text-btn]").forEach(function (a) { a.href = "sms:" + cell; if (a.closest(".footact")) a.textContent = "Text " + who; });
+    $$("[data-call-btn]").forEach(function (a) { a.href = "tel:" + cell; a.textContent = "Call " + who; });
+    $$("[data-mail-btn]").forEach(function (a) { a.href = "mailto:" + mail; a.textContent = "Email " + who; });
+    $$("[data-mgr]").forEach(function (a) { a.textContent = r ? r.name + ", your rep" : (W.managerName || "Frank") + ", " + (W.managerTitle || ""); });
+  }
   $$("[data-oemail-link]").forEach(function (a) { a.textContent = W.orderEmail || ""; a.href = "mailto:" + (W.orderEmail || ""); });
   $$("[data-mgr]").forEach(function (a) { a.textContent = (W.managerName || "Frank") + ", " + (W.managerTitle || ""); });
   $$("[data-text]").forEach(function (a) { a.textContent = W.textDisplay || ""; a.href = "sms:" + (W.textNumber || ""); });
@@ -1211,13 +1241,18 @@
   if (P.get("ref")) store.set("ref", P.get("ref").replace(/[<>]/g, "").slice(0, 60));
   if (P.get("cart")) {
     cart = [];
-    P.get("cart").split(",").forEach(function (x) { var a = x.split("*"), hit = SKU[(a[0] || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var qp = (a[1] || "").split("@"), pr = parseFloat(qp[1]); if (hit) { var it = { f: hit[0].id, v: vkey(hit[0].vars[hit[1]]), q: Math.max(1, parseInt(qp[0], 10) || 1) }; if (pr > 0 && pr < 100000) it.p = Math.round(pr * 100) / 100; cart.push(it); } });
+    P.get("cart").split(",").forEach(function (x) { var a = x.split("*"), hit = SKU[(a[0] || "").toUpperCase().replace(/[^A-Z0-9.]/g, "")]; var qp = (a[1] || "").split("@"); if (hit) cart.push({ f: hit[0].id, v: vkey(hit[0].vars[hit[1]]), q: Math.max(1, parseInt(qp[0], 10) || 1) }); });
     store.set("cart", cart);
   }
+  cart.forEach(function (c) { delete c.p; });
+  if (P.get("c")) { linkFor = clean(P.get("c"), 60); var mi = me(); if (!mi.company) { mi.company = linkFor; store.set("me", mi); } }
+  if (P.get("note")) linkNote = clean(P.get("note"), 140);
   deal.lines = (Array.isArray(deal.lines) ? deal.lines : []).filter(function (l) { return FAM[l.f] && findVar(FAM[l.f], l.v); });
   /* Any link somebody taps opens on the home page, even if it was copied from deep inside the site. */
   if (location.hash && location.hash !== "#home") { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { location.hash = ""; } }
+  contactWire();
   route(); badge();
+  if (P.get("tools")) location.hash = "#team";   /* the rep tools are not linked anywhere on the site */
   bfOpen(store.get("bf", 0) === 1);
   if (P.get("cart") && cart.length) { renderCart(); $("#cart").showModal(); }
 })();
