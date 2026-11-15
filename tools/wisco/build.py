@@ -477,7 +477,8 @@ def main():
                 v[3] = rk[v[2]][v[3]]; del v[6:]
             d["min"] = min(v[3] for v in d["vars"]) if d["vars"] else 0
             d.pop("lo", None)
-    data = dict(sawdeal=sawdeal,
+    PRIVATE = "--private" in sys.argv
+    data = dict(sawdeal=sawdeal, private=PRIVATE,
         priceList=(m.group(1).title() + " " + m.group(2)) if m else "", built=datetime.date.today().isoformat(),
         materials=[dict(k=k, n=n) for k, n in FA.MATERIALS], saws=[dict(k=k, n=n, s=s) for k, n, s in FA.SAWS],
         cats=[dict(k=k, n=n, s=s) for k, n, s in FA.CATS], families=out)

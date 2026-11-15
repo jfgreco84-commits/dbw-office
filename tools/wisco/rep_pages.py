@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SITE = os.path.join(ROOT, "wisco")
 BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-RESERVED = {"brand", "img", "share"}
+RESERVED = {"brand", "img", "share", "team"}
 
 
 def roster():
@@ -81,6 +81,13 @@ def build(site_url):
         d = os.path.join(SITE, r["slug"]); os.makedirs(d, exist_ok=True)
         open(os.path.join(d, "index.html"), "w", encoding="utf8").write(page)
         made.append(r["slug"])
+    # The rep tools are not linked anywhere on the site. Reps reach them at <site>/team/.
+    d = os.path.join(SITE, "team"); os.makedirs(d, exist_ok=True)
+    open(os.path.join(d, "index.html"), "w", encoding="utf8").write(
+        '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1"><title>DBW WISCO rep tools</title>'
+        '<meta http-equiv="refresh" content="0; url=../?tools=1"><script>location.replace("../?tools=1");</script>'
+        '</head><body><a href="../?tools=1">Open the rep tools</a></body></html>\n')
     return made
 
 
