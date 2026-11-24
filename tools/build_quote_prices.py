@@ -203,6 +203,7 @@ def build(path):
         if k in items:
             items[k]['note'] = n
     name = re.sub(r'\.xlsx$', '', path.split('/')[-1], flags=re.I)
+    name = re.sub(r'^[0-9a-f]{6,}-', '', name)   # drop an upload id prefix (e.g. 80c108cc-FINAL_...)
     month = next((m for m in MONTHS if m in name.upper()), None)
     if not month and list_date:
         month = MONTHS[int(list_date[5:7]) - 1]
