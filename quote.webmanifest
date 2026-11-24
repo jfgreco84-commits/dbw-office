@@ -2,7 +2,7 @@
   "name": "Froggy's Quote Generator",
   "short_name": "Froggy's Quote Generator",
   "description": "DBW quote builder: price list, packages, options, tax and freight.",
-  "start_url": "quote.html",
+  "start_url": "quick.html",
   "scope": "./",
   "display": "browser",
   "background_color": "#141925",
