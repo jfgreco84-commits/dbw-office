@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DBW Quote Builder</title>
+<title>Froggy's Quote Generator</title>
+<meta name="apple-mobile-web-app-title" content="Froggy's Quote Generator">
+<meta name="application-name" content="Froggy's Quote Generator">
+<meta name="theme-color" content="#141925">
+<link rel="apple-touch-icon" href="quote-icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="quote-icon-192.png">
+<link rel="manifest" href="quote.webmanifest">
 <!-- Quote builder for DBW WI reps.
      Costs: quote-prices.json (monthly price list, tools/build_quote_prices.py), falling back to
      the latest ShipSheet cost read live from rep.html. Blade Selector: quote-selector.json
@@ -112,7 +118,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
 </head>
 <body>
 <header>
-  <div class="logo">DBW QUOTE</div>
+  <div class="logo">🐸 Froggy's Quote Generator</div>
   <div><div style="font-weight:700;color:#fff" id="hdr-rep">Quote Builder</div><div class="sub" id="cat-status">Loading price list…</div></div>
   <button type="button" class="red sm" id="reset-top">↺ Reset</button>
 </header>
@@ -631,7 +637,7 @@ function render(){
   $('fr-mode').value=st.frMode||'tbd'; $('fr-amt').value=st.frAmt||''; $('fr-amt').hidden=st.frMode!=='amt';
   $('tx-mode').value=st.txMode||'auto'; $('tx-rate').value=st.txRate||''; $('tx-fr').checked=!!st.txFr;
   $('sh-street').value=st.shStreet||''; $('sh-city').value=st.shCity||''; $('sh-state').value=st.shState||''; $('sh-zip').value=st.shZip||''; $('sh-county').value=st.shCounty||''; $('sh-mke').checked=!!st.shMke; renderShip();
-  const R=REPS[st.rep]; $('hdr-rep').textContent=R?'Quote Builder · '+R.name+' ('+st.rep+')':'Quote Builder · pick your name below'; $('hdr-rep').classList.toggle('norep',!R);
+  const R=REPS[st.rep]; $('hdr-rep').textContent=R?R.name+' ('+st.rep+')':'Pick your name below'; $('hdr-rep').classList.toggle('norep',!R);
   showTab(st.tab||'item'); renderLines(); renderTotals();
 }
 
