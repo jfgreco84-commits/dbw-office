@@ -73,13 +73,26 @@ button.sm{padding:7px 11px;font-size:13px}
 @media(max-width:760px){.lgrid{grid-template-columns:1fr 1fr}.lgrid .desc{grid-column:span 2}}
 .hint{font-size:11px;color:#6b7585;margin-top:4px}
 .iw{position:relative}
+.dw{display:flex;gap:8px;align-items:center}
+.dw input{flex:1;min-width:0}
+.pic{width:44px;height:44px;flex:0 0 44px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid #3a4458;cursor:zoom-in}
+.pic[hidden]{display:none!important}
+.pic.lg{width:64px;height:64px;flex-basis:64px}
+.pic.sm{width:36px;height:36px;flex-basis:36px}
+.nopic{width:44px;height:44px;border-radius:8px;background:#232a3a;display:flex;align-items:center;justify-content:center;font-size:18px;color:#5a6476}
+.famh{display:flex;gap:10px;align-items:center}
+#zoom{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+#zoom[hidden]{display:none!important}
+#zoom img{max-width:min(92vw,520px);max-height:70vh;background:#fff;border-radius:14px;padding:10px}
+#zoom div{color:#fff;font-weight:800;margin-top:12px;text-align:center;font-size:15px}
 .sug{position:absolute;left:0;top:100%;z-index:40;margin-top:4px;width:100%;background:#1b2130;border:2px solid #f5a623;border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.6);overflow:hidden}
 .sug[hidden]{display:none!important}
-.sug .s{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;border-top:1px solid #2a3040;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sug .s{display:grid;grid-template-columns:44px 1fr auto;gap:2px 10px;align-items:center;padding:10px 12px;border-top:1px solid #2a3040;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .sug .s:first-child{border-top:none}
 .sug .s.on,.sug .s:hover{background:#2a3350}
 .sug .s b{color:#fff;font-size:15px;letter-spacing:.3px}
-.sug .s .d{grid-column:1 / -1;font-size:12px;color:#a9b3c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug .s .pic,.sug .s .nopic{grid-row:span 2;cursor:pointer}
+.sug .s .d{grid-column:2 / -1;font-size:12px;color:#a9b3c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sug .s .pr{font-weight:900;color:#4caf7d;font-size:14px}
 .sug .more{padding:7px 12px;font-size:11px;color:#8892a4;background:#151b28}
 .hint b{color:#c8d0de}
@@ -97,7 +110,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
 .res{margin-top:10px;max-height:520px;overflow:auto;border-top:1px solid #2a3040}
 .fam{padding:10px 0;border-bottom:1px solid #2a3040}
 .fam .fn{font-weight:800;color:#fff}
-.vr{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:6px 0 6px 10px;font-size:13px}
+.vr{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;padding:6px 0 6px 10px;font-size:13px}
 .vr .c{color:#8892a4;font-size:11px}
 .stars{color:#f5a623;letter-spacing:1px}
 #reset-top{margin-left:auto}
@@ -318,7 +331,7 @@ const up2=n=>Math.ceil(n*100-1e-6)/100;   // round UP to the cent so a package n
 const norm=c=>String(c||'').toUpperCase().replace(/[\s\/]/g,'');
 
 // ── Catalog: price list wins; ShipSheet history (rep.html) adds sold counts and covers the rest ──
-let CAT={}, PL={items:{}}, PLKEYS={}, SEL=null, SUGIDX=[];
+let CAT={}, PL={items:{}}, PLKEYS={}, SEL=null, SUGIDX=[], PIC={};
 function lookup(code){ if(!code)return null; if(norm(code)===AMEX.code)return {p:{code:AMEX.code,desc:AMEX.desc,cost:AMEX.cost,tab:'GIFT CARDS',mode:'cent'},h:null,key:AMEX.code};
   const k=PL.items[code]?code:norm(code); let p=PL.items[k]||null; if(!p&&PL.items[k+'20'])p=PL.items[k+'20'];
   let viaSize=null;
@@ -372,6 +385,8 @@ async function loadCatalog(){
   }catch(e){ PL={items:{}}; msg.push('Price list not loaded'); }
   try{ CAT=buildCatalog(extractOrders(await (await fetch('rep.html',{cache:'no-cache'})).text())); }catch(e){ CAT={}; }
   try{ SEL=await (await fetch('quote-selector.json',{cache:'no-cache'})).json(); }catch(e){ SEL=null; }
+  // Blade photos (from dbwwisco.com, copied into quote-img/): item # -> [photo, family name]
+  PIC={}; if(SEL)SEL.families.forEach(f=>{ if(f.i)f.v.forEach(v=>{ const k=norm(v[0]); if(!PIC[k])PIC[k]=[f.i,f.n]; }); });
   try{ TAX=await (await fetch('quote-tax.json',{cache:'no-cache'})).json();
     $('sh-county').innerHTML='<option value="">Pick county</option>'+Object.keys(TAX.wi.counties).sort().map(c=>`<option>${esc(c)}</option>`).join(''); }catch(e){ TAX=null; }
   const opts=[], used=new Set();
@@ -455,7 +470,7 @@ function lineHTML(l,i,R){
   return `<div class="line${eq?' eq':''}${lineBad(l)?' bad':''}" data-i="${i}">
   <div class="lgrid">
     <div class="iw"><label>${eq?'Equipment #':'Item # or words'}</label><input data-f="item" enterkeyhint="done" placeholder="${eq?'':'A14TREX, dragon…'}" value="${esc(l.item)}" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list"><div class="sug" hidden></div></div>
-    <div class="desc"><label>Description on quote</label><input data-f="desc" value="${esc(l.desc)}" placeholder="e.g. 14&quot; Asphalt Blade"></div>
+    <div class="desc"><label>Description on quote</label><div class="dw">${(()=>{ const P=picFor(l.item); return `<img class="pic" data-pic${P?` src="quote-img/${esc(P[0])}" alt="${esc(P[1])}" data-zoom="${esc(P[1])}"`:' hidden alt=""'}>`; })()}<input data-f="desc" value="${esc(l.desc)}" placeholder="e.g. 14&quot; Asphalt Blade"></div></div>
     <div><label>Qty${st.optOn&&!eq?' (set by options)':''}</label><input data-f="qty" type="number" min="0" step="1" inputmode="numeric" value="${esc(l.qty)}"${st.optOn&&!eq?' disabled':''}></div>
     <div><label>Cost each</label><input data-f="cost" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(l.cost)}"></div>
     <div><label>${eq?'Customer $ each':(r.pk?'Pkg price each':'Price each')}</label><input data-f="price" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(l.price)}" placeholder="${ph}"></div>
@@ -661,7 +676,7 @@ function renderBrowse(){
   if(!tab&&!q){ $('br-res').innerHTML='<div class="hint">Pick a tab or type a few words.</div>'; return; }
   const words=q.split(/\s+/).filter(Boolean);
   const hits=Object.entries(PL.items).filter(([k,v])=>(!tab||v.tab===tab)&&words.every(w=>(v.code+' '+v.desc).toUpperCase().includes(w))).slice(0,80);
-  $('br-res').innerHTML=hits.length?hits.map(([k,v])=>`<div class="vr"><div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?' <span class="chip m-mid">🔥</span>':''}${v.blowout?` <span class="chip m-lo">💥 ${v.blowout} left</span>`:''}<div class="c">${esc(v.tab)}</div></div><div>${money(v.cost)}</div><button type="button" class="gold sm" data-addk="${esc(k)}">Add</button></div>`).join(''):'<div class="hint">No match.</div>';
+  $('br-res').innerHTML=hits.length?hits.map(([k,v])=>`<div class="vr">${picHTML(k,'sm')||'<span></span>'}<div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?' <span class="chip m-mid">🔥</span>':''}${v.blowout?` <span class="chip m-lo">💥 ${v.blowout} left</span>`:''}<div class="c">${esc(v.tab)}</div></div><div>${money(v.cost)}</div><button type="button" class="gold sm" data-addk="${esc(k)}">Add</button></div>`).join(''):'<div class="hint">No match.</div>';
 }
 
 // ── Blade Selector (saw -> material -> size, best fit first) ──
@@ -684,7 +699,7 @@ function renderChain(){ const saw=$('s-chainsaw').value; const F=PL.chainFits||{
   const keys=F[saw]||[]; const order=['Chain','Bar','Sprocket','Saw (powerhead)'];
   const groups=order.map(g=>[g,keys.filter(k=>PL.items[k]&&chainKind(PL.items[k])===g)]).filter(x=>x[1].length);
   $('s-res').innerHTML=`<div class="hint" style="margin:6px 0">Fits the <b>${esc(saw)}</b>. Powerheads add as package equipment (FREE with the chains unless you type a $).</div>`+groups.map(([g,ks])=>`<div class="fam"><div class="fn">${g==='Saw (powerhead)'?'📦 ':''}${esc(g)}${g==='Chain'?'s':g==='Bar'?'s':g==='Sprocket'?'s':''}</div>${ks.map(k=>{ const v=PL.items[k]; const c=listCost(v,1);
-    return `<div class="vr"><div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?' <span class="chip m-mid">🔥 special</span>':''}</div><div>${money(c)}</div><button type="button" class="gold sm" data-addc="${esc(k)}" data-eq="${g==='Saw (powerhead)'?1:0}">${g==='Saw (powerhead)'?'Add to deal':'Add'}</button></div>`; }).join('')}</div>`).join('');
+    return `<div class="vr">${picHTML(k,'sm')||'<span></span>'}<div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?' <span class="chip m-mid">🔥 special</span>':''}</div><div>${money(c)}</div><button type="button" class="gold sm" data-addc="${esc(k)}" data-eq="${g==='Saw (powerhead)'?1:0}">${g==='Saw (powerhead)'?'Add to deal':'Add'}</button></div>`; }).join('')}</div>`).join('');
 }
 function renderSel(){
   const chain=$('s-saw').value==='chain'&&PL.chainFits&&Object.keys(PL.chainFits).length;
@@ -695,9 +710,9 @@ function renderSel(){
   let fams=selFams().map(f=>({f,vars:f.v.filter(v=>!size||v[2]===size)})).filter(x=>x.vars.length);
   fams.sort((a,b)=>(mat?((b.f.m[mat]||0)-(a.f.m[mat]||0)):0)||((tierRank[a.f.t]??5)-(tierRank[b.f.t]??5))||a.f.n.localeCompare(b.f.n));
   if(!$('s-saw').value&&!mat&&!size){ $('s-res').innerHTML='<div class="hint">Pick a saw or a material to start.</div>'; return; }
-  $('s-res').innerHTML=fams.length?fams.slice(0,40).map(({f,vars})=>`<div class="fam"><div class="fn">${esc(f.n)} ${f.t?`<span class="chip ${f.t==='supreme'||f.t==='pro'?'m-hi':'m-mid'}" style="font-size:10px">${esc(f.t.toUpperCase())}</span>`:''} ${mat?`<span class="stars" title="fit for this material">${stars(f.m[mat])}</span>`:''}</div>${f.h?`<div class="hint">${esc(f.h)}</div>`:''}
+  $('s-res').innerHTML=fams.length?fams.slice(0,40).map(({f,vars})=>`<div class="fam"><div class="famh">${f.i?`<img class="pic lg" src="quote-img/${esc(f.i)}" alt="${esc(f.n)}" loading="lazy" data-zoom="${esc(f.n)}">`:''}<div><div class="fn">${esc(f.n)} ${f.t?`<span class="chip ${f.t==='supreme'||f.t==='pro'?'m-hi':'m-mid'}" style="font-size:10px">${esc(f.t.toUpperCase())}</span>`:''} ${mat?`<span class="stars" title="fit for this material">${stars(f.m[mat])}</span>`:''}</div>${f.h?`<div class="hint">${esc(f.h)}</div>`:''}</div></div>
     ${vars.slice(0,12).map(v=>{ const L=lookup(v[0]); const p=L&&L.p; const c=p?listCost(p,1):(L&&L.h?L.h.cost:null);
-      return `<div class="vr"><div><b>${esc(p?p.code:v[0])}</b> ${esc(v[1])}${p&&p.special?' <span class="chip m-mid">🔥 special</span>':''}${p&&p.blowout?' <span class="chip m-lo">💥</span>':''}</div><div>${c?money(c):'<span class="c">cost?</span>'}</div><button type="button" class="gold sm" data-adds="${esc(v[0])}">Add</button></div>`; }).join('')}</div>`).join(''):'<div class="hint">Nothing fits that combo. Try another size or "Any".</div>';
+      return `<div class="vr"><span></span><div><b>${esc(p?p.code:v[0])}</b> ${esc(v[1])}${p&&p.special?' <span class="chip m-mid">🔥 special</span>':''}${p&&p.blowout?' <span class="chip m-lo">💥</span>':''}</div><div>${c?money(c):'<span class="c">cost?</span>'}</div><button type="button" class="gold sm" data-adds="${esc(v[0])}">Add</button></div>`; }).join('')}</div>`).join(''):'<div class="hint">Nothing fits that combo. Try another size or "Any".</div>';
 }
 
 // ── Package Deal: equipment by category, then make and model ──
@@ -801,13 +816,15 @@ function suggest(q){ q=(q||'').trim().toUpperCase(); if(!q)return {hits:[],total
     if(sc>=0)out.push([sc+(e.p?0:0.5),e]); }
   out.sort((a,b)=>a[0]-b[0]||a[1].n.length-b[1].n.length||a[1].n.localeCompare(b[1].n));
   return {hits:out.slice(0,8).map(x=>x[1]),total:out.length}; }
+function picFor(code){ if(!code)return null; const b=norm(String(code).split('#')[0]); return PIC[b]||(b.endsWith('20')&&PIC[b.slice(0,-2)])||PIC[b+'20']||null; }
+function picHTML(code,cls,zoom){ const P=picFor(code); return P?`<img class="pic${cls?' '+cls:''}" src="quote-img/${esc(P[0])}" alt="${esc(P[1])}" loading="lazy"${zoom===false?'':` data-zoom="${esc(P[1])}"`}>`:(cls==='sg'?'<span class="nopic">·</span>':''); }
 function sugBox(inp){ return inp.parentElement.querySelector('.sug'); }
 function hideSug(inp){ const b=inp&&sugBox(inp); if(b){ b.hidden=true; b.innerHTML=''; } }
 function showSug(inp,i){ const b=sugBox(inp); if(!b)return; const l=st.lines[i], {hits,total}=suggest(inp.value);
   if(!hits.length||(hits.length===1&&hits[0].n===norm(inp.value)&&hits[0].key===l.item&&l.cost)){ hideSug(inp); return; }
   const mu=+st.mu||TARGET;
   b.innerHTML=hits.map((e,j)=>{ const c=e.p?listCost(e.p,l.qty):(e.h&&e.h.cost); const pr=c>0?(l.kind==='equip'?money(c)+' cost':money(sheetPrice(+c,mu,e.p&&e.p.mode))+' ea'):'';
-      return `<div class="s" data-sug="${esc(e.key)}" role="option"><b>${esc(e.p?e.p.code:e.key)}${e.p&&e.p.special?' 🔥':''}${e.p&&e.p.blowout?' 💥':''}</b><span class="pr">${pr}</span><span class="d">${esc(e.p?e.p.desc:'ShipSheet history only')}</span></div>`; }).join('')
+      return `<div class="s" data-sug="${esc(e.key)}" role="option">${picHTML(e.key,'sg',false)}<b>${esc(e.p?e.p.code:e.key)}${e.p&&e.p.special?' 🔥':''}${e.p&&e.p.blowout?' 💥':''}</b><span class="pr">${pr}</span><span class="d">${esc(e.p?e.p.desc:'ShipSheet history only')}</span></div>`; }).join('')
     +(total>hits.length?`<div class="more">${total-hits.length} more: keep typing to narrow it down</div>`:'');
   b.hidden=false; b.dataset.i=i;
   const ir=inp.getBoundingClientRect(); b.style.width=Math.max(ir.width,Math.min(460,document.documentElement.clientWidth-ir.left-14))+'px';
@@ -826,11 +843,16 @@ $('lines').addEventListener('keydown',e=>{ if(e.target.dataset.f!=='item')return
     if(pick)pickSug(e.target,i,pick.dataset.sug); else { hideSug(e.target); e.target.blur(); } } });
 $('lines').addEventListener('focusout',e=>{ if(e.target.dataset.f==='item'){ const inp=e.target; setTimeout(()=>{ if(document.activeElement!==inp)hideSug(inp); },120); } });
 $('lines').addEventListener('focusin',e=>{ if(e.target.dataset.f==='item'&&e.target.value.trim()&&!st.lines[+e.target.closest('.line').dataset.i].cost)showSug(e.target,+e.target.closest('.line').dataset.i); });
+document.addEventListener('click',e=>{ const z=e.target.closest('[data-zoom]'); const Z=$('zoom');
+  if(z&&!z.closest('.sug')){ e.preventDefault(); Z.querySelector('img').src=z.getAttribute('src'); Z.querySelector('div').textContent=z.dataset.zoom; Z.hidden=false; return; }
+  if(e.target.closest('#zoom'))Z.hidden=true; });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape')$('zoom').hidden=true; });
 function isOption(v){ return !!document.querySelector(`#items option[value="${CSS.escape(v)}"]`); }
 // Update one line in place (no re-render), so a tap or click that follows isn't swallowed by a redraw.
 function patchLine(i){ const el=$('lines').querySelector(`.line[data-i="${i}"]`), l=st.lines[i]; if(!el||!l)return false;
   const set=(f,v)=>{ const x=el.querySelector(`[data-f=${f}]`); if(x&&document.activeElement!==x)x.value=v; };
-  set('item',l.item||''); set('desc',l.desc||''); set('cost',l.cost||''); el.querySelector('.hint').innerHTML=infoFor(l); el.classList.toggle('bad',lineBad(l)); refreshPlaceholders(); return true; }
+  set('item',l.item||''); set('desc',l.desc||''); set('cost',l.cost||'');
+  const im=el.querySelector('[data-pic]'), P=picFor(l.item); if(im){ if(P){ im.src='quote-img/'+P[0]; im.alt=P[1]; im.dataset.zoom=P[1]; im.hidden=false; } else { im.hidden=true; im.removeAttribute('src'); } } el.querySelector('.hint').innerHTML=infoFor(l); el.classList.toggle('bad',lineBad(l)); refreshPlaceholders(); return true; }
 function lineBad(l){ return l.kind!=='equip'&&!!(l.item||l.desc)&&(!(parseFloat(l.cost)>0)&&!has(l.price) || (has(l.price)&&!(parseFloat(l.price)>0)) || !(+l.qty>0)); }
 function applyItem(i,focusQty){ const l=st.lines[i]; if(!l)return; l.item=(l.item||'').trim().toUpperCase(); const L=lookup(l.item);
   if(L){ l.costManual=false; const c=L.p?listCost(L.p,l.qty):L.h.cost; l.cost=(+c).toFixed(2); if(L.p&&!l.descManual)l.desc=L.p.desc; }
@@ -862,5 +884,6 @@ function resetQuote(){ if(!confirm('Reset this quote? Customer, items and notes 
 $('clear').addEventListener('click',resetQuote); $('reset-top').addEventListener('click',resetQuote);
 render(); loadCatalog();
 </script>
+<div id="zoom" hidden><img alt=""><div></div></div>
 </body>
 </html>

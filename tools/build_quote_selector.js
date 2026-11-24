@@ -9,15 +9,16 @@
 // Keeps only what the selector needs: names, tiers, categories, saw types, material
 // ratings and the size variants (item #, size label, size). No prices: costs come from
 // quote-prices.json (the monthly price list).
+// Also copies each family's photo into quote-img/ so the quote tool can show which blade is which.
 'use strict';
 const fs = require('fs');
 const https = require('https');
 
-function get(url) {
+function get(url, binary) {
   return new Promise((res, rej) => https.get(url, r => {
-    if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) return res(get(new URL(r.headers.location, url).href));
-    if (r.statusCode !== 200) return rej(new Error(url + ' -> ' + r.statusCode));
-    let d = ''; r.setEncoding('utf8'); r.on('data', c => d += c); r.on('end', () => res(d));
+    if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) return res(get(new URL(r.headers.location, url).href, binary));
+    if (r.statusCode !== 200) { r.resume(); return rej(new Error(url + ' -> ' + r.statusCode)); }
+    const d = []; r.on('data', c => d.push(c)); r.on('end', () => { const b = Buffer.concat(d); res(binary ? b : b.toString('utf8')); });
   }).on('error', rej));
 }
 
@@ -35,9 +36,23 @@ function get(url) {
     families: C.families.map(f => ({
       n: f.n, t: f.tier || '', c: f.cats || [], s: f.saws || [], m: f.m || {},
       h: (f.hook || '').slice(0, 140),
+      i: /^[\w.-]+\.(webp|jpg|jpeg|png)$/i.test(f.img || '') ? f.img : '',
       v: (f.vars || []).map(v => [String(v[0]), String(v[1] || ''), +v[2] || 0]),
     })).filter(f => f.v.length),
   };
+  // Blade photos: copy each family's picture from dbwwisco.com/img/ into quote-img/ (same origin, works if the site is down)
+  fs.mkdirSync('quote-img', { recursive: true });
+  let got = 0;
+  for (const f of out.families) {
+    if (!f.i) continue;
+    const dst = 'quote-img/' + f.i;
+    if (!fs.existsSync(dst)) {
+      try { const b = await get('https://dbwwisco.com/img/' + f.i, true); if (b.length > 500) fs.writeFileSync(dst, b); else throw new Error('tiny'); }
+      catch (e) { console.warn('no photo:', f.i, e.message); f.i = ''; continue; }
+    }
+    got++;
+  }
+  console.log('photos:', got);
   fs.writeFileSync('quote-selector.json', JSON.stringify(out));
   console.log('quote-selector.json:', out.families.length, 'families,', out.families.reduce((t, f) => t + f.v.length, 0), 'sizes');
 })().catch(e => { console.error(e.message); process.exit(1); });
