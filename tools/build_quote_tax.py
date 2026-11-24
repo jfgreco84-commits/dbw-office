@@ -78,6 +78,8 @@ if os.path.exists('quote-tax.json'):
         old = json.load(open('quote-tax.json'))
         if 'collectStates' in old:
             out['collectStates'] = old['collectStates']
+        if not src_avalara:   # no new Avalara files this run: keep last month's out-of-state rates
+            out['zipRates'], out['zipRatesFrom'] = old.get('zipRates', {}), old.get('zipRatesFrom', [])
     except ValueError:
         pass
 for path in src_avalara:

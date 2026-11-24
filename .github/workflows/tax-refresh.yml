@@ -1,0 +1,78 @@
+name: tax-refresh
+
+# Monthly Wisconsin sales tax refresh for the quote tool (quote-tax.json).
+# Reads the WI Dept. of Revenue Sales Tax Rate Chart and rebuilds with tools/build_quote_tax.py,
+# which refuses to build unless all 72 counties parse. Commits ONLY when a rate changed
+# (state, any county, City of Milwaukee), never for a new page date alone. Out-of-state
+# Avalara ZIP rates and collectStates carry over untouched.
+
+on:
+  schedule:
+    - cron: '17 19 2 * *'   # 2nd of each month, 1:17 PM Central (19:17 UTC in winter)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+    concurrency:
+      group: tax-refresh
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download the WI DOR rate chart and the ZIP list
+        run: |
+          set -e
+          mkdir -p "$RUNNER_TEMP/tax" && cd "$RUNNER_TEMP/tax"
+          curl -fsSL --retry 3 https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx -o pcs-taxrates.html
+          npm pack -q zipcodes-us@1.2.0 && tar xzf zipcodes-us-1.2.0.tgz
+      - name: Rebuild quote-tax.json
+        run: |
+          set -e
+          cp quote-tax.json "$RUNNER_TEMP/old-quote-tax.json"
+          python3 -I tools/build_quote_tax.py "$RUNNER_TEMP/tax/pcs-taxrates.html" "$RUNNER_TEMP/tax/package/data/US.txt"
+      - name: Did any rate change?
+        id: diff
+        run: |
+          python3 -I - "$RUNNER_TEMP/old-quote-tax.json" quote-tax.json >> "$GITHUB_OUTPUT" <<'PY'
+          import json, sys
+          o, n = (json.load(open(f)) for f in sys.argv[1:3])
+          rates = lambda d: (d['wi']['state'], d['wi']['milwaukeeCity'], {k: v['rate'] for k, v in d['wi']['counties'].items()})
+          ch = []
+          (os_, oc, ocs), (ns, nc, ncs) = rates(o), rates(n)
+          if os_ != ns: ch.append(f'state {os_}% -> {ns}%')
+          if oc != nc: ch.append(f'City of Milwaukee {oc}% -> {nc}%')
+          for k in sorted(set(ocs) | set(ncs)):
+              if ocs.get(k) != ncs.get(k): ch.append(f'{k} County {ocs.get(k)}% -> {ncs.get(k)}%')
+          print('changed=' + ('yes' if ch else 'no'))
+          print('summary=' + ('; '.join(ch) if ch else 'no rate changes'))
+          PY
+      - name: Commit and publish the new rates
+        if: steps.diff.outputs.changed == 'yes'
+        env:
+          SUMMARY: ${{ steps.diff.outputs.summary }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          python3 tools/card_guard.py --check quote-tax.json
+          git config user.name "tax-refresh"
+          git config user.email "tax-refresh@users.noreply.github.com"
+          git add quote-tax.json
+          git commit -qm "Monthly WI tax refresh: $SUMMARY"
+          for attempt in 1 2 3; do
+            git pull -q --rebase origin main && git push -q origin HEAD:main && break
+            sleep $((attempt * 20))
+          done
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" || echo "Pages rebuild request failed; the next push will deploy it."
+      - name: Report
+        env:
+          SUMMARY: ${{ steps.diff.outputs.summary }}
+        run: |
+          echo "### WI tax refresh: $SUMMARY" >> "$GITHUB_STEP_SUMMARY"
