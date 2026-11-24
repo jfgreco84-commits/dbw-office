@@ -153,7 +153,7 @@ table.inner td{padding:5px 8px;border-bottom:1px solid #141820}
     <div class="rep-name" id="rep-name">Loading...</div>
     <div class="rep-meta" id="rep-meta"></div>
   </div>
-  <a class="quote-btn" id="quote-btn" href="quote.html">🧾 Build a Quote</a></header>
+  <a class="quote-btn" id="quote-btn" href="quick.html">🧾 Build a Quote</a></header>
 <div class="container">
   <div id="bonus-section"></div>
   <div class="section-title" style="margin-top:0" id="mtd-title">📦 MTD — Shipped</div>
@@ -21854,7 +21854,7 @@ const commYTD=rid=>(D.payroll||[]).filter(r=>r.rep_id===rid).reduce((a,r)=>a+(r.
 
 renderBonus(repId);
 document.getElementById('rep-name').textContent=rep.name+(rep.nick?' "'+rep.nick+'"':'');
-document.getElementById('quote-btn').href='quote.html?rep='+encodeURIComponent(repId);document.getElementById('rep-meta').textContent=repId+' · '+(rep.scale==='veteran'?'Veteran Rep':'New Rep')+' · '+D.generated;
+document.getElementById('quote-btn').href='quick.html?rep='+encodeURIComponent(repId);document.getElementById('rep-meta').textContent=repId+' · '+(rep.scale==='veteran'?'Veteran Rep':'New Rep')+' · '+D.generated;
 document.title=rep.name+' — DBW';
 
 const ytd=D.ytd[repId]||{};

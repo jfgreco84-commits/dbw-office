@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Froggy's Quote Generator</title>
+<meta name="apple-mobile-web-app-title" content="Froggy's Quote Generator">
+<meta name="application-name" content="Froggy's Quote Generator">
+<meta name="theme-color" content="#141925">
+<link rel="apple-touch-icon" href="quote-icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="quote-icon-192.png">
+<link rel="manifest" href="quote.webmanifest">
+<!-- Quick Quote: the 3-tap front door to the DBW quote tool. Search -> tap a size -> done.
+     Same pricing as quote.html (cost x markup, rounded like the price sheet, November 24-pack special)
+     and the SAME saved quote (localStorage dbw_quote_v1), so "Full tool" opens this exact quote for
+     packages, options, tax and freight. Saved on this device only. Never reads or stores card data. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;color:#e0e6f0;min-height:100vh;-webkit-text-size-adjust:100%}
+header{background:linear-gradient(135deg,#1a1f2e,#0d1520);border-bottom:2px solid #f5a623;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-size:18px;font-weight:900;color:#f5a623;letter-spacing:1px;flex:1;min-width:0}
+.logo small{display:block;font-size:12px;color:#c8d0de;letter-spacing:0;font-weight:700}
+.full{color:#8892a4;font-size:13px;font-weight:700;text-decoration:none;border:1px solid #2a3040;border-radius:16px;padding:6px 12px;white-space:nowrap}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 110px}
+.card{background:#1a1f2e;border:1px solid #2a3040;border-radius:12px;padding:14px;margin-bottom:14px}
+.title{font-size:12px;font-weight:800;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+input,select,textarea{width:100%;background:#0f1117;color:#e0e6f0;border:1px solid #2a3040;border-radius:8px;padding:10px 12px;font-size:16px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#f5a623}
+label{display:block;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px}
+button{background:#2a3040;color:#e0e6f0;border:none;border-radius:8px;padding:10px 14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
+button.gold{background:#f5a623;color:#0f1117}
+.money{font-variant-numeric:tabular-nums}
+/* search */
+#q{font-size:20px;padding:16px 16px 16px 46px;border:2px solid #f5a623;border-radius:12px;background:#0f1117 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' fill='none' stroke='%23f5a623' stroke-width='2.5' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E") 14px center no-repeat}
+.hint{font-size:12px;color:#8892a4;margin-top:8px}
+.fam{display:grid;grid-template-columns:72px 1fr;gap:12px;padding:12px 0;border-top:1px solid #2a3040}
+.fam:first-child{border-top:none}
+.fam img,.noimg{width:72px;height:72px;object-fit:contain;background:#fff;border-radius:10px}
+.noimg{background:#232a3a;display:flex;align-items:center;justify-content:center;font-size:26px}
+.fn{font-weight:900;color:#fff;font-size:16px}
+.fh{font-size:12px;color:#8892a4;margin:2px 0 8px}
+.sizes{display:flex;flex-wrap:wrap;gap:8px}
+.sz{display:flex;flex-direction:column;align-items:center;min-width:76px;padding:8px 10px;background:#232a3a;border:2px solid #3a4458;border-radius:10px;line-height:1.15}
+.sz b{font-size:16px;color:#fff}
+.sz span{font-size:13px;color:#4caf7d;font-weight:800}
+.sz em{font-style:normal;font-size:10px;color:#f5a623;font-weight:800}
+.sz.hit{border-color:#f5a623}
+.sz:active{transform:scale(.96)}
+.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:900;vertical-align:middle;margin-left:4px}
+.c-hi{background:#1a3a1a;color:#4caf7d}.c-sp{background:#3a2a10;color:#f5a623}.c-lo{background:#3a1a1a;color:#e05555}
+.row{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid #2a3040;font-size:14px}
+.row .d{font-size:12px;color:#8892a4}
+/* quote lines */
+.ln{display:grid;grid-template-columns:56px 1fr;gap:10px;padding:12px 0;border-top:1px solid #2a3040}
+.ln:first-child{border-top:none}
+.ln img,.ln .noimg{width:56px;height:56px;font-size:20px}
+.ln .t{font-weight:800;color:#fff;font-size:15px;line-height:1.25}
+.ln .c{font-size:12px;color:#8892a4}
+.ctl{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.step{display:flex;align-items:center;border:1px solid #3a4458;border-radius:10px;overflow:hidden}
+.step button{width:44px;height:44px;padding:0;font-size:22px;border-radius:0;background:#232a3a}
+.step input{width:56px;height:44px;border:none;border-radius:0;text-align:center;font-size:18px;font-weight:900;background:#0f1117;padding:0}
+.ea{flex:1;text-align:right;font-size:13px;color:#8892a4;min-width:90px}
+.ea b{display:block;font-size:18px;color:#fff}
+.del{background:none;color:#e05555;font-size:20px;padding:0 4px;line-height:1}
+.tt{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.ctl{flex-wrap:nowrap}
+.nudge{margin-top:8px;width:100%;text-align:left;background:#221b0e;border:2px solid #f5a623;color:#ffd58a;font-size:14px;font-weight:700;padding:10px 12px;border-radius:10px}
+.nudge b{color:#fff}
+.nudge.on{background:#16301f;border-color:#4caf7d;color:#9fe0b0}
+.empty{color:#8892a4;font-size:14px;padding:6px 0}
+.warn{background:#3a2a10;border:1px solid #f5a623;color:#ffd58a;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:10px}
+.warn a{color:#f5a623;font-weight:900}
+/* markup */
+.mub{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.mub button{padding:12px 0;font-size:16px;font-weight:900;border:3px solid transparent}
+.mub button.on{border-color:#fff;box-shadow:0 0 0 2px #f5a623}
+.comm{margin-top:10px;font-size:13px;color:#8892a4;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.comm b{color:#fff}
+.tog{display:flex;align-items:center;gap:8px;font-size:14px;color:#c8d0de;margin-top:10px}
+.tog input{width:22px;height:22px}
+details summary{cursor:pointer;font-weight:800;color:#c8d0de;list-style:none;font-size:15px}
+details summary::-webkit-details-marker{display:none}
+details summary:before{content:'▸ ';color:#f5a623}
+details[open] summary:before{content:'▾ '}
+/* sticky bar */
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0b0e14;border-top:2px solid #f5a623;padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px}
+#bar .bt{flex:1;min-width:0}
+#bar .a{font-size:24px;font-weight:900;color:#f5a623;line-height:1.05}
+#bar .b{font-size:11px;color:#8892a4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bar button{padding:13px 14px;font-size:15px}
+#toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#1f3a24;color:#9fe0b0;border:1px solid #4caf7d;border-radius:20px;padding:10px 18px;font-weight:800;font-size:14px;z-index:60;max-width:90vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+#zoom{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#zoom img{max-width:min(92vw,520px);max-height:70vh;background:#fff;border-radius:14px;padding:10px}
+#zoom div{color:#fff;font-weight:800;margin-top:12px;font-size:16px}
+/* printable customer quote (PDF) */
+#quote{display:none;background:#fff;color:#111;padding:24px;font-size:13px}
+#quote h2{font-size:20px;letter-spacing:1px}
+#quote table{width:100%;border-collapse:collapse;margin:14px 0}
+#quote th{background:#111;color:#f5a623;text-align:left;padding:7px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+#quote td{padding:7px 8px;border-bottom:1px solid #ddd;vertical-align:top}
+#quote .r{text-align:right;white-space:nowrap}
+#quote .m{color:#666;font-size:12px}
+#quote .grand td{font-weight:900;font-size:16px;border-top:2px solid #111;border-bottom:none}
+#quote .pitch{margin-top:5px;padding:5px 8px;background:#fff4dc;border-left:4px solid #f5a623;border-radius:4px;font-size:12px;color:#5a3d00}
+#quote .pitch.on{background:#e7f6ec;border-left-color:#1a7a3a;color:#1a5a2a;font-weight:700}
+@media print{body{background:#fff}header,.wrap,#bar,#toast,#zoom{display:none!important}#quote{display:block;padding:0}#quote *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🐸 Froggy's Quote Generator<small id="who">Pick your name below</small></div>
+  <a class="full" id="full" href="quote.html">Full tool ›</a>
+</header>
+<div class="wrap">
+  <div class="card" id="rep-card">
+    <div class="title">Who's quoting?</div>
+    <select id="rep"></select>
+  </div>
+
+  <div class="card">
+    <input id="q" type="search" placeholder="Item # or blade name (dragon, t-rex, 14)" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search">
+    <div class="hint" id="q-hint">Loading price list…</div>
+    <div id="res" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <div class="title">Your quote</div>
+    <div id="warn"></div>
+    <div id="lines"></div>
+  </div>
+
+  <div class="card">
+    <div class="title">Markup <span id="mu-chip" style="float:right;letter-spacing:0"></span></div>
+    <div class="mub" id="mub"></div>
+    <div class="comm" id="comm"></div>
+    <label class="tog"><input type="checkbox" id="newacct"> New account (25% commission at 1.7x and up)</label>
+  </div>
+
+  <div class="card">
+    <details id="cust-d"><summary>Customer name (optional)</summary>
+      <label for="co">Company</label><input id="co" autocomplete="off">
+      <label for="cname">Contact</label><input id="cname" autocomplete="off">
+      <label for="cnum">Customer #</label><input id="cnum" autocomplete="off" inputmode="numeric">
+      <label for="notes">Note on the quote</label><textarea id="notes" rows="2"></textarea>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="hint" style="margin:0 0 10px">Need a <b>package deal</b> (free saw), <b>A/B/C options</b>, <b>tax</b>, <b>freight</b> or a <b>hand-typed price</b>? The Full tool opens this same quote.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="quote.html" id="full2" style="flex:1"><button type="button" style="width:100%">🧰 Open in Full tool</button></a>
+      <button type="button" id="reset" style="background:#3a1a1a;color:#e05555">↺ New quote</button>
+    </div>
+  </div>
+  <div class="hint" style="text-align:center">Saved on this device only. Nothing is sent anywhere.</div>
+</div>
+
+<div id="bar"><div class="bt"><div class="a money" id="bar-a">$0.00</div><div class="b" id="bar-b">Search a blade to start</div></div>
+  <button type="button" id="copy">📋 Copy</button><button type="button" class="gold" id="pdf">🖨️ PDF</button></div>
+<div id="toast" hidden></div>
+<div id="zoom" hidden><img alt=""><div></div></div>
+<div id="quote"></div>
+
+<script>
+'use strict';
+// Same reps, markup ladder and rounding as quote.html. Keep the two in step.
+const REPS={
+  W784:{name:'Frank Greco',sign:'Big Frank Greco - The G.M.',email:'fgreco@diamondbladewarehouse.com'},
+  W839:{name:'John Anthony',email:'janthony@diamondbladewarehouse.com'},
+  W930:{name:'Adam Misurek',email:'amisurek@diamondbladewarehouse.com'},
+  W603:{name:'Adam West',email:'awest@diamondbladewarehouse.com'},
+  W983:{name:'Joe Deruki',email:'jderuki@diamondbladewarehouse.com'},
+  W973:{name:'TJ Sutton',email:'tsutton@diamondbladewarehouse.com'},
+  W849:{name:'John Baemmert',email:'jbaemert@diamondbladewarehouse.com'},
+  W962:{name:'Rob Redman',email:'rredman@diamondbladewarehouse.com'},
+  W762:{name:'Kerry Smith',email:'ksmith@diamondbladewarehouse.com'},
+  W959:{name:'Cassie Kolhouse',email:'ckolhouse@diamondbladewarehouse.com'},
+  W909:{name:'Luis Millan',email:''},
+  W934:{name:'Les Kubeny',email:'lkubeny@diamondbladewarehouse.com'},
+  W938:{name:'Geoff Nurse',email:'gnurse@diamondbladewarehouse.com'}
+};
+const ADDON=0.49, FLOOR=1.7, TARGET=2.0;
+const LADDER=[[3.0,.30],[2.2,.20],[2.1,.19],[2.0,.18],[1.9,.17],[1.8,.13],[1.7,.10],[1.6,.08],[1.5,.05],[1.3,.03]];
+const MUS=[[1.3,'#b3261e','#fff'],[1.5,'#d9534f','#fff'],[1.6,'#ef9a96','#3a1010'],[1.7,'#a8e0b4','#0f2a17'],[1.8,'#7fcf93','#0f2a17'],
+  [1.9,'#5cbc76','#0f2a17'],[2.0,'#43a862','#fff'],[2.1,'#348f52','#fff'],[2.2,'#2a7a45','#fff'],[3.0,'#21663a','#fff']];
+const $=id=>document.getElementById(id);
+const money=n=>'$'+(Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r2=n=>Math.round(n*100)/100;
+const norm=c=>String(c||'').toUpperCase().replace(/[\s\/]/g,'');
+const has=v=>v!==''&&v!=null&&!isNaN(parseFloat(v));
+function commRate(mu,acct){ const r=(LADDER.find(x=>mu>=x[0]-1e-9)||[0,0])[1]; return acct==='new'&&mu>=1.7-1e-9?0.25:r; }
+function listCost(p,qty){ if(!p)return null; if(p.special)return (+qty||0)>=24?p.special.cost24:p.special.cost; return p.cost; }
+function sheetPrice(cost,mu,mode){ return mode==='ceil'?Math.ceil(cost*mu-1e-9):Math.round((cost*mu+ADDON)*100+1e-6)/100; }
+
+let PL={items:{}}, PLKEYS={}, SEL=null, PIC={};
+function lookup(code){ if(!code)return null; const k=PL.items[code]?code:norm(code); let p=PL.items[k]||null, key=k; if(!p&&PL.items[k+'20']){ p=PL.items[k+'20']; key=k+'20'; } return p?{p,key}:null; }
+function picFor(code){ if(!code)return null; const b=norm(String(code).split('#')[0]); return PIC[b]||(b.endsWith('20')&&PIC[b.slice(0,-2)])||PIC[b+'20']||null; }
+
+// ── The saved quote: shared with quote.html (same key and shape). Only touch what this page owns. ──
+const SKEY='dbw_quote_v1';
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const newLine=o=>Object.assign({kind:'item',item:'',desc:'',qty:1,cost:'',price:'',costManual:false},o||{});
+function blank(){ return {rep:'',acct:'reorder',date:today(),co:'',name:'',num:'',mu:TARGET,notes:'',tab:'item',lines:[],optOn:false,opts:[{q:12,m:2.2},{q:25,m:2.1},{q:36,m:2.0},{q:50,m:1.9}],frMode:'tbd',frAmt:'',txMode:'auto',shStreet:'',shCity:'',shState:'',shZip:'',shCounty:'',shMke:false,txRate:'',txFr:false}; }
+function load(){ try{ const s=JSON.parse(localStorage.getItem(SKEY)); if(s&&Array.isArray(s.lines))return Object.assign(blank(),s); }catch(e){} return blank(); }
+function save(){ try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
+let st=load();
+const realLines=()=>st.lines.filter(l=>(l.item||l.desc));
+(()=>{ const r=new URLSearchParams(location.search).get('rep'); if(r&&REPS[r.toUpperCase()]){ st.rep=r.toUpperCase(); save(); } })();
+
+// ── Pricing (regular quote; packages and options live in the Full tool) ──
+function unitOf(l,mu){ if(has(l.price))return r2(parseFloat(l.price)); const c=parseFloat(l.cost)||0; const L=lookup(l.item); return c>0?sheetPrice(c,mu,L&&L.p.mode):0; }
+function calc(){ const mu=+st.mu||TARGET; const rows=realLines().filter(l=>(+l.qty||0)>0).map(l=>{ const q=+l.qty||0, unit=unitOf(l,mu); return {l,q,unit,ext:r2(unit*q)}; });
+  const sell=rows.reduce((t,r)=>t+r.ext,0), cogs=rows.reduce((t,r)=>t+r.q*(parseFloat(r.l.cost)||0),0), tmu=cogs>0?sell/cogs:0, rate=commRate(tmu,st.acct);
+  return {rows,sell,cogs,tmu,rate,comm:sell*rate,mu}; }
+const fullOnly=()=>st.optOn||st.lines.some(l=>l.kind==='equip'&&(l.item||l.desc)&&(+l.qty||0)>0);
+function pitch24(l,q,unit){ if(l.kind==='equip'||has(l.price)||l.costManual)return null; const L=lookup(l.item); if(!L||!L.p.special)return null;
+  if(q>=24)return {on:true}; const p24=sheetPrice(L.p.special.cost24,+st.mu||TARGET,L.p.mode); return unit>p24?{on:false,p24,save:unit-p24,more:24-q}:null; }
+
+// ── Search: blade families (with photos and sizes) first, then anything else on the price list ──
+// Size on the button; when two sizes repeat (or there's no size, e.g. a cart) show the item # so each button is clear.
+function sizeLabel(v,all,code){ const s=v[2]?`${+v[2]}"`:''; const same=all.filter(x=>x[2]===v[2]).length>1; return !s?code:same?`${s} ${code}`:s; }
+// Job words -> material keys in the Blade Finder ratings (quote-selector.json)
+const MATW=[[/^ASPH/,'a'],[/^GREEN/,'g'],[/^(REBAR|REINF|HARD)/,'r'],[/^(CONC|CURED)/,'c'],[/^(BRICK|BLOCK|CMU)/,'b'],[/^PAVER/,'p'],[/^(STONE|GRANITE)/,'s'],[/^(TILE|PORCEL)/,'t'],[/^(MORTAR|TUCK)/,'m'],[/^(METAL|IRON|DUCTILE|STEEL)/,'x'],[/^PIPE/,'pi'],[/^(PRECAST|PRESTRESS)/,'pc']];
+function famCard(f,qn,size){ const mu=+st.mu||TARGET; const seen=new Set(); const vars=f.v.map(v=>({v,L:lookup(v[0])})).filter(x=>x.L&&(!size||+x.v[2]===size)&&!seen.has(x.L.key)&&seen.add(x.L.key)); if(!vars.length)return '';
+  const all=vars.map(x=>x.v);
+  const sizes=vars.map(({v,L})=>{ const p=L.p, c=listCost(p,1), hit=qn&&qn.length>=3&&norm(v[0]).startsWith(qn);
+    return `<button type="button" class="sz${hit?' hit':''}" data-add="${esc(L.key)}"><b>${esc(sizeLabel(v,all,p.code))}</b><span>${money(sheetPrice(c,mu,p.mode))}</span>${p.special?`<em>🔥 24+: ${money(sheetPrice(p.special.cost24,mu,p.mode))}</em>`:''}${p.blowout?'<em>💥 blowout</em>':''}</button>`; }).join('');
+  const tier=f.t==='supreme'||f.t==='pro'?`<span class="chip c-hi">${esc(f.t.toUpperCase())}</span>`:f.t?`<span class="chip c-sp">${esc(f.t.toUpperCase())}</span>`:'';
+  return `<div class="fam">${f.i?`<img src="quote-img/${esc(f.i)}" alt="${esc(f.n)}" loading="lazy" data-zoom="${esc(f.n)}">`:'<div class="noimg">💎</div>'}<div><div class="fn">${esc(f.n)}${tier}</div>${f.h?`<div class="fh">${esc(f.h)}</div>`:''}<div class="sizes">${sizes}</div></div></div>`; }
+function search(){ const raw=$('q').value.trim(), q=raw.toUpperCase(), qn=norm(q), words=q.split(/\s+/).filter(Boolean);
+  if(!PL.count){ return; }
+  let fams=[], rest=[], famSize=0;
+  if(!q){ // nothing typed: this month's specials
+    fams=(SEL?SEL.families:[]).filter(f=>f.v.some(v=>{ const L=lookup(v[0]); return L&&L.p.special; }));
+    $('q-hint').innerHTML='🔥 <b>This month\'s specials.</b> Tap a size to add it. Or type an item # or blade name above.';
+  } else {
+    const fs=(SEL?SEL.families:[]).map(f=>{ const name=f.n.toUpperCase(), blurb=(f.n+' '+(f.h||'')).toUpperCase(); let sc=-1;
+      if(words.every(w=>name.includes(w)))sc=name.startsWith(words[0])?0:1;
+      else if(words.length>1&&blurb.includes(q))sc=1.2; else if((words.length>1||q.length>=4)&&words.every(w=>blurb.includes(w)))sc=1.5;
+      else if(qn.length>=2&&f.v.some(v=>norm(v[0]).startsWith(qn)))sc=2;
+      else if(qn.length>=3&&f.v.some(v=>norm(v[0]).includes(qn)))sc=3;
+      else if(words.length&&words.every(w=>(name+' '+f.v.map(v=>v[0]+' '+v[1]).join(' ')).toUpperCase().includes(w)))sc=4;
+      return [sc,f]; }).filter(x=>x[0]>=0).sort((a,b)=>a[0]-b[0]);
+    fams=fs.map(x=>x[1]);
+    const inFam=new Set(); fams.forEach(f=>f.v.forEach(v=>{ const L=lookup(v[0]); if(L)inFam.add(L.key); }));
+    // a job search ("asphalt 14", "14 concrete"): best-rated blades for that material, in that size
+    const mat=(words.map(w=>(MATW.find(([re])=>re.test(w))||[])[1]).find(Boolean))||null, szw=words.find(w=>/^\d{1,2}(\.\d+)?"?$/.test(w)), size=szw?parseFloat(szw):0;
+    if(mat){ const byMat=(SEL?SEL.families:[]).filter(f=>(f.m[mat]||0)>=4&&(!size||f.v.some(v=>+v[2]===size&&lookup(v[0])))).sort((a,b)=>(b.m[mat]||0)-(a.m[mat]||0));
+      byMat.forEach(f=>{ if(!fams.includes(f))fams.push(f); }); famSize=size; }
+    rest=Object.entries(PL.items).filter(([k,v])=>!inFam.has(k)&&(norm(v.code).startsWith(qn)||words.every(w=>(v.code+' '+v.desc).toUpperCase().includes(w))))
+      .sort((a,b)=>(norm(b[1].code).startsWith(qn)?1:0)-(norm(a[1].code).startsWith(qn)?1:0)||a[1].code.localeCompare(b[1].code));
+    $('q-hint').innerHTML=fams.length||rest.length?'Tap a size (or <b>Add</b>) to put it on the quote. Tap a photo to see it big.':'No match. Try fewer letters, a blade name, or the Full tool.';
+  }
+  const mu=+st.mu||TARGET;
+  $('res').innerHTML=fams.slice(0,q?8:30).map(f=>famCard(f,qn,famSize)).join('')+rest.slice(0,12).map(([k,v])=>{ const c=listCost(v,1);
+    const P=picFor(k); return `<div class="row">${P?`<img src="quote-img/${esc(P[0])}" alt="" style="width:44px;height:44px;object-fit:contain;background:#fff;border-radius:8px" data-zoom="${esc(P[1])}">`:'<span></span>'}<div><b>${esc(v.code)}</b>${v.special?'<span class="chip c-sp">🔥</span>':''}<div class="d">${esc(v.desc)}</div></div><div class="money" style="font-weight:800;color:#4caf7d">${money(sheetPrice(c,mu,v.mode))}</div><button type="button" class="gold" data-add="${esc(k)}">Add</button></div>`; }).join('')
+    +(rest.length>12?`<div class="hint">${rest.length-12} more: keep typing to narrow it down.</div>`:''); }
+let qT=0; $('q').addEventListener('input',()=>{ clearTimeout(qT); qT=setTimeout(search,120); });
+$('q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('q').blur(); } });
+
+function addItem(key){ const L=lookup(key); if(!L)return; const p=L.p, code=PLKEYS[L.key]||p.code;
+  let l=st.lines.find(x=>x.kind!=='equip'&&norm(x.item)===norm(code)&&!has(x.price));
+  if(l){ l.qty=String((+l.qty||0)+1); }
+  else { st.lines=st.lines.filter(x=>x.item||x.desc); l=newLine({item:code,desc:p.desc,qty:'1'}); st.lines.push(l); }
+  if(!l.costManual)l.cost=(+listCost(p,l.qty)).toFixed(2);
+  save(); renderAll(); toast(`✓ ${l.qty} × ${shortName(l)} on the quote`); }
+function shortName(l){ const P=picFor(l.item); const size=(String(l.desc).match(/^\s*(\d+(?:\.\d+)?(?:[-\s]\d\/\d)?)\s*"/)||[])[1]; return P?(size?size+'" ':'')+P[1]:(l.desc||l.item); }
+$('res').addEventListener('click',e=>{ const b=e.target.closest('[data-add]'); if(b)addItem(b.dataset.add); });
+
+// ── Quote lines ──
+function renderLines(){ const mu=+st.mu||TARGET, L=realLines();
+  $('warn').innerHTML=fullOnly()?`<div class="warn">This quote has a <b>${st.optOn?'A/B/C options':'package deal'}</b> set up in the Full tool, so prices here may not match. <a href="quote.html">Open the Full tool ›</a></div>`:'';
+  if(!L.length){ $('lines').innerHTML='<div class="empty">Nothing yet. Search above and tap a size.</div>'; return; }
+  $('lines').innerHTML=L.map(l=>{ const i=st.lines.indexOf(l), q=+l.qty||0, unit=unitOf(l,mu), P=picFor(l.item), x=pitch24(l,q,unit), lk=lookup(l.item);
+    const nudge=!x?'':x.on?`<div class="nudge on">✅ 24-pack special price is ON</div>`:`<button type="button" class="nudge" data-make24="${i}">🔥 Make it <b>24</b>: customer pays <b>${money(x.p24)}</b> ea (saves ${money(x.save)} ea). Tap to set qty 24.</button>`;
+    const eq=l.kind==='equip';
+    return `<div class="ln">${P?`<img src="quote-img/${esc(P[0])}" alt="${esc(P[1])}" data-zoom="${esc(P[1])}">`:'<div class="noimg">💎</div>'}<div>
+      <div class="tt"><div class="t">${esc(l.desc||l.item)}</div><button type="button" class="del" data-del="${i}" aria-label="Remove">✕</button></div><div class="c">${esc(lk?lk.p.code:l.item)}${lk&&lk.p.blowout?` · 💥 ${lk.p.blowout} left`:''}${has(l.price)?' · price typed in Full tool':''}${eq?' · package equipment':''}</div>
+      <div class="ctl"><div class="step"><button type="button" data-dec="${i}" aria-label="One less">−</button><input type="number" inputmode="numeric" min="0" step="1" value="${esc(l.qty)}" data-qty="${i}" aria-label="Quantity"><button type="button" data-inc="${i}" aria-label="One more">+</button></div>
+        <div class="ea">${eq?'see Full tool':`${money(unit)} ea<b class="money">${money(unit*q)}</b>`}</div></div>
+      ${nudge}</div></div>`; }).join(''); }
+function setQty(i,q){ const l=st.lines[i]; if(!l)return; q=Math.max(0,Math.floor(+q||0)); l.qty=String(q); if(!l.costManual){ const L=lookup(l.item); if(L)l.cost=(+listCost(L.p,q)).toFixed(2); } save(); }
+$('lines').addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t)return; const d=t.dataset;
+  if(d.inc!=null){ setQty(+d.inc,(+st.lines[+d.inc].qty||0)+1); renderAll(); }
+  else if(d.dec!=null){ const l=st.lines[+d.dec]; if((+l.qty||0)<=1){ if(confirm('Remove '+shortName(l)+' from the quote?')){ st.lines.splice(+d.dec,1); save(); } } else setQty(+d.dec,(+l.qty||0)-1); renderAll(); }
+  else if(d.del!=null){ st.lines.splice(+d.del,1); save(); renderAll(); }
+  else if(d.make24!=null){ setQty(+d.make24,24); renderAll(); toast('Qty 24: 24-pack price on'); } });
+$('lines').addEventListener('change',e=>{ const d=e.target.dataset; if(d.qty!=null){ setQty(+d.qty,e.target.value); renderAll(); } });
+$('lines').addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.dataset.qty!=null)e.target.blur(); });
+
+// ── Markup ──
+function renderMu(){ const m=+st.mu||TARGET;
+  $('mub').innerHTML=MUS.map(([v,bg,fg])=>`<button type="button" data-mu="${v}" class="${Math.abs(v-m)<1e-9?'on':''}" style="background:${bg};color:${fg}">${v.toFixed(1)}</button>`).join('');
+  const t=calc(); const low=m<FLOOR-1e-9;
+  $('mu-chip').innerHTML=`<span class="chip ${m>=2.2-1e-9?'c-hi':m>=FLOOR-1e-9?'c-sp':'c-lo'}" style="font-size:12px">${m.toFixed(2)}x</span>`;
+  $('comm').innerHTML=t.rows.length?`<span>Your commission <b>${money(t.comm)}</b> (${Math.round(t.rate*100)}%)</span>${low?'<span style="color:#e05555;font-weight:800">Under the 1.7 floor</span>':'<span>Target <b>2.0</b></span>'}`:'<span>Red = under the 1.7 floor. Target <b>2.0</b>.</span>'; }
+$('mub').addEventListener('click',e=>{ const b=e.target.closest('[data-mu]'); if(!b)return; st.mu=+b.dataset.mu; save(); renderAll(); if($('q').value||$('res').innerHTML)search(); });
+$('newacct').addEventListener('change',e=>{ st.acct=e.target.checked?'new':'reorder'; save(); renderAll(); });
+
+// ── Totals bar, copy and PDF ──
+function renderBar(){ const t=calc(); $('bar-a').textContent=money(t.sell);
+  $('bar-b').textContent=!REPS[st.rep]?'Pick your name at the top':!t.rows.length?'Search a blade to start':`${t.rows.reduce((n,r)=>n+r.q,0)} pcs · ${t.tmu.toFixed(2)}x · plus freight & tax`; }
+function blocker(){ const t=calc(); if(!REPS[st.rep])return 'Pick your name first (top of the page) so the quote is signed right.'; if(!t.rows.length)return 'Add at least one blade first.';
+  if(fullOnly())return 'This quote has a package deal or options. Send it from the Full tool so the prices are right.';
+  const bad=t.rows.find(r=>!(r.unit>0)); if(bad)return `${shortName(bad.l)} has no price. Fix it in the Full tool.`; return ''; }
+function quoteText(){ const t=calc(), R=REPS[st.rep]||{name:'',email:''};
+  const lines=t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit); return `${r.q} x ${r.l.desc||r.l.item} (${(lookup(r.l.item)||{p:{code:r.l.item}}).p.code}): ${money(r.unit)} each = ${money(r.ext)}`+(x?(x.on?' (24-pack special price)':`\n   SPECIAL: buy 24, pay ${money(x.p24)} each (save ${money(x.save)} each)`):''); });
+  return [`DIAMOND BLADE WAREHOUSE - QUOTE`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'','',...lines,'',`Subtotal: ${money(t.sell)}`,'Freight and sales tax added at invoice.','',st.notes||'','',R.sign||R.name,R.email]
+    .filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim(); }
+function renderQuote(){ const t=calc(), R=REPS[st.rep]||{name:'Diamond Blade Warehouse',email:''};
+  $('quote').innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px"><div><h2>DIAMOND BLADE WAREHOUSE</h2><div class="m">Quote</div></div><div style="text-align:right"><b>Date:</b> ${esc(st.date)}${st.num?`<div><b>Customer #:</b> ${esc(st.num)}</div>`:''}</div></div>
+    ${st.co||st.name?`<div style="margin-top:12px"><b>Prepared for:</b><br>${esc(st.co)}${st.co&&st.name?'<br>':''}${esc(st.name)}</div>`:''}
+    <table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>
+    ${t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit), lk=lookup(r.l.item); return `<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}<div class="m">${esc(lk?lk.p.code:r.l.item)}</div>${!x?'':x.on?'<div class="pitch on">🔥 24-pack special price applied</div>':`<div class="pitch">🔥 <b>Buy 24, pay ${money(x.p24)} each</b> (save ${money(x.save)} each). Add ${x.more} more of this blade.</div>`}</td><td class="r">${money(r.unit)}</td><td class="r">${money(r.ext)}</td></tr>`; }).join('')}
+    <tr class="grand"><td colspan="2">TOTAL</td><td class="r" colspan="2">${money(t.sell)}</td></tr>
+    <tr><td colspan="4" class="m" style="border-bottom:none">Freight and sales tax added at invoice.</td></tr></table>
+    ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
+    <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="m">${esc(R.email)}</div>`:''}<div class="m">Diamond Blade Warehouse</div></div>`; }
+function guarded(fn){ const b=blocker(); if(b){ alert(b); return; } fn(); }
+$('copy').addEventListener('click',()=>guarded(async()=>{ const txt=quoteText(); try{ await navigator.clipboard.writeText(txt); toast('📋 Quote copied. Paste it in a text or email.'); }catch(e){ prompt('Copy this quote:',txt); } }));
+$('pdf').addEventListener('click',()=>guarded(()=>{ renderQuote(); window.print(); }));
+
+// ── Rep, customer, reset ──
+$('rep').innerHTML='<option value="">Pick your name</option>'+Object.entries(REPS).map(([k,v])=>`<option value="${k}">${esc(v.name)} (${k})</option>`).join('');
+$('rep').addEventListener('change',e=>{ st.rep=e.target.value; save(); renderAll(); });
+[['co','co'],['cname','name'],['cnum','num'],['notes','notes']].forEach(([id,f])=>$(id).addEventListener('input',e=>{ st[f]=e.target.value; save(); }));
+$('reset').addEventListener('click',()=>{ if(!realLines().length&&!st.co&&!st.name||confirm('Start a new quote? This clears the blades and customer (your name and markup stay).')){
+  const keep={rep:st.rep,mu:st.mu}; st=Object.assign(blank(),keep); save(); $('q').value=''; renderAll(); search(); toast('New quote'); } });
+function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1800); }
+document.addEventListener('click',e=>{ const z=e.target.closest('[data-zoom]'); if(z){ $('zoom').querySelector('img').src=z.getAttribute('src'); $('zoom').querySelector('div').textContent=z.dataset.zoom; $('zoom').hidden=false; return; } if(e.target.closest('#zoom'))$('zoom').hidden=true; });
+
+function renderAll(){ const R=REPS[st.rep]; $('who').textContent=R?R.name+' ('+st.rep+')':'Pick your name below'; $('rep').value=st.rep; $('rep-card').hidden=!!R;
+  const fl='quote.html'+(st.rep?'?rep='+encodeURIComponent(st.rep):''); $('full').href=fl; $('full2').href=fl;
+  $('newacct').checked=st.acct==='new'; $('co').value=st.co||''; $('cname').value=st.name||''; $('cnum').value=st.num||''; $('notes').value=st.notes||'';
+  renderLines(); renderMu(); renderBar(); }
+// tap the name in the header to switch reps
+$('who').addEventListener('click',()=>{ $('rep-card').hidden=false; $('rep').focus(); });
+
+(async()=>{
+  try{ PL=await (await fetch('quote-prices.json',{cache:'no-cache'})).json(); const seen={}; Object.values(PL.items).forEach(v=>{ seen[v.code]=(seen[v.code]||0)+1; }); Object.entries(PL.items).forEach(([k,v])=>{ PLKEYS[k]=seen[v.code]>1?k:v.code; }); }catch(e){ PL={items:{}}; }
+  try{ SEL=await (await fetch('quote-selector.json',{cache:'no-cache'})).json(); PIC={}; SEL.families.forEach(f=>{ if(f.i)f.v.forEach(v=>{ const k=norm(v[0]); if(!PIC[k])PIC[k]=[f.i,f.n]; }); }); }catch(e){ SEL=null; }
+  if(!PL.count){ $('q-hint').textContent='Price list did not load. Check your connection and reload.'; }
+  st.lines.forEach(l=>{ if(l.item&&!l.costManual){ const L=lookup(l.item); if(L)l.cost=(+listCost(L.p,l.qty)).toFixed(2); } });
+  renderAll(); search();
+})();
+renderAll();
+</script>
+</body>
+</html>
