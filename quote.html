@@ -422,6 +422,7 @@ async function loadCatalog(){
   Object.entries(CAT).forEach(([k,v])=>{ const L=lookup(v.code); if(!used.has(k)&&!(L&&L.p))SUGIDX.push({key:v.code,k,p:null,n:norm(v.code),hay:(v.code+' ShipSheet history').toUpperCase(),h:v}); });
   $('cat-status').textContent=msg.join(' · ');
   st.lines.forEach(l=>{ if(l.item&&!l.costManual){ const L=lookup(l.item); const c=L&&(L.p?listCost(L.p,l.qty):L.h&&L.h.cost); if(c)l.cost=(+c).toFixed(2); } });
+  syncSpecials();   // mix & match months: a group's qty sets every special's cost
   initBrowse(); initSelector(); initPackage(); render();
 }
 
@@ -432,15 +433,25 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const newLine=(o)=>Object.assign({kind:'item',item:'',desc:'',qty:1,cost:'',price:'',costManual:false},o||{});
 function blank(){ return {rep:'',acct:'reorder',date:today(),co:'',name:'',num:'',mu:TARGET,notes:'',tab:'item',lines:[],optOn:false,opts:defOpts(),frMode:'tbd',frAmt:'',txMode:'auto',shStreet:'',shCity:'',shState:'',shZip:'',shCounty:'',shMke:false,txRate:'',txFr:false}; }
 function load(){ try{ const s=JSON.parse(localStorage.getItem(SKEY)); if(s&&Array.isArray(s.lines)){ s.lines=s.lines.map(l=>{ if(l.free){l.kind='equip';l.price='';delete l.free;} return newLine(l); }); delete s.pkg; return Object.assign(blank(),s); } }catch(e){} return blank(); }
-function save(){ try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
+function save(){ syncSpecials(); try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
+// Big months are MIX & MATCH (Froggy, Nov 24 2026): every special in the same group (Group A 4"-10", Group B 12"-20")
+// counts together toward the 12 and 24 breaks. Other months: each blade counts on its own.
+const mixOn=()=>!!PL.specialMixMatch;
+function groupOf(p){ return p&&p.special?(p.special.group||''):null; }
+function poolQty(l,lines){ const L=lookup(l.item), p=L&&L.p; if(!p||!p.special||!mixOn())return +l.qty||0; const g=groupOf(p);
+  return (lines||st.lines).filter(x=>x.kind!=='equip'&&(+x.qty||0)>0).reduce((t,x)=>{ const Lx=lookup(x.item); return t+(Lx&&Lx.p&&groupOf(Lx.p)===g?(+x.qty||0):0); },0); }
+function syncSpecials(lines){ (lines||st.lines).forEach(x=>{ if(x.kind==='equip'||x.costManual)return; const L=lookup(x.item); if(L&&L.p&&L.p.special)x.cost=(+listCost(L.p,poolQty(x,lines))).toFixed(2); }); }
+const groupShort=p=>{ const m=/\(([^)]*)\)/.exec(groupOf(p)||''); return m?m[1].replace(/\s+/g,''):'same-group'; };
 let st=load();
 
 // ── Pricing ──
 const has=v=>v!==''&&v!=null&&!isNaN(parseFloat(v));
 // opt = {q, m}: price every blade line at quantity q and markup m (Options). No opt = the quote as entered.
-function optLines(opt){ return st.lines.map(l=>{ if(!opt||l.kind==='equip')return l;
+function optLines(opt){ if(!opt)return st.lines; const out=st.lines.map(l=>{ if(l.kind==='equip')return l;
   const Lk=lookup(l.item); const c=(!l.costManual&&Lk&&Lk.p)?(+listCost(Lk.p,opt.q)).toFixed(2):l.cost;
-  return Object.assign({},l,{qty:opt.q,cost:c,_src:l}); }); }
+  return Object.assign({},l,{qty:opt.q,cost:c,_src:l}); });
+  if(mixOn())syncSpecials(out);   // mix & match: the option's qty on every blade in a group counts together
+  return out; }
 function calc(opt){
   const mu=opt?(+opt.m||TARGET):(+st.mu||TARGET); const L=optLines(opt).filter(l=>(l.item||l.desc)&&(+l.qty||0)>0);
   const cost=l=>(+l.qty||0)*(parseFloat(l.cost)||0);
@@ -489,13 +500,13 @@ function infoFor(l){
   return (bits.length?bits.join(' · '):(l.item?'Not on the price list: type the cost':'Type an item # or a few words (e.g. A14TREX or "dragon")'))+(p&&p.special?specialBox(l,p):'');
 }
 // This month's special: one clear box with every cost break (1-23 / 24+, or 1-11 / 12-23 / 24+ in big months), cost and what the customer pays
-function specialBox(l,p){ const q=+l.qty||0, mu=+st.mu||TARGET, T=tiersOf(p), cur=tierAt(p,q), top=cur===T.length-1;
+function specialBox(l,p){ const q=poolQty(l), mix=mixOn()&&q!==(+l.qty||0), mu=+st.mu||TARGET, T=tiersOf(p), cur=tierAt(p,q), top=cur===T.length-1;
   const sell=T.map(x=>sheetPrice(x.cost,mu,p.mode)), save=Math.max(0,sell[0]-sell[cur]);
   const pkg=st.lines.some(x=>x.kind==='equip'&&(x.item||x.desc)&&(+x.qty||0)>0);
   let msg;
   if(st.optOn)msg=`Options: each option gets the cost break for its qty automatically${T.length>2?' (12+ and 24+)':' (24+)'}.`;
-  else { msg=cur>0?`<span class="go">✅ ${T[cur].label} price is ON</span> (qty ${q}). Customer saves <b>${money(save)}</b> each vs buying 1.`:`Qty <b>${q}</b>.`;
-    T.slice(cur+1).forEach((x,j)=>{ const k=cur+1+j; msg+=` Add <b>${x.min-q} more</b> and the customer pays <b>${money(sell[k])}</b> each.<button type="button" class="gold sm m24" data-make24="${x.min}">Make it ${x.min}</button>`; }); }
+  else { msg=cur>0?`<span class="go">✅ ${T[cur].label} price is ON</span> (${mix?q+' '+groupShort(p)+' specials on the quote':'qty '+q}). Customer saves <b>${money(save)}</b> each vs buying 1.`:`${mix?`<b>${q}</b> ${esc(groupShort(p))} specials on the quote (mix &amp; match).`:`Qty <b>${q}</b>.`}`;
+    T.slice(cur+1).forEach((x,j)=>{ const k=cur+1+j; msg+=` Add <b>${x.min-q} more</b>${mixOn()?' '+esc(groupShort(p))+' special'+(x.min-q===1?'':'s')+' (any mix)':''} and the customer pays <b>${money(sell[k])}</b> each.<button type="button" class="gold sm m24" data-make24="${x.min}" data-pool="${q}">Make it ${x.min}</button>`; }); }
   if(pkg&&!st.optOn)msg+=`<br><span style="color:#c9b48a">Package deal: these are the regular prices. The deal sets the blade price on the quote.</span>`;
   else if(has(l.price))msg+=`<br><span style="color:#c9b48a">Your typed price ${money(parseFloat(l.price))} is what goes on the quote.</span>`;
   return `<div class="spbox"><div class="sph">🔥 ${esc(specialName())}: ${T.length>2?'12-PACK &amp; 24-PACK':'24-PACK'} PRICE <span>(${PL.specialMixMatch?'mix &amp; match':'same item # · no mix &amp; match'})</span></div>${p.special.reg?`<div class="sps" style="margin:0 0 6px">Regular cost <s>${money(p.special.reg)}</s>: ${esc(String(PL.month||'this month'))}'s big-month prices below.</div>`:''}
@@ -635,10 +646,10 @@ function zipFill(){ const z=(st.shZip||'').slice(0,5); if(!TAX||!/^\d{5}$/.test(
 function optTotals(o){ const t=calc(o); const tax=r2((t.sell+(st.txFr?t.fr:0))*t.txRate); return Object.assign(t,{tax,grand:r2(t.sell+t.fr+tax)}); }
 // Customer-facing pitch for this month's special cost breaks (regular quotes only; a package deal or a hand-typed price sets its own price)
 function pitch24(r,t){ const l=r.l; if(!l||l.kind==='equip'||t.pkg||st.optOn||has(l.price)||l.costManual)return null; const L=lookup(l.item), p=L&&L.p; if(!p||!p.special)return null;
-  return nextTiers(p,+r.q||0,r.unit,c=>sheetPrice(c,+st.mu||TARGET,p.mode)); }
+  const x=nextTiers(p,poolQty(l),r.unit,c=>sheetPrice(c,+st.mu||TARGET,p.mode)); if(x)x.grp=mixOn()?groupShort(p):''; return x; }
 function pitchHTML(r,t){ const x=pitch24(r,t); if(!x)return '';
   return (x.cur.min>1?`<div class="pitch on">🔥 ${x.cur.label.replace(/ \(.*\)/,'')} special price applied</div>`:'')
-    +x.next.map(n=>`<div class="pitch">🔥 <b>Buy ${n.min}, pay ${money(n.price)} each</b> (save ${money(n.save)} each). Add ${n.more} more of this blade.</div>`).join(''); }
+    +x.next.map(n=>`<div class="pitch">🔥 <b>Buy ${n.min}, pay ${money(n.price)} each</b> (save ${money(n.save)} each). Add ${n.more} more ${x.grp?esc(x.grp)+' special blades (mix &amp; match)':'of this blade'}.</div>`).join(''); }
 const pitchText=x=>!x?'':(x.cur.min>1?` (${x.cur.label.replace(/ \(.*\)/,'')} special price)`:'')+x.next.map(n=>`\n   SPECIAL: buy ${n.min}, pay ${money(n.price)} each (save ${money(n.save)} each)`).join('');
 function quoteText(t){
   const R=REPS[st.rep]||{name:'',email:''};
@@ -836,8 +847,9 @@ $('lines').addEventListener('input',e=>{
   if(f==='desc')l.descManual=v.trim()!=='';
   if(f==='cost')l.costManual=true;
   save();
-  if(f==='qty'&&!l.costManual){ const L=lookup(l.item); if(L&&L.p&&L.p.special){ const before=l.cost; l.cost=(+listCost(L.p,l.qty)).toFixed(2);
-      if(before!==l.cost){ const at=e.target.selectionStart; save(); renderLines(); renderTotals(); const q=$('lines').querySelector(`.line[data-i="${i}"] [data-f=qty]`); if(q){q.focus();try{q.setSelectionRange(at,at);}catch(_){}} return; } } }
+  if(f==='qty'&&!l.costManual){ const L=lookup(l.item); if(L&&L.p&&L.p.special){ syncSpecials();
+      // redraw when any cost box on screen no longer matches (a qty change can move the cost of every special in its group)
+      if([...$('lines').querySelectorAll('.line')].some(el=>{ const x=st.lines[+el.dataset.i], c=el.querySelector('[data-f=cost]'); return x&&c&&c.value!==String(x.cost); })){ const at=e.target.selectionStart; save(); renderLines(); renderTotals(); const q=$('lines').querySelector(`.line[data-i="${i}"] [data-f=qty]`); if(q){q.focus();try{q.setSelectionRange(at,at);}catch(_){}} return; } } }
   if(f==='qty'&&l.item===AMEX.code){ const hn=e.target.closest('.line').querySelector('.hint'); if(hn)hn.innerHTML=infoFor(l); }
   const le=e.target.closest('.line'); if(le){ le.classList.toggle('bad',lineBad(l)); if(f!=='desc')le.querySelector('.hint').innerHTML=infoFor(l); }
   renderTotals(); refreshPlaceholders();
@@ -853,7 +865,7 @@ $('lines').addEventListener('change',e=>{ if(e.target.dataset.f!=='item')return;
 $('lines').addEventListener('click',e=>{ const row=e.target.closest('.line'); if(!row)return; const i=+row.dataset.i, l=st.lines[i];
   if(e.target.dataset.var){ l.item=PLKEYS[e.target.dataset.var]||e.target.dataset.var; l.costManual=false; applyItem(i,false); return; }
   if(e.target.dataset.clrprice){ l.price=''; save(); renderLines(); renderTotals(); return; }
-  if(e.target.dataset.make24){ const n=+e.target.dataset.make24>1?+e.target.dataset.make24:24; l.qty=String(n); if(!l.costManual){ const Lk=lookup(l.item); if(Lk&&Lk.p)l.cost=(+listCost(Lk.p,n)).toFixed(2); } save(); renderLines(); renderTotals(); toast('Qty '+n+': '+n+'-pack price on'); return; }
+  if(e.target.dataset.make24){ const tgt=+e.target.dataset.make24>1?+e.target.dataset.make24:24, pool=+e.target.dataset.pool||(+l.qty||0), n=mixOn()?(+l.qty||0)+Math.max(0,tgt-pool):tgt; l.qty=String(n); if(!l.costManual){ const Lk=lookup(l.item); if(Lk&&Lk.p)l.cost=(+listCost(Lk.p,n)).toFixed(2); } save(); renderLines(); renderTotals(); toast(mixOn()?`Qty ${n}: ${tgt}-pack price on for the group`:`Qty ${n}: ${n}-pack price on`); return; }
   const d=e.target.dataset.del; if(d==null)return; st.lines.splice(+d,1); save(); renderLines(); renderTotals(); });
 // ── Live suggestions under the item box: item # first (exact, starts with, contains), then words in the description ──
 function suggest(q){ q=(q||'').trim().toUpperCase(); if(!q)return {hits:[],total:0}; const qn=norm(q), words=q.split(/\s+/).filter(Boolean);
