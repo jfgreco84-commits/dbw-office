@@ -76,14 +76,12 @@ def colmap(row):
 
 
 def mode_for(cost, rest):
+    """Vote: how many of the row's printed prices match cost x M + 0.49 vs cost x M rounded up
+    to the dollar (M = any markup on the sheet). Majority wins; ties keep +$0.49."""
     vals = [v for v in rest if v is not None]
-    for m in MS:
-        if any(abs(v - (cost * m + 0.49)) < 0.011 for v in vals):
-            return 'add49'
-    for m in MS:
-        if any(abs(v - math.ceil(cost * m - 1e-9)) < 0.011 for v in vals):
-            return 'ceil'
-    return 'add49'
+    add = sum(1 for v in vals if any(abs(v - (cost * m + 0.49)) < 0.011 for m in MS))
+    up = sum(1 for v in vals if any(abs(v - math.ceil(cost * m - 1e-9)) < 0.011 for m in MS))
+    return 'ceil' if up > add else 'add49'
 
 
 def build(path):
@@ -138,6 +136,8 @@ def build(path):
                     if num(c):
                         cost = num(c)
                         break
+            if re.search(r'\b(PART|ITEM)\s*#', code.upper()):   # a header row inside a tab (e.g. VENDOR PART #)
+                continue
             if code and cost and cost > 0:
                 ci = cm['cost'] if cm['cost'] is not None else next(i for i, c in enumerate(r) if num(c) == cost)
                 rest = [num(c) for c in r[ci + 1:]]
