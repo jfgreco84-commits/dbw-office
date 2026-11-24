@@ -10,14 +10,15 @@
 <link rel="apple-touch-icon" href="quote-icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="quote-icon-192.png">
 <link rel="manifest" href="quote.webmanifest">
-<!-- Quick Quote, built like Froggy's Ultimate Calculator (FROGGYS_ULTIMATE_CALCULATOR_26.xlsx, ULTIMATE tab):
-       blade lines: QTY x BLADE COST;  promos / freebies: their cost goes into TOTAL COG'S
-       TOTAL DEAL = TOTAL COG'S x M/U;  PRICE PER BLADE = TOTAL DEAL / TOTAL BLADE QTY
-       commission = TOTAL DEAL x the standard matrix rate for that M/U (new account / 36-month update: 25% at 1.7 and up)
-     Each blade's own price = its cost x the deal factor (M/U x all COG / blade COG), rounded UP to the cent so the deal
-     never lands under the markup. With no freebies that is simply cost x M/U.
-     Shares the saved quote with quote.html (localStorage dbw_quote_v1) so "Full tool" opens the same quote for
-     packages, options, tax and freight. Saved on this device only. Never reads or stores card data. -->
+<!-- Quick Quote, built like Froggy's Ultimate Calculator (FROGGYS_ULTIMATE_CALCULATOR_26.xlsx):
+       BLADES ONLY: each blade is priced on its own: blade cost x M/U, rounded up to the cent.
+       SAW DEAL:    TOTAL COG'S = blades + saw/equipment + promo items;  TOTAL DEAL = TOTAL COG'S x M/U.
+                    The saw is FREE unless the rep types what the customer pays for it; the blades carry the rest
+                    of the deal, each in proportion to its own cost (a 16" stays priced above a 14").
+       Commission = TOTAL DEAL x the standard matrix rate for that M/U (new account / 36-month update: 25% at 1.7+).
+     Shares the saved quote with quote.html (localStorage dbw_quote_v1). Saw and promo items are package equipment
+     lines there too, so the Full tool opens the same deal for options, tax and freight.
+     Saved on this device only. Never reads or stores card data. -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 [hidden]{display:none!important}
@@ -26,14 +27,17 @@ header{background:linear-gradient(135deg,#1a1f2e,#0d1520);padding:10px 14px;disp
 .logo{font-size:17px;font-weight:900;color:#f5a623;letter-spacing:.5px;flex:1;min-width:0}
 .logo small{display:block;font-size:12px;color:#c8d0de;font-weight:700;cursor:pointer}
 .full{color:#8892a4;font-size:13px;font-weight:700;text-decoration:none;border:1px solid #2a3040;border-radius:16px;padding:6px 12px;white-space:nowrap}
-/* markup bar: always on screen */
 #mubar{position:sticky;top:0;z-index:40;background:#0b0e14;border-bottom:2px solid #f5a623;padding:8px 10px 9px}
-#mubar .lab{display:flex;justify-content:space-between;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-#mubar .lab b{color:#fff;letter-spacing:0;font-size:13px;text-transform:none}
+#mubar .in{max-width:1240px;margin:0 auto}
+#mubar .lab{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+#mubar .lab span:last-child{text-transform:none;letter-spacing:0;font-size:12px;text-align:right}
+#mubar .lab b{color:#fff;font-size:13px}
 .mub{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
 .mub button{padding:9px 0;font-size:14px;font-weight:900;border:2px solid transparent;border-radius:7px}
 .mub button.on{border-color:#fff;box-shadow:0 0 0 2px #f5a623;transform:scale(1.06)}
-.wrap{max-width:720px;margin:0 auto;padding:12px 12px 110px}
+.wrap{max-width:1240px;margin:0 auto;padding:12px 12px 110px}
+.cols{display:block}
+@media(min-width:1000px){.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);column-gap:16px;align-items:start;grid-template-rows:auto 1fr}.main{grid-column:1;grid-row:1}.extra{grid-column:1;grid-row:2}.side{grid-column:2;grid-row:1/span 2;position:sticky;top:86px;max-height:calc(100vh - 170px);overflow:auto;border-radius:12px}}
 .card{background:#1a1f2e;border:1px solid #2a3040;border-radius:12px;padding:14px;margin-bottom:12px}
 .title{font-size:12px;font-weight:800;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;display:flex;justify-content:space-between;gap:8px}
 .title span{color:#8892a4;letter-spacing:0;text-transform:none;font-weight:700}
@@ -42,10 +46,15 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#f5a623}
 label{display:block;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin:10px 0 4px}
 button{background:#2a3040;color:#e0e6f0;border:none;border-radius:8px;padding:10px 14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;-webkit-tap-highlight-color:transparent}
 button.gold{background:#f5a623;color:#0f1117}
-.hint{font-size:12px;color:#8892a4;margin-top:8px}
+.hint{font-size:12px;color:#8892a4;margin-top:8px;line-height:1.4}
 .chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:900;vertical-align:middle;margin-left:4px}
 .c-hi{background:#1a3a1a;color:#4caf7d}.c-sp{background:#3a2a10;color:#f5a623}.c-lo{background:#3a1a1a;color:#e05555}
-/* blade lines */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.modes{grid-template-columns:1fr}}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#0f1117;border:1px solid #2a3040;border-radius:12px;padding:4px;gap:4px}
+.seg button{padding:12px 6px;font-size:15px;background:none;color:#8892a4;border-radius:9px}
+.seg button.on{background:#f5a623;color:#0f1117}
+.seg-l{font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
 .ln{padding:12px 0;border-top:1px solid #2a3040}
 .ln:first-child{border-top:none;padding-top:0}
 .lh{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center}
@@ -56,10 +65,10 @@ button.gold{background:#f5a623;color:#0f1117}
 .lh input.nm{padding:8px 10px;font-size:15px}
 .del{background:none;color:#e05555;font-size:20px;padding:4px 6px}
 .lc{display:grid;grid-template-columns:auto 1fr 1.1fr;gap:8px;align-items:end;margin-top:8px}
-.lc .k{font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
+.k{font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
 .step{display:flex;align-items:center;border:1px solid #3a4458;border-radius:10px;overflow:hidden}
 .step button{width:38px;height:46px;padding:0;font-size:22px;border-radius:0;background:#232a3a}
-.step input{width:50px;height:46px;border:none;border-radius:0;text-align:center;font-size:18px;font-weight:900;padding:0}
+.step input{width:52px;height:46px;border:none;border-radius:0;text-align:center;font-size:18px;font-weight:900;padding:0}
 .cost{position:relative}
 .cost input{height:48px;padding-left:22px;font-size:18px;font-weight:800}
 .cost:before{content:'$';position:absolute;left:10px;bottom:13px;color:#8892a4;font-weight:800}
@@ -67,17 +76,16 @@ button.gold{background:#f5a623;color:#0f1117}
 .pb .k{color:#7fcf93;margin:0}
 .pb b{display:block;font-size:20px;color:#fff;line-height:1.1}
 .pb.bad{background:#3a1a1a;border-color:#7a3030}
-.sub{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#8892a4;margin-top:6px}
+.sub{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#8892a4;margin-top:6px;flex-wrap:wrap}
 .sub b{color:#c8d0de}
 .sub button{padding:2px 8px;font-size:12px}
 .nudge{margin-top:8px;width:100%;text-align:left;background:#221b0e;border:1px solid #f5a623;color:#ffd58a;font-size:13px;font-weight:700;padding:8px 10px;border-radius:9px}
 .nudge b{color:#fff}
 .nudge.on{background:#16301f;border-color:#4caf7d;color:#9fe0b0}
-.empty{color:#8892a4;font-size:14px;padding:2px 0 8px}
+.empty{color:#c8d0de;font-size:15px;padding:2px 0 4px}
 .addrow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px;position:relative}
 #q{font-size:17px;padding:13px 12px 13px 40px;border:2px solid #f5a623;border-radius:10px;background:#0f1117 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%23f5a623' stroke-width='2.5' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E") 12px center no-repeat}
 #blank{white-space:nowrap;font-size:14px}
-/* search results drop down OVER the page, so nothing below moves */
 #res{position:absolute;left:0;right:0;top:100%;margin-top:6px;z-index:30;background:#1b2130;border:2px solid #f5a623;border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,.7);max-height:60vh;overflow:auto;padding:4px 12px}
 .rh{font-size:12px;color:#8892a4;padding:8px 0 4px;display:flex;justify-content:space-between;gap:8px}
 .rh button{padding:2px 10px;font-size:12px}
@@ -92,27 +100,47 @@ button.gold{background:#f5a623;color:#0f1117}
 .row{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid #2a3040;font-size:14px}
 .row img{width:40px;height:40px;object-fit:contain;background:#fff;border-radius:6px}
 .row .d{font-size:12px;color:#8892a4}
-/* freebies */
-.fb{display:flex;flex-wrap:wrap;gap:6px}
-.fb button{padding:7px 10px;font-size:13px;font-weight:700}
+.eq{padding:12px 0;border-top:1px solid #2a3040}
+.eq:first-child{border-top:none;padding-top:0}
+.eqc{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:end;margin-top:8px}
+.pay{display:grid;grid-template-columns:auto 1fr;gap:6px;align-items:center}
+.pay .fr{padding:11px 14px;font-size:14px;background:#232a3a;color:#8892a4}
+.pay .fr.on{background:#1a7a3a;color:#fff}
+.pay .cost input{height:44px;font-size:16px}
+.reg{font-size:13px;color:#8892a4;margin-top:6px}
+.reg s{color:#6b7585}
+.reg b{color:#4caf7d}
+.picker{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px;border-top:1px solid #2a3040;padding-top:12px}
+.models{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+.models button{display:grid;grid-template-columns:1fr auto;gap:8px;text-align:left;font-size:14px;padding:10px 12px;background:#232a3a}
+.models button span{color:#8892a4;font-weight:600;font-size:12px}
+.fb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.fb button{padding:8px 10px;font-size:13px;font-weight:700}
 .fb button span{color:#8892a4;font-weight:600}
-.fl{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid #2a3040;font-size:14px}
-.fl:first-child{border-top:none}
-/* the matrix */
+.order{background:#0f1117;border:2px solid #f5a623;border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.order .oh{font-size:12px;font-weight:900;color:#f5a623;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;gap:8px}
+.order .oh span{color:#c8d0de;letter-spacing:0;text-transform:none}
+.order ul{list-style:none}
+.order li{font-size:14px;color:#fff;padding:3px 0;display:flex;justify-content:space-between;gap:10px}
+.order li>span:last-child{color:#c8d0de;white-space:nowrap}
+.order li.free>span:last-child{color:#4caf7d;font-weight:800}
+.order .ot{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #2a3040;margin-top:6px;padding-top:6px;font-size:13px;color:#8892a4;flex-wrap:wrap}
+.order .ot b{color:#fff;font-size:15px}
 .mx{width:100%;border-collapse:collapse;font-size:14px}
 .mx th{font-size:10px;color:#8892a4;text-transform:uppercase;letter-spacing:.5px;text-align:right;padding:4px 6px;font-weight:700}
 .mx th:first-child,.mx td:first-child{text-align:left}
-.mx td{padding:9px 6px;text-align:right;border-top:1px solid #2a3040;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mx td{padding:9px 6px;text-align:right;border-top:1px solid #2a3040;font-variant-numeric:tabular-nums;white-space:nowrap;vertical-align:top}
 .mx td:first-child span{display:inline-block;min-width:40px;text-align:center;border-radius:6px;padding:3px 0;font-weight:900}
+.mx td.pbc b{color:#fff;font-size:15px}
+.mx td.pbc div{font-size:12px;color:#c8d0de;line-height:1.5}
+.mx td.pbc div em{font-style:normal;color:#8892a4}
 .mx tr{cursor:pointer}
 .mx tr.on td{background:#26304a}
 .mx tr.on td:first-child{box-shadow:inset 4px 0 0 #f5a623}
-.mx td b{color:#fff}
-.cog{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#8892a4;margin-bottom:6px;flex-wrap:wrap}
-.cog b{color:#fff;font-size:15px}
 .tog{display:flex;align-items:center;gap:8px;font-size:14px;color:#c8d0de;margin-top:10px;text-transform:none;letter-spacing:0}
 .tog input{width:22px;height:22px}
 .warn{background:#3a2a10;border:1px solid #f5a623;color:#ffd58a;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:10px}
+.warn.red{background:#3a1a1a;border-color:#e05555;color:#ffb3b3}
 .warn a{color:#f5a623;font-weight:900}
 details summary{cursor:pointer;font-weight:800;color:#c8d0de;list-style:none;font-size:15px}
 details summary::-webkit-details-marker{display:none}
@@ -127,7 +155,6 @@ details[open] summary:before{content:'▾ '}
 #zoom{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 #zoom img{max-width:min(92vw,520px);max-height:70vh;background:#fff;border-radius:14px;padding:10px}
 #zoom div{color:#fff;font-weight:800;margin-top:12px;font-size:16px}
-/* printable customer quote (PDF) */
 #quote{display:none;background:#fff;color:#111;padding:24px;font-size:13px}
 #quote h2{font-size:20px;letter-spacing:1px}
 #quote table{width:100%;border-collapse:collapse;margin:14px 0}
@@ -136,7 +163,9 @@ details[open] summary:before{content:'▾ '}
 #quote .r{text-align:right;white-space:nowrap}
 #quote .m{color:#666;font-size:12px}
 #quote .free{color:#1a7a3a;font-weight:800}
+#quote s{color:#999;font-size:12px;display:block}
 #quote .grand td{font-weight:900;font-size:16px;border-top:2px solid #111;border-bottom:none}
+#quote .save td{color:#1a7a3a;font-weight:800;border-bottom:none}
 #quote .pitch{margin-top:5px;padding:5px 8px;background:#fff4dc;border-left:4px solid #f5a623;border-radius:4px;font-size:12px;color:#5a3d00}
 #quote .pitch.on{background:#e7f6ec;border-left-color:#1a7a3a;color:#1a5a2a;font-weight:700}
 @media print{body{background:#fff}header,#mubar,.wrap,#bar,#toast,#zoom{display:none!important}#quote{display:block;padding:0}#quote *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
@@ -147,41 +176,60 @@ details[open] summary:before{content:'▾ '}
   <div class="logo">🐸 Froggy's Quote Generator<small id="who">Pick your name below</small></div>
   <a class="full" id="full" href="quote.html">Full tool ›</a>
 </header>
-<div id="mubar">
+<div id="mubar"><div class="in">
   <div class="lab"><span>Markup</span><span id="mu-sum"></span></div>
   <div class="mub" id="mub"></div>
-</div>
-<div class="wrap">
+</div></div>
+<div class="wrap"><div class="cols">
+ <div class="main">
   <div class="card" id="rep-card">
     <div class="title">Who's quoting?</div>
     <select id="rep"></select>
   </div>
 
   <div class="card">
-    <div class="title">Blades <span id="bl-sum"></span></div>
+    <div class="modes">
+      <div><div class="seg-l">What are we quoting?</div><div class="seg" id="seg-saw"><button type="button" data-saw="0">Blades only</button><button type="button" data-saw="1">🪚 Saw deal</button></div></div>
+      <div><div class="seg-l">How many kinds of blades?</div><div class="seg" id="seg-multi"><button type="button" data-multi="0">One blade</button><button type="button" data-multi="1">Multiple blades</button></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="title"><span style="color:#f5a623;letter-spacing:2px;text-transform:uppercase;font-weight:800" id="bl-title">Blade</span><span id="bl-sum"></span></div>
     <div id="warn"></div>
     <div id="lines"></div>
     <div class="addrow">
-      <input id="q" type="search" placeholder="+ Add a blade: item # or name" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search">
+      <input id="q" type="search" placeholder="Item # or blade name" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search">
       <button type="button" id="blank" title="Add a line and type the cost yourself">+ Cost only</button>
       <div id="res" hidden></div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="title">Promo / freebies <span id="fb-sum"></span></div>
+  <div class="card" id="saw-card" hidden>
+    <div class="title">🪚 Saw deal <span id="saw-sum"></span></div>
+    <div id="eqs"></div>
+    <div class="picker">
+      <div class="seg-l" style="margin:0">Add a saw or equipment</div>
+      <select id="eq-cat"></select>
+      <div class="models" id="eq-models"></div>
+    </div>
+    <div class="seg-l" style="margin-top:14px">Throw in a promo</div>
     <div class="fb" id="fb-chips"></div>
-    <div id="fb-list" style="margin-top:8px"></div>
-    <div class="hint">Freebie cost goes into Total COG's, same as your calculator, so the price per blade covers it. The customer sees them as FREE on the quote.</div>
+    <div class="hint">Saw and promo cost go into <b>Total COG's</b>. The saw is <b>FREE</b> unless you type what the customer pays. The blades carry the deal, each priced off its own cost, so a 16" stays above a 14".</div>
   </div>
 
+ </div>
+
+ <div class="side">
   <div class="card">
+    <div class="order" id="order"></div>
     <div class="title">Markup matrix <span>tap a row to use it</span></div>
-    <div class="cog"><span>Total COG's <b id="cog">$0.00</b></span><span>Total blade qty <b id="tq">0</b></span></div>
-    <table class="mx"><thead><tr><th>M/U</th><th>Total deal</th><th>Per blade</th><th id="comm-h">Commission</th></tr></thead><tbody id="mx"></tbody></table>
+    <table class="mx"><thead><tr><th>M/U</th><th id="pb-h">Per blade</th><th>Total deal</th><th id="comm-h">Commission</th></tr></thead><tbody id="mx"></tbody></table>
     <label class="tog"><input type="checkbox" id="newacct"> New account / 36-month update (25% at 1.7 and up)</label>
   </div>
-
+  <div class="hint" style="text-align:center">Saved on this device only. Nothing is sent anywhere.</div>
+ </div>
+ <div class="extra">
   <div class="card">
     <details><summary>Customer name (optional)</summary>
       <label for="co">Company</label><input id="co" autocomplete="off">
@@ -192,16 +240,16 @@ details[open] summary:before{content:'▾ '}
   </div>
 
   <div class="card">
-    <div class="hint" style="margin:0 0 10px">Need a <b>package deal</b> (free saw), <b>A/B/C options</b>, <b>tax</b> or <b>freight</b>? The Full tool opens this same quote. Its prices use the price sheet's rounding, so they can differ by a few cents, and it doesn't carry the freebies.</div>
+    <div class="hint" style="margin:0 0 10px">Need <b>A/B/C options</b>, <b>tax</b> or <b>freight</b>? The Full tool opens this same quote. Its prices use the price sheet's rounding, so they can differ by a few cents.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <a href="quote.html" id="full2" style="flex:1"><button type="button" style="width:100%">🧰 Open in Full tool</button></a>
       <button type="button" id="reset" style="background:#3a1a1a;color:#e05555">↺ New quote</button>
     </div>
   </div>
-  <div class="hint" style="text-align:center">Saved on this device only. Nothing is sent anywhere.</div>
-</div>
+ </div>
+</div></div>
 
-<div id="bar"><div class="bt"><div class="a" id="bar-a">$0.00</div><div class="b" id="bar-b">Add a blade to start</div></div>
+<div id="bar"><div class="bt"><div class="a" id="bar-a">$0.00</div><div class="b" id="bar-b">Pick a blade to start</div></div>
   <button type="button" id="copy">📋 Copy</button><button type="button" class="gold" id="pdf">🖨️ PDF</button></div>
 <div id="toast" hidden></div>
 <div id="zoom" hidden><img alt=""><div></div></div>
@@ -209,7 +257,7 @@ details[open] summary:before{content:'▾ '}
 
 <script>
 'use strict';
-// Same reps and commission matrix as quote.html and Froggy's calculator. Keep them in step.
+// Same reps, commission matrix and equipment list as quote.html and Froggy's calculator. Keep them in step.
 const REPS={
   W784:{name:'Frank Greco',sign:'Big Frank Greco - The G.M.',email:'fgreco@diamondbladewarehouse.com'},
   W839:{name:'John Anthony',email:'janthony@diamondbladewarehouse.com'},
@@ -229,8 +277,25 @@ const FLOOR=1.7, TARGET=2.0;
 const LADDER=[[3.0,.30],[2.2,.20],[2.1,.19],[2.0,.18],[1.9,.17],[1.8,.13],[1.7,.10],[1.6,.08],[1.5,.05],[1.3,.03]];
 const MUS=[[1.3,'#b3261e','#fff'],[1.5,'#d9534f','#fff'],[1.6,'#ef9a96','#3a1010'],[1.7,'#a8e0b4','#0f2a17'],[1.8,'#7fcf93','#0f2a17'],
   [1.9,'#5cbc76','#0f2a17'],[2.0,'#43a862','#fff'],[2.1,'#348f52','#fff'],[2.2,'#2a7a45','#fff'],[3.0,'#21663a','#fff']];
-// Freebies from the MULTI ITEM tab (cost each)
-const FREEBIES=[['T-shirt M/L/XL',2.82],['T-shirt 2XL',4.04],['T-shirt 3XL',4.41],['Hoodie',17],['Charger',3]];
+const EQUIP=[
+  ['14" Handheld Gas Saws',['TS420','TS500-14','TS710I','K770-14','K970A-14','DSH700','900X14']],
+  ['12" Handheld Gas Saws',['K770-12','TS410']],
+  ['16" Handheld Gas Saws',['TS910I','K970A-16','900X16']],
+  ['Battery Saws (9" to 10.5")',['XEC01PT1','XEC01Z','K535I-PKG','K540I','TSA230-9','DCS692X2']],
+  ['Electric Handheld Saws',['K4000','K4000-CUTNBREAK']],
+  ['Cut-N-Break & Ring Saws',['K760-CUTNBREAK','K970-RINGSAW','K970-17RINGSAW','K3600-RINGSAW']],
+  ['Walk-Behind Carts (for handheld saws)',['K770-CART','TS420CART','TS700CART','TS910I-CART']],
+  ['Low HP Walk-Behind Saws',['FS309-14','CCE0911-20','FS400']],
+  ['Early-Entry / Green Concrete Saws',['X150-PROWLER','GS-100','966845303','966845505']],
+  ['Gas Chain Saws',['ICS-680ES','ICS-695XL','ICS-695F4','K970CHAINSAW','PACKAGE-DEAL','STIHL-GS461']],
+  ['Hydraulic Chain Saws',['ICS890F4-566112','ICS890F4-566116']],
+  ['Grinders & Mag Saws',['A45GRC10','VS45GRIND','AGR7C10','A9GRC10','SKIL714MAG']],
+  ['Core Drills & Stands',['DK17MOTOR&D160VSTAND-MOSTCOMMONCOMBO','DK17MOTOR&D250VSTAND-PROFESSIONALSETUP','DK32MOTOR&D350RSTAND-PROFESSIONALSETUP','DK17-115V','DK17-230V','DK32','D160V','D250V','D350R']],
+  ['Pumps & Generators (Tsurumi)','PUMPS']
+];
+const AMEX={code:'AMEX-GC',desc:'$50 AMEX Gift Card',cost:55,face:50};
+// Promo items (cost each) from the calculator's MULTI ITEM tab
+const PROMOS=[['T-shirt M/L/XL',2.82],['T-shirt 2XL',4.04],['T-shirt 3XL',4.41],['Hoodie',17],['Charger',3]];
 const $=id=>document.getElementById(id);
 const money=n=>'$'+(Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -242,68 +307,107 @@ function commRate(mu,acct){ const r=(LADDER.find(x=>mu>=x[0]-1e-9)||[0,0])[1]; r
 function listCost(p,qty){ if(!p)return null; if(p.special)return (+qty||0)>=24?p.special.cost24:p.special.cost; return p.cost; }
 
 let PL={items:{}}, PLKEYS={}, SEL=null, PIC={};
-function lookup(code){ if(!code)return null; const k=PL.items[code]?code:norm(code); let p=PL.items[k]||null, key=k; if(!p&&PL.items[k+'20']){ p=PL.items[k+'20']; key=k+'20'; } return p?{p,key}:null; }
+function lookup(code){ if(!code)return null; if(norm(code)===AMEX.code)return {p:{code:AMEX.code,desc:AMEX.desc,cost:AMEX.cost},key:AMEX.code};
+  const k=PL.items[code]?code:norm(code); let p=PL.items[k]||null, key=k; if(!p&&PL.items[k+'20']){ p=PL.items[k+'20']; key=k+'20'; } return p?{p,key}:null; }
 function picFor(code){ if(!code)return null; const b=norm(String(code).split('#')[0]); return PIC[b]||(b.endsWith('20')&&PIC[b.slice(0,-2)])||PIC[b+'20']||null; }
 
-// ── The saved quote: shared with quote.html (same key and shape) plus this page's freebies. ──
+// ── The saved quote: shared with quote.html (same key and shape) ──
 const SKEY='dbw_quote_v1';
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const newLine=o=>Object.assign({kind:'item',item:'',desc:'',qty:1,cost:'',price:'',costManual:false},o||{});
-function blank(){ return {rep:'',acct:'reorder',date:today(),co:'',name:'',num:'',mu:TARGET,notes:'',tab:'item',lines:[],optOn:false,opts:[{q:12,m:2.2},{q:25,m:2.1},{q:36,m:2.0},{q:50,m:1.9}],frMode:'tbd',frAmt:'',txMode:'auto',shStreet:'',shCity:'',shState:'',shZip:'',shCounty:'',shMke:false,txRate:'',txFr:false,freebies:[]}; }
+function blank(){ return {rep:'',acct:'reorder',date:today(),co:'',name:'',num:'',mu:TARGET,notes:'',tab:'item',lines:[],optOn:false,opts:[{q:12,m:2.2},{q:25,m:2.1},{q:36,m:2.0},{q:50,m:1.9}],frMode:'tbd',frAmt:'',txMode:'auto',shStreet:'',shCity:'',shState:'',shZip:'',shCounty:'',shMke:false,txRate:'',txFr:false,qSaw:false,qMulti:false,parked:[]}; }
 function load(){ try{ const s=JSON.parse(localStorage.getItem(SKEY)); if(s&&Array.isArray(s.lines))return Object.assign(blank(),s); }catch(e){} return blank(); }
 function save(){ try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
-let st=load(); if(!Array.isArray(st.freebies))st.freebies=[];
-const realLines=()=>st.lines.filter(l=>(l.item||l.desc||has(l.cost)||l.blank));
-(()=>{ const r=new URLSearchParams(location.search).get('rep'); if(r&&REPS[r.toUpperCase()]){ st.rep=r.toUpperCase(); save(); } })();
+let st=load();
+// the earlier Quick Quote kept freebies separately: they are promo equipment lines now
+if(Array.isArray(st.freebies)&&st.freebies.length){ st.freebies.forEach(f=>st.lines.push(newLine({kind:'equip',desc:f.n,cost:(+f.c).toFixed(2),qty:String(f.q||1),costManual:true,promo:true}))); st.qSaw=true; }
+delete st.freebies; if(!Array.isArray(st.parked))st.parked=[];
+const isBlade=l=>l.kind!=='equip'&&!!(l.item||l.desc||has(l.cost)||l.blank);
+const isEq=l=>l.kind==='equip'&&!!(l.item||l.desc);
+const blades=()=>st.lines.filter(isBlade), equips=()=>st.lines.filter(isEq);
+if(st.lines.some(isEq))st.qSaw=true;
+if(blades().length>1)st.qMulti=true;
+(()=>{ const r=new URLSearchParams(location.search).get('rep'); if(r&&REPS[r.toUpperCase()])st.rep=r.toUpperCase(); })();
+save();
 
 // ── The calculator ──
-const promoCost=()=>st.freebies.reduce((t,f)=>t+(+f.c||0)*(+f.q||0),0);
 function calc(mu){ mu=mu||(+st.mu||TARGET);
-  const L=realLines().filter(l=>l.kind!=='equip'&&(+l.qty||0)>0);
-  const fixed=L.filter(l=>has(l.price)), carry=L.filter(l=>!has(l.price));
-  const B=carry.reduce((t,l)=>t+(+l.qty)*(parseFloat(l.cost)||0),0), P=promoCost(), Fc=fixed.reduce((t,l)=>t+(+l.qty)*(parseFloat(l.cost)||0),0);
-  const factor=B>0?mu*(B+P)/B:mu;   // freebie cost spread over the blades, like TOTAL COG'S in the calculator
-  const rows=L.map(l=>{ const q=+l.qty, c=parseFloat(l.cost)||0, unit=has(l.price)?r2(parseFloat(l.price)):(c>0?up2(c*factor):0); return {l,q,c,unit,ext:r2(unit*q)}; });
-  const deal=rows.reduce((t,r)=>t+r.ext,0), cogs=B+P+Fc, qty=rows.reduce((t,r)=>t+r.q,0);
+  const B_=blades().filter(l=>(+l.qty||0)>0), E_=st.qSaw?equips().filter(l=>(+l.qty||0)>0):[];
+  const c=l=>parseFloat(l.cost)||0, carriers=B_.filter(l=>!has(l.price));
+  const B=carriers.reduce((t,l)=>t+(+l.qty)*c(l),0), Fx=B_.filter(l=>has(l.price)).reduce((t,l)=>t+(+l.qty)*c(l),0), E=E_.reduce((t,l)=>t+(+l.qty)*c(l),0);
+  const eqSale=E_.reduce((t,l)=>t+(has(l.price)&&parseFloat(l.price)>0?r2(parseFloat(l.price))*(+l.qty):0),0);
+  const pkg=E_.length>0, carry=(B+E)*mu-eqSale, factor=pkg?(B>0?carry/B:0):mu;
+  const rows=B_.map(l=>{ const q=+l.qty, unit=has(l.price)?r2(parseFloat(l.price)):(c(l)>0?Math.max(0,up2(c(l)*factor)):0); return {l,q,c:c(l),unit,ext:r2(unit*q)}; });
+  const eqRows=E_.map(l=>{ const q=+l.qty, paid=has(l.price)&&parseFloat(l.price)>0, unit=paid?r2(parseFloat(l.price)):0;
+    const reg=l.promo?0:(norm(l.item)===AMEX.code?AMEX.face:up2(c(l)*mu)); return {l,q,c:c(l),unit,ext:r2(unit*q),free:!paid,reg}; });
+  const deal=[...rows,...eqRows].reduce((t,r)=>t+r.ext,0), cogs=B+Fx+E, qty=rows.reduce((t,r)=>t+r.q,0);
   const tmu=cogs>0?deal/cogs:0, rate=commRate(Math.min(mu,tmu+1e-9),st.acct);
-  return {rows,deal,cogs,qty,per:qty?deal/qty:0,tmu,rate,comm:deal*rate,mu,P,factor}; }
-const fullOnly=()=>st.optOn||st.lines.some(l=>l.kind==='equip'&&(l.item||l.desc)&&(+l.qty||0)>0);
-function pitch24(l,q,unit,factor){ if(has(l.price)||l.costManual)return null; const L=lookup(l.item); if(!L||!L.p.special)return null;
-  if(q>=24)return {on:true}; const p24=up2(L.p.special.cost24*factor); return unit>p24?{on:false,p24,save:unit-p24,more:24-q}:null; }
+  const eqSave=eqRows.reduce((t,r)=>t+(r.reg>r.unit?(r.reg-r.unit)*r.q:0),0);
+  return {rows,eqRows,deal,cogs,qty,tmu,rate,comm:deal*rate,mu,pkg,factor,eqSale,B,E,underCost:pkg&&B>0&&factor<1,eqSave}; }
+const optOnly=()=>st.optOn;
+function pitch24(l,q,unit,t){ if(t.pkg||has(l.price)||l.costManual)return null; const L=lookup(l.item); if(!L||!L.p.special)return null;
+  if(q>=24)return {on:true}; const p24=up2(L.p.special.cost24*t.factor); return unit>p24?{on:false,p24,save:unit-p24,more:24-q}:null; }
+function shortName(l){ const P=picFor(l.item), L=lookup(l.item); const size=(String(l.desc).match(/^\s*(\d+(?:\.\d+)?)\s*"/)||[])[1];
+  return P?(size?size+'" ':'')+P[1]:L?L.p.code:(l.desc||'Blade'); }
 
-// ── Markup bar (top, always visible) and the matrix ──
+// ── Switches ──
+function renderModes(){ [...$('seg-saw').children].forEach(b=>b.classList.toggle('on',(b.dataset.saw==='1')===!!st.qSaw));
+  [...$('seg-multi').children].forEach(b=>b.classList.toggle('on',(b.dataset.multi==='1')===!!st.qMulti));
+  $('saw-card').hidden=!st.qSaw; $('bl-title').textContent=st.qMulti?'Blades':'Blade';
+  $('q').placeholder=st.qMulti?'+ Add a blade: item # or name':(blades().length?'Swap the blade: item # or name':'Pick the blade: item # or name (dragon, A14TREX)'); }
+$('seg-saw').addEventListener('click',e=>{ const b=e.target.closest('[data-saw]'); if(!b)return; const on=b.dataset.saw==='1'; if(on===!!st.qSaw)return;
+  if(on){ st.lines.push(...st.parked); st.parked=[]; } else { st.parked=equips(); st.lines=st.lines.filter(l=>l.kind!=='equip'); }
+  st.qSaw=on; save(); renderAll(); if(on){ toast('Saw deal on: pick the saw below the blades'); } });
+$('seg-multi').addEventListener('click',e=>{ const b=e.target.closest('[data-multi]'); if(!b)return; const on=b.dataset.multi==='1'; if(on===!!st.qMulti)return;
+  if(!on&&blades().length>1){ const keep=blades()[0]; if(!confirm(`One blade keeps only the first blade (${shortName(keep)}) and removes the other ${blades().length-1}. OK?`))return; st.lines=st.lines.filter(l=>!isBlade(l)||l===keep); }
+  st.qMulti=on; save(); renderAll(); });
+
+// ── Markup bar and matrix ──
 function muBtns(){ const m=+st.mu||TARGET; $('mub').innerHTML=MUS.map(([v,bg,fg])=>`<button type="button" data-mu="${v}" class="${Math.abs(v-m)<1e-9?'on':''}" style="background:${bg};color:${fg}">${v.toFixed(1)}</button>`).join(''); }
-function setMu(m){ st.mu=+m; save(); renderCalc(); [...$('mub').children].forEach(b=>b.classList.toggle('on',Math.abs(+b.dataset.mu-st.mu)<1e-9)); }
+function setMu(m){ st.mu=+m; save(); [...$('mub').children].forEach(b=>b.classList.toggle('on',Math.abs(+b.dataset.mu-st.mu)<1e-9)); renderCalc(); }
 $('mub').addEventListener('click',e=>{ const b=e.target.closest('[data-mu]'); if(b)setMu(b.dataset.mu); });
 $('mx').addEventListener('click',e=>{ const tr=e.target.closest('[data-mu]'); if(tr){ setMu(tr.dataset.mu); toast('Markup '+(+tr.dataset.mu).toFixed(1)+'x'); } });
 $('newacct').addEventListener('change',e=>{ st.acct=e.target.checked?'new':'reorder'; save(); renderCalc(); });
 
+function orderHTML(t){ const m=+st.mu||TARGET, mode=`${st.qSaw?'🪚 Saw deal':'Blades only'} · ${st.qMulti?'multiple blades':'one blade'}`;
+  if(!t.rows.length&&!t.eqRows.length)return `<div class="oh">This order <span>${mode}</span></div><div class="hint" style="margin:0">Nothing yet. ${st.qSaw?'Pick the blades and the saw.':'Pick the blade.'}</div>`;
+  const li=[...t.rows.map(r=>`<li><span>${r.q} × ${esc(r.l.desc||r.l.item||'Blade')}${r.l.item?' <span style="color:#8892a4;font-size:12px">'+esc(codeOf(r.l))+'</span>':''}</span><span>${r.unit>0?money(r.unit)+' ea':'no cost'}</span></li>`),
+    ...t.eqRows.map(r=>`<li class="${r.free?'free':''}"><span>${r.q} × ${esc(r.l.desc||r.l.item)}</span><span>${r.free?'FREE':money(r.unit)+' ea'}</span></li>`)].join('');
+  return `<div class="oh">This order <span>${mode} · ${m.toFixed(1)}x</span></div><ul>${li}</ul>
+    <div class="ot"><span>Total COG's <b>${money(t.cogs)}</b></span><span>${t.qty} blade${t.qty===1?'':'s'}</span><span>Total deal <b>${money(t.deal)}</b></span></div>`; }
 // Everything that depends on numbers (no re-render of the inputs, so typing never loses focus)
-function renderCalc(){ const t=calc(), m=+st.mu||TARGET;
-  $('cog').textContent=money(t.cogs); $('tq').textContent=t.qty;
+function renderCalc(){ const t=calc(), m=+st.mu||TARGET, multi=t.rows.length>1;
+  $('order').innerHTML=orderHTML(t);
   $('comm-h').textContent=st.acct==='new'?'New acct comm':'Commission';
-  $('mx').innerHTML=[...MUS].reverse().map(([v,bg,fg])=>{ const x=calc(v); return `<tr data-mu="${v}" class="${Math.abs(v-m)<1e-9?'on':''}"><td><span style="background:${bg};color:${fg}">${v.toFixed(1)}</span></td><td>${x.qty?money(x.deal):'-'}</td><td><b>${x.qty?money(x.per):'-'}</b></td><td>${x.qty?money(x.comm)+' <span style="color:#8892a4;font-size:11px">'+Math.round(commRate(v,st.acct)*100)+'%</span>':'-'}</td></tr>`; }).join('');
-  $('mu-sum').innerHTML=t.qty?`<b>${m.toFixed(1)}x</b> · ${money(t.per)}/blade · comm <b>${money(t.comm)}</b>`:`<b>${m.toFixed(1)}x</b>${m<FLOOR?' · under the 1.7 floor':''}`;
+  $('pb-h').textContent=multi?'Per blade (each)':'Per blade';
+  $('mx').innerHTML=[...MUS].reverse().map(([v,bg,fg])=>{ const x=calc(v), ok=x.qty>0&&!x.underCost;
+    const pb=!x.qty?'-':x.underCost?'<span style="color:#e05555">saw $ too high</span>':multi?x.rows.map(r=>`<div><em>${esc(shortName(r.l))}</em> <b>${money(r.unit)}</b></div>`).join(''):`<b>${money(x.rows[0].unit)}</b>`;
+    return `<tr data-mu="${v}" class="${Math.abs(v-m)<1e-9?'on':''}"><td><span style="background:${bg};color:${fg}">${v.toFixed(1)}</span></td><td class="pbc">${pb}</td><td>${ok?money(x.deal):'-'}</td><td>${ok?money(x.comm)+' <span style="color:#8892a4;font-size:11px">'+Math.round(commRate(v,st.acct)*100)+'%</span>':'-'}</td></tr>`; }).join('');
+  $('mu-sum').innerHTML=t.qty?`<b>${m.toFixed(1)}x</b> · ${multi?'total <b>'+money(t.deal)+'</b>':'<b>'+money(t.rows[0].unit)+'</b>/blade'} · comm <b>${money(t.comm)}</b>`:`<b>${m.toFixed(1)}x</b>${m<FLOOR?' · under the 1.7 floor':''}`;
   $('bl-sum').textContent=t.qty?`${t.qty} blade${t.qty===1?'':'s'}`:'';
-  $('fb-sum').textContent=t.P?money(t.P)+' in COG\'s':'';
-  // per-line numbers
+  $('saw-sum').textContent=t.pkg?`${money(t.E)} in COG's`:'';
+  $('warn').innerHTML=(optOnly()?`<div class="warn">This quote has <b>A/B/C options</b> set up in the Full tool. Finish it there. <a href="quote.html">Open the Full tool ›</a></div>`:'')
+    +(t.underCost?`<div class="warn red">⚠️ The $ typed on the saw is more than this deal can carry: the blades would sell under cost. Lower what the customer pays for the saw, or add blades.</div>`:'')
+    +(st.qSaw&&!t.eqRows.length&&t.qty?`<div class="warn">🪚 Saw deal is on: pick the saw in the Saw deal box below.</div>`:'');
   t.rows.forEach(r=>{ const i=st.lines.indexOf(r.l), el=$('lines').querySelector(`.ln[data-i="${i}"]`); if(!el)return;
-    el.querySelector('[data-pb]').innerHTML=`<div class="k">Per blade</div><b>${r.unit>0?money(r.unit):'type cost'}</b>`; el.querySelector('[data-pb]').classList.toggle('bad',!(r.unit>0));
+    const pb=el.querySelector('[data-pb]'); pb.innerHTML=`<div class="k">Per blade</div><b>${r.unit>0?money(r.unit):'type cost'}</b>`; pb.classList.toggle('bad',!(r.unit>0));
     el.querySelector('[data-tot]').innerHTML=r.unit>0?`${r.q} × ${money(r.unit)} = <b>${money(r.ext)}</b>`:'';
     const lk=lookup(r.l.item), sheet=lk?listCost(lk.p,r.q):null, sx=el.querySelector('[data-sx]');
     if(sx)sx.innerHTML=lk&&r.l.costManual&&Math.abs(r.c-sheet)>0.004?`<button type="button" data-sheet="${i}">↺ sheet cost ${money(sheet)}</button>`:'';
-    const x=pitch24(r.l,r.q,r.unit,t.factor), n=el.querySelector('[data-nudge]');
+    const x=pitch24(r.l,r.q,r.unit,t), n=el.querySelector('[data-nudge]');
     n.innerHTML=!x?'':x.on?'<div class="nudge on">✅ 24-pack special cost is ON</div>':`<button type="button" class="nudge" data-make24="${i}">🔥 Make it <b>24</b>: <b>${money(x.p24)}</b> per blade (saves ${money(x.save)} ea). Tap to set qty 24.</button>`; });
-  realLines().filter(l=>!(+l.qty>0)).forEach(l=>{ const el=$('lines').querySelector(`.ln[data-i="${st.lines.indexOf(l)}"]`); if(el){ el.querySelector('[data-pb]').innerHTML='<div class="k">Per blade</div><b>qty 0</b>'; el.querySelector('[data-tot]').textContent='Not on the quote'; el.querySelector('[data-nudge]').innerHTML=''; } });
+  blades().filter(l=>!(+l.qty>0)).forEach(l=>{ const el=$('lines').querySelector(`.ln[data-i="${st.lines.indexOf(l)}"]`); if(el){ el.querySelector('[data-pb]').innerHTML='<div class="k">Per blade</div><b>qty 0</b>'; el.querySelector('[data-tot]').textContent='Not on the quote'; el.querySelector('[data-nudge]').innerHTML=''; } });
+  t.eqRows.forEach(r=>{ const i=st.lines.indexOf(r.l), el=$('eqs').querySelector(`.eq[data-i="${i}"]`); if(!el)return;
+    el.querySelector('[data-reg]').innerHTML=r.reg>0?`Regular <s>${money(r.reg)}</s> · customer ${r.free?'gets it <b>FREE</b>':'pays <b>'+money(r.unit)+'</b>'}${r.reg>r.unit?' · saves <b>'+money((r.reg-r.unit)*r.q)+'</b>':''}`:`Costs you ${money(r.c*r.q)} · customer gets it <b>FREE</b>`;
+    const fr=el.querySelector('.fr'); if(fr)fr.classList.toggle('on',r.free); });
   $('bar-a').textContent=money(t.deal);
-  $('bar-b').textContent=!REPS[st.rep]?'Pick your name at the top':!t.qty?'Add a blade to start':`${t.qty} blades · ${m.toFixed(1)}x · ${money(t.per)}/blade · comm ${money(t.comm)}`; }
+  $('bar-b').textContent=!REPS[st.rep]?'Pick your name at the top':!t.qty?'Pick a blade to start':`${t.qty} blades · ${m.toFixed(1)}x · ${multi?'':money(t.rows[0].unit)+'/blade · '}comm ${money(t.comm)}`; }
 
 // ── Blade lines ──
-function renderLines(){ const L=realLines();
-  $('warn').innerHTML=fullOnly()?`<div class="warn">This quote has a <b>${st.optOn?'A/B/C options':'package deal'}</b> set up in the Full tool. Finish it there. <a href="quote.html">Open the Full tool ›</a></div>`:'';
-  $('lines').innerHTML=L.length?L.map(l=>{ const i=st.lines.indexOf(l), P=picFor(l.item), lk=lookup(l.item), eq=l.kind==='equip';
+function renderLines(){ const L=blades();
+  $('lines').innerHTML=L.length?L.map(l=>{ const i=st.lines.indexOf(l), P=picFor(l.item), lk=lookup(l.item);
     return `<div class="ln" data-i="${i}"><div class="lh">${P?`<img src="quote-img/${esc(P[0])}" alt="${esc(P[1])}" data-zoom="${esc(P[1])}">`:'<div class="noimg">💎</div>'}
-      <div>${l.item?`<div class="t">${esc(l.desc||l.item)}</div><div class="c">${esc(lk?lk.p.code:l.item)}${lk&&lk.p.special?' <span class="chip c-sp">🔥 SPECIAL</span>':''}${lk&&lk.p.blowout?' <span class="chip c-lo">💥 '+lk.p.blowout+' left</span>':''}${eq?' · package equipment':''}</div>`
+      <div>${l.item?`<div class="t">${esc(l.desc||l.item)}</div><div class="c">${esc(lk?lk.p.code:l.item)}${lk&&lk.p.special?' <span class="chip c-sp">🔥 SPECIAL</span>':''}${lk&&lk.p.blowout?' <span class="chip c-lo">💥 '+lk.p.blowout+' left</span>':''}</div>`
         :`<input class="nm" data-nm="${i}" value="${esc(l.desc)}" placeholder="Blade name (shows on quote)">`}</div>
       <button type="button" class="del" data-del="${i}" aria-label="Remove">✕</button></div>
       <div class="lc"><div><div class="k">Qty</div><div class="step"><button type="button" data-dec="${i}" aria-label="One less">−</button><input type="number" inputmode="numeric" min="0" step="1" value="${esc(l.qty)}" data-qty="${i}" aria-label="Quantity"><button type="button" data-inc="${i}" aria-label="One more">+</button></div></div>
@@ -311,14 +415,13 @@ function renderLines(){ const L=realLines();
         <div class="pb" data-pb></div></div>
       <div class="sub"><span data-tot></span><span data-sx></span>${has(l.price)?'<span>price typed in Full tool</span>':''}</div>
       <div data-nudge></div></div>`; }).join('')
-    :'<div class="empty">No blades yet. Search below, or tap <b>+ Cost only</b> and type the cost like your calculator.</div>';
-  renderCalc(); }
-function setQty(i,q){ const l=st.lines[i]; if(!l)return; q=Math.max(0,Math.floor(+q||0)); l.qty=String(q); if(!l.costManual){ const L=lookup(l.item); if(L)l.cost=(+listCost(L.p,q)).toFixed(2); } save(); }
+    :`<div class="empty">${st.qMulti?'Add each blade the customer wants. Each one gets its own price.':'Type the blade below, or tap <b>+ Cost only</b> and type the cost like your calculator.'}</div>`;
+  renderModes(); renderCalc(); }
+function setQty(i,q){ const l=st.lines[i]; if(!l)return; q=Math.max(0,Math.floor(+q||0)); l.qty=String(q); if(!l.costManual&&l.kind!=='equip'){ const L=lookup(l.item); if(L)l.cost=(+listCost(L.p,q)).toFixed(2); } save(); }
 $('lines').addEventListener('input',e=>{ const d=e.target.dataset, v=e.target.value;
   if(d.qty!=null){ const l=st.lines[+d.qty]; if(v==='')return; const before=l.cost; setQty(+d.qty,v); if(l.cost!==before){ const c=$('lines').querySelector(`[data-cost="${d.qty}"]`); if(c)c.value=l.cost; } renderCalc(); }
   else if(d.cost!=null){ const l=st.lines[+d.cost]; if(v!==''&&(+v<0||isNaN(+v)))return; l.cost=v; l.costManual=true; save(); renderCalc(); }
-  else if(d.nm!=null){ st.lines[+d.nm].desc=v; save(); } });
-// no redraw when a box is left: the next tap (qty, cost, a markup) must land where the rep tapped
+  else if(d.nm!=null){ st.lines[+d.nm].desc=v; save(); renderCalc(); } });
 $('lines').addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.target.dataset.qty!=null||e.target.dataset.cost!=null||e.target.dataset.nm!=null))e.target.blur(); });
 $('lines').addEventListener('click',e=>{ const t=e.target.closest('button'); if(!t)return; const d=t.dataset;
   if(d.inc!=null){ setQty(+d.inc,(+st.lines[+d.inc].qty||0)+1); renderLines(); }
@@ -326,10 +429,13 @@ $('lines').addEventListener('click',e=>{ const t=e.target.closest('button'); if(
   else if(d.del!=null){ st.lines.splice(+d.del,1); save(); renderLines(); }
   else if(d.make24!=null){ setQty(+d.make24,24); renderLines(); toast('Qty 24: 24-pack cost on'); }
   else if(d.sheet!=null){ const l=st.lines[+d.sheet], L=lookup(l.item); l.costManual=false; l.cost=(+listCost(L.p,l.qty)).toFixed(2); save(); renderLines(); } });
-$('blank').addEventListener('click',()=>{ st.lines=st.lines.filter(x=>x.item||x.desc||has(x.cost)||x.blank); const n=realLines().length+1; st.lines.push(newLine({desc:'',qty:'1',cost:'',costManual:true,blank:true})); save(); renderLines();
-  const c=$('lines').querySelector(`[data-cost="${st.lines.length-1}"]`); if(c){ c.scrollIntoView({block:'center'}); c.focus(); } });
+// One blade: a new pick swaps the blade (keeps the qty). Multiple blades: it's added.
+function placeBlade(nl){ if(!st.qMulti){ const old=blades()[0]; if(old){ nl.qty=old.qty; st.lines[st.lines.indexOf(old)]=nl; return; } }
+  st.lines=st.lines.filter(x=>x.kind==='equip'||isBlade(x)); st.lines.push(nl); }
+$('blank').addEventListener('click',()=>{ const nl=newLine({desc:'',qty:'1',cost:'',costManual:true,blank:true}); placeBlade(nl); save(); renderLines();
+  const c=$('lines').querySelector(`[data-cost="${st.lines.indexOf(nl)}"]`); if(c){ c.scrollIntoView({block:'center'}); c.focus(); } });
 
-// ── Search (drops down over the page; no prices here, the price is on the blade line) ──
+// ── Search (drops down over the page; photos and sizes only, the price is on the blade line) ──
 function sizeLabel(v,all,code){ const s=v[2]?`${+v[2]}"`:''; const same=all.filter(x=>x[2]===v[2]).length>1; return !s?code:same?`${s} ${code}`:s; }
 const MATW=[[/^ASPH/,'a'],[/^GREEN/,'g'],[/^(REBAR|REINF|HARD)/,'r'],[/^(CONC|CURED)/,'c'],[/^(BRICK|BLOCK|CMU)/,'b'],[/^PAVER/,'p'],[/^(STONE|GRANITE)/,'s'],[/^(TILE|PORCEL)/,'t'],[/^(MORTAR|TUCK)/,'m'],[/^(METAL|IRON|DUCTILE|STEEL)/,'x'],[/^PIPE/,'pi'],[/^(PRECAST|PRESTRESS)/,'pc']];
 function famCard(f,qn,size){ const seen=new Set(); const vars=f.v.map(v=>({v,L:lookup(v[0])})).filter(x=>x.L&&(!size||+x.v[2]===size)&&!seen.has(x.L.key)&&seen.add(x.L.key)); if(!vars.length)return '';
@@ -340,7 +446,7 @@ function famCard(f,qn,size){ const seen=new Set(); const vars=f.v.map(v=>({v,L:l
 function search(){ const q=$('q').value.trim().toUpperCase(), qn=norm(q), words=q.split(/\s+/).filter(Boolean);
   if(!PL.count)return;
   let fams=[], rest=[], famSize=0, head;
-  if(!q){ fams=(SEL?SEL.families:[]).filter(f=>f.v.some(v=>{ const L=lookup(v[0]); return L&&L.p.special; })); head='🔥 This month\'s specials. Tap a size to add it.'; }
+  if(!q){ fams=(SEL?SEL.families:[]).filter(f=>f.v.some(v=>{ const L=lookup(v[0]); return L&&L.p.special; })); head='🔥 This month\'s specials. Tap a size.'; }
   else {
     fams=(SEL?SEL.families:[]).map(f=>{ const name=f.n.toUpperCase(), blurb=(f.n+' '+(f.h||'')).toUpperCase(); let sc=-1;
       if(words.every(w=>name.includes(w)))sc=name.startsWith(words[0])?0:1;
@@ -358,7 +464,7 @@ function search(){ const q=$('q').value.trim().toUpperCase(), qn=norm(q), words=
   }
   $('res').innerHTML=`<div class="rh"><span>${head}</span><button type="button" data-close="1">Close</button></div>`
     +fams.slice(0,q?8:30).map(f=>famCard(f,qn,famSize)).join('')
-    +rest.slice(0,12).map(([k,v])=>{ const P=picFor(k); return `<div class="row">${P?`<img src="quote-img/${esc(P[0])}" alt="" data-zoom="${esc(P[1])}">`:'<span></span>'}<div><b>${esc(v.code)}</b>${v.special?'<span class="chip c-sp">🔥</span>':''}<div class="d">${esc(v.desc)}</div></div><button type="button" class="gold" data-add="${esc(k)}">Add</button></div>`; }).join('')
+    +rest.slice(0,12).map(([k,v])=>{ const P=picFor(k); return `<div class="row">${P?`<img src="quote-img/${esc(P[0])}" alt="">`:'<span></span>'}<div><b>${esc(v.code)}</b>${v.special?'<span class="chip c-sp">🔥</span>':''}<div class="d">${esc(v.desc)}</div></div><button type="button" class="gold" data-add="${esc(k)}">Add</button></div>`; }).join('')
     +(rest.length>12?`<div class="hint" style="padding-bottom:8px">${rest.length-12} more: keep typing.</div>`:'');
   $('res').hidden=false; }
 let qT=0; $('q').addEventListener('input',()=>{ clearTimeout(qT); qT=setTimeout(search,120); });
@@ -368,40 +474,74 @@ function closeRes(){ $('res').hidden=true; }
 document.addEventListener('pointerdown',e=>{ if(!$('res').hidden&&!e.target.closest('.addrow'))closeRes(); });
 $('res').addEventListener('click',e=>{ if(e.target.closest('[data-close]')){ closeRes(); return; } const b=e.target.closest('[data-add]'); if(b){ addItem(b.dataset.add); $('q').value=''; closeRes(); } });
 function addItem(key){ const L=lookup(key); if(!L)return; const p=L.p, code=PLKEYS[L.key]||p.code;
-  let l=st.lines.find(x=>x.kind!=='equip'&&norm(x.item)===norm(code)&&!has(x.price));
-  if(l)l.qty=String((+l.qty||0)+1);
-  else { st.lines=st.lines.filter(x=>x.item||x.desc||has(x.cost)||x.blank); l=newLine({item:code,desc:p.desc,qty:'1'}); st.lines.push(l); }
+  let l=st.qMulti&&st.lines.find(x=>x.kind!=='equip'&&norm(x.item)===norm(code)&&!has(x.price)), msg;
+  if(l){ l.qty=String((+l.qty||0)+1); msg=`✓ ${l.qty} × ${p.code}`; }
+  else { const had=!st.qMulti&&blades().length; l=newLine({item:code,desc:p.desc,qty:'1'}); placeBlade(l); msg=had?`Swapped to ${p.code}`:`✓ ${p.code} on the quote`; }
   if(!l.costManual)l.cost=(+listCost(p,l.qty)).toFixed(2);
-  save(); renderLines(); toast(`✓ ${l.qty} × ${p.code} on the quote`);
-  const q=$('lines').querySelector(`[data-qty="${st.lines.indexOf(l)}"]`); if(q){ q.scrollIntoView({block:'center'}); } }
+  save(); renderLines(); toast(msg);
+  const q=$('lines').querySelector(`[data-qty="${st.lines.indexOf(l)}"]`); if(q)q.scrollIntoView({block:'center'}); }
 
-// ── Freebies ──
-$('fb-chips').innerHTML=FREEBIES.map(([n,c],i)=>`<button type="button" data-fb="${i}">+ ${esc(n)} <span>${money(c)}</span></button>`).join('')+'<button type="button" data-fb="x">+ Other $</button>';
-$('fb-chips').addEventListener('click',e=>{ const b=e.target.closest('[data-fb]'); if(!b)return;
-  if(b.dataset.fb==='x'){ const c=prompt('Promo / freebie cost ($):'); if(!has(c)||+c<0)return; const n=prompt('What is it? (shows on the quote as FREE)','Promo item')||'Promo item'; st.freebies.push({n,c:+(+c).toFixed(2),q:1}); }
-  else { const [n,c]=FREEBIES[+b.dataset.fb]; const f=st.freebies.find(x=>x.n===n); if(f)f.q=(+f.q||0)+1; else st.freebies.push({n,c,q:1}); }
-  save(); renderFree(); renderCalc(); });
-function renderFree(){ $('fb-list').innerHTML=st.freebies.map((f,i)=>`<div class="fl"><span>${f.q>1?f.q+' × ':''}${esc(f.n)}</span><span style="color:#8892a4">${money(f.c*f.q)} cost</span><button type="button" class="del" data-fbdel="${i}" aria-label="Remove">✕</button></div>`).join(''); }
-$('fb-list').addEventListener('click',e=>{ const b=e.target.closest('[data-fbdel]'); if(!b)return; const f=st.freebies[+b.dataset.fbdel]; if(f.q>1)f.q--; else st.freebies.splice(+b.dataset.fbdel,1); save(); renderFree(); renderCalc(); });
+// ── Saw deal: saw / equipment and promo items (package equipment lines, same as the Full tool) ──
+function modelsFor(keys){ if(keys==='PUMPS')return Object.entries(PL.items).filter(([k,v])=>/TSURAMI|PUMP/i.test(v.tab)&&/pump|generator/i.test(v.desc)&&v.cost>=250).map(([k])=>k);
+  return keys.map(k=>lookup(k)).filter(Boolean).map(L=>L.key); }
+function renderPicker(){ $('eq-cat').innerHTML='<option value="">Pick a category (14" saws, carts, core drills…)</option>'+EQUIP.map(([n,ks],i)=>modelsFor(ks).length?`<option value="${i}">${esc(n)}</option>`:'').join('');
+  $('eq-cat').value=st.eqCat||''; renderModels(); }
+function renderModels(){ const i=$('eq-cat').value; if(i===''||!EQUIP[+i]){ $('eq-models').innerHTML=''; return; }
+  $('eq-models').innerHTML=modelsFor(EQUIP[+i][1]).map(k=>{ const p=PL.items[k]; return `<button type="button" data-eqadd="${esc(k)}"><div><b>${esc(p.code)}</b><br><span>${esc(p.desc)}</span></div><span>cost ${money(p.cost)}</span></button>`; }).join(''); }
+$('eq-cat').addEventListener('change',()=>{ st.eqCat=$('eq-cat').value; save(); renderModels(); });
+$('eq-models').addEventListener('click',e=>{ const b=e.target.closest('[data-eqadd]'); if(!b)return; const L=lookup(b.dataset.eqadd); if(!L)return;
+  const ex=st.lines.find(l=>l.kind==='equip'&&norm(l.item)===norm(L.p.code)); if(ex)ex.qty=String((+ex.qty||0)+1);
+  else st.lines.push(newLine({kind:'equip',item:PLKEYS[L.key]||L.p.code,desc:L.p.desc,qty:'1',cost:(+L.p.cost).toFixed(2)}));
+  save(); renderSaw(); renderCalc(); toast('🪚 '+L.p.code+' added: FREE unless you type a price'); });
+$('fb-chips').innerHTML=PROMOS.map(([n,c],i)=>`<button type="button" data-fb="${i}">+ ${esc(n)} <span>${money(c)}</span></button>`).join('')
+  +`<button type="button" data-fb="amex">+ $50 AMEX card <span>${money(AMEX.cost)}</span></button><button type="button" data-fb="x">+ Other $</button>`;
+$('fb-chips').addEventListener('click',e=>{ const b=e.target.closest('[data-fb]'); if(!b)return; const k=b.dataset.fb;
+  if(k==='x'){ const c=prompt('Promo / freebie cost ($):'); if(!has(c)||+c<0)return; const n=prompt('What is it? (shows on the quote as FREE)','Promo item')||'Promo item'; st.lines.push(newLine({kind:'equip',desc:n,cost:(+c).toFixed(2),qty:'1',costManual:true,promo:true})); }
+  else if(k==='amex'){ const ex=st.lines.find(l=>l.kind==='equip'&&l.item===AMEX.code); if(ex)ex.qty=String((+ex.qty||0)+1); else st.lines.push(newLine({kind:'equip',item:AMEX.code,desc:AMEX.desc,cost:AMEX.cost.toFixed(2),qty:'1'})); }
+  else { const [n,c]=PROMOS[+k]; const ex=st.lines.find(l=>l.kind==='equip'&&l.promo&&l.desc===n); if(ex)ex.qty=String((+ex.qty||0)+1); else st.lines.push(newLine({kind:'equip',desc:n,cost:c.toFixed(2),qty:'1',costManual:true,promo:true})); }
+  save(); renderSaw(); renderCalc(); });
+function renderSaw(){ const L=equips();
+  $('eqs').innerHTML=L.length?L.map(l=>{ const i=st.lines.indexOf(l), P=picFor(l.item), lk=lookup(l.item), amex=norm(l.item)===AMEX.code;
+    return `<div class="eq" data-i="${i}"><div class="lh">${P?`<img src="quote-img/${esc(P[0])}" alt="">`:`<div class="noimg">${l.promo?'🎁':amex?'💳':'🪚'}</div>`}
+      <div><div class="t">${esc(l.desc||l.item)}</div><div class="c">${l.promo?'Promo item':esc(lk?lk.p.code:l.item)}</div></div><button type="button" class="del" data-eqdel="${i}" aria-label="Remove">✕</button></div>
+      <div class="eqc"><div><div class="k">Qty</div><div class="step"><button type="button" data-eqdec="${i}">−</button><input type="number" inputmode="numeric" min="1" step="1" value="${esc(l.qty)}" data-eqqty="${i}"><button type="button" data-eqinc="${i}">+</button></div></div>
+        <div><div class="k">Cost each</div><div class="cost"><input type="number" inputmode="decimal" min="0" step="0.01" value="${esc(l.cost)}" data-eqcost="${i}"></div></div></div>
+      ${l.promo||amex?'':`<div class="k" style="margin-top:10px">Customer pays for it</div><div class="pay"><button type="button" class="fr" data-eqfree="${i}">FREE</button><div class="cost"><input type="number" inputmode="decimal" min="0" step="0.01" value="${esc(l.price)}" data-eqp="${i}" placeholder="or type $ (e.g. 500)"></div></div>`}
+      <div class="reg" data-reg></div></div>`; }).join('')
+    :'<div class="empty" style="margin-bottom:4px">No saw yet. Pick a category below, then the model.</div>'; }
+$('eqs').addEventListener('input',e=>{ const d=e.target.dataset, v=e.target.value;
+  if(d.eqqty!=null){ if(v==='')return; st.lines[+d.eqqty].qty=String(Math.max(1,Math.floor(+v||1))); }
+  else if(d.eqcost!=null){ if(v!==''&&(+v<0||isNaN(+v)))return; st.lines[+d.eqcost].cost=v; st.lines[+d.eqcost].costManual=true; }
+  else if(d.eqp!=null){ if(v!==''&&(+v<0||isNaN(+v)))return; st.lines[+d.eqp].price=v; }
+  else return; save(); renderCalc(); });
+$('eqs').addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.tagName==='INPUT')e.target.blur(); });
+$('eqs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b)return; const d=b.dataset;
+  if(d.eqdel!=null)st.lines.splice(+d.eqdel,1);
+  else if(d.eqinc!=null){ const l=st.lines[+d.eqinc]; l.qty=String((+l.qty||0)+1); }
+  else if(d.eqdec!=null){ const l=st.lines[+d.eqdec]; if((+l.qty||0)>1)l.qty=String((+l.qty)-1); else st.lines.splice(+d.eqdec,1); }
+  else if(d.eqfree!=null)st.lines[+d.eqfree].price='';
+  else return; save(); renderSaw(); renderCalc(); });
 
 // ── Copy and PDF ──
-function blocker(){ const t=calc(); if(!REPS[st.rep])return 'Pick your name first (top of the page) so the quote is signed right.'; if(!t.qty)return 'Add at least one blade first.';
-  if(fullOnly())return 'This quote has a package deal or options. Send it from the Full tool so the prices are right.';
-  const bad=t.rows.find(r=>!(r.unit>0)); if(bad)return `"${bad.l.desc||bad.l.item||'A blade'}" has no cost. Type the blade cost first.`;
-  const nm=t.rows.find(r=>!r.l.item&&!String(r.l.desc).trim()); if(nm)return 'Give the cost-only blade a name so the customer knows what it is.'; return ''; }
 const codeOf=l=>{ const L=lookup(l.item); return L?L.p.code:l.item; };
+function blocker(){ const t=calc(); if(!REPS[st.rep])return 'Pick your name first (top of the page) so the quote is signed right.'; if(!t.qty)return 'Add at least one blade first.';
+  if(optOnly())return 'This quote has A/B/C options. Send it from the Full tool so the prices are right.';
+  if(t.underCost)return 'The $ typed on the saw is more than the deal can carry: the blades would sell under cost. Lower the saw $ or add blades.';
+  const bad=t.rows.find(r=>!(r.unit>0)); if(bad)return `"${bad.l.desc||bad.l.item||'A blade'}" has no cost. Type the blade cost first.`;
+  if(t.rows.find(r=>!r.l.item&&!String(r.l.desc).trim()))return 'Give the cost-only blade a name so the customer knows what it is.'; return ''; }
 function quoteText(){ const t=calc(), R=REPS[st.rep]||{name:'',email:''};
-  const lines=t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit,t.factor); return `${r.q} x ${r.l.desc||r.l.item}${r.l.item?' ('+codeOf(r.l)+')':''}: ${money(r.unit)} each = ${money(r.ext)}`+(x?(x.on?' (24-pack special price)':`\n   SPECIAL: buy 24, pay ${money(x.p24)} each (save ${money(x.save)} each)`):''); });
-  const free=st.freebies.map(f=>`${f.q} x ${f.n}: FREE`);
-  return ['DIAMOND BLADE WAREHOUSE - QUOTE',`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'','',...lines,...free,'',`Total: ${money(t.deal)}`,'Freight and sales tax added at invoice.','',st.notes||'','',R.sign||R.name,R.email]
+  const lines=t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit,t); return `${r.q} x ${r.l.desc||r.l.item}${r.l.item?' ('+codeOf(r.l)+')':''}: ${money(r.unit)} each = ${money(r.ext)}`+(x?(x.on?' (24-pack special price)':`\n   SPECIAL: buy 24, pay ${money(x.p24)} each (save ${money(x.save)} each)`):''); });
+  const eq=t.eqRows.map(r=>`${r.q} x ${r.l.desc||r.l.item}${r.l.item&&!r.l.promo&&norm(r.l.item)!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (regular '+money(r.reg)+' each)':''}`);
+  return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'','',...lines,...eq,'',`Total: ${money(t.deal)}`,t.eqSave>0?`You save ${money(t.eqSave)} on the equipment.`:'','Freight and sales tax added at invoice.','',st.notes||'','',R.sign||R.name,R.email]
     .filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim(); }
 function renderQuote(){ const t=calc(), R=REPS[st.rep]||{name:'Diamond Blade Warehouse',email:''};
-  $('quote').innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px"><div><h2>DIAMOND BLADE WAREHOUSE</h2><div class="m">Quote</div></div><div style="text-align:right"><b>Date:</b> ${esc(st.date)}${st.num?`<div><b>Customer #:</b> ${esc(st.num)}</div>`:''}</div></div>
+  $('quote').innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px"><div><h2>DIAMOND BLADE WAREHOUSE</h2><div class="m">${t.pkg?'Package Deal':'Quote'}</div></div><div style="text-align:right"><b>Date:</b> ${esc(st.date)}${st.num?`<div><b>Customer #:</b> ${esc(st.num)}</div>`:''}</div></div>
     ${st.co||st.name?`<div style="margin-top:12px"><b>Prepared for:</b><br>${esc(st.co)}${st.co&&st.name?'<br>':''}${esc(st.name)}</div>`:''}
     <table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>
-    ${t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit,t.factor); return `<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}${r.l.item?`<div class="m">${esc(codeOf(r.l))}</div>`:''}${!x?'':x.on?'<div class="pitch on">🔥 24-pack special price applied</div>':`<div class="pitch">🔥 <b>Buy 24, pay ${money(x.p24)} each</b> (save ${money(x.save)} each). Add ${x.more} more of this blade.</div>`}</td><td class="r">${money(r.unit)}</td><td class="r">${money(r.ext)}</td></tr>`; }).join('')}
-    ${st.freebies.map(f=>`<tr><td>${f.q}</td><td>${esc(f.n)}</td><td class="r free">FREE</td><td class="r free">FREE</td></tr>`).join('')}
+    ${t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit,t); return `<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}${r.l.item?`<div class="m">${esc(codeOf(r.l))}</div>`:''}${!x?'':x.on?'<div class="pitch on">🔥 24-pack special price applied</div>':`<div class="pitch">🔥 <b>Buy 24, pay ${money(x.p24)} each</b> (save ${money(x.save)} each). Add ${x.more} more of this blade.</div>`}</td><td class="r">${money(r.unit)}</td><td class="r">${money(r.ext)}</td></tr>`; }).join('')}
+    ${t.eqRows.map(r=>`<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}${r.l.item&&!r.l.promo&&norm(r.l.item)!==AMEX.code?`<div class="m">${esc(codeOf(r.l))}</div>`:''}${r.free?'<div class="m">Included with this package</div>':''}</td><td class="r">${r.reg>r.unit?`<s>${money(r.reg)}</s>`:''}${r.free?'<span class="free">FREE</span>':money(r.unit)}</td><td class="r">${r.reg>r.unit?`<s>${money(r.reg*r.q)}</s>`:''}${r.free?'<span class="free">FREE</span>':money(r.ext)}</td></tr>`).join('')}
     <tr class="grand"><td colspan="2">TOTAL</td><td class="r" colspan="2">${money(t.deal)}</td></tr>
+    ${t.eqSave>0?`<tr class="save"><td colspan="2">You save on the equipment</td><td class="r" colspan="2">${money(t.eqSave)}</td></tr>`:''}
     <tr><td colspan="4" class="m" style="border-bottom:none">Freight and sales tax added at invoice.</td></tr></table>
     ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
     <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="m">${esc(R.email)}</div>`:''}<div class="m">Diamond Blade Warehouse</div></div>`; }
@@ -414,22 +554,22 @@ $('rep').innerHTML='<option value="">Pick your name</option>'+Object.entries(REP
 $('rep').addEventListener('change',e=>{ st.rep=e.target.value; save(); renderAll(); });
 $('who').addEventListener('click',()=>{ $('rep-card').hidden=false; $('rep').focus(); });
 [['co','co'],['cname','name'],['cnum','num'],['notes','notes']].forEach(([id,f])=>$(id).addEventListener('input',e=>{ st[f]=e.target.value; save(); }));
-$('reset').addEventListener('click',()=>{ if(!realLines().length&&!st.freebies.length&&!st.co&&!st.name||confirm('Start a new quote? This clears the blades, freebies and customer (your name and markup stay).')){
-  st=Object.assign(blank(),{rep:st.rep,mu:st.mu,acct:st.acct}); save(); $('q').value=''; renderAll(); toast('New quote'); } });
-function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1800); }
-document.addEventListener('click',e=>{ const z=e.target.closest('[data-zoom]'); if(z){ $('zoom').querySelector('img').src=z.getAttribute('src'); $('zoom').querySelector('div').textContent=z.dataset.zoom; $('zoom').hidden=false; return; } if(e.target.closest('#zoom'))$('zoom').hidden=true; });
+$('reset').addEventListener('click',()=>{ if(!st.lines.some(l=>isBlade(l)||isEq(l))&&!st.co&&!st.name||confirm('Start a new quote? This clears the blades, saw, promos and customer (your name, markup and switches stay).')){
+  st=Object.assign(blank(),{rep:st.rep,mu:st.mu,acct:st.acct,qSaw:st.qSaw,qMulti:st.qMulti,eqCat:st.eqCat}); save(); $('q').value=''; renderAll(); toast('New quote'); } });
+function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1900); }
+document.addEventListener('click',e=>{ const z=e.target.closest('[data-zoom]'); if(z&&!z.closest('#res')){ $('zoom').querySelector('img').src=z.getAttribute('src'); $('zoom').querySelector('div').textContent=z.dataset.zoom; $('zoom').hidden=false; return; } if(e.target.closest('#zoom'))$('zoom').hidden=true; });
 
 function renderAll(){ const R=REPS[st.rep]; $('who').textContent=R?R.name+' ('+st.rep+') · change':'Pick your name below'; $('rep').value=st.rep; $('rep-card').hidden=!!R;
   const fl='quote.html'+(st.rep?'?rep='+encodeURIComponent(st.rep):''); $('full').href=fl; $('full2').href=fl;
   $('newacct').checked=st.acct==='new'; $('co').value=st.co||''; $('cname').value=st.name||''; $('cnum').value=st.num||''; $('notes').value=st.notes||'';
-  muBtns(); renderFree(); renderLines(); }
+  muBtns(); renderSaw(); renderLines(); }
 
 (async()=>{
   try{ PL=await (await fetch('quote-prices.json',{cache:'no-cache'})).json(); const seen={}; Object.values(PL.items).forEach(v=>{ seen[v.code]=(seen[v.code]||0)+1; }); Object.entries(PL.items).forEach(([k,v])=>{ PLKEYS[k]=seen[v.code]>1?k:v.code; }); }catch(e){ PL={items:{}}; }
   try{ SEL=await (await fetch('quote-selector.json',{cache:'no-cache'})).json(); PIC={}; SEL.families.forEach(f=>{ if(f.i)f.v.forEach(v=>{ const k=norm(v[0]); if(!PIC[k])PIC[k]=[f.i,f.n]; }); }); }catch(e){ SEL=null; }
   if(!PL.count)$('q').placeholder='Price list did not load: tap + Cost only';
-  st.lines.forEach(l=>{ if(l.item&&!l.costManual){ const L=lookup(l.item); if(L)l.cost=(+listCost(L.p,l.qty)).toFixed(2); } });
-  renderAll();
+  st.lines.forEach(l=>{ if(l.item&&!l.costManual&&l.kind!=='equip'){ const L=lookup(l.item); if(L)l.cost=(+listCost(L.p,l.qty)).toFixed(2); } });
+  renderPicker(); renderAll();
 })();
 renderAll();
 </script>
