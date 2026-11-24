@@ -68,9 +68,18 @@ out = {
     'wi': {'state': state, 'counties': counties, 'milwaukeeCity': city[0], 'milwaukeeCitySince': city[1]},
     'zips': zips,
     'zipRates': {}, 'zipRatesFrom': [],
-    # States DBW is registered to collect in. None = not known yet: out-of-state tax shows "if applicable".
-    'collectStates': None,
+    # Where DBW collects sales tax: 'ALL' (Justin, Nov 23 2026: every state unless the buyer is exempt),
+    # a list of state codes, or None (unknown: out-of-state tax shows "if applicable").
+    # Carried over from the existing quote-tax.json on every rebuild.
+    'collectStates': 'ALL',
 }
+if os.path.exists('quote-tax.json'):
+    try:
+        old = json.load(open('quote-tax.json'))
+        if 'collectStates' in old:
+            out['collectStates'] = old['collectStates']
+    except ValueError:
+        pass
 for path in src_avalara:
     n0 = len(out['zipRates'])
     with open(path, newline='', encoding='utf-8-sig') as fh:

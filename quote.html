@@ -429,11 +429,13 @@ function autoTax(){
   const stt=(st.shState||'').toUpperCase();
   if(!stt||!/^\d{5}/.test(st.shZip||'')&&!st.shCounty)return {rate:null,why:'Enter the ship-to ZIP'};
   if(stt!=='WI'){
+    // States with no general sales tax
+    if(['DE','MT','NH','OR'].includes(stt))return {rate:0,oos:true,why:`${stt} has no general sales tax`};
     if(TAX&&Array.isArray(TAX.collectStates)&&!TAX.collectStates.includes(stt))return {rate:null,oos:true,none:true,why:`DBW does not collect ${stt} sales tax: the buyer owes use tax`};
     const zr=TAX&&TAX.zipRates?TAX.zipRates[(st.shZip||'').slice(0,5)]:null;
-    const ifa=!(TAX&&Array.isArray(TAX.collectStates));
+    const ifa=!(TAX&&(TAX.collectStates==='ALL'||Array.isArray(TAX.collectStates)));
     if(zr!=null)return {rate:zr,oos:true,ifa,why:`${stt} ZIP ${st.shZip.slice(0,5)}: est. ${pct(zr)} combined (Avalara ZIP table)${ifa?', shown if applicable':''}`};
-    return {rate:null,oos:true,ifa,why:`Out of state (${stt}): no ZIP rate loaded yet. Shows "if applicable, added at invoice". You can type a rate.`}; }
+    return {rate:null,oos:true,ifa,why:`Out of state (${stt}): no ZIP rate loaded yet, so tax shows "added at invoice". You can type a rate.`}; }
   if(!TAX)return {rate:null,why:'Loading Wisconsin tax rates…'};
   const W=TAX.wi, c=W.counties[st.shCounty];
   if(!c)return {rate:null,why:'Pick the Wisconsin county'};
@@ -442,17 +444,20 @@ function autoTax(){
   if(st.shMke){ r+=W.milwaukeeCity; parts.push(`City of Milwaukee ${pct(W.milwaukeeCity)}`); }
   return {rate:Math.round(r*1000)/1000,parts,why:parts.join(' + ')+' = '+pct(r)};
 }
+function taxPending(){ const AT=autoTax(); return st.txMode==='tbd'||(st.txMode==='rate'&&!has(st.txRate))||(st.txMode==='auto'&&AT.rate==null&&!AT.none); }
 function txLabel(t){ const AT=autoTax();
+  if(st.txMode==='auto'&&AT.rate===0)return 'None';
   if(st.txMode==='exempt')return 'Exempt';
   if(st.txMode==='rate'&&has(st.txRate))return money(t.tax);
   if(st.txMode==='auto'&&AT.rate!=null)return money(t.tax);
   if(st.txMode==='auto'&&AT.none)return 'Not collected (buyer owes use tax)';
-  if(st.txMode==='auto'&&AT.oos)return 'If applicable, added at invoice';
+  if(st.txMode==='auto'&&AT.oos)return AT.ifa?'If applicable, added at invoice':'Added at invoice';
   return 'Applicable tax added at invoice'; }
 function txName(){ const AT=autoTax(); const fr=st.txFr?', incl. freight':'';
   if(st.txMode==='rate'&&has(st.txRate))return `Sales tax (${(+st.txRate).toString()}%${fr})`;
+  if(st.txMode==='auto'&&AT.rate===0)return `Sales tax (${(st.shState||'').toUpperCase()} has no general sales tax)`;
   if(st.txMode==='auto'&&AT.rate!=null)return `Est. sales tax${AT.ifa?', if applicable':''} (${pct(AT.rate)}${st.shCity?', '+st.shCity:''}, ${(st.shState||'').toUpperCase()}${fr})`;
-  if(st.txMode==='auto'&&AT.oos&&!AT.none)return 'Sales tax (if applicable)';
+  if(st.txMode==='auto'&&AT.oos&&!AT.none)return AT.ifa?'Sales tax (if applicable)':'Sales tax';
   return 'Sales tax'; }
 function shipTo(){ const a=[st.shStreet,[st.shCity,[st.shState,st.shZip].filter(Boolean).join(' ')].filter(Boolean).join(', ')].filter(Boolean); return a; }
 function renderShip(){
@@ -490,7 +495,7 @@ function renderQuote(t){
     <tr><td colspan="2">${esc(txName())}</td><td class="r" colspan="2" style="white-space:normal">${esc(txLabel(t))}</td></tr>
     <tr class="grand"><td colspan="2">TOTAL</td><td class="r" colspan="2">${money(t.grand)}</td></tr>
     ${st.txMode==='auto'&&autoTax().ifa?`<tr><td colspan="4" class="muted" style="border-bottom:none">Sales tax applies only if DBW collects tax in your state. Final tax is shown on the invoice.</td></tr>`:''}
-    ${(st.frMode==='tbd'||(!t.tax&&st.txMode!=='exempt'&&!autoTax().none))?`<tr><td colspan="4" class="muted" style="border-bottom:none">Total shown before ${[st.frMode==='tbd'?'freight':'',(!t.tax&&st.txMode!=='exempt')?'tax':''].filter(Boolean).join(' and ')}.</td></tr>`:''}
+    ${(st.frMode==='tbd'||taxPending())?`<tr><td colspan="4" class="muted" style="border-bottom:none">Total shown before ${[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join(' and ')}.</td></tr>`:''}
     ${t.eqSave>0?`<tr class="save"><td colspan="2">You save on equipment</td><td class="r" colspan="2">${money(t.eqSave)}</td></tr>`:''}</table>
     ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
     <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="muted">${esc(R.email)}</div>`:''}<div class="muted">Diamond Blade Warehouse</div></div>`;
