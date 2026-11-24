@@ -72,7 +72,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
 #quote .r{text-align:right;white-space:nowrap;overflow-wrap:normal}
 #quote .grand td{font-weight:900;font-size:16px;border-top:2px solid #111;border-bottom:none}
 #quote .muted{color:#666;font-size:12px}
-#quote .free{color:#1a7a3a;font-weight:800}
+#quote .free{color:#1a7a3a;font-weight:800}#quote .reg{color:#999;text-decoration:line-through;font-size:12px;display:block}#quote .save td{color:#1a7a3a;font-weight:800;border-bottom:none}
 @media(max-width:480px){#quote{padding:14px;font-size:13px}#quote th,#quote td{padding:6px 4px}#quote th{letter-spacing:0}}
 @media print{header,.noprint{display:none!important}body{background:#fff}.container{padding:0}#quote{border-radius:0;padding:0}}
 </style>
@@ -326,10 +326,13 @@ function calc(){
     else if(has(l.price))unit=r2(parseFloat(l.price));
     else if(pkg){ unit=c>0?up2(c*factor):0; pk=true; }
     else { const Lk=lookup(l.item); unit=c>0?sheetPrice(c,mu,Lk&&Lk.p&&Lk.p.mode):0; }
-    return {l,q,unit,ext:r2(unit*q),free,pk}; });
+    // regular price of package equipment = what it sells for on its own at this markup (AMEX = face value)
+    let reg=0; if(l.kind==='equip'&&c>0){ const Lk=lookup(l.item); reg=l.item===AMEX.code?AMEX.face:sheetPrice(c,mu,Lk&&Lk.p&&Lk.p.mode); }
+    return {l,q,unit,ext:r2(unit*q),free,pk,reg}; });
   const sell=rows.reduce((t,r)=>t+r.ext,0), cogs=L.reduce((t,l)=>t+cost(l),0);
+  const eqSave=rows.reduce((t,r)=>t+(r.reg>r.unit?(r.reg-r.unit)*r.q:0),0);
   const tmu=cogs>0?sell/cogs:0, rate=commRate(tmu,st.acct);
-  return {rows,sell,cogs,tmu,rate,comm:sell*rate,mu,pkg,E,B,eqSale,pkgTotal,carry,factor};
+  return {rows,sell,cogs,tmu,rate,comm:sell*rate,mu,pkg,E,B,eqSale,pkgTotal,carry,factor,eqSave};
 }
 
 // ── Line rendering ──
@@ -387,11 +390,12 @@ function renderTotals(){
 function qtyLabel(r){ return r.q; }
 function codeOf(l){ const L=lookup(l.item); return L&&L.p?L.p.code:l.item; }
 function itemName(r){ const n=r.l.desc||r.l.item; return r.l.item===AMEX.code?`${n} (${money0(r.q*AMEX.face)} in cards)`:n; }
-function priceCell(r,ext){ if(r.free)return '<span class="free">FREE</span>'; return money(ext?r.ext:r.unit); }
+function priceCell(r,ext){ const was=r.reg>r.unit?`<span class="reg">${money(ext?r.reg*r.q:r.reg)}</span>`:'';
+  if(r.free)return was+'<span class="free">FREE</span>'; return was+(was?`<span class="free">${money(ext?r.ext:r.unit)}</span>`:money(ext?r.ext:r.unit)); }
 function quoteText(t){
   const R=REPS[st.rep]||{name:'',email:''};
-  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}`);
-  return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',``,...lines,``,`TOTAL: ${money(t.sell)}`,st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
+  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (regular '+money(r.reg)+' each)':''}`);
+  return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',``,...lines,``,`TOTAL: ${money(t.sell)}`,t.eqSave>0?`You save ${money(t.eqSave)} on the equipment`:'',st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
 }
 function renderQuote(t){
   const R=REPS[st.rep]||{name:'Diamond Blade Warehouse',email:''};
@@ -404,7 +408,8 @@ function renderQuote(t){
     ${st.co||st.name?`<div style="margin-top:12px"><b>Prepared for:</b> ${esc(st.co)}${st.co&&st.name?'<br>':''}${esc(st.name)}</div>`:''}
     <table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>
     ${t.rows.map(r=>`<tr><td>${esc(qtyLabel(r))}</td><td>${esc(itemName(r))}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?`<div class="muted">${esc(codeOf(r.l))}</div>`:''}${r.free?'<div class="muted">Included with this package</div>':''}</td><td class="r">${priceCell(r,false)}</td><td class="r">${priceCell(r,true)}</td></tr>`).join('')}
-    <tr class="grand"><td colspan="2">${t.pkg?'PACKAGE TOTAL':'TOTAL'}</td><td class="r" colspan="2">${money(t.sell)}</td></tr></table>
+    <tr class="grand"><td colspan="2">${t.pkg?'PACKAGE TOTAL':'TOTAL'}</td><td class="r" colspan="2">${money(t.sell)}</td></tr>
+    ${t.eqSave>0?`<tr class="save"><td colspan="2">You save on equipment</td><td class="r" colspan="2">${money(t.eqSave)}</td></tr>`:''}</table>
     ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
     <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="muted">${esc(R.email)}</div>`:''}<div class="muted">Diamond Blade Warehouse</div></div>`;
 }
