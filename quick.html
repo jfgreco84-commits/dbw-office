@@ -27,6 +27,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;color:#e0e6f0;mi
 header{background:linear-gradient(135deg,#1a1f2e,#0d1520);padding:10px 14px;display:flex;align-items:center;gap:10px}
 .logo{font-size:17px;font-weight:900;color:#f5a623;letter-spacing:.5px;flex:1;min-width:0}
 .logo small{display:block;font-size:12px;color:#c8d0de;font-weight:700;cursor:pointer}
+.newq{background:#3a1a1a;color:#ff8a8a;font-size:13px;font-weight:800;border:1px solid #6a2a2a;border-radius:16px;padding:6px 12px;white-space:nowrap}
 .full{color:#8892a4;font-size:13px;font-weight:700;text-decoration:none;border:1px solid #2a3040;border-radius:16px;padding:6px 12px;white-space:nowrap}
 #mubar{position:sticky;top:0;z-index:40;background:#0b0e14;border-bottom:2px solid #f5a623;padding:8px 10px 9px}
 #mubar .in{max-width:1240px;margin:0 auto}
@@ -186,6 +187,7 @@ details[open] summary:before{content:'▾ '}
 <body>
 <header>
   <div class="logo">🐸 Froggy's Quote Generator<small id="who">Pick your name below</small></div>
+  <button type="button" class="newq" id="reset-top" title="Clear this quote and start a new one">↺ New quote</button>
   <a class="full" id="full" href="quote.html">Full tool ›</a>
 </header>
 <div id="mubar"><div class="in">
@@ -595,6 +597,7 @@ $('rep').innerHTML='<option value="">Pick your name</option>'+Object.entries(REP
 $('rep').addEventListener('change',e=>{ st.rep=e.target.value; save(); renderAll(); });
 $('who').addEventListener('click',()=>{ $('rep-card').hidden=false; $('rep').focus(); });
 [['co','co'],['cname','name'],['cnum','num'],['notes','notes']].forEach(([id,f])=>$(id).addEventListener('input',e=>{ st[f]=e.target.value; save(); }));
+$('reset-top').addEventListener('click',()=>$('reset').click());
 $('reset').addEventListener('click',()=>{ if(!st.lines.some(l=>isBlade(l)||isEq(l))&&!st.co&&!st.name||confirm('Start a new quote? This clears the blades, saw, promos and customer (your name, markup and switches stay).')){
   st=Object.assign(blank(),{rep:st.rep,mu:st.mu,acct:st.acct,qSaw:st.qSaw,qMulti:st.qMulti,eqCat:st.eqCat}); save(); $('q').value=''; renderAll(); toast('New quote'); } });
 function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1900); }
