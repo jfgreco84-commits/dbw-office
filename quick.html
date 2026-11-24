@@ -11,7 +11,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="quote-icon-192.png">
 <link rel="manifest" href="quote.webmanifest">
 <!-- Quick Quote, built like Froggy's Ultimate Calculator (FROGGYS_ULTIMATE_CALCULATOR_26.xlsx):
-       BLADES ONLY: each blade is priced on its own: blade cost x M/U, rounded up to the cent.
+       BLADES ONLY: each blade is priced on its own: blade cost x M/U rounded like the price sheet (+$0.49, or up to the
+                    whole dollar on items the sheet prices that way; Froggy, Nov 24 2026). Same as quote.html.
        SAW DEAL:    TOTAL COG'S = blades + saw/equipment + promo items;  TOTAL DEAL = TOTAL COG'S x M/U.
                     The saw is FREE unless the rep types what the customer pays for it; the blades carry the rest
                     of the deal, each in proportion to its own cost (a 16" stays priced above a 14").
@@ -251,7 +252,7 @@ details[open] summary:before{content:'▾ '}
   </div>
 
   <div class="card">
-    <div class="hint" style="margin:0 0 10px">Need <b>A/B/C options</b>, <b>tax</b> or <b>freight</b>? The Full tool opens this same quote. Its prices use the price sheet's rounding, so they can differ by a few cents.</div>
+    <div class="hint" style="margin:0 0 10px">Need <b>A/B/C options</b>, <b>tax</b> or <b>freight</b>? The Full tool opens this same quote. Prices match: both use the price sheet's rounding.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <a href="quote.html" id="full2" style="flex:1"><button type="button" style="width:100%">🧰 Open in Full tool</button></a>
       <button type="button" id="reset" style="background:#3a1a1a;color:#e05555">↺ New quote</button>
@@ -311,7 +312,11 @@ const $=id=>document.getElementById(id);
 const money=n=>'$'+(Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const r2=n=>Math.round(n*100)/100;
-const up2=n=>Math.ceil(n*100-1e-6)/100;   // round UP to the cent: never under the markup
+const up2=n=>Math.ceil(n*100-1e-6)/100;   // round UP to the cent: never under the markup (saw-deal blades, same as quote.html)
+const ADDON=0.49;
+// Price-sheet rounding, same as quote.html: cost x M/U + $0.49 (half-up to the cent), or whole dollars up for 'ceil' items
+function sheetPrice(cost,mu,mode){ return mode==='ceil'?Math.ceil(cost*mu-1e-9):Math.round((cost*mu+ADDON)*100+1e-6)/100; }
+const modeOf=l=>{ const L=lookup(l.item); return L&&L.p&&L.p.mode; };
 const norm=c=>String(c||'').toUpperCase().replace(/[\s\/]/g,'');
 const has=v=>v!==''&&v!=null&&!isNaN(parseFloat(v));
 function commRate(mu,acct){ const r=(LADDER.find(x=>mu>=x[0]-1e-9)||[0,0])[1]; return acct==='new'&&mu>=1.7-1e-9?0.25:r; }
@@ -361,9 +366,9 @@ function calc(mu){ mu=mu||(+st.mu||TARGET);
   const B=carriers.reduce((t,l)=>t+(+l.qty)*c(l),0), Fx=B_.filter(l=>has(l.price)).reduce((t,l)=>t+(+l.qty)*c(l),0), E=E_.reduce((t,l)=>t+(+l.qty)*c(l),0);
   const eqSale=E_.reduce((t,l)=>t+(has(l.price)&&parseFloat(l.price)>0?r2(parseFloat(l.price))*(+l.qty):0),0);
   const pkg=E_.length>0, carry=(B+E)*mu-eqSale, factor=pkg?(B>0?carry/B:0):mu;
-  const rows=B_.map(l=>{ const q=+l.qty, unit=has(l.price)?r2(parseFloat(l.price)):(c(l)>0?Math.max(0,up2(c(l)*factor)):0); return {l,q,c:c(l),unit,ext:r2(unit*q)}; });
+  const rows=B_.map(l=>{ const q=+l.qty, unit=has(l.price)?r2(parseFloat(l.price)):(c(l)>0?(pkg?Math.max(0,up2(c(l)*factor)):sheetPrice(c(l),mu,modeOf(l))):0); return {l,q,c:c(l),unit,ext:r2(unit*q)}; });
   const eqRows=E_.map(l=>{ const q=+l.qty, paid=has(l.price)&&parseFloat(l.price)>0, unit=paid?r2(parseFloat(l.price)):0;
-    const reg=l.promo?0:(norm(l.item)===AMEX.code?AMEX.face:up2(c(l)*mu)); return {l,q,c:c(l),unit,ext:r2(unit*q),free:!paid,reg}; });
+    const reg=l.promo?0:(norm(l.item)===AMEX.code?AMEX.face:sheetPrice(c(l),mu,modeOf(l))); return {l,q,c:c(l),unit,ext:r2(unit*q),free:!paid,reg}; });
   const deal=[...rows,...eqRows].reduce((t,r)=>t+r.ext,0), cogs=B+Fx+E, qty=rows.reduce((t,r)=>t+r.q,0);
   const tmu=cogs>0?deal/cogs:0, rate=commRate(Math.min(mu,tmu+1e-9),st.acct);
   const eqSave=eqRows.reduce((t,r)=>t+(r.reg>r.unit?(r.reg-r.unit)*r.q:0),0);
@@ -372,7 +377,7 @@ const optOnly=()=>st.optOn;
 // The next cost breaks above this qty: what the customer would pay per blade there
 function pitch24(l,q,unit,t){ if(t.pkg||has(l.price)||l.costManual)return null; const L=lookup(l.item); if(!L||!L.p.special)return null;
   const pq=poolQty(l), T=tiersOf(L.p), cur=tierAt(L.p,pq);
-  return {cur:T[cur],pool:pq,grp:mixOn()?groupShort(L.p):'',next:T.slice(cur+1).map(x=>({min:x.min,name:x.name,price:up2(x.cost*t.factor)})).filter(x=>x.price<unit).map(x=>Object.assign(x,{save:unit-x.price,more:x.min-pq}))}; }
+  return {cur:T[cur],pool:pq,grp:mixOn()?groupShort(L.p):'',next:T.slice(cur+1).map(x=>({min:x.min,name:x.name,price:t.pkg?up2(x.cost*t.factor):sheetPrice(x.cost,t.mu,L.p.mode)})).filter(x=>x.price<unit).map(x=>Object.assign(x,{save:unit-x.price,more:x.min-pq}))}; }
 function shortName(l){ const P=picFor(l.item), L=lookup(l.item); const size=(String(l.desc).match(/^\s*(\d+(?:\.\d+)?)\s*"/)||[])[1];
   return P?(size?size+'" ':'')+P[1]:L?L.p.code:(l.desc||'Blade'); }
 
