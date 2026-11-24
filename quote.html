@@ -139,8 +139,9 @@ input[type=range]{padding:0;accent-color:#f5a623}
     <div class="hint" style="margin:0 0 8px">Don't know the item #? Pick the saw, the material and the size. Best fit shows first (same as the Blade Finder on dbwwisco.com).</div>
     <div class="g3">
       <div><label>Saw</label><select id="s-saw"></select></div>
-      <div><label>Material</label><select id="s-mat"></select></div>
-      <div><label>Size</label><select id="s-size"></select></div>
+      <div class="s-blade"><label>Material</label><select id="s-mat"></select></div>
+      <div class="s-blade"><label>Size</label><select id="s-size"></select></div>
+      <div class="s-chain" style="grid-column:span 2" hidden><label>Your chain saw</label><select id="s-chainsaw"></select></div>
     </div>
     <div id="s-res" class="res"></div>
   </div>
@@ -373,8 +374,8 @@ function renderTotals(){
   if(t.pkg){ const bq=t.rows.filter(r=>r.pk).reduce((n,r)=>n+r.q,0);
     msg+=`<div class="info"><b>📦 Package:</b> (blades ${money(t.B)} + equipment ${money(t.E)}) x ${(+st.mu).toFixed(2)} = <b>${money(t.pkgTotal)}</b>`+
       (t.eqSale?` · less ${money(t.eqSale)} charged for equipment = <b>${money(t.carry)}</b> on the blades`:'')+
-      (bq?` · ${bq} blade${bq===1?'':'s'}`+(t.rows.filter(r=>r.pk).length===1?` = <b>${money(t.rows.find(r=>r.pk).unit)} per blade</b>`:', priced by line below'):'')+`</div>`;
-    if(!t.B)msg+='<div class="warn">Add the blades for this package. The blades carry the equipment cost.</div>';
+      (bq?` · ${bq} blade${bq===1?'':'s'}/chain${bq===1?'':'s'}`+(t.rows.filter(r=>r.pk).length===1?` = <b>${money(t.rows.find(r=>r.pk).unit)} each</b>`:', priced by line below'):'')+`</div>`;
+    if(!t.B)msg+='<div class="warn">Add the blades (or chains) for this package. They carry the equipment cost.</div>';
     else if(t.factor<1)msg+='<div class="warn">The $ on the equipment is more than the package needs: the blades would sell under cost.</div>'; }
   if(t.cogs>0&&t.tmu<FLOOR-1e-9)msg+=`<div class="warn">⚠️ Total is ${t.tmu.toFixed(2)}x. That's under the 1.7x floor. Raise the price or get Froggy's OK first.</div>`;
   else if(t.cogs>0)msg+=`<div class="ok">Total markup <b>${t.tmu.toFixed(2)}x</b> · commission rate <b>${Math.round(t.rate*100)}%</b>${st.acct==='new'?' (new account)':''}.</div>`;
@@ -384,11 +385,12 @@ function renderTotals(){
   renderQuote(t);
 }
 function qtyLabel(r){ return r.q; }
+function codeOf(l){ const L=lookup(l.item); return L&&L.p?L.p.code:l.item; }
 function itemName(r){ const n=r.l.desc||r.l.item; return r.l.item===AMEX.code?`${n} (${money0(r.q*AMEX.face)} in cards)`:n; }
 function priceCell(r,ext){ if(r.free)return '<span class="free">FREE</span>'; return money(ext?r.ext:r.unit); }
 function quoteText(t){
   const R=REPS[st.rep]||{name:'',email:''};
-  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+r.l.item+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}`);
+  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}`);
   return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',``,...lines,``,`TOTAL: ${money(t.sell)}`,st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
 }
 function renderQuote(t){
@@ -401,7 +403,7 @@ function renderQuote(t){
     </div>
     ${st.co||st.name?`<div style="margin-top:12px"><b>Prepared for:</b> ${esc(st.co)}${st.co&&st.name?'<br>':''}${esc(st.name)}</div>`:''}
     <table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>
-    ${t.rows.map(r=>`<tr><td>${esc(qtyLabel(r))}</td><td>${esc(itemName(r))}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?`<div class="muted">${esc(r.l.item)}</div>`:''}${r.free?'<div class="muted">Included with this package</div>':''}</td><td class="r">${priceCell(r,false)}</td><td class="r">${priceCell(r,true)}</td></tr>`).join('')}
+    ${t.rows.map(r=>`<tr><td>${esc(qtyLabel(r))}</td><td>${esc(itemName(r))}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?`<div class="muted">${esc(codeOf(r.l))}</div>`:''}${r.free?'<div class="muted">Included with this package</div>':''}</td><td class="r">${priceCell(r,false)}</td><td class="r">${priceCell(r,true)}</td></tr>`).join('')}
     <tr class="grand"><td colspan="2">${t.pkg?'PACKAGE TOTAL':'TOTAL'}</td><td class="r" colspan="2">${money(t.sell)}</td></tr></table>
     ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
     <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="muted">${esc(R.email)}</div>`:''}<div class="muted">Diamond Blade Warehouse</div></div>`;
@@ -440,14 +442,27 @@ function initSelector(){
   if(!SEL){ $('s-res').innerHTML='<div class="hint">Blade Selector data not loaded. Use Item # / search.</div>'; return; }
   $('s-saw').innerHTML='<option value="">Any saw</option>'+SEL.saws.map(([k,n,s])=>`<option value="${k}">${esc(n)}${s?' ('+esc(s)+')':''}</option>`).join('');
   $('s-mat').innerHTML='<option value="">Any material</option>'+SEL.materials.map(([k,n])=>`<option value="${k}">${esc(n)}</option>`).join('');
-  selSizes(); renderSel();
+  initChain(); selSizes(); renderSel();
 }
 function selFams(){ const saw=$('s-saw').value, mat=$('s-mat').value;
   return SEL.families.filter(f=>(!saw||f.s.includes(saw))&&(!mat||(f.m[mat]||0)>0)); }
 function selSizes(){ const keep=$('s-size').value; const sizes=[...new Set(selFams().flatMap(f=>f.v.map(v=>v[2])))].filter(Boolean).sort((a,b)=>a-b);
   $('s-size').innerHTML='<option value="">Any size</option>'+sizes.map(s=>`<option value="${s}"${String(s)===keep?' selected':''}>${s}"</option>`).join(''); }
 function stars(n){ const f=Math.round(n||0); return '★'.repeat(f)+'☆'.repeat(Math.max(0,5-f)); }
+function chainKind(v){ const d=(v.code+' '+v.desc).toUpperCase(); return /POWERHEAD|ROCK BOSS W\/|PACKAGE/.test(d)?'Saw (powerhead)':/SPROCK/.test(d)?'Sprocket':/\bBAR\b/.test(d)?'Bar':'Chain'; }
+function initChain(){ const F=PL.chainFits||{}; const saws=Object.keys(F).sort((a,b)=>(/gas/.test(b)-/gas/.test(a))||a.localeCompare(b));
+  $('s-chainsaw').innerHTML='<option value="">Pick the saw they run</option>'+['gas','hydraulic'].map(g=>{ const xs=saws.filter(x=>g==='gas'?/\(gas\)/.test(x):!/\(gas\)/.test(x)); return xs.length?`<optgroup label="${g==='gas'?'Gas chain saws':'Hydraulic chain saws'}">${xs.map(x=>`<option>${esc(x)}</option>`).join('')}</optgroup>`:''; }).join(''); }
+function renderChain(){ const saw=$('s-chainsaw').value; const F=PL.chainFits||{};
+  if(!saw){ $('s-res').innerHTML='<div class="hint">Pick the chain saw the customer runs. Chains, bars and sprockets that fit it show here.</div>'; return; }
+  const keys=F[saw]||[]; const order=['Chain','Bar','Sprocket','Saw (powerhead)'];
+  const groups=order.map(g=>[g,keys.filter(k=>PL.items[k]&&chainKind(PL.items[k])===g)]).filter(x=>x[1].length);
+  $('s-res').innerHTML=`<div class="hint" style="margin:6px 0">Fits the <b>${esc(saw)}</b>. Powerheads add as package equipment (FREE with the chains unless you type a $).</div>`+groups.map(([g,ks])=>`<div class="fam"><div class="fn">${g==='Saw (powerhead)'?'📦 ':''}${esc(g)}${g==='Chain'?'s':g==='Bar'?'s':g==='Sprocket'?'s':''}</div>${ks.map(k=>{ const v=PL.items[k]; const c=listCost(v,1);
+    return `<div class="vr"><div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?' <span class="chip m-mid">🔥 special</span>':''}</div><div>${money(c)}</div><button type="button" class="gold sm" data-addc="${esc(k)}" data-eq="${g==='Saw (powerhead)'?1:0}">${g==='Saw (powerhead)'?'Add to deal':'Add'}</button></div>`; }).join('')}</div>`).join('');
+}
 function renderSel(){
+  const chain=$('s-saw').value==='chain'&&PL.chainFits&&Object.keys(PL.chainFits).length;
+  document.querySelectorAll('.s-blade').forEach(e=>e.hidden=!!chain); document.querySelectorAll('.s-chain').forEach(e=>e.hidden=!chain);
+  if(chain){ renderChain(); return; }
   if(!SEL)return; const mat=$('s-mat').value, size=+$('s-size').value||0;
   const tierRank={supreme:0,pro:1,premium:2,standard:3,economy:4,'':5};
   let fams=selFams().map(f=>({f,vars:f.v.filter(v=>!size||v[2]===size)})).filter(x=>x.vars.length);
@@ -494,7 +509,8 @@ $('add').addEventListener('click',()=>{st.lines.push(newLine());save();renderLin
 $('br-tab').addEventListener('change',renderBrowse); $('br-q').addEventListener('input',renderBrowse);
 $('br-res').addEventListener('click',e=>{ const k=e.target.dataset.addk; if(k)addLine(PLKEYS[k]||k); });
 $('s-saw').addEventListener('change',()=>{selSizes();renderSel();}); $('s-mat').addEventListener('change',()=>{selSizes();renderSel();}); $('s-size').addEventListener('change',renderSel);
-$('s-res').addEventListener('click',e=>{ const k=e.target.dataset.adds; if(k)addLine(k); });
+$('s-res').addEventListener('click',e=>{ const k=e.target.dataset.adds; if(k)addLine(k); const c=e.target.dataset.addc; if(c)addLine(PLKEYS[c]||c,1,e.target.dataset.eq==='1'?'equip':'item'); });
+$('s-chainsaw').addEventListener('change',renderChain);
 $('p-cat').addEventListener('change',pkgModels);
 $('p-add').addEventListener('click',()=>{ const k=$('p-model').value; if(!k)return; const q=Math.max(1,parseInt($('p-qty').value)||1);
   if(k===AMEX.code){ addAmex(q*AMEX.face); return; }
