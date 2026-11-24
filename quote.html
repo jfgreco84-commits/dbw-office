@@ -498,7 +498,7 @@ function specialBox(l,p){ const q=+l.qty||0, mu=+st.mu||TARGET, T=tiersOf(p), cu
     T.slice(cur+1).forEach((x,j)=>{ const k=cur+1+j; msg+=` Add <b>${x.min-q} more</b> and the customer pays <b>${money(sell[k])}</b> each.<button type="button" class="gold sm m24" data-make24="${x.min}">Make it ${x.min}</button>`; }); }
   if(pkg&&!st.optOn)msg+=`<br><span style="color:#c9b48a">Package deal: these are the regular prices. The deal sets the blade price on the quote.</span>`;
   else if(has(l.price))msg+=`<br><span style="color:#c9b48a">Your typed price ${money(parseFloat(l.price))} is what goes on the quote.</span>`;
-  return `<div class="spbox"><div class="sph">🔥 ${esc(specialName())}: ${T.length>2?'12-PACK &amp; 24-PACK':'24-PACK'} PRICE <span>(same item # · no mix &amp; match)</span></div>
+  return `<div class="spbox"><div class="sph">🔥 ${esc(specialName())}: ${T.length>2?'12-PACK &amp; 24-PACK':'24-PACK'} PRICE <span>(${PL.specialMixMatch?'mix &amp; match':'same item # · no mix &amp; match'})</span></div>${p.special.reg?`<div class="sps" style="margin:0 0 6px">Regular cost <s>${money(p.special.reg)}</s>: ${esc(String(PL.month||'this month'))}'s big-month prices below.</div>`:''}
     <table class="spt"><tr><th>Buying</th><th>Your cost</th><th>Customer pays @ ${mu.toFixed(1)}x</th></tr>
     ${T.map((x,k)=>`<tr class="${k===cur&&!st.optOn?'on':''}"><td>${x.label}</td><td>${money(x.cost)}</td><td><b>${money(sell[k])}</b> ea</td></tr>`).join('')}</table>
     <div class="sps">${msg}</div></div>`; }

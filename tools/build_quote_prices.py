@@ -11,8 +11,9 @@ Reads every tab. Rules:
   - Rounding follows the sheet: if the listed markup columns read cost x M + 0.49 the
     item is 'add49'; if they read whole dollars rounded up it is 'ceil'.
   - SPECIAL tab (this month's specials, no mix & match): columns found by their header.
-    Every month: COST (1-23) and 24PC (24+). Big months (March, May, August, October) add a
-    12PC column: COST is then 1-11, 12PC is 12-23 and 24PC is 24+.
+    Every month: COST (1-23) and 24PC (24+). Big months (March, May, August, October):
+    COST (regular), 1-11 PC, 12-23 PC and 24PC. A blank 1-11 means the regular COST;
+    a blank 12-23 means that blade has no 12-pack break (1-23 at the 1-11 price).
   - BLOWOUT tab: closeouts with quantity on hand.
   - A text-only row on an item code (e.g. "$34.00 WHEN SOLD WITH SAW DEALS") is kept as a note.
 Never reads or writes customer data.
@@ -91,6 +92,7 @@ def mode_for(cost, rest):
 def build(path):
     wb = openpyxl.load_workbook(path, data_only=True)
     items, notes, specials, blowout, fits = {}, {}, {}, {}, {}
+    special_mix = None
     list_date = None
     for ws in wb.worksheets:
         title = s(ws.title)
@@ -102,20 +104,30 @@ def build(path):
                     d = c.date().isoformat()
                     list_date = max(list_date or d, d)
         if T == 'SPECIAL':
-            col = {'cost': 2, 'c12': None, 'c24': 3}   # default layout: code, desc, COST, 24PC
+            col = {'cost': 2, 'c1': None, 'c12': None, 'c24': 3}   # default layout: code, desc, COST, 24PC
+            group = ''
             for r in rows:
                 up = [s(c).upper() for c in (r or [])]
+                mm = next((u for u in up if 'MIX' in u and 'MATCH' in u), None)
+                if mm:   # "NO MIX & MATCH" (each blade counts on its own) or "MIX & MATCH" (blades in a group count together)
+                    special_mix = not re.search(r'\bNO\b', mm)
                 if 'COST' in up:   # a header row: read where COST / 12PC / 24PC sit
                     ci = up.index('COST')
+                    group = s(r[0]) if r and s(r[0]) else group
                     col = {'cost': ci,
+                           'c1': next((i for i, u in enumerate(up) if i > ci and re.search(r'(^|\D)1\s*-\s*11(\D|$)', u)), None),
                            'c12': next((i for i, u in enumerate(up) if i > ci and re.search(r'(^|\D)12(\D|$)', u)), None),
                            'c24': next((i for i, u in enumerate(up) if i > ci and re.search(r'(^|\D)24(\D|$)', u)), col['c24'])}
                     continue
                 g = lambda i: num(r[i]) if i is not None and i < len(r) else None
                 if r and s(r[0]) and g(col['cost']) and g(col['c24']):
-                    sp = {'code': s(r[0]), 'desc': s(r[1]), 'cost': g(col['cost']), 'cost24': g(col['c24'])}
+                    reg = g(col['cost'])
+                    sp = {'code': s(r[0]), 'desc': s(r[1]), 'cost': g(col['c1']) or reg, 'cost24': g(col['c24'])}
                     if g(col['c12']):
                         sp['cost12'] = g(col['c12'])
+                    sp['group'] = group
+                    if sp['cost'] != reg:
+                        sp['reg'] = reg   # big month: the regular cost the 1-11 price came down from
                     specials[norm(s(r[0]))] = sp
             continue
         if T == 'BLOWOUT':
@@ -184,7 +196,7 @@ def build(path):
         base = items.get(k)
         items[k] = {'code': sp['code'], 'desc': (base or {}).get('desc') or sp['desc'], 'cost': sp['cost'],
                     'mode': (base or {}).get('mode', 'add49'), 'tab': (base or {}).get('tab', 'SPECIAL'),
-                    'special': {k: sp[k] for k in ('cost', 'cost12', 'cost24') if k in sp}}
+                    'special': {k: sp[k] for k in ('cost', 'cost12', 'cost24', 'reg', 'group') if k in sp}}
     for k, b in blowout.items():
         items[k] = {'code': b['code'], 'desc': b['desc'], 'cost': b['cost'], 'mode': 'add49', 'tab': 'BLOWOUT', 'blowout': b['qty']}
     for k, n in notes.items():
@@ -195,6 +207,7 @@ def build(path):
     if not month and list_date:
         month = MONTHS[int(list_date[5:7]) - 1]
     return {'name': name, 'date': list_date, 'month': month.title() if month else '',
+            'specialMixMatch': special_mix,
             'bigMonth': bool(month in BIG_MONTHS or any('cost12' in v.get('special', {}) for v in items.values())),
             'built': datetime.date.today().isoformat(), 'count': len(items), 'items': items, 'chainFits': fits}
 

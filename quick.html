@@ -416,7 +416,7 @@ function renderCalc(){ const t=calc(), m=+st.mu||TARGET, multi=t.rows.length>1;
     const tiers=el.querySelector('[data-tiers]'), ck=el.querySelector('[data-ck]'), T=lk&&tiersOf(lk.p), cur=T?tierAt(lk.p,r.q):0;
     if(ck)ck.textContent=T&&cur>0&&!r.l.costManual?'Blade cost · '+T[cur].name:'Blade cost';
     if(tiers)tiers.innerHTML=!lk?'':T
-      ?T.map((x,k)=>`<div class="tier ${k===cur?'on':k<cur?'off':''}">${x.name} (${x.label})${k===cur&&k>0?' ✓':''}<b>${money(x.cost)}</b></div>`).join('')
+      ?(lk.p.special.reg?`<div class="tier off">Regular cost<b>${money(lk.p.special.reg)}</b></div>`:'')+T.map((x,k)=>`<div class="tier ${k===cur?'on':k<cur?'off':''}">${x.name} (${x.label})${k===cur&&k>0?' ✓':''}<b>${money(x.cost)}</b></div>`).join('')
         +(cur>0?`<div class="tier down">↓ Cost dropped<b>${money(T[0].cost-T[cur].cost)}/blade</b></div>`:`<div class="tier na">At ${T[1].min} you save<b>${money(T[0].cost-T[1].cost)}/blade</b></div>`)
       :`<div class="tier on">Standard cost<b>${money(lk.p.cost)}</b></div><div class="tier na">24-pack<b style="font-size:12px">no 24-pack price</b></div>`;
     const x=pitch24(r.l,r.q,r.unit,t), n=el.querySelector('[data-nudge]');
