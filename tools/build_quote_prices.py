@@ -19,6 +19,22 @@ import json, math, re, sys, datetime
 import openpyxl
 
 MS = [3, 2.2, 2.1, 2, 1.9, 1.8, 1.7, 1.6, 1.5, 1.3]
+# Diamond chain fitment: the SAW column on the chain tabs -> the saw name reps pick.
+# Unknown SAW values pass through as written, so a new saw on next month's sheet still shows.
+SAW_NAMES = {
+    '680ES': 'ICS 613 / 680ES (gas)', '613/680': 'ICS 613 / 680ES (gas)',
+    '633/695GC': 'ICS 633 / 695GC (gas)', '695XL-F4': 'ICS 695XL Force 4 (gas)',
+    'HUSKYK970': 'Husqvarna K970 chain saw (gas)', 'GS461': 'Stihl 461 Rock Boss (gas)', 'STIHLROCKBOSS': 'Stihl 461 Rock Boss (gas)',
+    '880F4-890F4': 'ICS 880F4 / 890F4 Force 4 (hydraulic, 12 GPM)', '814PRO': 'ICS 814 Pro (hydraulic, 8 GPM)',
+    'ICS823/853': 'ICS 823 / 853 (hydraulic, 8 GPM)', 'RGCMINIC-50': 'RGC Mini C-50 (hydraulic, 8 GPM)',
+    'RGC-C150': 'RGC C150 (hydraulic, 8 GPM)', 'RGC-C120': 'RGC C120 Force 4 (hydraulic, 12 GPM)',
+    'K6500': 'Husqvarna K6500 high-cycle (hydraulic)',
+}
+
+
+def saw_name(v):
+    k = re.sub(r'\s+', '', s(v).upper()).strip('/')
+    return SAW_NAMES.get(k, s(v).strip('/ '))
 HDR_WORDS = {'COST', 'PRICE', 'DESCRIPTION', 'ITEM #', 'ITEM#', 'PART #', 'PART#', 'MODEL', 'ITEM NUMBER', 'SAWS'}
 
 
@@ -72,7 +88,7 @@ def mode_for(cost, rest):
 
 def build(path):
     wb = openpyxl.load_workbook(path, data_only=True)
-    items, notes, specials, blowout = {}, {}, {}, {}
+    items, notes, specials, blowout, fits = {}, {}, {}, {}, {}
     list_date = None
     for ws in wb.worksheets:
         title = s(ws.title)
@@ -101,6 +117,7 @@ def build(path):
                 cm = colmap(r)
                 up = [s(c).upper() for c in r]
                 cm['hp'] = up.index('HP') if 'HP' in up else None
+                cm['saw'] = (up.index('SAW') if 'SAW' in up else 2) if 'CHAIN' in T else None  # some chain headers label the saw column MSRP
                 extra = [s(c) for c in r if isinstance(c, str) and s(c) and s(c).upper() not in HDR_WORDS
                          and s(c).upper() not in ('SAW', 'BRAND', 'MSRP', 'LIST', 'APPLICATION', 'VOLT', 'AMP', 'BIT CAP', 'STAND', 'HP')]
                 if T == 'WET BLADES' and extra:
@@ -134,9 +151,13 @@ def build(path):
                     desc = section
                 key = norm(code)
                 k, n = key, 2
-                while k in items and items[k]['desc'] != desc:
+                while k in items and (items[k]['desc'] != desc or items[k]['cost'] != round(cost, 2)):
                     k, n = f'{key}#{n}', n + 1
                 items[k] = {'code': code, 'desc': desc, 'cost': round(cost, 2), 'mode': mode_for(cost, rest), 'tab': title}
+                if cm.get('saw') is not None and cm['saw'] < len(r) and s(r[cm['saw']]) and not num(r[cm['saw']]):
+                    lst = fits.setdefault(saw_name(r[cm['saw']]), [])
+                    if k not in lst:
+                        lst.append(k)
             elif code and not cost:
                 note = desc if desc else ''
                 if note and norm(code) in items:
@@ -154,7 +175,7 @@ def build(path):
         if k in items:
             items[k]['note'] = n
     return {'name': re.sub(r'\.xlsx$', '', path.split('/')[-1], flags=re.I), 'date': list_date,
-            'built': datetime.date.today().isoformat(), 'count': len(items), 'items': items}
+            'built': datetime.date.today().isoformat(), 'count': len(items), 'items': items, 'chainFits': fits}
 
 
 if __name__ == '__main__':
