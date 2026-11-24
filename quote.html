@@ -232,7 +232,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
   <div id="opt-box" hidden>
     <div id="opt-list"></div>
     <div class="row" style="margin-top:8px"><button type="button" class="gold sm" id="opt-add">+ Add option</button><button type="button" class="sm" id="opt-reset">Reset to 12 / 25 / 36 / 50</button></div>
-    <div class="hint">Every blade line is priced at each option's qty. Specials drop to 24pc cost at 24+. The saw stays FREE in every option.</div>
+    <div class="hint">Every blade line is priced at each option's qty. Specials drop to their cost breaks (12+ in big months, 24+). The saw stays FREE in every option.</div>
   </div>
 </div>
 
@@ -362,8 +362,16 @@ function variantsOf(key){ if(!key||!PL.items[key])return []; const base=norm(PL.
   return Object.keys(PL.items).filter(k=>k!==key&&norm(PL.items[k].code)===base); }
 function variantLabel(k){ const v=PL.items[k]; const saws=Object.entries(PL.chainFits||{}).filter(([,ks])=>ks.includes(k)).map(([n])=>n.replace(/ \(.*\)$/,''));
   return saws.length?saws.join(' / '):((v.desc.match(/\(([^)]+)\)$/)||[])[1]||v.tab); }
-// November special: 24PC cost at 24+ of the SAME item (no mix & match)
-function listCost(p,qty){ if(!p)return null; if(p.special)return (+qty||0)>=24?p.special.cost24:p.special.cost; return p.cost; }
+// This month's special: cost breaks on the SAME item (no mix & match). Every month: 1-23 and 24PC (24+).
+// Big months (March, May, August, October): 1-11, 12PC (12-23) and 24PC (24+) when the sheet has a 12PC column.
+function tiersOf(p){ const s=p&&p.special; if(!s)return null; return s.cost12!=null?[{min:1,cost:s.cost,label:'1 to 11'},{min:12,cost:s.cost12,label:'12-pack (12 to 23)'},{min:24,cost:s.cost24,label:'24-pack (24+)'}]
+  :[{min:1,cost:s.cost,label:'1 to 23'},{min:24,cost:s.cost24,label:'24-pack (24+)'}]; }
+function tierAt(p,qty){ const T=tiersOf(p); let i=0; T.forEach((x,j)=>{ if((+qty||0)>=x.min)i=j; }); return i; }
+function listCost(p,qty){ if(!p)return null; if(p.special)return tiersOf(p)[tierAt(p,qty)].cost; return p.cost; }
+const specialName=()=>{ const m=String(PL.month||'').toUpperCase(); return (m?m+' ':'')+'SPECIAL'; };
+// What the customer pays at the next cost breaks above qty q (for the pitch on the quote)
+function nextTiers(p,q,unit,price){ const T=tiersOf(p); if(!T)return null; const cur=tierAt(p,q);
+  return {cur:T[cur],top:cur===T.length-1,next:T.slice(cur+1).map(x=>({min:x.min,price:price(x.cost),label:x.label})).filter(x=>x.price<unit).map(x=>Object.assign(x,{save:unit-x.price,more:x.min-q}))}; }
 function sheetPrice(cost,mu,mode){ return mode==='ceil'?Math.ceil(cost*mu-1e-9):Math.round((cost*mu+ADDON)*100+1e-6)/100; }  // half-up, float-safe
 function brandOf(code,desc){ const s=(code+' '+desc).toUpperCase(); const b=BRANDS.find(([,re])=>re.test(code.toUpperCase())||re.test(s)); return b?b[0]:'Other'; }
 function buildCatalog(po){
@@ -480,20 +488,19 @@ function infoFor(l){
   if((l.item||l.desc)&&!L&&!(parseFloat(l.cost)>0)&&!has(l.price))bits.push('<b style="color:#e05555">⚠️ Not on the price list: type the cost (or a price).</b>');
   return (bits.length?bits.join(' · '):(l.item?'Not on the price list: type the cost':'Type an item # or a few words (e.g. A14TREX or "dragon")'))+(p&&p.special?specialBox(l,p):'');
 }
-// This month's special: one clear box with the 1-23 price vs the 24-pack price (24+ of the SAME item), cost and what the customer pays
-function specialBox(l,p){ const q=+l.qty||0, hit=q>=24, mu=+st.mu||TARGET, sp=p.special;
-  const s1=sheetPrice(sp.cost,mu,p.mode), s24=sheetPrice(sp.cost24,mu,p.mode), save=Math.max(0,s1-s24);
+// This month's special: one clear box with every cost break (1-23 / 24+, or 1-11 / 12-23 / 24+ in big months), cost and what the customer pays
+function specialBox(l,p){ const q=+l.qty||0, mu=+st.mu||TARGET, T=tiersOf(p), cur=tierAt(p,q), top=cur===T.length-1;
+  const sell=T.map(x=>sheetPrice(x.cost,mu,p.mode)), save=Math.max(0,sell[0]-sell[cur]);
   const pkg=st.lines.some(x=>x.kind==='equip'&&(x.item||x.desc)&&(+x.qty||0)>0);
   let msg;
-  if(st.optOn)msg=`Options: any option at <b>24 or more</b> gets the 24-pack price automatically.`;
-  else if(hit)msg=`<span class="go">✅ 24-pack price is ON</span> (qty ${q}). Customer saves <b>${money(save)}</b> each vs buying under 24.`;
-  else msg=`Qty <b>${q}</b>. Add <b>${24-q} more</b> of this same blade and the customer pays <b>${money(s24)}</b> each, saving <b>${money(save*24)}</b> on 24.<button type="button" class="gold sm m24" data-make24="1">Make it 24</button>`;
+  if(st.optOn)msg=`Options: each option gets the cost break for its qty automatically${T.length>2?' (12+ and 24+)':' (24+)'}.`;
+  else { msg=cur>0?`<span class="go">✅ ${T[cur].label} price is ON</span> (qty ${q}). Customer saves <b>${money(save)}</b> each vs buying 1.`:`Qty <b>${q}</b>.`;
+    T.slice(cur+1).forEach((x,j)=>{ const k=cur+1+j; msg+=` Add <b>${x.min-q} more</b> and the customer pays <b>${money(sell[k])}</b> each.<button type="button" class="gold sm m24" data-make24="${x.min}">Make it ${x.min}</button>`; }); }
   if(pkg&&!st.optOn)msg+=`<br><span style="color:#c9b48a">Package deal: these are the regular prices. The deal sets the blade price on the quote.</span>`;
   else if(has(l.price))msg+=`<br><span style="color:#c9b48a">Your typed price ${money(parseFloat(l.price))} is what goes on the quote.</span>`;
-  return `<div class="spbox"><div class="sph">🔥 NOVEMBER SPECIAL: 24-PACK PRICE <span>(24+ of this same item # · no mix &amp; match)</span></div>
+  return `<div class="spbox"><div class="sph">🔥 ${esc(specialName())}: ${T.length>2?'12-PACK &amp; 24-PACK':'24-PACK'} PRICE <span>(same item # · no mix &amp; match)</span></div>
     <table class="spt"><tr><th>Buying</th><th>Your cost</th><th>Customer pays @ ${mu.toFixed(1)}x</th></tr>
-    <tr class="${hit||st.optOn?'':'on'}"><td>1 to 23</td><td>${money(sp.cost)}</td><td><b>${money(s1)}</b> ea</td></tr>
-    <tr class="${hit&&!st.optOn?'on':''}"><td>24-pack (24+)</td><td>${money(sp.cost24)}</td><td><b>${money(s24)}</b> ea</td></tr></table>
+    ${T.map((x,k)=>`<tr class="${k===cur&&!st.optOn?'on':''}"><td>${x.label}</td><td>${money(x.cost)}</td><td><b>${money(sell[k])}</b> ea</td></tr>`).join('')}</table>
     <div class="sps">${msg}</div></div>`; }
 function lineHTML(l,i,R){
   const r=R.get(l)||{unit:0}; const eq=l.kind==='equip';
@@ -626,13 +633,13 @@ function zipFill(){ const z=(st.shZip||'').slice(0,5); if(!TAX||!/^\d{5}$/.test(
   st.shMke=r[1]==='WI'&&r[0].toUpperCase()==='MILWAUKEE'&&['Milwaukee','Washington','Waukesha'].includes(r[2]);
   $('sh-city').value=st.shCity; $('sh-state').value=st.shState; $('sh-county').value=st.shCounty; $('sh-mke').checked=st.shMke; }
 function optTotals(o){ const t=calc(o); const tax=r2((t.sell+(st.txFr?t.fr:0))*t.txRate); return Object.assign(t,{tax,grand:r2(t.sell+t.fr+tax)}); }
-// Customer-facing 24-pack pitch for this month's special (regular quotes only; a package deal or a hand-typed price sets its own price)
+// Customer-facing pitch for this month's special cost breaks (regular quotes only; a package deal or a hand-typed price sets its own price)
 function pitch24(r,t){ const l=r.l; if(!l||l.kind==='equip'||t.pkg||st.optOn||has(l.price)||l.costManual)return null; const L=lookup(l.item), p=L&&L.p; if(!p||!p.special)return null;
-  const q=+r.q||0; if(q>=24)return {on:true};
-  const p24=sheetPrice(p.special.cost24,+st.mu||TARGET,p.mode); if(!(r.unit>p24))return null;
-  return {on:false,p24,save:r.unit-p24,more:24-q}; }
-function pitchHTML(r,t){ const x=pitch24(r,t); if(!x)return ''; return x.on?'<div class="pitch on">🔥 24-pack special price applied</div>'
-  :`<div class="pitch">🔥 <b>Buy 24, pay ${money(x.p24)} each</b> (save ${money(x.save)} each). Add ${x.more} more of this blade.</div>`; }
+  return nextTiers(p,+r.q||0,r.unit,c=>sheetPrice(c,+st.mu||TARGET,p.mode)); }
+function pitchHTML(r,t){ const x=pitch24(r,t); if(!x)return '';
+  return (x.cur.min>1?`<div class="pitch on">🔥 ${x.cur.label.replace(/ \(.*\)/,'')} special price applied</div>`:'')
+    +x.next.map(n=>`<div class="pitch">🔥 <b>Buy ${n.min}, pay ${money(n.price)} each</b> (save ${money(n.save)} each). Add ${n.more} more of this blade.</div>`).join(''); }
+const pitchText=x=>!x?'':(x.cur.min>1?` (${x.cur.label.replace(/ \(.*\)/,'')} special price)`:'')+x.next.map(n=>`\n   SPECIAL: buy ${n.min}, pay ${money(n.price)} each (save ${money(n.save)} each)`).join('');
 function quoteText(t){
   const R=REPS[st.rep]||{name:'',email:''};
   if(st.optOn&&st.opts.length){
@@ -640,7 +647,7 @@ function quoteText(t){
     const body=st.opts.flatMap((o,i)=>{ const x=optTotals(o); return ['',`OPTION ${LET[i]}: ${o.q} each`,...x.rows.map(r=>`  ${r.q} x ${itemName(r)}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}`),`  Subtotal ${money(x.sell)} | Freight: ${frLabel(x)} | ${txName()}: ${txLabel(x)} | TOTAL ${money(x.grand)}`]; });
     return [...head,...body,'',st.notes||'','',R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
   }
-  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (regular '+money(r.reg)+' each)':''}${(x=>!x?'':x.on?' (24-pack special price)':`\n   SPECIAL: buy 24, pay ${money(x.p24)} each (save ${money(x.save)} each)`)(pitch24(r,t))}`);
+  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (regular '+money(r.reg)+' each)':''}${pitchText(pitch24(r,t))}`);
   return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',shipTo().length?`Ship to: ${shipTo().join(', ')}`:'',``,...lines,``,`Subtotal: ${money(t.sell)}`,`Freight / shipping: ${frLabel(t)}`,`${txName()}: ${txLabel(t)}`,`TOTAL: ${money(t.grand)}${(st.frMode==='tbd'||taxPending())?' plus '+[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join(' and ')+' as noted':''}`,t.eqSave>0?`You save ${money(t.eqSave)} on the equipment`:'',st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
 }
 function renderQuote(t){
@@ -714,7 +721,7 @@ function renderBrowse(){
   if(!tab&&!q){ $('br-res').innerHTML='<div class="hint">Pick a tab or type a few words.</div>'; return; }
   const words=q.split(/\s+/).filter(Boolean);
   const hits=Object.entries(PL.items).filter(([k,v])=>(!tab||v.tab===tab)&&words.every(w=>(v.code+' '+v.desc).toUpperCase().includes(w))).slice(0,80);
-  $('br-res').innerHTML=hits.length?hits.map(([k,v])=>`<div class="vr">${picHTML(k,'sm')||'<span></span>'}<div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?` <span class="chip m-mid">🔥 24-pack cost ${money(v.special.cost24)}</span>`:''}${v.blowout?` <span class="chip m-lo">💥 ${v.blowout} left</span>`:''}<div class="c">${esc(v.tab)}</div></div><div>${money(v.cost)}</div><button type="button" class="gold sm" data-addk="${esc(k)}">Add</button></div>`).join(''):'<div class="hint">No match.</div>';
+  $('br-res').innerHTML=hits.length?hits.map(([k,v])=>`<div class="vr">${picHTML(k,'sm')||'<span></span>'}<div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?` <span class="chip m-mid">🔥 ${v.special.cost12!=null?'12+ '+money(v.special.cost12)+' · ':''}24+ ${money(v.special.cost24)}</span>`:''}${v.blowout?` <span class="chip m-lo">💥 ${v.blowout} left</span>`:''}<div class="c">${esc(v.tab)}</div></div><div>${money(v.cost)}</div><button type="button" class="gold sm" data-addk="${esc(k)}">Add</button></div>`).join(''):'<div class="hint">No match.</div>';
 }
 
 // ── Blade Selector (saw -> material -> size, best fit first) ──
@@ -737,7 +744,7 @@ function renderChain(){ const saw=$('s-chainsaw').value; const F=PL.chainFits||{
   const keys=F[saw]||[]; const order=['Chain','Bar','Sprocket','Saw (powerhead)'];
   const groups=order.map(g=>[g,keys.filter(k=>PL.items[k]&&chainKind(PL.items[k])===g)]).filter(x=>x[1].length);
   $('s-res').innerHTML=`<div class="hint" style="margin:6px 0">Fits the <b>${esc(saw)}</b>. Powerheads add as package equipment (FREE with the chains unless you type a $).</div>`+groups.map(([g,ks])=>`<div class="fam"><div class="fn">${g==='Saw (powerhead)'?'📦 ':''}${esc(g)}${g==='Chain'?'s':g==='Bar'?'s':g==='Sprocket'?'s':''}</div>${ks.map(k=>{ const v=PL.items[k]; const c=listCost(v,1);
-    return `<div class="vr">${picHTML(k,'sm')||'<span></span>'}<div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?` <span class="chip m-mid">🔥 24-pack cost ${money(v.special.cost24)}</span>`:''}</div><div>${money(c)}</div><button type="button" class="gold sm" data-addc="${esc(k)}" data-eq="${g==='Saw (powerhead)'?1:0}">${g==='Saw (powerhead)'?'Add to deal':'Add'}</button></div>`; }).join('')}</div>`).join('');
+    return `<div class="vr">${picHTML(k,'sm')||'<span></span>'}<div><b>${esc(v.code)}</b> ${esc(v.desc)}${v.special?` <span class="chip m-mid">🔥 ${v.special.cost12!=null?'12+ '+money(v.special.cost12)+' · ':''}24+ ${money(v.special.cost24)}</span>`:''}</div><div>${money(c)}</div><button type="button" class="gold sm" data-addc="${esc(k)}" data-eq="${g==='Saw (powerhead)'?1:0}">${g==='Saw (powerhead)'?'Add to deal':'Add'}</button></div>`; }).join('')}</div>`).join('');
 }
 function renderSel(){
   const chain=$('s-saw').value==='chain'&&PL.chainFits&&Object.keys(PL.chainFits).length;
@@ -750,7 +757,7 @@ function renderSel(){
   if(!$('s-saw').value&&!mat&&!size){ $('s-res').innerHTML='<div class="hint">Pick a saw or a material to start.</div>'; return; }
   $('s-res').innerHTML=fams.length?fams.slice(0,40).map(({f,vars})=>`<div class="fam"><div class="famh">${f.i?`<img class="pic lg" src="quote-img/${esc(f.i)}" alt="${esc(f.n)}" loading="lazy" data-zoom="${esc(f.n)}">`:''}<div><div class="fn">${esc(f.n)} ${f.t?`<span class="chip ${f.t==='supreme'||f.t==='pro'?'m-hi':'m-mid'}" style="font-size:10px">${esc(f.t.toUpperCase())}</span>`:''} ${mat?`<span class="stars" title="fit for this material">${stars(f.m[mat])}</span>`:''}</div>${f.h?`<div class="hint">${esc(f.h)}</div>`:''}</div></div>
     ${vars.slice(0,12).map(v=>{ const L=lookup(v[0]); const p=L&&L.p; const c=p?listCost(p,1):(L&&L.h?L.h.cost:null);
-      return `<div class="vr"><span></span><div><b>${esc(p?p.code:v[0])}</b> ${esc(v[1])}${p&&p.special?` <span class="chip m-mid">🔥 24-pack cost ${money(p.special.cost24)}</span>`:''}${p&&p.blowout?' <span class="chip m-lo">💥</span>':''}</div><div>${c?money(c):'<span class="c">cost?</span>'}</div><button type="button" class="gold sm" data-adds="${esc(v[0])}">Add</button></div>`; }).join('')}</div>`).join(''):'<div class="hint">Nothing fits that combo. Try another size or "Any".</div>';
+      return `<div class="vr"><span></span><div><b>${esc(p?p.code:v[0])}</b> ${esc(v[1])}${p&&p.special?` <span class="chip m-mid">🔥 ${p.special.cost12!=null?'12+ '+money(p.special.cost12)+' · ':''}24+ ${money(p.special.cost24)}</span>`:''}${p&&p.blowout?' <span class="chip m-lo">💥</span>':''}</div><div>${c?money(c):'<span class="c">cost?</span>'}</div><button type="button" class="gold sm" data-adds="${esc(v[0])}">Add</button></div>`; }).join('')}</div>`).join(''):'<div class="hint">Nothing fits that combo. Try another size or "Any".</div>';
 }
 
 // ── Package Deal: equipment by category, then make and model ──
@@ -846,7 +853,7 @@ $('lines').addEventListener('change',e=>{ if(e.target.dataset.f!=='item')return;
 $('lines').addEventListener('click',e=>{ const row=e.target.closest('.line'); if(!row)return; const i=+row.dataset.i, l=st.lines[i];
   if(e.target.dataset.var){ l.item=PLKEYS[e.target.dataset.var]||e.target.dataset.var; l.costManual=false; applyItem(i,false); return; }
   if(e.target.dataset.clrprice){ l.price=''; save(); renderLines(); renderTotals(); return; }
-  if(e.target.dataset.make24){ l.qty='24'; if(!l.costManual){ const Lk=lookup(l.item); if(Lk&&Lk.p)l.cost=(+listCost(Lk.p,24)).toFixed(2); } save(); renderLines(); renderTotals(); toast('Qty 24: 24-pack price on'); return; }
+  if(e.target.dataset.make24){ const n=+e.target.dataset.make24>1?+e.target.dataset.make24:24; l.qty=String(n); if(!l.costManual){ const Lk=lookup(l.item); if(Lk&&Lk.p)l.cost=(+listCost(Lk.p,n)).toFixed(2); } save(); renderLines(); renderTotals(); toast('Qty '+n+': '+n+'-pack price on'); return; }
   const d=e.target.dataset.del; if(d==null)return; st.lines.splice(+d,1); save(); renderLines(); renderTotals(); });
 // ── Live suggestions under the item box: item # first (exact, starts with, contains), then words in the description ──
 function suggest(q){ q=(q||'').trim().toUpperCase(); if(!q)return {hits:[],total:0}; const qn=norm(q), words=q.split(/\s+/).filter(Boolean);
@@ -862,7 +869,7 @@ function hideSug(inp){ const b=inp&&sugBox(inp); if(b){ b.hidden=true; b.innerHT
 function showSug(inp,i){ const b=sugBox(inp); if(!b)return; const l=st.lines[i], {hits,total}=suggest(inp.value);
   if(!hits.length||(hits.length===1&&hits[0].n===norm(inp.value)&&hits[0].key===l.item&&l.cost)){ hideSug(inp); return; }
   const mu=+st.mu||TARGET;
-  b.innerHTML=hits.map((e,j)=>{ const c=e.p?listCost(e.p,l.qty):(e.h&&e.h.cost); const pr=c>0?(l.kind==='equip'?money(c)+' cost':money(sheetPrice(+(e.p&&e.p.special?e.p.special.cost:c),mu,e.p&&e.p.mode))+' ea'+(e.p&&e.p.special?`<br><span style="font-size:11px;color:#f5a623">24-pack ${money(sheetPrice(e.p.special.cost24,mu,e.p.mode))} ea</span>`:'')):'';
+  b.innerHTML=hits.map((e,j)=>{ const c=e.p?listCost(e.p,l.qty):(e.h&&e.h.cost); const pr=c>0?(l.kind==='equip'?money(c)+' cost':money(sheetPrice(+(e.p&&e.p.special?e.p.special.cost:c),mu,e.p&&e.p.mode))+' ea'+(e.p&&e.p.special?`<br><span style="font-size:11px;color:#f5a623">${e.p.special.cost12!=null?'12+ '+money(sheetPrice(e.p.special.cost12,mu,e.p.mode))+' · ':''}24+ ${money(sheetPrice(e.p.special.cost24,mu,e.p.mode))} ea</span>`:'')):'';
       return `<div class="s" data-sug="${esc(e.key)}" role="option">${picHTML(e.key,'sg',false)}<b>${esc(e.p?e.p.code:e.key)}${e.p&&e.p.special?' 🔥':''}${e.p&&e.p.blowout?' 💥':''}</b><span class="pr">${pr}</span><span class="d">${esc(e.p?e.p.desc:'ShipSheet history only')}</span></div>`; }).join('')
     +(total>hits.length?`<div class="more">${total-hits.length} more: keep typing to narrow it down</div>`:'');
   b.hidden=false; b.dataset.i=i;

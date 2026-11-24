@@ -10,7 +10,9 @@ Reads every tab. Rules:
     section title (used in descriptions where the row has no description of its own).
   - Rounding follows the sheet: if the listed markup columns read cost x M + 0.49 the
     item is 'add49'; if they read whole dollars rounded up it is 'ceil'.
-  - SPECIAL tab (this month's specials): COST and 24PC cost, no mix & match.
+  - SPECIAL tab (this month's specials, no mix & match): columns found by their header.
+    Every month: COST (1-23) and 24PC (24+). Big months (March, May, August, October) add a
+    12PC column: COST is then 1-11, 12PC is 12-23 and 24PC is 24+.
   - BLOWOUT tab: closeouts with quantity on hand.
   - A text-only row on an item code (e.g. "$34.00 WHEN SOLD WITH SAW DEALS") is kept as a note.
 Never reads or writes customer data.
@@ -35,6 +37,8 @@ SAW_NAMES = {
 def saw_name(v):
     k = re.sub(r'\s+', '', s(v).upper()).strip('/')
     return SAW_NAMES.get(k, s(v).strip('/ '))
+MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
+BIG_MONTHS = {'MARCH', 'MAY', 'AUGUST', 'OCTOBER'}   # quote-heavy months: the special adds a 12PC price break
 HDR_WORDS = {'COST', 'PRICE', 'DESCRIPTION', 'ITEM #', 'ITEM#', 'PART #', 'PART#', 'MODEL', 'ITEM NUMBER', 'SAWS'}
 
 
@@ -98,9 +102,21 @@ def build(path):
                     d = c.date().isoformat()
                     list_date = max(list_date or d, d)
         if T == 'SPECIAL':
+            col = {'cost': 2, 'c12': None, 'c24': 3}   # default layout: code, desc, COST, 24PC
             for r in rows:
-                if r and s(r[0]) and num(r[2] if len(r) > 2 else None) and num(r[3] if len(r) > 3 else None):
-                    specials[norm(s(r[0]))] = {'code': s(r[0]), 'desc': s(r[1]), 'cost': num(r[2]), 'cost24': num(r[3])}
+                up = [s(c).upper() for c in (r or [])]
+                if 'COST' in up:   # a header row: read where COST / 12PC / 24PC sit
+                    ci = up.index('COST')
+                    col = {'cost': ci,
+                           'c12': next((i for i, u in enumerate(up) if i > ci and re.search(r'(^|\D)12(\D|$)', u)), None),
+                           'c24': next((i for i, u in enumerate(up) if i > ci and re.search(r'(^|\D)24(\D|$)', u)), col['c24'])}
+                    continue
+                g = lambda i: num(r[i]) if i is not None and i < len(r) else None
+                if r and s(r[0]) and g(col['cost']) and g(col['c24']):
+                    sp = {'code': s(r[0]), 'desc': s(r[1]), 'cost': g(col['cost']), 'cost24': g(col['c24'])}
+                    if g(col['c12']):
+                        sp['cost12'] = g(col['c12'])
+                    specials[norm(s(r[0]))] = sp
             continue
         if T == 'BLOWOUT':
             for r in rows:
@@ -168,13 +184,18 @@ def build(path):
         base = items.get(k)
         items[k] = {'code': sp['code'], 'desc': (base or {}).get('desc') or sp['desc'], 'cost': sp['cost'],
                     'mode': (base or {}).get('mode', 'add49'), 'tab': (base or {}).get('tab', 'SPECIAL'),
-                    'special': {'cost': sp['cost'], 'cost24': sp['cost24']}}
+                    'special': {k: sp[k] for k in ('cost', 'cost12', 'cost24') if k in sp}}
     for k, b in blowout.items():
         items[k] = {'code': b['code'], 'desc': b['desc'], 'cost': b['cost'], 'mode': 'add49', 'tab': 'BLOWOUT', 'blowout': b['qty']}
     for k, n in notes.items():
         if k in items:
             items[k]['note'] = n
-    return {'name': re.sub(r'\.xlsx$', '', path.split('/')[-1], flags=re.I), 'date': list_date,
+    name = re.sub(r'\.xlsx$', '', path.split('/')[-1], flags=re.I)
+    month = next((m for m in MONTHS if m in name.upper()), None)
+    if not month and list_date:
+        month = MONTHS[int(list_date[5:7]) - 1]
+    return {'name': name, 'date': list_date, 'month': month.title() if month else '',
+            'bigMonth': bool(month in BIG_MONTHS or any('cost12' in v.get('special', {}) for v in items.values())),
             'built': datetime.date.today().isoformat(), 'count': len(items), 'items': items, 'chainFits': fits}
 
 
@@ -185,4 +206,6 @@ if __name__ == '__main__':
         json.dump(out, f, separators=(',', ':'), sort_keys=True)
     sp = sum(1 for v in out['items'].values() if 'special' in v)
     bo = sum(1 for v in out['items'].values() if 'blowout' in v)
-    print(f"{dst}: {out['count']} items ({sp} specials, {bo} blowout), list date {out['date']}")
+    s12 = sum(1 for v in out['items'].values() if 'cost12' in v.get('special', {}))
+    print(f"{dst}: {out['count']} items ({sp} specials, {s12} with a 12PC price, {bo} blowout), "
+          f"{out['month']} list{' (big month)' if out['bigMonth'] else ''}, list date {out['date']}")
