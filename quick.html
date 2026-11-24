@@ -333,7 +333,15 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 const newLine=o=>Object.assign({kind:'item',item:'',desc:'',qty:1,cost:'',price:'',costManual:false},o||{});
 function blank(){ return {rep:'',acct:'reorder',date:today(),co:'',name:'',num:'',mu:TARGET,notes:'',tab:'item',lines:[],optOn:false,opts:[{q:12,m:2.2},{q:25,m:2.1},{q:36,m:2.0},{q:50,m:1.9}],frMode:'tbd',frAmt:'',txMode:'auto',shStreet:'',shCity:'',shState:'',shZip:'',shCounty:'',shMke:false,txRate:'',txFr:false,qSaw:false,qMulti:false,parked:[]}; }
 function load(){ try{ const s=JSON.parse(localStorage.getItem(SKEY)); if(s&&Array.isArray(s.lines))return Object.assign(blank(),s); }catch(e){} return blank(); }
-function save(){ try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
+function save(){ syncSpecials(); try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
+// Big months are MIX & MATCH (Froggy, Nov 24 2026): every special in the same group (Group A 4"-10", Group B 12"-20")
+// counts together toward the 12 and 24 breaks. Other months: each blade counts on its own.
+const mixOn=()=>!!PL.specialMixMatch;
+function groupOf(p){ return p&&p.special?(p.special.group||''):null; }
+function poolQty(l){ const L=lookup(l.item), p=L&&L.p; if(!p||!p.special||!mixOn())return +l.qty||0; const g=groupOf(p);
+  return st.lines.filter(x=>x.kind!=='equip'&&(+x.qty||0)>0).reduce((t,x)=>{ const Lx=lookup(x.item); return t+(Lx&&Lx.p&&groupOf(Lx.p)===g?(+x.qty||0):0); },0); }
+function syncSpecials(){ st.lines.forEach(x=>{ if(x.kind==='equip'||x.costManual)return; const L=lookup(x.item); if(L&&L.p&&L.p.special)x.cost=(+listCost(L.p,poolQty(x))).toFixed(2); }); }
+const groupShort=p=>{ const m=/\(([^)]*)\)/.exec(groupOf(p)||''); return m?m[1].replace(/\s+/g,''):'same-group'; };
 let st=load();
 // the earlier Quick Quote kept freebies separately: they are promo equipment lines now
 if(Array.isArray(st.freebies)&&st.freebies.length){ st.freebies.forEach(f=>st.lines.push(newLine({kind:'equip',desc:f.n,cost:(+f.c).toFixed(2),qty:String(f.q||1),costManual:true,promo:true}))); st.qSaw=true; }
@@ -363,8 +371,8 @@ function calc(mu){ mu=mu||(+st.mu||TARGET);
 const optOnly=()=>st.optOn;
 // The next cost breaks above this qty: what the customer would pay per blade there
 function pitch24(l,q,unit,t){ if(t.pkg||has(l.price)||l.costManual)return null; const L=lookup(l.item); if(!L||!L.p.special)return null;
-  const T=tiersOf(L.p), cur=tierAt(L.p,q);
-  return {cur:T[cur],next:T.slice(cur+1).map(x=>({min:x.min,name:x.name,price:up2(x.cost*t.factor)})).filter(x=>x.price<unit).map(x=>Object.assign(x,{save:unit-x.price,more:x.min-q}))}; }
+  const pq=poolQty(l), T=tiersOf(L.p), cur=tierAt(L.p,pq);
+  return {cur:T[cur],pool:pq,grp:mixOn()?groupShort(L.p):'',next:T.slice(cur+1).map(x=>({min:x.min,name:x.name,price:up2(x.cost*t.factor)})).filter(x=>x.price<unit).map(x=>Object.assign(x,{save:unit-x.price,more:x.min-pq}))}; }
 function shortName(l){ const P=picFor(l.item), L=lookup(l.item); const size=(String(l.desc).match(/^\s*(\d+(?:\.\d+)?)\s*"/)||[])[1];
   return P?(size?size+'" ':'')+P[1]:L?L.p.code:(l.desc||'Blade'); }
 
@@ -408,19 +416,21 @@ function renderCalc(){ const t=calc(), m=+st.mu||TARGET, multi=t.rows.length>1;
     +(t.underCost?`<div class="warn red">⚠️ The $ typed on the saw is more than this deal can carry: the blades would sell under cost. Lower what the customer pays for the saw, or add blades.</div>`:'')
     +(st.qSaw&&!t.eqRows.length&&t.qty?`<div class="warn">🪚 Saw deal is on: pick the saw in the Saw deal box below.</div>`:'');
   t.rows.forEach(r=>{ const i=st.lines.indexOf(r.l), el=$('lines').querySelector(`.ln[data-i="${i}"]`); if(!el)return;
+    const cb=el.querySelector('[data-cost]'); if(cb&&document.activeElement!==cb&&cb.value!==String(r.l.cost))cb.value=r.l.cost;
     const pb=el.querySelector('[data-pb]'); pb.innerHTML=`<div class="k">Per blade</div><b>${r.unit>0?money(r.unit):'type cost'}</b>`; pb.classList.toggle('bad',!(r.unit>0));
     el.querySelector('[data-tot]').innerHTML=r.unit>0?`${r.q} × ${money(r.unit)} = <b>${money(r.ext)}</b>`:'';
     const lk=lookup(r.l.item), sheet=lk?listCost(lk.p,r.q):null, sx=el.querySelector('[data-sx]');
     if(sx)sx.innerHTML=lk&&r.l.costManual&&Math.abs(r.c-sheet)>0.004?`<button type="button" data-sheet="${i}">↺ sheet cost ${money(sheet)}</button>`:'';
     // Standard cost vs the cost breaks (12-pack in big months, 24-pack), so the rep sees the cost drop
-    const tiers=el.querySelector('[data-tiers]'), ck=el.querySelector('[data-ck]'), T=lk&&tiersOf(lk.p), cur=T?tierAt(lk.p,r.q):0;
+    const tiers=el.querySelector('[data-tiers]'), ck=el.querySelector('[data-ck]'), T=lk&&tiersOf(lk.p), pq=T?poolQty(r.l):0, cur=T?tierAt(lk.p,pq):0;
     if(ck)ck.textContent=T&&cur>0&&!r.l.costManual?'Blade cost · '+T[cur].name:'Blade cost';
     if(tiers)tiers.innerHTML=!lk?'':T
       ?(lk.p.special.reg?`<div class="tier off">Regular cost<b>${money(lk.p.special.reg)}</b></div>`:'')+T.map((x,k)=>`<div class="tier ${k===cur?'on':k<cur?'off':''}">${x.name} (${x.label})${k===cur&&k>0?' ✓':''}<b>${money(x.cost)}</b></div>`).join('')
         +(cur>0?`<div class="tier down">↓ Cost dropped<b>${money(T[0].cost-T[cur].cost)}/blade</b></div>`:`<div class="tier na">At ${T[1].min} you save<b>${money(T[0].cost-T[1].cost)}/blade</b></div>`)
+        +(mixOn()?`<div class="tier na">Mix &amp; match: ${esc(groupShort(lk.p))} specials on the quote<b>${pq}</b></div>`:'')
       :`<div class="tier on">Standard cost<b>${money(lk.p.cost)}</b></div><div class="tier na">24-pack<b style="font-size:12px">no 24-pack price</b></div>`;
     const x=pitch24(r.l,r.q,r.unit,t), n=el.querySelector('[data-nudge]');
-    n.innerHTML=!x?'':x.next.map(m=>`<button type="button" class="nudge" data-make24="${i}" data-to="${m.min}">🔥 Make it <b>${m.min}</b>: <b>${money(m.price)}</b> per blade (saves ${money(m.save)} ea). Tap to set qty ${m.min}.</button>`).join(''); });
+    n.innerHTML=!x?'':x.next.map(m=>`<button type="button" class="nudge" data-make24="${i}" data-to="${m.min}" data-pool="${x.pool}">🔥 Make it <b>${m.min}</b>: <b>${money(m.price)}</b> per blade (saves ${money(m.save)} ea). Tap to set qty ${m.min}.</button>`).join(''); });
   blades().filter(l=>!(+l.qty>0)).forEach(l=>{ const el=$('lines').querySelector(`.ln[data-i="${st.lines.indexOf(l)}"]`); if(el){ el.querySelector('[data-pb]').innerHTML='<div class="k">Per blade</div><b>qty 0</b>'; el.querySelector('[data-tot]').textContent='Not on the quote'; el.querySelector('[data-nudge]').innerHTML=''; } });
   t.eqRows.forEach(r=>{ const i=st.lines.indexOf(r.l), el=$('eqs').querySelector(`.eq[data-i="${i}"]`); if(!el)return;
     el.querySelector('[data-reg]').innerHTML=r.reg>0?`Regular <s>${money(r.reg)}</s> · customer ${r.free?'gets it <b>FREE</b>':'pays <b>'+money(r.unit)+'</b>'}${r.reg>r.unit?' · saves <b>'+money((r.reg-r.unit)*r.q)+'</b>':''}`:`Costs you ${money(r.c*r.q)} · customer gets it <b>FREE</b>`;
@@ -453,7 +463,7 @@ $('lines').addEventListener('click',e=>{ const t=e.target.closest('button'); if(
   if(d.inc!=null){ setQty(+d.inc,(+st.lines[+d.inc].qty||0)+1); renderLines(); }
   else if(d.dec!=null){ const l=st.lines[+d.dec]; if((+l.qty||0)>1){ setQty(+d.dec,(+l.qty||0)-1); renderLines(); } else if(confirm('Remove this blade from the quote?')){ st.lines.splice(+d.dec,1); save(); renderLines(); } }
   else if(d.del!=null){ st.lines.splice(+d.del,1); save(); renderLines(); }
-  else if(d.make24!=null){ const n=+d.to||24; setQty(+d.make24,n); renderLines(); toast('Qty '+n+': '+n+'-pack cost on'); }
+  else if(d.make24!=null){ const tgt=+d.to||24, l=st.lines[+d.make24], n=mixOn()?(+l.qty||0)+Math.max(0,tgt-(+d.pool||0)):tgt; setQty(+d.make24,n); renderLines(); toast(mixOn()?`Qty ${n}: ${tgt}-pack cost on for the group`:`Qty ${n}: ${n}-pack cost on`); }
   else if(d.sheet!=null){ const l=st.lines[+d.sheet], L=lookup(l.item); l.costManual=false; l.cost=(+listCost(L.p,l.qty)).toFixed(2); save(); renderLines(); } });
 // One blade: a new pick swaps the blade (keeps the qty). Multiple blades: it's added.
 function placeBlade(nl){ if(!st.qMulti){ const old=blades()[0]; if(old){ nl.qty=old.qty; st.lines[st.lines.indexOf(old)]=nl; return; } }
@@ -564,7 +574,7 @@ function renderQuote(){ const t=calc(), R=REPS[st.rep]||{name:'Diamond Blade War
   $('quote').innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px"><div><h2>DIAMOND BLADE WAREHOUSE</h2><div class="m">${t.pkg?'Package Deal':'Quote'}</div></div><div style="text-align:right"><b>Date:</b> ${esc(st.date)}${st.num?`<div><b>Customer #:</b> ${esc(st.num)}</div>`:''}</div></div>
     ${st.co||st.name?`<div style="margin-top:12px"><b>Prepared for:</b><br>${esc(st.co)}${st.co&&st.name?'<br>':''}${esc(st.name)}</div>`:''}
     <table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>
-    ${t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit,t); return `<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}${r.l.item?`<div class="m">${esc(codeOf(r.l))}</div>`:''}${!x?'':(x.cur.min>1?`<div class="pitch on">🔥 ${x.cur.name} special price applied</div>`:'')+x.next.map(m=>`<div class="pitch">🔥 <b>Buy ${m.min}, pay ${money(m.price)} each</b> (save ${money(m.save)} each). Add ${m.more} more of this blade.</div>`).join('')}</td><td class="r">${money(r.unit)}</td><td class="r">${money(r.ext)}</td></tr>`; }).join('')}
+    ${t.rows.map(r=>{ const x=pitch24(r.l,r.q,r.unit,t); return `<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}${r.l.item?`<div class="m">${esc(codeOf(r.l))}</div>`:''}${!x?'':(x.cur.min>1?`<div class="pitch on">🔥 ${x.cur.name} special price applied</div>`:'')+x.next.map(m=>`<div class="pitch">🔥 <b>Buy ${m.min}, pay ${money(m.price)} each</b> (save ${money(m.save)} each). Add ${m.more} more ${x.grp?esc(x.grp)+' special blades (mix &amp; match)':'of this blade'}.</div>`).join('')}</td><td class="r">${money(r.unit)}</td><td class="r">${money(r.ext)}</td></tr>`; }).join('')}
     ${t.eqRows.map(r=>`<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}${r.l.item&&!r.l.promo&&norm(r.l.item)!==AMEX.code?`<div class="m">${esc(codeOf(r.l))}</div>`:''}${r.free?'<div class="m">Included with this package</div>':''}</td><td class="r">${r.reg>r.unit?`<s>${money(r.reg)}</s>`:''}${r.free?'<span class="free">FREE</span>':money(r.unit)}</td><td class="r">${r.reg>r.unit?`<s>${money(r.reg*r.q)}</s>`:''}${r.free?'<span class="free">FREE</span>':money(r.ext)}</td></tr>`).join('')}
     <tr class="grand"><td colspan="2">TOTAL</td><td class="r" colspan="2">${money(t.deal)}</td></tr>
     ${t.eqSave>0?`<tr class="save"><td colspan="2">You save on the equipment</td><td class="r" colspan="2">${money(t.eqSave)}</td></tr>`:''}
