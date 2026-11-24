@@ -66,6 +66,16 @@ button.sm{padding:7px 11px;font-size:13px}
 .lgrid{display:grid;grid-template-columns:2fr 3fr 70px 110px 110px 36px;gap:8px;align-items:end}
 @media(max-width:760px){.lgrid{grid-template-columns:1fr 1fr}.lgrid .desc{grid-column:span 2}}
 .hint{font-size:11px;color:#6b7585;margin-top:4px}
+.iw{position:relative}
+.sug{position:absolute;left:0;top:100%;z-index:40;margin-top:4px;width:100%;background:#1b2130;border:2px solid #f5a623;border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.6);overflow:hidden}
+.sug[hidden]{display:none!important}
+.sug .s{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 12px;border-top:1px solid #2a3040;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sug .s:first-child{border-top:none}
+.sug .s.on,.sug .s:hover{background:#2a3350}
+.sug .s b{color:#fff;font-size:15px;letter-spacing:.3px}
+.sug .s .d{grid-column:1 / -1;font-size:12px;color:#a9b3c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sug .s .pr{font-weight:900;color:#4caf7d;font-size:14px}
+.sug .more{padding:7px 12px;font-size:11px;color:#8892a4;background:#151b28}
 .hint b{color:#c8d0de}
 .chip{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:800}
 .m-hi{background:#1a3a1a;color:#4caf7d}.m-mid{background:#3a2a10;color:#f5a623}.m-lo{background:#3a1a1a;color:#e05555}.m-eq{background:#22331a;color:#9fe07a}
@@ -302,7 +312,7 @@ const up2=n=>Math.ceil(n*100-1e-6)/100;   // round UP to the cent so a package n
 const norm=c=>String(c||'').toUpperCase().replace(/[\s\/]/g,'');
 
 // ── Catalog: price list wins; ShipSheet history (rep.html) adds sold counts and covers the rest ──
-let CAT={}, PL={items:{}}, PLKEYS={}, SEL=null;
+let CAT={}, PL={items:{}}, PLKEYS={}, SEL=null, SUGIDX=[];
 function lookup(code){ if(!code)return null; if(norm(code)===AMEX.code)return {p:{code:AMEX.code,desc:AMEX.desc,cost:AMEX.cost,tab:'GIFT CARDS',mode:'cent'},h:null,key:AMEX.code};
   const k=PL.items[code]?code:norm(code); let p=PL.items[k]||null; if(!p&&PL.items[k+'20'])p=PL.items[k+'20'];
   let viaSize=null;
@@ -362,6 +372,8 @@ async function loadCatalog(){
   Object.entries(PL.items).sort((a,b)=>a[1].code.localeCompare(b[1].code)).forEach(([k,v])=>{ used.add(k); opts.push(`<option value="${esc(PLKEYS[k])}" label="${esc((v.special?'🔥 ':'')+(v.blowout?'💥 ':'')+v.desc)}">`); });
   Object.entries(CAT).sort((a,b)=>b[1].n-a[1].n).forEach(([k,v])=>{ if(!used.has(k))opts.push(`<option value="${esc(v.code)}" label="ShipSheet history only">`); });
   $('items').innerHTML=opts.join('');
+  SUGIDX=[]; Object.entries(PL.items).forEach(([k,v])=>SUGIDX.push({key:PLKEYS[k],k,p:v,n:norm(v.code),hay:(v.code+' '+v.desc).toUpperCase()}));
+  Object.entries(CAT).forEach(([k,v])=>{ const L=lookup(v.code); if(!used.has(k)&&!(L&&L.p))SUGIDX.push({key:v.code,k,p:null,n:norm(v.code),hay:(v.code+' ShipSheet history').toUpperCase(),h:v}); });
   $('cat-status').textContent=msg.join(' · ');
   st.lines.forEach(l=>{ if(l.item&&!l.costManual){ const L=lookup(l.item); const c=L&&(L.p?listCost(L.p,l.qty):L.h&&L.h.cost); if(c)l.cost=(+c).toFixed(2); } });
   initBrowse(); initSelector(); initPackage(); render();
@@ -436,7 +448,7 @@ function lineHTML(l,i,R){
   const ph=eq?'FREE':(st.optOn?'by option':(r.unit?'auto '+r.unit.toFixed(2):'auto'));
   return `<div class="line${eq?' eq':''}${lineBad(l)?' bad':''}" data-i="${i}">
   <div class="lgrid">
-    <div><label>${eq?'Equipment #':'Item # or words'}</label><input list="items" data-f="item" enterkeyhint="done" placeholder="${eq?'':'A14TREX, dragon…'}" value="${esc(l.item)}" autocapitalize="characters" autocomplete="off"></div>
+    <div class="iw"><label>${eq?'Equipment #':'Item # or words'}</label><input data-f="item" enterkeyhint="done" placeholder="${eq?'':'A14TREX, dragon…'}" value="${esc(l.item)}" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" role="combobox" aria-autocomplete="list"><div class="sug" hidden></div></div>
     <div class="desc"><label>Description on quote</label><input data-f="desc" value="${esc(l.desc)}" placeholder="e.g. 14&quot; Asphalt Blade"></div>
     <div><label>Qty${st.optOn&&!eq?' (set by options)':''}</label><input data-f="qty" type="number" min="0" step="1" inputmode="numeric" value="${esc(l.qty)}"${st.optOn&&!eq?' disabled':''}></div>
     <div><label>Cost each</label><input data-f="cost" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(l.cost)}"></div>
@@ -749,8 +761,8 @@ $('lines').addEventListener('input',e=>{
     // picked from the suggestion list (no keystroke): resolve now and jump to Qty. While typing: wait for Done / tap out.
     const picked=!e.inputType||e.inputType==='insertReplacementText';
     if(picked&&isOption(e.target.value)){ applyItem(i,true); return; }
-    const hn=e.target.closest('.line').querySelector('.hint'); if(hn)hn.textContent=l.item?'Finish the item # and tap Done (or pick from the list).':'Type an item # or a few words (e.g. A14TREX or "dragon")';
-    return; }
+    const hn=e.target.closest('.line').querySelector('.hint'); if(hn)hn.textContent=l.item?'Tap a match below, or finish the item # and tap Done.':'Type an item # or a few words (e.g. A14TREX or "dragon")';
+    showSug(e.target,i); return; }
   let v=e.target.value;
   if(f==='qty'&&v!==''){ const n=Math.max(0,Math.floor(+v||0)); if(String(n)!==v){ v=String(n); e.target.value=v; } }
   if((f==='cost'||f==='price')&&v!==''&&(+v<0||isNaN(+v))){ v=''; e.target.value=''; }
@@ -776,6 +788,38 @@ $('lines').addEventListener('click',e=>{ const row=e.target.closest('.line'); if
   if(e.target.dataset.var){ l.item=PLKEYS[e.target.dataset.var]||e.target.dataset.var; l.costManual=false; applyItem(i,false); return; }
   if(e.target.dataset.clrprice){ l.price=''; save(); renderLines(); renderTotals(); return; }
   const d=e.target.dataset.del; if(d==null)return; st.lines.splice(+d,1); save(); renderLines(); renderTotals(); });
+// ── Live suggestions under the item box: item # first (exact, starts with, contains), then words in the description ──
+function suggest(q){ q=(q||'').trim().toUpperCase(); if(!q)return {hits:[],total:0}; const qn=norm(q), words=q.split(/\s+/).filter(Boolean);
+  const out=[]; for(const e of SUGIDX){ let sc=-1;
+    if(qn&&e.n===qn)sc=0; else if(qn&&e.n.startsWith(qn))sc=1; else if(qn.length>=2&&e.n.includes(qn))sc=2; else if(words.every(w=>e.hay.includes(w)))sc=3;
+    if(sc>=0)out.push([sc+(e.p?0:0.5),e]); }
+  out.sort((a,b)=>a[0]-b[0]||a[1].n.length-b[1].n.length||a[1].n.localeCompare(b[1].n));
+  return {hits:out.slice(0,8).map(x=>x[1]),total:out.length}; }
+function sugBox(inp){ return inp.parentElement.querySelector('.sug'); }
+function hideSug(inp){ const b=inp&&sugBox(inp); if(b){ b.hidden=true; b.innerHTML=''; } }
+function showSug(inp,i){ const b=sugBox(inp); if(!b)return; const l=st.lines[i], {hits,total}=suggest(inp.value);
+  if(!hits.length||(hits.length===1&&hits[0].n===norm(inp.value)&&hits[0].key===l.item&&l.cost)){ hideSug(inp); return; }
+  const mu=+st.mu||TARGET;
+  b.innerHTML=hits.map((e,j)=>{ const c=e.p?listCost(e.p,l.qty):(e.h&&e.h.cost); const pr=c>0?(l.kind==='equip'?money(c)+' cost':money(sheetPrice(+c,mu,e.p&&e.p.mode))+' ea'):'';
+      return `<div class="s" data-sug="${esc(e.key)}" role="option"><b>${esc(e.p?e.p.code:e.key)}${e.p&&e.p.special?' 🔥':''}${e.p&&e.p.blowout?' 💥':''}</b><span class="pr">${pr}</span><span class="d">${esc(e.p?e.p.desc:'ShipSheet history only')}</span></div>`; }).join('')
+    +(total>hits.length?`<div class="more">${total-hits.length} more: keep typing to narrow it down</div>`:'');
+  b.hidden=false; b.dataset.i=i;
+  const ir=inp.getBoundingClientRect(); b.style.width=Math.max(ir.width,Math.min(460,document.documentElement.clientWidth-ir.left-14))+'px';
+  // phone: make sure the list isn't hidden behind the keyboard
+  requestAnimationFrame(()=>{ const vh=(window.visualViewport&&visualViewport.height)||innerHeight, r=b.getBoundingClientRect();
+    if(r.bottom>vh-8){ const top=inp.getBoundingClientRect().top; window.scrollBy({top:Math.min(r.bottom-vh+16,top-70),behavior:'auto'}); } }); }
+function pickSug(inp,i,key){ const l=st.lines[i]; if(!l)return; hideSug(inp); inp.value=key; l.item=key.toUpperCase(); l.costManual=false; l.descManual=false; save(); applyItem(i,true); }
+$('lines').addEventListener('mousedown',e=>{ if(e.target.closest('.sug'))e.preventDefault(); });   // keep the keyboard up and the field focused
+$('lines').addEventListener('click',e=>{ const s=e.target.closest('[data-sug]'); if(!s)return; e.stopPropagation();
+  const inp=s.closest('.iw').querySelector('[data-f=item]'); pickSug(inp,+s.closest('.line').dataset.i,s.dataset.sug); },true);
+$('lines').addEventListener('keydown',e=>{ if(e.target.dataset.f!=='item')return; const b=sugBox(e.target); const open=b&&!b.hidden; const rows=open?[...b.querySelectorAll('.s')]:[]; let at=rows.findIndex(r=>r.classList.contains('on'));
+  if(open&&(e.key==='ArrowDown'||e.key==='ArrowUp')){ e.preventDefault(); at=e.key==='ArrowDown'?Math.min(rows.length-1,at+1):Math.max(0,at-1); rows.forEach((r,j)=>r.classList.toggle('on',j===at)); return; }
+  if(e.key==='Escape'){ hideSug(e.target); return; }
+  if(e.key==='Enter'){ e.preventDefault(); const i=+e.target.closest('.line').dataset.i;
+    const pick=at>=0?rows[at]:(rows[0]&&norm(rows[0].dataset.sug)===norm(e.target.value)?rows[0]:null);
+    if(pick)pickSug(e.target,i,pick.dataset.sug); else { hideSug(e.target); e.target.blur(); } } });
+$('lines').addEventListener('focusout',e=>{ if(e.target.dataset.f==='item'){ const inp=e.target; setTimeout(()=>{ if(document.activeElement!==inp)hideSug(inp); },120); } });
+$('lines').addEventListener('focusin',e=>{ if(e.target.dataset.f==='item'&&e.target.value.trim()&&!st.lines[+e.target.closest('.line').dataset.i].cost)showSug(e.target,+e.target.closest('.line').dataset.i); });
 function isOption(v){ return !!document.querySelector(`#items option[value="${CSS.escape(v)}"]`); }
 // Update one line in place (no re-render), so a tap or click that follows isn't swallowed by a redraw.
 function patchLine(i){ const el=$('lines').querySelector(`.line[data-i="${i}"]`), l=st.lines[i]; if(!el||!l)return false;
