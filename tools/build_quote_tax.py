@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Build quote-tax.json (the quote tool's tax finder data).
 
-    python3 tools/build_quote_tax.py pcs-taxrates.html US.txt
+    python3 tools/build_quote_tax.py pcs-taxrates.html US.txt [TAXRATES_ZIP5_XX*.csv ...]
 
 pcs-taxrates.html : the Wisconsin DOR "Tax Rates" page
                     https://www.revenue.wi.gov/Pages/FAQS/pcs-taxrates.aspx (its Sales Tax Rate Chart)
 US.txt            : GeoNames US postal codes (CC BY 4.0, https://www.geonames.org), tab separated:
                     country, zip, city, state name, state code, county, ...
+
+TAXRATES_ZIP5_*.csv (optional, any number): Avalara's free monthly ZIP rate tables, one per state,
+                    columns State, ZipCode, TaxRegionName, EstimatedCombinedRate, ... (rates as decimals).
+                    Used for every state except Wisconsin, which always comes from the DOR chart.
 
 Output: state rate, every Wisconsin county's county tax rate (0 where none), the City of
 Milwaukee tax, the DOR guidance date, and ZIP -> [city, state, county] for every US ZIP.
@@ -15,7 +19,8 @@ silently ship wrong rates.
 """
 import html, json, re, sys
 
-src_html, src_zip = sys.argv[1], sys.argv[2]
+import csv, os
+src_html, src_zip, src_avalara = sys.argv[1], sys.argv[2], sys.argv[3:]
 raw = open(src_html, encoding='utf-8', errors='ignore').read()
 t = re.sub(r'<(script|style)[^>]*>.*?</\1>', '', raw, flags=re.S)
 t = re.sub(r'<(br|/p|/li|/tr|/h\d|/td)[^>]*>', '\n', t)
@@ -62,9 +67,23 @@ out = {
     'zipSource': 'GeoNames postal codes, CC BY 4.0 (geonames.org)',
     'wi': {'state': state, 'counties': counties, 'milwaukeeCity': city[0], 'milwaukeeCitySince': city[1]},
     'zips': zips,
+    'zipRates': {}, 'zipRatesFrom': [],
+    # States DBW is registered to collect in. None = not known yet: out-of-state tax shows "if applicable".
+    'collectStates': None,
 }
+for path in src_avalara:
+    n0 = len(out['zipRates'])
+    with open(path, newline='', encoding='utf-8-sig') as fh:
+        for row in csv.DictReader(fh):
+            st, z, r = (row.get('State') or '').strip().upper(), (row.get('ZipCode') or '').strip().zfill(5), row.get('EstimatedCombinedRate')
+            if st and st != 'WI' and re.fullmatch(r'\d{5}', z) and r not in (None, ''):
+                out['zipRates'][z] = round(float(r) * 100, 4)
+    if len(out['zipRates']) == n0:
+        sys.exit(f'{path}: no rates read. Is this an Avalara TAXRATES_ZIP5 file?')
+    out['zipRatesFrom'].append(os.path.basename(path))
 with open('quote-tax.json', 'w') as fh:
     json.dump(out, fh, separators=(',', ':'), sort_keys=True)
 none = [k for k, v in counties.items() if not v['rate']]
 print(f"quote-tax.json: WI {state}% state, 72 counties (no county tax: {', '.join(none)}), "
-      f"Milwaukee County {counties['Milwaukee']['rate']}%, City of Milwaukee {city[0]}%, {len(zips)} US ZIPs, as of {out['asOf']}")
+      f"Milwaukee County {counties['Milwaukee']['rate']}%, City of Milwaukee {city[0]}%, {len(zips)} US ZIPs, as of {out['asOf']}; "
+      f"{len(out['zipRates'])} out-of-state ZIP rates from {len(out['zipRatesFrom'])} Avalara file(s)")

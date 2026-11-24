@@ -428,7 +428,12 @@ const RESORT=['STURGEON BAY','MINOCQUA','EPHRAIM','SISTER BAY','RHINELANDER','ST
 function autoTax(){
   const stt=(st.shState||'').toUpperCase();
   if(!stt||!/^\d{5}/.test(st.shZip||'')&&!st.shCounty)return {rate:null,why:'Enter the ship-to ZIP'};
-  if(stt!=='WI')return {rate:null,why:'Out of state ('+stt+'): tax added at invoice',oos:true};
+  if(stt!=='WI'){
+    if(TAX&&Array.isArray(TAX.collectStates)&&!TAX.collectStates.includes(stt))return {rate:null,oos:true,none:true,why:`DBW does not collect ${stt} sales tax: the buyer owes use tax`};
+    const zr=TAX&&TAX.zipRates?TAX.zipRates[(st.shZip||'').slice(0,5)]:null;
+    const ifa=!(TAX&&Array.isArray(TAX.collectStates));
+    if(zr!=null)return {rate:zr,oos:true,ifa,why:`${stt} ZIP ${st.shZip.slice(0,5)}: est. ${pct(zr)} combined (Avalara ZIP table)${ifa?', shown if applicable':''}`};
+    return {rate:null,oos:true,ifa,why:`Out of state (${stt}): no ZIP rate loaded yet. Shows "if applicable, added at invoice". You can type a rate.`}; }
   if(!TAX)return {rate:null,why:'Loading Wisconsin tax rates…'};
   const W=TAX.wi, c=W.counties[st.shCounty];
   if(!c)return {rate:null,why:'Pick the Wisconsin county'};
@@ -441,11 +446,13 @@ function txLabel(t){ const AT=autoTax();
   if(st.txMode==='exempt')return 'Exempt';
   if(st.txMode==='rate'&&has(st.txRate))return money(t.tax);
   if(st.txMode==='auto'&&AT.rate!=null)return money(t.tax);
-  if(st.txMode==='auto'&&AT.oos)return 'Added at invoice';
+  if(st.txMode==='auto'&&AT.none)return 'Not collected (buyer owes use tax)';
+  if(st.txMode==='auto'&&AT.oos)return 'If applicable, added at invoice';
   return 'Applicable tax added at invoice'; }
 function txName(){ const AT=autoTax(); const fr=st.txFr?', incl. freight':'';
   if(st.txMode==='rate'&&has(st.txRate))return `Sales tax (${(+st.txRate).toString()}%${fr})`;
-  if(st.txMode==='auto'&&AT.rate!=null)return `Est. sales tax (${pct(AT.rate)}${st.shCity?', '+st.shCity+', WI':''}${fr})`;
+  if(st.txMode==='auto'&&AT.rate!=null)return `Est. sales tax${AT.ifa?', if applicable':''} (${pct(AT.rate)}${st.shCity?', '+st.shCity:''}, ${(st.shState||'').toUpperCase()}${fr})`;
+  if(st.txMode==='auto'&&AT.oos&&!AT.none)return 'Sales tax (if applicable)';
   return 'Sales tax'; }
 function shipTo(){ const a=[st.shStreet,[st.shCity,[st.shState,st.shZip].filter(Boolean).join(' ')].filter(Boolean).join(', ')].filter(Boolean); return a; }
 function renderShip(){
@@ -482,7 +489,8 @@ function renderQuote(t){
     <tr><td colspan="2">Freight / shipping</td><td class="r" colspan="2" style="white-space:normal">${st.frMode==='free'?'<span class="free">FREE</span>':esc(frLabel(t))}</td></tr>
     <tr><td colspan="2">${esc(txName())}</td><td class="r" colspan="2" style="white-space:normal">${esc(txLabel(t))}</td></tr>
     <tr class="grand"><td colspan="2">TOTAL</td><td class="r" colspan="2">${money(t.grand)}</td></tr>
-    ${(st.frMode==='tbd'||(!t.tax&&st.txMode!=='exempt'))?`<tr><td colspan="4" class="muted" style="border-bottom:none">Total shown before ${[st.frMode==='tbd'?'freight':'',(!t.tax&&st.txMode!=='exempt')?'tax':''].filter(Boolean).join(' and ')}.</td></tr>`:''}
+    ${st.txMode==='auto'&&autoTax().ifa?`<tr><td colspan="4" class="muted" style="border-bottom:none">Sales tax applies only if DBW collects tax in your state. Final tax is shown on the invoice.</td></tr>`:''}
+    ${(st.frMode==='tbd'||(!t.tax&&st.txMode!=='exempt'&&!autoTax().none))?`<tr><td colspan="4" class="muted" style="border-bottom:none">Total shown before ${[st.frMode==='tbd'?'freight':'',(!t.tax&&st.txMode!=='exempt')?'tax':''].filter(Boolean).join(' and ')}.</td></tr>`:''}
     ${t.eqSave>0?`<tr class="save"><td colspan="2">You save on equipment</td><td class="r" colspan="2">${money(t.eqSave)}</td></tr>`:''}</table>
     ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
     <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="muted">${esc(R.email)}</div>`:''}<div class="muted">Diamond Blade Warehouse</div></div>`;
