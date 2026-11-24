@@ -14,7 +14,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;color:#e0e6f0;mi
 header{background:linear-gradient(135deg,#1a1f2e,#0d1520);border-bottom:2px solid #f5a623;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .logo{font-size:20px;font-weight:900;color:#f5a623;letter-spacing:2px}
 .sub{font-size:12px;color:#8892a4}
-.container{max-width:960px;margin:0 auto;padding:16px}
+.container{max-width:960px;margin:0 auto;padding:16px;overflow-x:hidden}
 .card{background:#1a1f2e;border:1px solid #2a3040;border-radius:10px;padding:14px;margin-bottom:14px}
 .title{font-size:12px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
 label{display:block;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
@@ -48,7 +48,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
 /* customer-facing quote */
 #quote{background:#fff;color:#111;border-radius:10px;padding:22px;font-size:14px}
 #quote h2{font-size:20px;letter-spacing:1px}
-#quote table{width:100%;border-collapse:collapse;margin:14px 0}
+#quote{overflow-wrap:anywhere}#quote table{width:100%;border-collapse:collapse;margin:14px 0;table-layout:fixed}#quote th:nth-child(1){width:11%}#quote th:nth-child(3){width:24%}#quote th:nth-child(4){width:29%}#quote .r{white-space:nowrap;overflow-wrap:normal}#quote th{white-space:nowrap}@media(max-width:480px){#quote{padding:14px;font-size:13px}#quote th,#quote td{padding:6px 4px}#quote th{letter-spacing:0}}
 #quote th{background:#111;color:#f5a623;text-align:left;padding:7px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px}
 #quote td{padding:7px 8px;border-bottom:1px solid #ddd}
 #quote .r{text-align:right}
@@ -93,7 +93,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
       <button type="button" data-mu="2.2">2.2</button>
     </div>
   </div>
-  <div class="hint">Price each = <b>cost x markup + $0.49</b> (Price Book formula). Target <b>2.0x</b>, minimum <b>1.7x</b>. Package deals: check <b>Included</b> on a saw or tool to give it at $0, and the blades carry the package to the markup.</div>
+  <div class="hint">Price each = <b>cost x markup + $0.49</b>, or rounded up to the whole dollar on the tabs that price that way (12"+ blades, core bits, core rigs), same as the price list. Target <b>2.0x</b>, minimum <b>1.7x</b>. Package deals: check <b>Included</b> on a saw or tool to give it at $0, and the blades carry the package to the markup.</div>
   <label class="cbx" style="margin-top:10px"><input type="checkbox" id="pkg"> Package deal: spread the whole package cost over the paid lines so the TOTAL hits the markup</label>
 </div>
 
@@ -113,7 +113,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
     <div class="box"><div class="l">Est. commission</div><div class="v" id="t-comm" style="color:#4caf7d">$0.00</div></div>
   </div>
   <div id="t-msg"></div>
-  <div class="hint">Commission estimate uses the DBW ladder on the total sale (MU = sale / cost). Year-one scale and returns or collections are not counted here. Costs are the latest from ShipSheets; if the warehouse sent a newer cost, type it in.</div>
+  <div class="hint">Commission estimate uses the DBW ladder on the total sale (MU = sale / cost). Year-one scale and returns or collections are not counted here. Costs come from this month's price list (specials switch to the 24pc cost at 24+ of the same item); items not on the list use the latest ShipSheet cost. Type over any cost to change it.</div>
 </div>
 
 <div class="card noprint">
@@ -159,8 +159,14 @@ const money=n=>'$'+(Math.round(n*100)/100).toLocaleString('en-US',{minimumFracti
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const r2=n=>Math.round(n*100)/100;
 
-// ── Catalog: latest unit cost per item from rep.html ShipSheet data ──
-let CAT={};
+// ── Catalog: monthly price list (quote-prices.json) wins; ShipSheet history (rep.html) adds sold counts ──
+let CAT={}, PL={items:{}}, PLKEYS={};
+const norm=c=>String(c||'').toUpperCase().replace(/[\s\/]/g,'');
+function lookup(code){ if(!code)return null; const k=PL.items[code]?code:norm(code); const p=PL.items[k]||null, h=CAT[k]||CAT[norm(code)]||null;
+  if(!p&&!h)return null; return {p,h,key:k}; }
+// November special: 24PC cost at 24+ of the SAME item (no mix & match)
+function listCost(p,qty){ if(!p)return null; if(p.special)return (+qty||0)>=24?p.special.cost24:p.special.cost; return p.cost; }
+function unitPrice(cost,mu,mode){ return mode==='ceil'?Math.ceil(cost*mu-1e-9):r2(cost*mu+ADDON); }
 function buildCatalog(po){
   const cat={};
   Object.values(po||{}).forEach(pps=>Object.values(pps||{}).forEach(ords=>(ords||[]).forEach(o=>{
@@ -168,7 +174,7 @@ function buildCatalog(po){
     const d=m[3]+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');
     (o.items||[]).forEach(it=>{
       const q=+it.qty||0, c=+it.cogs||0, s=+it.sell||0; if(!it.item||q<=0||c<=0)return;
-      const e=cat[it.item]||(cat[it.item]={n:0,date:'',cost:0,mus:[]});
+      const e=cat[norm(it.item)]||(cat[norm(it.item)]={code:it.item,n:0,date:'',cost:0,mus:[]});
       e.n++; if(s>0)e.mus.push(s/c);
       if(d>e.date){e.date=d;e.cost=r2(c/q);}
     });
@@ -188,14 +194,22 @@ function extractOrders(html){
   return null;
 }
 async function loadCatalog(){
-  try{
-    const res=await fetch('rep.html',{cache:'no-cache'}); const po=extractOrders(await res.text());
-    CAT=buildCatalog(po);
-    const keys=Object.keys(CAT).sort((a,b)=>CAT[b].n-CAT[a].n);
-    $('items').innerHTML=keys.map(k=>`<option value="${esc(k)}">`).join('');
-    const newest=keys.reduce((m,k)=>CAT[k].date>m?CAT[k].date:m,'');
-    $('cat-status').textContent=keys.length+' items with real costs from ShipSheets (newest '+newest+')';
-  }catch(e){ $('cat-status').textContent='Could not load item costs. Type the cost on each line.'; }
+  const msg=[];
+  try{ const r=await fetch('quote-prices.json',{cache:'no-cache'}); PL=await r.json();
+    const seen={}; Object.entries(PL.items).forEach(([k,v])=>{ seen[v.code]=(seen[v.code]||0)+1; });
+    Object.entries(PL.items).forEach(([k,v])=>{ PLKEYS[k]=seen[v.code]>1?k:v.code; });
+    const sp=Object.values(PL.items).filter(v=>v.special).length;
+    msg.push(PL.count+' items from '+(PL.name||'the price list').replace(/_/g,' ')+(PL.date?' ('+PL.date+')':'')+(sp?', '+sp+' specials':''));
+  }catch(e){ PL={items:{}}; msg.push('Price list not loaded'); }
+  try{ const res=await fetch('rep.html',{cache:'no-cache'}); CAT=buildCatalog(extractOrders(await res.text())); }catch(e){ CAT={}; }
+  const opts=[]; const used=new Set();
+  Object.entries(PL.items).sort((a,b)=>a[1].code.localeCompare(b[1].code)).forEach(([k,v])=>{ used.add(k); opts.push(`<option value="${esc(PLKEYS[k])}" label="${esc((v.special?'🔥 ':'')+(v.blowout?'💥 ':'')+v.desc)}">`); });
+  Object.entries(CAT).sort((a,b)=>b[1].n-a[1].n).forEach(([k,v])=>{ if(!used.has(k))opts.push(`<option value="${esc(v.code)}" label="ShipSheet history only">`); });
+  $('items').innerHTML=opts.join('');
+  if(Object.keys(CAT).length)msg.push('sold history on '+Object.keys(CAT).length);
+  $('cat-status').textContent=msg.join(' · ');
+  // refresh costs on saved lines that came from the list
+  st.lines.forEach(l=>{ if(l.item&&!l.costManual){ const L=lookup(l.item); const c=L&&(L.p?listCost(L.p,l.qty):L.h&&L.h.cost); if(c)l.cost=(+c).toFixed(2); } });
   render();
 }
 
@@ -206,7 +220,6 @@ function blank(){ return {rep:'',acct:'reorder',date:(d=>d.getFullYear()+'-'+Str
 function load(){ try{ const s=JSON.parse(localStorage.getItem(SKEY)); if(s&&Array.isArray(s.lines))return s; }catch(e){} return blank(); }
 function save(){ try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
 
-function linePrice(l,mu){ const c=parseFloat(l.cost)||0; return c>0?r2(c*mu+ADDON):0; }
 function calc(){
   const mu=+st.mu||TARGET; const L=st.lines.filter(l=>(l.item||l.desc)&&(+l.qty||0)>0);
   let cogs=0; L.forEach(l=>cogs+=(+l.qty||0)*(parseFloat(l.cost)||0));
@@ -217,7 +230,7 @@ function calc(){
   const rows=L.map(l=>{ const q=+l.qty||0; let unit;
     if(l.free)unit=0;
     else if(l.price!==''&&l.price!=null&&!isNaN(parseFloat(l.price)))unit=r2(parseFloat(l.price));
-    else { const c=parseFloat(l.cost)||0; unit=c>0?r2(c*factor*mu+ADDON):0; }
+    else { const c=parseFloat(l.cost)||0, L=lookup(l.item); unit=c>0?unitPrice(c*factor,mu,L&&L.p&&L.p.mode):0; }
     return {l,q,unit,ext:r2(unit*q)}; });
   const sell=rows.reduce((t,r)=>t+r.ext,0);
   const tmu=cogs>0?sell/cogs:0;
@@ -226,8 +239,15 @@ function calc(){
 }
 
 function lineHTML(l,i,units){
-  const c=CAT[l.item]; const u=units&&units.get(l);
-  const info=c?`Last cost <b>${money(c.cost)}</b> on ${c.date} · sold ${c.n}x${c.med?` · usually <b>${c.med.toFixed(2)}x</b>`:''}`:(l.item?'Not in ShipSheets yet: type the cost':'Start typing an item # (e.g. A14TREX)');
+  const L=lookup(l.item), p=L&&L.p, h=L&&L.h; const u=units&&units.get(l);
+  const bits=[];
+  if(p){ bits.push(`List cost <b>${money(p.cost)}</b> <span style="color:#6b7585">(${esc(p.tab)})</span>`);
+    if(p.special){ const hit=(+l.qty||0)>=24; bits.push(`<span class="chip m-mid">🔥 Nov special</span> ${money(p.special.cost)}, <b>${money(p.special.cost24)} at 24+</b> same item${hit?' <span class="chip m-hi">24pc cost on</span>':` (${24-(+l.qty||0)} more for 24pc)`}`); }
+    if(p.blowout)bits.push(`<span class="chip m-lo">💥 Blowout: ${p.blowout} left</span>`);
+    if(p.note)bits.push(`<b style="color:#f5a623">${esc(p.note)}</b>`); }
+  if(h)bits.push(`sold ${h.n}x${h.med?` · usually <b>${h.med.toFixed(2)}x</b>`:''}${p?'':` · last cost <b>${money(h.cost)}</b> on ${h.date}`}`);
+  if(l.costManual&&(p||h))bits.push('<span style="color:#e05555">cost typed by hand</span>');
+  const info=bits.length?bits.join(' · '):(l.item?'Not on the price list: type the cost':'Type an item # or a few words (e.g. A14TREX or "dragon")');
   return `<div class="line" data-i="${i}">
   <div class="lgrid">
     <div><label>Item #</label><input list="items" data-f="item" value="${esc(l.item)}" autocapitalize="characters" autocomplete="off"></div>
@@ -274,7 +294,7 @@ function renderQuote(t){
     ${st.co||st.name?`<div style="margin-top:12px"><b>Prepared for:</b> ${esc(st.co)}${st.co&&st.name?'<br>':''}${esc(st.name)}</div>`:''}
     <table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>
     ${t.rows.map(r=>`<tr><td>${r.q}</td><td>${esc(r.l.desc||r.l.item)}${r.l.desc&&r.l.item?`<div class="muted">${esc(r.l.item)}</div>`:''}</td><td class="r">${r.l.free?'Included':money(r.unit)}</td><td class="r">${r.l.free?'Included':money(r.ext)}</td></tr>`).join('')}
-    <tr class="grand"><td colspan="3">TOTAL</td><td class="r">${money(t.sell)}</td></tr></table>
+    <tr class="grand"><td colspan="2">TOTAL</td><td class="r" colspan="2">${money(t.sell)}</td></tr></table>
     ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
     <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="muted">${esc(R.email)}</div>`:''}<div class="muted">Diamond Blade Warehouse</div></div>`;
 }
@@ -297,9 +317,14 @@ $('add').addEventListener('click',()=>{st.lines.push({item:'',desc:'',qty:1,cost
 $('lines').addEventListener('input',e=>{
   const f=e.target.dataset.f; if(!f)return; const i=+e.target.closest('.line').dataset.i; const l=st.lines[i];
   if(f==='free'){l.free=e.target.checked;save();renderLines();renderTotals();return;}
-  if(f==='item'){ l.item=e.target.value.trim().toUpperCase(); const c=CAT[l.item];
-    if(c){ l.cost=c.cost.toFixed(2); save(); renderLines(); renderTotals(); const el=$('lines').querySelector(`.line[data-i="${i}"] [data-f=desc]`); if(el)el.focus(); return; } }
+  if(f==='item'){ l.item=e.target.value.trim().toUpperCase(); const L=lookup(l.item);
+    if(L){ l.costManual=false; const c=L.p?listCost(L.p,l.qty):L.h.cost; l.cost=(+c).toFixed(2); if(L.p&&!l.desc)l.desc=L.p.desc;
+      save(); renderLines(); renderTotals(); const el=$('lines').querySelector(`.line[data-i="${i}"] [data-f=qty]`); if(el)el.focus(); return; }
+    const hn=e.target.closest('.line').querySelector('.hint'); if(hn)hn.textContent=l.item?'Not on the price list: type the cost':'Type an item # or a few words (e.g. A14TREX or "dragon")'; }
   else l[f]=e.target.value;
+  if(f==='cost')l.costManual=true;
+  if(f==='qty'&&!l.costManual){ const L=lookup(l.item); if(L&&L.p&&L.p.special){ const before=l.cost; l.cost=(+listCost(L.p,l.qty)).toFixed(2);
+      if(before!==l.cost){ save(); const at=e.target.selectionStart; renderLines(); renderTotals(); const q=$('lines').querySelector(`.line[data-i="${i}"] [data-f=qty]`); if(q){q.focus();try{q.setSelectionRange(at,at);}catch(_){}} return; } } }
   save(); renderTotals();
   if(f==='cost'||f==='qty'){ const units=new Map(calc().rows.map(r=>[r.l,r.unit])); $('lines').querySelectorAll('.line').forEach(el=>{ const x=st.lines[+el.dataset.i], p=el.querySelector('[data-f=price]'); if(p&&!x.free){const v=units.get(x);p.placeholder=v?v.toFixed(2):'auto';} }); }
 });
