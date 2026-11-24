@@ -76,6 +76,15 @@ button.gold{background:#f5a623;color:#0f1117}
 .pb .k{color:#7fcf93;margin:0}
 .pb b{display:block;font-size:20px;color:#fff;line-height:1.1}
 .pb.bad{background:#3a1a1a;border-color:#7a3030}
+.tiers{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:12px}
+.tier{border:1px solid #3a4458;border-radius:8px;padding:5px 9px;color:#8892a4;background:#151a26;line-height:1.25}
+.tier b{display:block;font-size:15px;color:#c8d0de}
+.tier.on{border-color:#4caf7d;background:#16301f;color:#9fe0b0}
+.tier.on b{color:#fff}
+.tier.off b{text-decoration:line-through;color:#6b7585}
+.tier.na{border-style:dashed}
+.tier.down{border-color:#f5a623;color:#ffd58a;background:#221b0e}
+.tier.down b{color:#ffd58a}
 .sub{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#8892a4;margin-top:6px;flex-wrap:wrap}
 .sub b{color:#c8d0de}
 .sub button{padding:2px 8px;font-size:12px}
@@ -134,6 +143,8 @@ button.gold{background:#f5a623;color:#0f1117}
 .mx td.pbc b{color:#fff;font-size:15px}
 .mx td.pbc div{font-size:12px;color:#c8d0de;line-height:1.5}
 .mx td.pbc div em{font-style:normal;color:#8892a4}
+.mxw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:560px){.mx td{padding:8px 4px}.mx td.pbc div{line-height:1.25;margin-bottom:4px}.mx td.pbc div em{display:block;font-size:11px}}
 .mx tr{cursor:pointer}
 .mx tr.on td{background:#26304a}
 .mx tr.on td:first-child{box-shadow:inset 4px 0 0 #f5a623}
@@ -224,7 +235,7 @@ details[open] summary:before{content:'▾ '}
   <div class="card">
     <div class="order" id="order"></div>
     <div class="title">Markup matrix <span>tap a row to use it</span></div>
-    <table class="mx"><thead><tr><th>M/U</th><th id="pb-h">Per blade</th><th>Total deal</th><th id="comm-h">Commission</th></tr></thead><tbody id="mx"></tbody></table>
+    <div class="mxw"><table class="mx"><thead><tr><th>M/U</th><th id="pb-h">Per blade</th><th>Total deal</th><th id="comm-h">Commission</th></tr></thead><tbody id="mx"></tbody></table></div>
     <label class="tog"><input type="checkbox" id="newacct"> New account / 36-month update (25% at 1.7 and up)</label>
   </div>
   <div class="hint" style="text-align:center">Saved on this device only. Nothing is sent anywhere.</div>
@@ -394,8 +405,14 @@ function renderCalc(){ const t=calc(), m=+st.mu||TARGET, multi=t.rows.length>1;
     el.querySelector('[data-tot]').innerHTML=r.unit>0?`${r.q} × ${money(r.unit)} = <b>${money(r.ext)}</b>`:'';
     const lk=lookup(r.l.item), sheet=lk?listCost(lk.p,r.q):null, sx=el.querySelector('[data-sx]');
     if(sx)sx.innerHTML=lk&&r.l.costManual&&Math.abs(r.c-sheet)>0.004?`<button type="button" data-sheet="${i}">↺ sheet cost ${money(sheet)}</button>`:'';
+    // Standard cost vs 24-pack cost, so the rep sees the cost drop at 24
+    const tiers=el.querySelector('[data-tiers]'), ck=el.querySelector('[data-ck]'), sp=lk&&lk.p.special, on24=!!sp&&r.q>=24;
+    if(ck)ck.textContent=on24&&!r.l.costManual?'Blade cost · 24-pack':'Blade cost';
+    if(tiers)tiers.innerHTML=!lk?'':sp
+      ?`<div class="tier ${on24?'off':'on'}">Standard (1-23)<b>${money(sp.cost)}</b></div><div class="tier ${on24?'on':''}">24-pack (24+)${on24?' ✓':''}<b>${money(sp.cost24)}</b></div>${on24?`<div class="tier down">↓ Cost dropped<b>${money(sp.cost-sp.cost24)}/blade</b></div>`:`<div class="tier na">At 24 you save<b>${money(sp.cost-sp.cost24)}/blade</b></div>`}`
+      :`<div class="tier on">Standard cost<b>${money(lk.p.cost)}</b></div><div class="tier na">24-pack<b style="font-size:12px">no 24-pack price</b></div>`;
     const x=pitch24(r.l,r.q,r.unit,t), n=el.querySelector('[data-nudge]');
-    n.innerHTML=!x?'':x.on?'<div class="nudge on">✅ 24-pack special cost is ON</div>':`<button type="button" class="nudge" data-make24="${i}">🔥 Make it <b>24</b>: <b>${money(x.p24)}</b> per blade (saves ${money(x.save)} ea). Tap to set qty 24.</button>`; });
+    n.innerHTML=!x||x.on?'':`<button type="button" class="nudge" data-make24="${i}">🔥 Make it <b>24</b>: <b>${money(x.p24)}</b> per blade (saves ${money(x.save)} ea). Tap to set qty 24.</button>`; });
   blades().filter(l=>!(+l.qty>0)).forEach(l=>{ const el=$('lines').querySelector(`.ln[data-i="${st.lines.indexOf(l)}"]`); if(el){ el.querySelector('[data-pb]').innerHTML='<div class="k">Per blade</div><b>qty 0</b>'; el.querySelector('[data-tot]').textContent='Not on the quote'; el.querySelector('[data-nudge]').innerHTML=''; } });
   t.eqRows.forEach(r=>{ const i=st.lines.indexOf(r.l), el=$('eqs').querySelector(`.eq[data-i="${i}"]`); if(!el)return;
     el.querySelector('[data-reg]').innerHTML=r.reg>0?`Regular <s>${money(r.reg)}</s> · customer ${r.free?'gets it <b>FREE</b>':'pays <b>'+money(r.unit)+'</b>'}${r.reg>r.unit?' · saves <b>'+money((r.reg-r.unit)*r.q)+'</b>':''}`:`Costs you ${money(r.c*r.q)} · customer gets it <b>FREE</b>`;
@@ -411,8 +428,9 @@ function renderLines(){ const L=blades();
         :`<input class="nm" data-nm="${i}" value="${esc(l.desc)}" placeholder="Blade name (shows on quote)">`}</div>
       <button type="button" class="del" data-del="${i}" aria-label="Remove">✕</button></div>
       <div class="lc"><div><div class="k">Qty</div><div class="step"><button type="button" data-dec="${i}" aria-label="One less">−</button><input type="number" inputmode="numeric" min="0" step="1" value="${esc(l.qty)}" data-qty="${i}" aria-label="Quantity"><button type="button" data-inc="${i}" aria-label="One more">+</button></div></div>
-        <div><div class="k">Blade cost</div><div class="cost"><input type="number" inputmode="decimal" min="0" step="0.01" value="${esc(l.cost)}" data-cost="${i}" placeholder="0.00" aria-label="Blade cost"></div></div>
+        <div><div class="k" data-ck>Blade cost</div><div class="cost"><input type="number" inputmode="decimal" min="0" step="0.01" value="${esc(l.cost)}" data-cost="${i}" placeholder="0.00" aria-label="Blade cost"></div></div>
         <div class="pb" data-pb></div></div>
+      <div class="tiers" data-tiers></div>
       <div class="sub"><span data-tot></span><span data-sx></span>${has(l.price)?'<span>price typed in Full tool</span>':''}</div>
       <div data-nudge></div></div>`; }).join('')
     :`<div class="empty">${st.qMulti?'Add each blade the customer wants. Each one gets its own price.':'Type the blade below, or tap <b>+ Cost only</b> and type the cost like your calculator.'}</div>`;
