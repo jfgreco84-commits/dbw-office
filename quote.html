@@ -16,11 +16,19 @@
      Never stores or prints card data; it reads only item, qty, sell and cogs from rep.html. -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;color:#e0e6f0;min-height:100vh}
 header{background:linear-gradient(135deg,#1a1f2e,#0d1520);border-bottom:2px solid #f5a623;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .logo{font-size:20px;font-weight:900;color:#f5a623;letter-spacing:2px}
 .sub{font-size:12px;color:#8892a4}
-.container{max-width:960px;margin:0 auto;padding:16px;overflow-x:hidden}
+.container{max-width:960px;margin:0 auto;padding:16px 16px 96px;overflow-x:hidden}
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:50;background:#0b0e14;border-top:2px solid #f5a623;padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px}
+#bar .bt{flex:1;min-width:0}
+#bar .bt .a{font-size:20px;font-weight:900;color:#f5a623;line-height:1.1}
+#bar .bt .b{font-size:11px;color:#8892a4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bar button{padding:11px 12px}
+.norep{color:#ff9d9d!important}
+.varb{margin:4px 4px 0 0;padding:4px 8px;font-size:12px}
 .card{background:#1a1f2e;border:1px solid #2a3040;border-radius:10px;padding:14px;margin-bottom:14px}
 .title{font-size:12px;font-weight:700;color:#f5a623;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
 label{display:block;font-size:11px;color:#8892a4;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
@@ -53,6 +61,7 @@ button.sm{padding:7px 11px;font-size:13px}
 #quote .opth td{background:#f5f0e6;font-weight:900;font-size:15px;border-top:2px solid #111}
 .line{border-top:1px solid #2a3040;padding:12px 0}
 .line:first-child{border-top:none;padding-top:0}
+.line.bad{border:2px solid #e05555;border-radius:8px;padding:10px;margin:8px 0}
 .line.eq{background:#151b28;border:1px solid #3a4a2a;border-radius:8px;padding:10px;margin:8px 0}
 .lgrid{display:grid;grid-template-columns:2fr 3fr 70px 110px 110px 36px;gap:8px;align-items:end}
 @media(max-width:760px){.lgrid{grid-template-columns:1fr 1fr}.lgrid .desc{grid-column:span 2}}
@@ -88,7 +97,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
 #quote .muted{color:#666;font-size:12px}
 #quote .free{color:#1a7a3a;font-weight:800}#quote .reg{color:#999;text-decoration:line-through;font-size:12px;display:block}#quote .save td{color:#1a7a3a;font-weight:800;border-bottom:none}
 @media(max-width:480px){#quote{padding:14px;font-size:13px}#quote th,#quote td{padding:6px 4px}#quote th{letter-spacing:0}}
-@media print{header,.noprint{display:none!important}body{background:#fff}.container{padding:0}#quote{border-radius:0;padding:0}}
+@media print{header,.noprint,#bar{display:none!important}body{background:#fff}.container{padding:0}#quote{border-radius:0;padding:0}}
 </style>
 </head>
 <body>
@@ -100,7 +109,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
 <div class="container">
 
 <div class="card noprint">
-  <div class="title">Who's quoting</div>
+  <div class="title">1 · Who's quoting</div>
   <div class="g3">
     <div><label>Rep</label><select id="rep"></select></div>
     <div><label>Account type</label><select id="acct"><option value="reorder">Reorder (current / reactivation)</option><option value="new">New account (never bought or 36+ months)</option></select></div>
@@ -109,26 +118,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
 </div>
 
 <div class="card noprint">
-  <div class="title">Customer</div>
-  <div class="g3">
-    <div><label>Company</label><input id="cco" placeholder="Company name"></div>
-    <div><label>Contact</label><input id="cname" placeholder="Contact name"></div>
-    <div><label>DBW customer # (optional)</label><input id="cnum" placeholder="00-XXX0000"></div>
-  </div>
-</div>
-
-<div class="card noprint">
-  <div class="title">Markup</div>
-  <div class="row" style="gap:14px">
-    <div style="flex:1;min-width:220px"><input id="mu" type="range" min="1.3" max="3" step="0.05" value="2"></div>
-    <div><span id="mu-chip" class="chip m-hi">2.00x</span></div>
-  </div>
-  <div class="mub" id="mub"></div>
-  <div class="hint">Regular items: <b>cost x markup</b>, rounded like the price sheet (+$0.49, or whole dollar up on 12"+ blades, core bits and core rigs). Target <b>2.0x</b>, minimum <b>1.7x</b> (red = under the floor). Package deals use the package math below. Options use their own markups.</div>
-</div>
-
-<div class="card noprint">
-  <div class="title">Add to the quote</div>
+  <div class="title">2 · Add items</div>
   <div class="tabs">
     <button type="button" data-tab="item" class="on">🔎 Item # / search</button>
     <button type="button" data-tab="sel">🧭 Blade Selector</button>
@@ -136,17 +126,17 @@ input[type=range]{padding:0;accent-color:#f5a623}
   </div>
 
   <div data-panel="item">
-    <div class="hint" style="margin:0 0 8px">Know the item #? Add a line and type it (or a few words like "dragon" or "asphalt").</div>
+    <div class="hint" style="margin:0 0 8px">Type the item # (or "dragon", "asphalt") in the line below, then tap Done.</div>
     <button type="button" class="gold" id="add">+ Add item line</button>
-    <div class="info" style="margin-top:12px">
-      <label>Browse the price list</label>
+    <details class="info" style="margin-top:12px">
+      <summary style="cursor:pointer;font-weight:700;color:#c8d0de">🔍 Browse the whole price list</summary>
       <div class="g2"><select id="br-tab"><option value="">All tabs</option></select><input id="br-q" placeholder='Words or size, e.g. 14" asphalt'></div>
       <div id="br-res" class="res"></div>
-    </div>
+    </details>
   </div>
 
   <div data-panel="sel" hidden>
-    <div class="hint" style="margin:0 0 8px">Don't know the item #? Pick the saw, the material and the size. Best fit shows first (same as the Blade Finder on dbwwisco.com).</div>
+    <div class="hint" style="margin:0 0 8px">No item #? Pick saw, material, size. Best fit first.</div>
     <div class="g3">
       <div><label>Saw</label><select id="s-saw"></select></div>
       <div class="s-blade"><label>Material</label><select id="s-mat"></select></div>
@@ -157,7 +147,7 @@ input[type=range]{padding:0;accent-color:#f5a623}
   </div>
 
   <div data-panel="pkg" hidden>
-    <div class="hint" style="margin:0 0 8px">Pick the equipment, then add the blades. The blades carry the whole deal and the equipment shows <b>FREE</b>, unless you type a $ on the equipment line.</div>
+    <div class="hint" style="margin:0 0 8px">Add the saw, then the blades. Blades carry the deal; the saw shows <b>FREE</b> unless you type a $ on it.</div>
     <div class="g3">
       <div><label>Category</label><select id="p-cat"></select></div>
       <div style="grid-column:span 2"><label>Make / model</label><select id="p-model"></select></div>
@@ -175,35 +165,42 @@ input[type=range]{padding:0;accent-color:#f5a623}
 </div>
 
 <div class="card noprint">
-  <div class="title">Items on this quote</div>
+  <div class="title">3 · Items on this quote</div>
   <div id="lines"></div>
   <datalist id="items"></datalist>
 </div>
 
 <div class="card noprint">
-  <div class="title">Options (let the customer pick A, B, C…)</div>
+  <div class="title">4 · Markup</div>
+  <div class="row" style="gap:14px">
+    <div style="flex:1;min-width:220px"><input id="mu" type="range" min="1.3" max="3" step="0.05" value="2"></div>
+    <div><span id="mu-chip" class="chip m-hi">2.00x</span></div>
+  </div>
+  <div class="mub" id="mub"></div>
+  <div class="hint">Red = under the 1.7 floor. Green = good. Target <b>2.0</b>.</div>
+</div>
+
+<div class="card noprint">
+  <div class="title">5 · Options <span style="text-transform:none;letter-spacing:0;color:#8892a4;font-weight:400">(optional: pick A, B, C…)</span></div>
   <label class="cbx" style="margin-bottom:8px"><input type="checkbox" id="opt-on" style="width:auto"> <b>Quote as options</b>: same items at different quantities, each with its own markup</label>
   <div id="opt-box" hidden>
     <div id="opt-list"></div>
     <div class="row" style="margin-top:8px"><button type="button" class="gold sm" id="opt-add">+ Add option</button><button type="button" class="sm" id="opt-reset">Reset to 12 / 25 / 36 / 50</button></div>
-    <div class="hint">Each option uses every blade line on the quote at the option's quantity (each line's own qty is ignored while options are on). Specials switch to 24pc cost at 24+. Package equipment stays the same in every option.</div>
+    <div class="hint">Every blade line is priced at each option's qty. Specials drop to 24pc cost at 24+. The saw stays FREE in every option.</div>
   </div>
 </div>
 
 <div class="card noprint">
-  <div class="title">Your numbers (rep only, never on the quote)</div>
-  <div class="tot">
-    <div class="box"><div class="l">Product subtotal</div><div class="v" id="t-sell">$0.00</div></div>
-    <div class="box"><div class="l">Cost</div><div class="v" id="t-cogs" style="color:#e05555">$0.00</div></div>
-    <div class="box"><div class="l">Markup</div><div class="v" id="t-mu">0.00x</div></div>
-    <div class="box"><div class="l">Est. commission</div><div class="v" id="t-comm" style="color:#4caf7d">$0.00</div></div>
+  <div class="title">6 · Customer</div>
+  <div class="g3">
+    <div><label>Company</label><input id="cco" placeholder="Company name"></div>
+    <div><label>Contact</label><input id="cname" placeholder="Contact name"></div>
+    <div><label>DBW customer # (optional)</label><input id="cnum" placeholder="00-XXX0000"></div>
   </div>
-  <div id="t-msg"></div>
-  <div class="hint">Commission estimate uses the DBW ladder on the total sale (MU = sale / cost). Year-one scale and returns or collections are not counted. Costs come from this month's price list (specials switch to the 24pc cost at 24+ of the same item); items not on the list use the latest ShipSheet cost. Type over any cost to change it.</div>
 </div>
 
 <div class="card noprint">
-  <div class="title">Ship to, freight & tax</div>
+  <div class="title">7 · Ship to, freight & tax</div>
   <label>Ship-to address (the ZIP fills in city, state and county)</label>
   <input id="sh-street" placeholder="Street address" autocomplete="off">
   <div class="g3" style="margin-top:6px">
@@ -222,11 +219,23 @@ input[type=range]{padding:0;accent-color:#f5a623}
     <div><label>Sales tax</label><select id="tx-mode"><option value="auto">From ship-to address (auto)</option><option value="tbd">Applicable tax added at invoice</option><option value="exempt">Tax exempt (cert on file)</option><option value="rate">Tax rate %</option></select>
       <div class="row" id="tx-rate-row" style="margin-top:6px"><div style="width:110px" id="tx-rate-box"><input id="tx-rate" type="number" min="0" step="0.001" inputmode="decimal" placeholder="e.g. 5.5"></div><label class="cbx" style="margin:0"><input type="checkbox" id="tx-fr" style="width:auto"> tax the freight too</label></div></div>
   </div>
-  <div class="hint">Freight and tax show on the customer quote under the subtotal. They are not part of markup or commission.</div>
+  <div class="hint">Shows under the subtotal. Not part of markup or commission.</div>
 </div>
 
 <div class="card noprint">
-  <div class="title">Notes on the quote (optional)</div>
+  <div class="title">8 · Your numbers <span style="text-transform:none;letter-spacing:0;color:#8892a4;font-weight:400">(rep only)</span></div>
+  <div class="tot" id="t-boxes">
+    <div class="box"><div class="l">Product subtotal</div><div class="v" id="t-sell">$0.00</div></div>
+    <div class="box"><div class="l">Cost</div><div class="v" id="t-cogs" style="color:#e05555">$0.00</div></div>
+    <div class="box"><div class="l">Markup</div><div class="v" id="t-mu">0.00x</div></div>
+    <div class="box"><div class="l">Est. commission</div><div class="v" id="t-comm" style="color:#4caf7d">$0.00</div></div>
+  </div>
+  <div id="t-msg"></div>
+  <div class="hint">Commission is an estimate from the DBW ladder (year-one scale, returns and collections not counted). Costs: this month's price list, else the last ShipSheet cost.</div>
+</div>
+
+<div class="card noprint">
+  <div class="title">9 · Notes <span style="text-transform:none;letter-spacing:0;color:#8892a4;font-weight:400">(optional, shows on the quote)</span></div>
   <textarea id="qnotes" rows="2" placeholder="Anything the customer should see: lead time, how to order"></textarea>
 </div>
 
@@ -238,6 +247,8 @@ input[type=range]{padding:0;accent-color:#f5a623}
 
 <div id="quote"></div>
 <div class="hint noprint" style="margin:10px 0 30px;text-align:center">Saved on this device only. Nothing is sent anywhere.</div>
+<div id="bar" class="noprint"><div class="bt"><div class="a" id="bar-a">$0.00</div><div class="b" id="bar-b">Add an item to start</div></div>
+  <button type="button" id="bar-copy">📋 Copy</button><button type="button" class="gold" id="bar-print">🖨️ PDF</button></div>
 </div>
 
 <script>
@@ -294,10 +305,20 @@ const norm=c=>String(c||'').toUpperCase().replace(/[\s\/]/g,'');
 let CAT={}, PL={items:{}}, PLKEYS={}, SEL=null;
 function lookup(code){ if(!code)return null; if(norm(code)===AMEX.code)return {p:{code:AMEX.code,desc:AMEX.desc,cost:AMEX.cost,tab:'GIFT CARDS',mode:'cent'},h:null,key:AMEX.code};
   const k=PL.items[code]?code:norm(code); let p=PL.items[k]||null; if(!p&&PL.items[k+'20'])p=PL.items[k+'20'];
-  const h=CAT[k]||null; if(!p&&!h)return null; return {p,h,key:p?(PL.items[k]?k:k+'20'):k}; }
+  let viaSize=null;
+  if(!p){ const m=/^(3MLB|KMLB)-?(\d{2})(\d{3})$/.exec(norm(code)); if(m){ const base=`${m[2]}X.${m[3]}`;
+      const hit=Object.entries(PL.items).find(([kk,v])=>norm(v.code)===base&&v.desc.toUpperCase().includes(m[1])); if(hit){ p=hit[1]; viaSize=hit[0]; } } }
+  const h=CAT[k]||null; if(!p&&!h)return null;
+  const key=viaSize||(p?(PL.items[k]?k:k+'20'):k);
+  return {p,h,key,alias:!!(p&&!PL.items[k]&&!PL.items[code])}; }
+// other price-list entries that share this item # (e.g. GDI1464 at $396 for ICS 613/680 vs $436 for K970)
+function variantsOf(key){ if(!key||!PL.items[key])return []; const base=norm(PL.items[key].code);
+  return Object.keys(PL.items).filter(k=>k!==key&&norm(PL.items[k].code)===base); }
+function variantLabel(k){ const v=PL.items[k]; const saws=Object.entries(PL.chainFits||{}).filter(([,ks])=>ks.includes(k)).map(([n])=>n.replace(/ \(.*\)$/,''));
+  return saws.length?saws.join(' / '):((v.desc.match(/\(([^)]+)\)$/)||[])[1]||v.tab); }
 // November special: 24PC cost at 24+ of the SAME item (no mix & match)
 function listCost(p,qty){ if(!p)return null; if(p.special)return (+qty||0)>=24?p.special.cost24:p.special.cost; return p.cost; }
-function sheetPrice(cost,mu,mode){ return mode==='ceil'?Math.ceil(cost*mu-1e-9):r2(cost*mu+ADDON); }
+function sheetPrice(cost,mu,mode){ return mode==='ceil'?Math.ceil(cost*mu-1e-9):Math.round((cost*mu+ADDON)*100+1e-6)/100; }  // half-up, float-safe
 function brandOf(code,desc){ const s=(code+' '+desc).toUpperCase(); const b=BRANDS.find(([,re])=>re.test(code.toUpperCase())||re.test(s)); return b?b[0]:'Other'; }
 function buildCatalog(po){
   const cat={};
@@ -369,12 +390,12 @@ function calc(opt){
   const pkg=equip.length>0;
   const carriers=items.filter(l=>!has(l.price));
   const E=equip.reduce((t,l)=>t+cost(l),0), B=carriers.reduce((t,l)=>t+cost(l),0);
-  const eqSale=equip.reduce((t,l)=>t+(has(l.price)?r2(parseFloat(l.price))*(+l.qty||0):0),0);
+  const eqSale=equip.reduce((t,l)=>t+(has(l.price)&&parseFloat(l.price)>0?r2(parseFloat(l.price))*(+l.qty||0):0),0);
   const pkgTotal=(B+E)*mu, carry=pkgTotal-eqSale, factor=B>0?carry/B:0;
   const rows=L.map(l=>{ const q=+l.qty||0, c=parseFloat(l.cost)||0; let unit, free=false, pk=false;
-    if(l.kind==='equip'){ if(has(l.price))unit=r2(parseFloat(l.price)); else {unit=0;free=true;} }
+    if(l.kind==='equip'){ if(has(l.price)&&parseFloat(l.price)>0)unit=r2(parseFloat(l.price)); else {unit=0;free=true;} }
     else if(has(l.price))unit=r2(parseFloat(l.price));
-    else if(pkg){ unit=c>0?up2(c*factor):0; pk=true; }
+    else if(pkg){ unit=c>0?Math.max(0,up2(c*factor)):0; pk=true; }
     else { const Lk=lookup(l.item); unit=c>0?sheetPrice(c,mu,Lk&&Lk.p&&Lk.p.mode):0; }
     // regular price of package equipment = what it sells for on its own at this markup (AMEX = face value)
     let reg=0; if(l.kind==='equip'&&c>0){ const Lk=lookup(l.item); reg=l.item===AMEX.code?AMEX.face:sheetPrice(c,+st.mu||TARGET,Lk&&Lk.p&&Lk.p.mode); }  // same regular price in every option
@@ -398,17 +419,26 @@ function infoFor(l){
     if(p.blowout)bits.push(`<span class="chip m-lo">💥 Blowout: ${p.blowout} left</span>`);
     if(p.note)bits.push(`<b style="color:#f5a623">${esc(p.note)}</b>`); }
   if(h)bits.push(`sold ${h.n}x${h.med?` · usually <b>${h.med.toFixed(2)}x</b>`:''}${p?'':` · last cost <b>${money(h.cost)}</b> on ${h.date}`}`);
+  if(L&&L.alias&&p)bits.push(`<span style="color:#f5a623">Not listed as ${esc(l.item)}: priced as <b>${esc(p.code)}</b>. Confirm it's the same blade.</span>`);
+  const vars=L&&p?variantsOf(L.key):[];
+  if(vars.length)bits.push(`<span style="color:#f5a623">⚠️ This item # is on the sheet ${vars.length+1} ways. Pick the right one:</span><br>`+[L.key,...vars].map(k=>{ const v=PL.items[k]; return `<button type="button" class="varb ${k===L.key?'gold':''}" data-var="${esc(k)}">${money(v.cost)} · ${esc(variantLabel(k))}</button>`; }).join(''));
   if(l.costManual&&(p||h))bits.push('<span style="color:#e05555">cost typed by hand</span>');
+  if(has(l.price)){ const pr=parseFloat(l.price), c=parseFloat(l.cost)||0;
+    bits.push(`<span style="color:#e05555">Price typed by hand: markup buttons won't change it.</span> <button type="button" class="varb" data-clrprice="1">use auto price</button>`);
+    if(!(pr>0))bits.push('<b style="color:#e05555">⚠️ Price is $0. Fix it or tap "use auto price".</b>');
+    else if(c>0&&pr<c*FLOOR-1e-9)bits.push(`<b style="color:#e05555">⚠️ ${(pr/c).toFixed(2)}x: under the 1.7 floor.</b>`); }
+  if((l.item||l.desc)&&!(+l.qty>0)&&!st.optOn)bits.push('<b style="color:#e05555">⚠️ Qty is 0: this line is NOT on the quote.</b>');
+  if((l.item||l.desc)&&!L&&!(parseFloat(l.cost)>0)&&!has(l.price))bits.push('<b style="color:#e05555">⚠️ Not on the price list: type the cost (or a price).</b>');
   return bits.length?bits.join(' · '):(l.item?'Not on the price list: type the cost':'Type an item # or a few words (e.g. A14TREX or "dragon")');
 }
 function lineHTML(l,i,R){
   const r=R.get(l)||{unit:0}; const eq=l.kind==='equip';
-  const ph=eq?'FREE':(r.unit?r.unit.toFixed(2):'auto');
-  return `<div class="line${eq?' eq':''}" data-i="${i}">
+  const ph=eq?'FREE':(st.optOn?'by option':(r.unit?'auto '+r.unit.toFixed(2):'auto'));
+  return `<div class="line${eq?' eq':''}${lineBad(l)?' bad':''}" data-i="${i}">
   <div class="lgrid">
-    <div><label>${eq?'Equipment #':'Item #'}</label><input list="items" data-f="item" value="${esc(l.item)}" autocapitalize="characters" autocomplete="off"></div>
+    <div><label>${eq?'Equipment #':'Item # or words'}</label><input list="items" data-f="item" enterkeyhint="done" placeholder="${eq?'':'A14TREX, dragon…'}" value="${esc(l.item)}" autocapitalize="characters" autocomplete="off"></div>
     <div class="desc"><label>Description on quote</label><input data-f="desc" value="${esc(l.desc)}" placeholder="e.g. 14&quot; Asphalt Blade"></div>
-    <div><label>Qty</label><input data-f="qty" type="number" min="0" step="1" inputmode="numeric" value="${esc(l.qty)}"></div>
+    <div><label>Qty${st.optOn&&!eq?' (set by options)':''}</label><input data-f="qty" type="number" min="0" step="1" inputmode="numeric" value="${esc(l.qty)}"${st.optOn&&!eq?' disabled':''}></div>
     <div><label>Cost each</label><input data-f="cost" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(l.cost)}"></div>
     <div><label>${eq?'Customer $ each':(r.pk?'Pkg price each':'Price each')}</label><input data-f="price" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(l.price)}" placeholder="${ph}"></div>
     <div><button type="button" class="red" data-del="${i}" title="Remove" style="padding:9px 0;width:36px">✕</button></div>
@@ -416,15 +446,15 @@ function lineHTML(l,i,R){
   <div class="hint">${infoFor(l)}</div></div>`;
 }
 function rowsMap(){ return new Map(calc().rows.map(r=>[r.l,r])); }
-function renderLines(){ const R=rowsMap();
+function renderLines(){ if(!st.lines.length)st.lines.push(newLine()); const R=rowsMap();
   $('lines').innerHTML=st.lines.length?st.lines.map((l,i)=>lineHTML(l,i,R)).join(''):'<div class="hint" style="margin:0">Nothing yet. Add an item, use the Blade Selector, or start a Package Deal above.</div>'; }
 function refreshPlaceholders(){ const R=rowsMap(); $('lines').querySelectorAll('.line').forEach(el=>{ const l=st.lines[+el.dataset.i]; const p=el.querySelector('[data-f=price]'); const r=R.get(l);
-  if(p&&l.kind!=='equip')p.placeholder=r&&r.unit?r.unit.toFixed(2):'auto'; }); }
+  if(p&&l.kind!=='equip')p.placeholder=st.optOn?'by option':(r&&r.unit?'auto '+r.unit.toFixed(2):'auto'); }); }
 // Markup steps, red (under the 1.7 floor) to green
 const MUS=[[1.3,'#b3261e','#fff'],[1.5,'#d9534f','#fff'],[1.6,'#ef9a96','#3a1010'],[1.7,'#a8e0b4','#0f2a17'],[1.8,'#7fcf93','#0f2a17'],
   [1.9,'#5cbc76','#0f2a17'],[2.0,'#43a862','#fff'],[2.1,'#348f52','#fff'],[2.2,'#2a7a45','#fff'],[3.0,'#21663a','#fff']];
 const muBtn=(m,on,attr)=>{ const c=MUS.find(x=>Math.abs(x[0]-m)<1e-9); return `<button type="button" ${attr}="${m}" class="${on?'on':''}" style="background:${c[1]};color:${c[2]}">${m.toFixed(1)}</button>`; };
-function renderMuButtons(){ $('mub').innerHTML=MUS.map(([m])=>muBtn(m,Math.abs((+st.mu)-m)<1e-9,'data-mu')).join(''); }
+function renderMuButtons(){ const bs=$('mub').querySelectorAll('button'); if(bs.length===MUS.length){ bs.forEach(b=>b.classList.toggle('on',Math.abs((+st.mu)-(+b.dataset.mu))<1e-9)); return; } $('mub').innerHTML=MUS.map(([m])=>muBtn(m,Math.abs((+st.mu)-m)<1e-9,'data-mu')).join(''); }
 const LET='ABCDEFGH';
 function renderOptions(){
   $('opt-on').checked=!!st.optOn; $('opt-box').hidden=!st.optOn; if(!st.optOn)return;
@@ -436,6 +466,15 @@ function renderOptions(){
       <div><button type="button" class="red" data-odel="${i}" title="Remove" style="padding:9px 0;width:36px">✕</button></div>
       <div class="optm">${MUS.map(([m])=>muBtn(m,Math.abs((+o.m)-m)<1e-9,'data-om')).join('')}</div>
       <div class="optsum">${per} · total <b>${money(t.sell)}</b> · markup <span class="chip ${muClass(t.tmu)}">${t.tmu.toFixed(2)}x</span> · commission <b>${money(t.comm)}</b> (${Math.round(t.rate*100)}%)</div></div>`; }).join('');
+}
+function renderBar(t){
+  const R=REPS[st.rep];
+  if(!R){ $('bar-a').innerHTML='<span class="norep">Pick your name</span>'; $('bar-b').textContent='Needed to sign the quote'; return; }
+  if(!t.rows.length){ $('bar-a').textContent='$0.00'; $('bar-b').textContent='Add an item to start'; return; }
+  const why=blocker();
+  if(st.optOn){ const xs=st.opts.map((o,i)=>LET[i]+' '+money(optTotals(o).grand)); $('bar-a').textContent=st.opts.length+' options'; $('bar-b').innerHTML=why?`<span class="norep">${esc(why.split(':')[0])}</span>`:esc(xs.join(' · ')+(taxPending()||st.frMode==='tbd'?' (before '+[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join('/')+')':'')); return; }
+  $('bar-a').innerHTML=`${money(t.grand)} <span class="chip ${muClass(t.tmu)}" style="font-size:12px;vertical-align:middle">${t.tmu.toFixed(2)}x</span>`;
+  $('bar-b').innerHTML=why?`<span class="norep">${esc(why.split(':')[0])}</span>`:`comm ${money(t.comm)} (${Math.round(t.rate*100)}%)${taxPending()||st.frMode==='tbd'?' · before '+[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join('/'):''}`;
 }
 function renderTotals(){
   renderMuButtons(); renderOptions();
@@ -451,11 +490,14 @@ function renderTotals(){
       (bq?` · ${bq} blade${bq===1?'':'s'}/chain${bq===1?'':'s'}`+(t.rows.filter(r=>r.pk).length===1?` = <b>${money(t.rows.find(r=>r.pk).unit)} each</b>`:', priced by line below'):'')+`</div>`;
     if(!t.B)msg+='<div class="warn">Add the blades (or chains) for this package. They carry the equipment cost.</div>';
     else if(t.factor<1)msg+='<div class="warn">The $ on the equipment is more than the package needs: the blades would sell under cost.</div>'; }
-  if(t.cogs>0&&t.tmu<FLOOR-1e-9)msg+=`<div class="warn">⚠️ Total is ${t.tmu.toFixed(2)}x. That's under the 1.7x floor. Raise the price or get Froggy's OK first.</div>`;
+  if(t.pkg&&!t.B){}
+  else if(t.cogs>0&&t.tmu<FLOOR-1e-9)msg+=`<div class="warn">⚠️ Total is ${t.tmu.toFixed(2)}x. That's under the 1.7x floor. Raise the price or get Froggy's OK first.</div>`;
   else if(t.cogs>0)msg+=`<div class="ok">Total markup <b>${t.tmu.toFixed(2)}x</b> · commission rate <b>${Math.round(t.rate*100)}%</b>${st.acct==='new'?' (new account)':''}.</div>`;
   const missing=t.rows.filter(r=>r.l.kind!=='equip'&&!(parseFloat(r.l.cost)>0)&&!has(r.l.price)).length;
   if(missing)msg+=`<div class="warn">${missing} line${missing>1?'s have':' has'} no cost and no price yet.</div>`;
+  if(st.optOn){ $('t-boxes').hidden=true; msg=`<div class="info"><b>Options are on.</b> Each option's price, markup and commission show in the Options box above.</div>`; } else $('t-boxes').hidden=false;
   $('t-msg').innerHTML=msg;
+  renderBar(t);
   renderQuote(t);
 }
 function qtyLabel(r){ return r.q; }
@@ -506,12 +548,16 @@ function shipTo(){ const a=[st.shStreet,[st.shCity,[st.shState,st.shZip].filter(
 function renderShip(){
   const wi=(st.shState||'').toUpperCase()==='WI'; $('sh-wi').hidden=!wi||!TAX;
   const AT=autoTax(); let h='';
-  if(st.txMode==='auto'){ h=AT.rate!=null?`<b>Tax: ${esc(AT.why)}</b>`:esc(AT.why);
+  if((st.shZip||'').length>=5&&TAX&&!TAX.zips[(st.shZip||'').slice(0,5)]&&!wi)h+='<span style="color:#e05555">ZIP not found. Check it, or type the city and state.</span><br>';
+  if(st.txMode==='auto'){ h+=AT.rate!=null?`<b>Tax: ${esc(AT.why)}</b>`:esc(AT.why);
     if(wi&&TAX)h+=` · <a href="${esc(TAX.lookup)}" target="_blank" rel="noopener" style="color:#f5a623">check an exact address (WI DOR)</a> · rates as of ${esc(TAX.asOf)}`; }
+  if(wi&&st.shMke)h+=`<br><span style="color:#f5a623">City of Milwaukee 2% added because the city is Milwaukee. Some Milwaukee ZIPs reach into West Allis, Wauwatosa, Greenfield, Glendale and other suburbs: if the address is outside city limits, uncheck the box.</span>`;
+  if(wi&&TAX&&(st.shZip||'').length>=5&&!TAX.zips[(st.shZip||'').slice(0,5)])h+=`<br><span style="color:#e05555">ZIP not found. Check it, or type the city and state.</span>`;
   if(wi&&RESORT.includes((st.shCity||'').toUpperCase().trim()))h+=`<br>${esc(st.shCity)} has a premier resort area tax. Not added: per WI DOR it only applies to certain retail store types (department, gift, sporting goods, restaurants and the like).`;
   $('sh-hint').innerHTML=h; $('tx-rate-box').hidden=st.txMode!=='rate'; $('tx-rate-row').hidden=!(st.txMode==='rate'||st.txMode==='auto');
 }
-function zipFill(){ const z=(st.shZip||'').slice(0,5); if(!TAX||!/^\d{5}$/.test(z))return; const r=TAX.zips[z]; if(!r)return;
+function zipFill(){ const z=(st.shZip||'').slice(0,5); if(!TAX||!/^\d{5}$/.test(z))return; const r=TAX.zips[z];
+  if(!r){ st.shCity=''; st.shState=''; st.shCounty=''; st.shMke=false; $('sh-city').value=''; $('sh-state').value=''; $('sh-county').value=''; $('sh-mke').checked=false; return; }
   st.shCity=r[0]; st.shState=r[1]; st.shCounty=r[1]==='WI'?r[2]:'';
   st.shMke=r[1]==='WI'&&r[0].toUpperCase()==='MILWAUKEE'&&['Milwaukee','Washington','Waukesha'].includes(r[2]);
   $('sh-city').value=st.shCity; $('sh-state').value=st.shState; $('sh-county').value=st.shCounty; $('sh-mke').checked=st.shMke; }
@@ -524,7 +570,7 @@ function quoteText(t){
     return [...head,...body,'',st.notes||'','',R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
   }
   const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (regular '+money(r.reg)+' each)':''}`);
-  return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',shipTo().length?`Ship to: ${shipTo().join(', ')}`:'',``,...lines,``,`Subtotal: ${money(t.sell)}`,`Freight / shipping: ${frLabel(t)}`,`${txName()}: ${txLabel(t)}`,`TOTAL: ${money(t.grand)}${(st.frMode==='tbd'||!t.tax&&st.txMode!=='exempt')?' plus freight/tax as noted':''}`,t.eqSave>0?`You save ${money(t.eqSave)} on the equipment`:'',st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
+  return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',shipTo().length?`Ship to: ${shipTo().join(', ')}`:'',``,...lines,``,`Subtotal: ${money(t.sell)}`,`Freight / shipping: ${frLabel(t)}`,`${txName()}: ${txLabel(t)}`,`TOTAL: ${money(t.grand)}${(st.frMode==='tbd'||taxPending())?' plus '+[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join(' and ')+' as noted':''}`,t.eqSave>0?`You save ${money(t.eqSave)} on the equipment`:'',st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
 }
 function renderQuote(t){
   const R=REPS[st.rep]||{name:'Diamond Blade Warehouse',email:''};
@@ -543,7 +589,7 @@ function renderQuote(t){
     $('quote').innerHTML=top+`<table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>`+
       st.opts.map((o,i)=>{ const x=optTotals(o); return `<tr class="opth"><td colspan="4">Option ${LET[i]}: ${esc(o.q)} each</td></tr>`+
         x.rows.map(r=>`<tr><td>${esc(r.q)}</td><td>${esc(itemName(r))}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?`<div class="muted">${esc(codeOf(r.l))}</div>`:''}</td><td class="r">${priceCell(r,false)}</td><td class="r">${priceCell(r,true)}</td></tr>`).join('')+
-        `<tr><td colspan="2">Subtotal${st.frMode!=='tbd'||!taxPending()?' · freight '+esc(frLabel(x))+' · '+esc(txLabel(x))+' tax':''}</td><td class="r" colspan="2"><b>${money(x.grand)}</b></td></tr>`; }).join('')+
+        `<tr><td colspan="2"><b>Option ${LET[i]} total</b>${st.frMode!=='tbd'||!taxPending()?'<div class="muted">freight '+esc(frLabel(x))+' · tax '+esc(txLabel(x))+'</div>':''}</td><td class="r" colspan="2"><b>${money(x.grand)}</b></td></tr>`; }).join('')+
       `${(st.frMode==='tbd'||taxPending())?`<tr><td colspan="4" class="muted" style="border-bottom:none">Totals shown before ${[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join(' and ')}.</td></tr>`:''}</table>`+sign;
     return;
   }
@@ -573,7 +619,7 @@ function render(){
   $('fr-mode').value=st.frMode||'tbd'; $('fr-amt').value=st.frAmt||''; $('fr-amt').hidden=st.frMode!=='amt';
   $('tx-mode').value=st.txMode||'auto'; $('tx-rate').value=st.txRate||''; $('tx-fr').checked=!!st.txFr;
   $('sh-street').value=st.shStreet||''; $('sh-city').value=st.shCity||''; $('sh-state').value=st.shState||''; $('sh-zip').value=st.shZip||''; $('sh-county').value=st.shCounty||''; $('sh-mke').checked=!!st.shMke; renderShip();
-  const R=REPS[st.rep]; $('hdr-rep').textContent=R?'Quote Builder · '+R.name+' ('+st.rep+')':'Quote Builder';
+  const R=REPS[st.rep]; $('hdr-rep').textContent=R?'Quote Builder · '+R.name+' ('+st.rep+')':'Quote Builder · pick your name below'; $('hdr-rep').classList.toggle('norep',!R);
   showTab(st.tab||'item'); renderLines(); renderTotals();
 }
 
@@ -581,8 +627,9 @@ function render(){
 function addLine(code,qty,kind){
   const L=lookup(code); const l=newLine({kind:kind||'item',item:L?(L.p?(PLKEYS[L.key]||L.p.code):L.h.code):code,qty:qty||1});
   if(L){ const c=L.p?listCost(L.p,l.qty):L.h.cost; l.cost=(+c).toFixed(2); if(L.p)l.desc=L.p.desc; }
+  const last=st.lines[st.lines.length-1]; if(last&&!last.item&&!last.desc)st.lines.pop();   // fill the empty ready line instead of adding below it
   st.lines.push(l); save(); renderLines(); renderTotals();
-  const el=$('lines').querySelector(`.line[data-i="${st.lines.length-1}"]`); if(el)el.scrollIntoView({block:'nearest'});
+  const el=$('lines').querySelector(`.line[data-i="${st.lines.length-1}"]`); if(el)el.scrollIntoView({block:'nearest'}); toast('Added: '+(l.desc||l.item));
 }
 
 // ── Browse the price list ──
@@ -661,10 +708,10 @@ function showTab(t){ st.tab=t; document.querySelectorAll('[data-tab]').forEach(b
 
 // ── Wiring ──
 $('rep').innerHTML='<option value="">Pick your name</option>'+Object.entries(REPS).map(([k,v])=>`<option value="${k}">${esc(v.name)} (${k})</option>`).join('');
-const qp=new URLSearchParams(location.search).get('rep'); if(qp&&REPS[qp.toUpperCase()])st.rep=qp.toUpperCase();
+const qp=new URLSearchParams(location.search).get('rep'); if(qp&&REPS[qp.toUpperCase()]){ st.rep=qp.toUpperCase(); save(); }
 [['rep','rep'],['acct','acct'],['qdate','date'],['cco','co'],['cname','name'],['cnum','num'],['qnotes','notes']].forEach(([id,k])=>$(id).addEventListener('input',e=>{st[k]=e.target.value;save();if(k==='rep'||k==='acct')render();else renderTotals();}));
 $('mu').addEventListener('input',e=>{st.mu=+e.target.value;save();renderLines();renderTotals();});
-[['fr-mode','frMode'],['fr-amt','frAmt'],['tx-mode','txMode'],['tx-rate','txRate']].forEach(([id,k])=>$(id).addEventListener('input',e=>{ st[k]=e.target.value; save();
+[['fr-mode','frMode'],['fr-amt','frAmt'],['tx-mode','txMode'],['tx-rate','txRate']].forEach(([id,k])=>$(id).addEventListener('input',e=>{ if((k==='frAmt'||k==='txRate')&&e.target.value!==''&&!(+e.target.value>=0))e.target.value=''; st[k]=e.target.value; save();
   $('fr-amt').hidden=st.frMode!=='amt'; renderShip(); renderTotals(); }));
 [['sh-street','shStreet'],['sh-city','shCity'],['sh-state','shState'],['sh-zip','shZip']].forEach(([id,k])=>$(id).addEventListener('input',e=>{ st[k]=k==='shState'?e.target.value.toUpperCase():e.target.value;
   if(k==='shZip')zipFill(); if(k==='shCity'&&(st.shState||'').toUpperCase()==='WI'){ st.shMke=st.shCity.trim().toUpperCase()==='MILWAUKEE'&&['Milwaukee','Washington','Waukesha'].includes(st.shCounty); $('sh-mke').checked=st.shMke; }
@@ -673,7 +720,7 @@ $('sh-county').addEventListener('change',e=>{st.shCounty=e.target.value;save();r
 $('sh-mke').addEventListener('change',e=>{st.shMke=e.target.checked;save();renderShip();renderTotals();});
 $('tx-fr').addEventListener('change',e=>{st.txFr=e.target.checked;save();renderTotals();});
 $('mub').addEventListener('click',e=>{ const m=e.target.dataset.mu; if(!m)return; st.mu=+m; save(); renderLines(); renderTotals(); });
-$('opt-on').addEventListener('change',e=>{ st.optOn=e.target.checked; if(!Array.isArray(st.opts)||!st.opts.length)st.opts=defOpts(); save(); renderTotals(); });
+$('opt-on').addEventListener('change',e=>{ st.optOn=e.target.checked; if(!Array.isArray(st.opts)||!st.opts.length)st.opts=defOpts(); save(); renderLines(); renderTotals(); });
 $('opt-reset').addEventListener('click',()=>{ st.opts=defOpts(); save(); renderTotals(); });
 $('opt-add').addEventListener('click',()=>{ if(st.opts.length>=LET.length)return; const last=st.opts[st.opts.length-1]||{q:0,m:2.0}; st.opts.push({q:(+last.q||0)+24,m:Math.max(1.3,Math.round(((+last.m||2)-0.1)*10)/10)}); save(); renderTotals(); });
 $('opt-list').addEventListener('click',e=>{ const row=e.target.closest('.opt'); if(!row)return; const i=+row.dataset.o;
@@ -692,26 +739,75 @@ $('p-cat').addEventListener('change',pkgModels);
 $('p-add').addEventListener('click',()=>{ const k=$('p-model').value; if(!k)return; const q=Math.max(1,parseInt($('p-qty').value)||1);
   if(k===AMEX.code){ addAmex(q*AMEX.face); return; }
   addLine(PLKEYS[k]||k,q,'equip'); });
-function addAmex(dollars){ const n=Math.max(1,Math.round((+dollars||0)/AMEX.face));
-  st.lines.push(newLine({kind:'equip',item:AMEX.code,desc:AMEX.desc,qty:n,cost:AMEX.cost.toFixed(2)})); save(); renderLines(); renderTotals(); }
+function addAmex(dollars){ const d=+dollars; if(!(d>=AMEX.face)||d%AMEX.face){ alert('AMEX cards come in $50 steps. Type 50, 100, 150…'); $('gc-amt').focus(); return; } const n=d/AMEX.face;
+  const last=st.lines[st.lines.length-1]; if(last&&!last.item&&!last.desc)st.lines.pop();
+  st.lines.push(newLine({kind:'equip',item:AMEX.code,desc:AMEX.desc,qty:n,cost:AMEX.cost.toFixed(2)})); save(); renderLines(); renderTotals(); toast('Added '+n+' AMEX card'+(n>1?'s':'')+' ($'+(n*AMEX.face)+')'); }
 $('gc-add').addEventListener('click',()=>addAmex($('gc-amt').value));
 $('lines').addEventListener('input',e=>{
   const f=e.target.dataset.f; if(!f)return; const i=+e.target.closest('.line').dataset.i; const l=st.lines[i];
-  if(f==='item'){ l.item=e.target.value.trim().toUpperCase(); const L=lookup(l.item);
-    if(L){ l.costManual=false; const c=L.p?listCost(L.p,l.qty):L.h.cost; l.cost=(+c).toFixed(2); if(L.p&&!l.desc)l.desc=L.p.desc;
-      save(); renderLines(); renderTotals(); const el=$('lines').querySelector(`.line[data-i="${i}"] [data-f=qty]`); if(el)el.focus(); return; }
-    const hn=e.target.closest('.line').querySelector('.hint'); if(hn)hn.textContent=l.item?'Not on the price list: type the cost':'Type an item # or a few words (e.g. A14TREX or "dragon")'; }
-  else l[f]=e.target.value;
+  if(f==='item'){ l.item=e.target.value.trim().toUpperCase(); save();
+    // picked from the suggestion list (no keystroke): resolve now and jump to Qty. While typing: wait for Done / tap out.
+    const picked=!e.inputType||e.inputType==='insertReplacementText';
+    if(picked&&isOption(e.target.value)){ applyItem(i,true); return; }
+    const hn=e.target.closest('.line').querySelector('.hint'); if(hn)hn.textContent=l.item?'Finish the item # and tap Done (or pick from the list).':'Type an item # or a few words (e.g. A14TREX or "dragon")';
+    return; }
+  let v=e.target.value;
+  if(f==='qty'&&v!==''){ const n=Math.max(0,Math.floor(+v||0)); if(String(n)!==v){ v=String(n); e.target.value=v; } }
+  if((f==='cost'||f==='price')&&v!==''&&(+v<0||isNaN(+v))){ v=''; e.target.value=''; }
+  l[f]=v;
+  if(f==='desc')l.descManual=v.trim()!=='';
   if(f==='cost')l.costManual=true;
   save();
   if(f==='qty'&&!l.costManual){ const L=lookup(l.item); if(L&&L.p&&L.p.special){ const before=l.cost; l.cost=(+listCost(L.p,l.qty)).toFixed(2);
       if(before!==l.cost){ const at=e.target.selectionStart; save(); renderLines(); renderTotals(); const q=$('lines').querySelector(`.line[data-i="${i}"] [data-f=qty]`); if(q){q.focus();try{q.setSelectionRange(at,at);}catch(_){}} return; } } }
   if(f==='qty'&&l.item===AMEX.code){ const hn=e.target.closest('.line').querySelector('.hint'); if(hn)hn.innerHTML=infoFor(l); }
+  const le=e.target.closest('.line'); if(le){ le.classList.toggle('bad',lineBad(l)); if(f!=='desc')le.querySelector('.hint').innerHTML=infoFor(l); }
   renderTotals(); refreshPlaceholders();
 });
-$('lines').addEventListener('click',e=>{ const d=e.target.dataset.del; if(d==null)return; st.lines.splice(+d,1); save(); renderLines(); renderTotals(); });
-$('print').addEventListener('click',()=>window.print());
-$('copy').addEventListener('click',async()=>{ const txt=quoteText(calc()); try{await navigator.clipboard.writeText(txt);$('copy').textContent='✓ Copied';}catch(e){prompt('Copy this quote:',txt);} setTimeout(()=>$('copy').textContent='📋 Copy quote text',1800); });
+// Resolve an item # when the field is left. If a mouse/finger is still pressed (the rep is tapping a button), wait until
+// that tap finishes, so the page doesn't shift under the pointer and swallow the tap.
+let ptrDown=false, pendingApply=[];
+document.addEventListener('pointerdown',()=>{ ptrDown=true; },true);
+document.addEventListener('pointerup',()=>{ ptrDown=false; if(pendingApply.length){ const q=pendingApply; pendingApply=[]; setTimeout(()=>q.forEach(i=>applyItem(i,false)),30); } },true);
+document.addEventListener('pointercancel',()=>{ ptrDown=false; },true);
+$('lines').addEventListener('change',e=>{ if(e.target.dataset.f!=='item')return; const i=+e.target.closest('.line').dataset.i;
+  if(ptrDown)pendingApply.push(i); else setTimeout(()=>applyItem(i,false),0); });
+$('lines').addEventListener('click',e=>{ const row=e.target.closest('.line'); if(!row)return; const i=+row.dataset.i, l=st.lines[i];
+  if(e.target.dataset.var){ l.item=PLKEYS[e.target.dataset.var]||e.target.dataset.var; l.costManual=false; applyItem(i,false); return; }
+  if(e.target.dataset.clrprice){ l.price=''; save(); renderLines(); renderTotals(); return; }
+  const d=e.target.dataset.del; if(d==null)return; st.lines.splice(+d,1); save(); renderLines(); renderTotals(); });
+function isOption(v){ return !!document.querySelector(`#items option[value="${CSS.escape(v)}"]`); }
+// Update one line in place (no re-render), so a tap or click that follows isn't swallowed by a redraw.
+function patchLine(i){ const el=$('lines').querySelector(`.line[data-i="${i}"]`), l=st.lines[i]; if(!el||!l)return false;
+  const set=(f,v)=>{ const x=el.querySelector(`[data-f=${f}]`); if(x&&document.activeElement!==x)x.value=v; };
+  set('item',l.item||''); set('desc',l.desc||''); set('cost',l.cost||''); el.querySelector('.hint').innerHTML=infoFor(l); el.classList.toggle('bad',lineBad(l)); refreshPlaceholders(); return true; }
+function lineBad(l){ return l.kind!=='equip'&&!!(l.item||l.desc)&&(!(parseFloat(l.cost)>0)&&!has(l.price) || (has(l.price)&&!(parseFloat(l.price)>0)) || !(+l.qty>0)); }
+function applyItem(i,focusQty){ const l=st.lines[i]; if(!l)return; l.item=(l.item||'').trim().toUpperCase(); const L=lookup(l.item);
+  if(L){ l.costManual=false; const c=L.p?listCost(L.p,l.qty):L.h.cost; l.cost=(+c).toFixed(2); if(L.p&&!l.descManual)l.desc=L.p.desc; }
+  else if(l._last!==l.item){ if(!l.costManual)l.cost=''; if(!l.descManual)l.desc=''; }   // not on the list: don't keep the old item's cost and name
+  l._last=l.item;
+  if(!focusQty&&patchLine(i)){ save(); renderTotals(); return; }
+  // keep the rep where they tapped: re-rendering replaces the inputs, so put focus back on the same field
+  const ae=document.activeElement, back=ae&&ae.dataset&&ae.dataset.f&&ae.closest('.line')?[+ae.closest('.line').dataset.i,ae.dataset.f]:null;
+  save(); renderLines(); renderTotals();
+  const go=focusQty?[i,'qty']:back;
+  if(go){ const el=$('lines').querySelector(`.line[data-i="${go[0]}"] [data-f=${go[1]}]`); if(el){ el.focus(); if(focusQty||go[1]==='qty'){ try{el.select();}catch(_){} } } } }
+function blocker(){ const t=calc();
+  if(!REPS[st.rep])return 'Pick your name first (top of the page) so the quote is signed right.';
+  if(!t.rows.length)return 'Add at least one item first.';
+  const bad=st.optOn?st.opts.map((o,i)=>[LET[i],calc(o)]).filter(([,x])=>x.pkg&&x.B&&x.factor<1).map(([L])=>L):(t.pkg&&t.B&&t.factor<1?['x']:[]);
+  if(bad.length)return 'The $ typed on the equipment is more than the deal can carry: the blades would sell under cost. Lower the equipment $ (or add blades) first.';
+  if(t.pkg&&!t.B)return 'This package has equipment but no blades. Add the blades (or chains) first.';
+  const nop=st.lines.map((l,i)=>[l,i]).filter(([l])=>l.kind!=='equip'&&(l.item||l.desc)&&(st.optOn||+l.qty>0)&&(!(parseFloat(l.cost)>0)&&!has(l.price)||has(l.price)&&!(parseFloat(l.price)>0)));
+  if(nop.length)return `Line ${nop.map(([,i])=>i+1).join(', ')} has no price (no cost and no price, or a $0 price). Fix it first.`;
+  return ''; }
+function toast(m){ let t=$('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='noprint'; t.style.cssText='position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:#1a3a1a;color:#8fe0b0;border:1px solid #2f6b3f;padding:10px 14px;border-radius:10px;font-weight:700;z-index:60;max-width:90%;text-align:center'; document.body.appendChild(t); } t.textContent=m; t.hidden=false; clearTimeout(t._h); t._h=setTimeout(()=>t.hidden=true,2600); }
+function guarded(fn){ const why=blocker(); if(why){ alert(why); if(!REPS[st.rep]){ $('rep').focus(); $('rep').scrollIntoView({block:'center'}); } return; } fn(); }
+async function doCopy(btn){ const txt=quoteText(calc()); try{await navigator.clipboard.writeText(txt);btn.textContent='✓ Copied';toast('Quote copied. Paste it into your email or text.');}catch(e){prompt('Copy this quote:',txt);} setTimeout(()=>btn.textContent=btn.id==='bar-copy'?'📋 Copy':'📋 Copy quote text',1800); }
+$('print').addEventListener('click',()=>guarded(()=>window.print()));
+$('bar-print').addEventListener('click',()=>guarded(()=>window.print()));
+$('bar-copy').addEventListener('click',()=>guarded(()=>doCopy($('bar-copy'))));
+$('copy').addEventListener('click',()=>guarded(()=>doCopy($('copy'))));
 function resetQuote(){ if(!confirm('Reset this quote? Customer, items and notes clear. Your rep name stays.'))return; const rep=st.rep; st=blank(); st.rep=rep; save(); render(); window.scrollTo(0,0); }
 $('clear').addEventListener('click',resetQuote); $('reset-top').addEventListener('click',resetQuote);
 render(); loadCatalog();
