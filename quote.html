@@ -37,6 +37,20 @@ button.sm{padding:7px 11px;font-size:13px}
 .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .tabs button{padding:12px 6px}
 .tabs button.on{background:#f5a623;color:#0f1117}
+.mub{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:10px}
+@media(max-width:620px){.mub{grid-template-columns:repeat(5,1fr)}}
+.mub button{padding:10px 0;font-size:15px;font-weight:900;border:2px solid transparent}
+.mub button.on{border-color:#fff;box-shadow:0 0 0 2px #f5a623}
+.opt{display:grid;grid-template-columns:34px 110px 1fr 36px;gap:8px;align-items:center;padding:10px 0;border-top:1px solid #2a3040}
+.opt:first-child{border-top:none}
+.opt .L{font-size:18px;font-weight:900;color:#f5a623;text-align:center}
+.optm{grid-column:1 / -1;display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+@media(max-width:620px){.optm{grid-template-columns:repeat(5,1fr)}}
+.optm button{padding:8px 0;font-size:13px;font-weight:900;border:2px solid transparent}
+.optm button.on{border-color:#fff;box-shadow:0 0 0 2px #f5a623}
+.optsum{grid-column:1 / -1;font-size:12px;color:#8892a4}
+.optsum b{color:#e0e6f0}
+#quote .opth td{background:#f5f0e6;font-weight:900;font-size:15px;border-top:2px solid #111}
 .line{border-top:1px solid #2a3040;padding:12px 0}
 .line:first-child{border-top:none;padding-top:0}
 .line.eq{background:#151b28;border:1px solid #3a4a2a;border-radius:8px;padding:10px;margin:8px 0}
@@ -108,13 +122,9 @@ input[type=range]{padding:0;accent-color:#f5a623}
   <div class="row" style="gap:14px">
     <div style="flex:1;min-width:220px"><input id="mu" type="range" min="1.3" max="3" step="0.05" value="2"></div>
     <div><span id="mu-chip" class="chip m-hi">2.00x</span></div>
-    <div class="row" style="gap:6px">
-      <button type="button" data-mu="1.7">1.7 floor</button>
-      <button type="button" data-mu="2">2.0 target</button>
-      <button type="button" data-mu="2.2">2.2</button>
-    </div>
   </div>
-  <div class="hint">Regular items: <b>cost x markup</b>, rounded like the price sheet (+$0.49, or whole dollar up on 12"+ blades, core bits and core rigs). Target <b>2.0x</b>, minimum <b>1.7x</b>. Package deals use the package math below.</div>
+  <div class="mub" id="mub"></div>
+  <div class="hint">Regular items: <b>cost x markup</b>, rounded like the price sheet (+$0.49, or whole dollar up on 12"+ blades, core bits and core rigs). Target <b>2.0x</b>, minimum <b>1.7x</b> (red = under the floor). Package deals use the package math below. Options use their own markups.</div>
 </div>
 
 <div class="card noprint">
@@ -168,6 +178,16 @@ input[type=range]{padding:0;accent-color:#f5a623}
   <div class="title">Items on this quote</div>
   <div id="lines"></div>
   <datalist id="items"></datalist>
+</div>
+
+<div class="card noprint">
+  <div class="title">Options (let the customer pick A, B, C…)</div>
+  <label class="cbx" style="margin-bottom:8px"><input type="checkbox" id="opt-on" style="width:auto"> <b>Quote as options</b>: same items at different quantities, each with its own markup</label>
+  <div id="opt-box" hidden>
+    <div id="opt-list"></div>
+    <div class="row" style="margin-top:8px"><button type="button" class="gold sm" id="opt-add">+ Add option</button><button type="button" class="sm" id="opt-reset">Reset to 12 / 25 / 36 / 50</button></div>
+    <div class="hint">Each option uses every blade line on the quote at the option's quantity (each line's own qty is ignored while options are on). Specials switch to 24pc cost at 24+. Package equipment stays the same in every option.</div>
+  </div>
 </div>
 
 <div class="card noprint">
@@ -328,17 +348,22 @@ async function loadCatalog(){
 
 // ── State (saved on this device only) ──
 const SKEY='dbw_quote_v1';
+const defOpts=()=>[{q:12,m:2.2},{q:25,m:2.1},{q:36,m:2.0},{q:50,m:1.9}];
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const newLine=(o)=>Object.assign({kind:'item',item:'',desc:'',qty:1,cost:'',price:'',costManual:false},o||{});
-function blank(){ return {rep:'',acct:'reorder',date:today(),co:'',name:'',num:'',mu:TARGET,notes:'',tab:'item',lines:[],frMode:'tbd',frAmt:'',txMode:'auto',shStreet:'',shCity:'',shState:'',shZip:'',shCounty:'',shMke:false,txRate:'',txFr:false}; }
+function blank(){ return {rep:'',acct:'reorder',date:today(),co:'',name:'',num:'',mu:TARGET,notes:'',tab:'item',lines:[],optOn:false,opts:defOpts(),frMode:'tbd',frAmt:'',txMode:'auto',shStreet:'',shCity:'',shState:'',shZip:'',shCounty:'',shMke:false,txRate:'',txFr:false}; }
 function load(){ try{ const s=JSON.parse(localStorage.getItem(SKEY)); if(s&&Array.isArray(s.lines)){ s.lines=s.lines.map(l=>{ if(l.free){l.kind='equip';l.price='';delete l.free;} return newLine(l); }); delete s.pkg; return Object.assign(blank(),s); } }catch(e){} return blank(); }
 function save(){ try{ localStorage.setItem(SKEY,JSON.stringify(st)); }catch(e){} }
 let st=load();
 
 // ── Pricing ──
 const has=v=>v!==''&&v!=null&&!isNaN(parseFloat(v));
-function calc(){
-  const mu=+st.mu||TARGET; const L=st.lines.filter(l=>(l.item||l.desc)&&(+l.qty||0)>0);
+// opt = {q, m}: price every blade line at quantity q and markup m (Options). No opt = the quote as entered.
+function optLines(opt){ return st.lines.map(l=>{ if(!opt||l.kind==='equip')return l;
+  const Lk=lookup(l.item); const c=(!l.costManual&&Lk&&Lk.p)?(+listCost(Lk.p,opt.q)).toFixed(2):l.cost;
+  return Object.assign({},l,{qty:opt.q,cost:c,_src:l}); }); }
+function calc(opt){
+  const mu=opt?(+opt.m||TARGET):(+st.mu||TARGET); const L=optLines(opt).filter(l=>(l.item||l.desc)&&(+l.qty||0)>0);
   const cost=l=>(+l.qty||0)*(parseFloat(l.cost)||0);
   const equip=L.filter(l=>l.kind==='equip'), items=L.filter(l=>l.kind!=='equip');
   const pkg=equip.length>0;
@@ -352,7 +377,7 @@ function calc(){
     else if(pkg){ unit=c>0?up2(c*factor):0; pk=true; }
     else { const Lk=lookup(l.item); unit=c>0?sheetPrice(c,mu,Lk&&Lk.p&&Lk.p.mode):0; }
     // regular price of package equipment = what it sells for on its own at this markup (AMEX = face value)
-    let reg=0; if(l.kind==='equip'&&c>0){ const Lk=lookup(l.item); reg=l.item===AMEX.code?AMEX.face:sheetPrice(c,mu,Lk&&Lk.p&&Lk.p.mode); }
+    let reg=0; if(l.kind==='equip'&&c>0){ const Lk=lookup(l.item); reg=l.item===AMEX.code?AMEX.face:sheetPrice(c,+st.mu||TARGET,Lk&&Lk.p&&Lk.p.mode); }  // same regular price in every option
     return {l,q,unit,ext:r2(unit*q),free,pk,reg}; });
   const sell=rows.reduce((t,r)=>t+r.ext,0), cogs=L.reduce((t,l)=>t+cost(l),0);
   const eqSave=rows.reduce((t,r)=>t+(r.reg>r.unit?(r.reg-r.unit)*r.q:0),0);
@@ -395,7 +420,25 @@ function renderLines(){ const R=rowsMap();
   $('lines').innerHTML=st.lines.length?st.lines.map((l,i)=>lineHTML(l,i,R)).join(''):'<div class="hint" style="margin:0">Nothing yet. Add an item, use the Blade Selector, or start a Package Deal above.</div>'; }
 function refreshPlaceholders(){ const R=rowsMap(); $('lines').querySelectorAll('.line').forEach(el=>{ const l=st.lines[+el.dataset.i]; const p=el.querySelector('[data-f=price]'); const r=R.get(l);
   if(p&&l.kind!=='equip')p.placeholder=r&&r.unit?r.unit.toFixed(2):'auto'; }); }
+// Markup steps, red (under the 1.7 floor) to green
+const MUS=[[1.3,'#b3261e','#fff'],[1.5,'#d9534f','#fff'],[1.6,'#ef9a96','#3a1010'],[1.7,'#a8e0b4','#0f2a17'],[1.8,'#7fcf93','#0f2a17'],
+  [1.9,'#5cbc76','#0f2a17'],[2.0,'#43a862','#fff'],[2.1,'#348f52','#fff'],[2.2,'#2a7a45','#fff'],[3.0,'#21663a','#fff']];
+const muBtn=(m,on,attr)=>{ const c=MUS.find(x=>Math.abs(x[0]-m)<1e-9); return `<button type="button" ${attr}="${m}" class="${on?'on':''}" style="background:${c[1]};color:${c[2]}">${m.toFixed(1)}</button>`; };
+function renderMuButtons(){ $('mub').innerHTML=MUS.map(([m])=>muBtn(m,Math.abs((+st.mu)-m)<1e-9,'data-mu')).join(''); }
+const LET='ABCDEFGH';
+function renderOptions(){
+  $('opt-on').checked=!!st.optOn; $('opt-box').hidden=!st.optOn; if(!st.optOn)return;
+  $('opt-list').innerHTML=st.opts.map((o,i)=>{ const t=calc(o); const bl=t.rows.filter(r=>r.l.kind!=='equip');
+    const per=bl.length===1?`<b>${money(bl[0].unit)}</b> each`:bl.length?bl.map(r=>`${esc(codeOf(r.l))} <b>${money(r.unit)}</b>`).join(' · '):'add a blade line';
+    return `<div class="opt" data-o="${i}"><div class="L">${LET[i]}</div>
+      <div><label style="margin:0">Qty</label><input data-of="q" type="number" min="1" step="1" inputmode="numeric" value="${esc(o.q)}"></div>
+      <div class="hint" style="margin:0">Markup for option ${LET[i]}:</div>
+      <div><button type="button" class="red" data-odel="${i}" title="Remove" style="padding:9px 0;width:36px">✕</button></div>
+      <div class="optm">${MUS.map(([m])=>muBtn(m,Math.abs((+o.m)-m)<1e-9,'data-om')).join('')}</div>
+      <div class="optsum">${per} · total <b>${money(t.sell)}</b> · markup <span class="chip ${muClass(t.tmu)}">${t.tmu.toFixed(2)}x</span> · commission <b>${money(t.comm)}</b> (${Math.round(t.rate*100)}%)</div></div>`; }).join('');
+}
 function renderTotals(){
+  renderMuButtons(); renderOptions();
   const t=calc();
   $('mu-chip').textContent=(+st.mu).toFixed(2)+'x'; $('mu-chip').className='chip '+muClass(+st.mu);
   $('t-sell').textContent=money(t.sell); $('t-cogs').textContent=money(t.cogs);
@@ -472,14 +515,38 @@ function zipFill(){ const z=(st.shZip||'').slice(0,5); if(!TAX||!/^\d{5}$/.test(
   st.shCity=r[0]; st.shState=r[1]; st.shCounty=r[1]==='WI'?r[2]:'';
   st.shMke=r[1]==='WI'&&r[0].toUpperCase()==='MILWAUKEE'&&['Milwaukee','Washington','Waukesha'].includes(r[2]);
   $('sh-city').value=st.shCity; $('sh-state').value=st.shState; $('sh-county').value=st.shCounty; $('sh-mke').checked=st.shMke; }
+function optTotals(o){ const t=calc(o); const tax=r2((t.sell+(st.txFr?t.fr:0))*t.txRate); return Object.assign(t,{tax,grand:r2(t.sell+t.fr+tax)}); }
 function quoteText(t){
   const R=REPS[st.rep]||{name:'',email:''};
+  if(st.optOn&&st.opts.length){
+    const head=[`DIAMOND BLADE WAREHOUSE - QUOTE OPTIONS (pick the one you want)`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',shipTo().length?`Ship to: ${shipTo().join(', ')}`:''];
+    const body=st.opts.flatMap((o,i)=>{ const x=optTotals(o); return ['',`OPTION ${LET[i]}: ${o.q} each`,...x.rows.map(r=>`  ${r.q} x ${itemName(r)}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}`),`  Subtotal ${money(x.sell)} | Freight: ${frLabel(x)} | ${txName()}: ${txLabel(x)} | TOTAL ${money(x.grand)}`]; });
+    return [...head,...body,'',st.notes||'','',R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
+  }
   const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (regular '+money(r.reg)+' each)':''}`);
   return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',shipTo().length?`Ship to: ${shipTo().join(', ')}`:'',``,...lines,``,`Subtotal: ${money(t.sell)}`,`Freight / shipping: ${frLabel(t)}`,`${txName()}: ${txLabel(t)}`,`TOTAL: ${money(t.grand)}${(st.frMode==='tbd'||!t.tax&&st.txMode!=='exempt')?' plus freight/tax as noted':''}`,t.eqSave>0?`You save ${money(t.eqSave)} on the equipment`:'',st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
 }
 function renderQuote(t){
   const R=REPS[st.rep]||{name:'Diamond Blade Warehouse',email:''};
   if(!t.rows.length){ $('quote').innerHTML='<div class="muted" style="text-align:center">Add an item and the customer quote shows here.</div>'; return; }
+  const top=`
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div><h2>DIAMOND BLADE WAREHOUSE</h2><div class="muted">${st.optOn?'Quote options: pick the one you want':(t.pkg?'Package Deal':'Quote')}</div></div>
+      <div style="text-align:right"><div><b>Date:</b> ${esc(st.date)}</div>${st.num?`<div><b>Customer #:</b> ${esc(st.num)}</div>`:''}</div>
+    </div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px">
+    ${st.co||st.name?`<div><b>Prepared for:</b><br>${esc(st.co)}${st.co&&st.name?'<br>':''}${esc(st.name)}</div>`:''}
+    ${shipTo().length?`<div><b>Ship to:</b><br>${shipTo().map(esc).join('<br>')}</div>`:''}</div>`;
+  const sign=`${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
+    <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="muted">${esc(R.email)}</div>`:''}<div class="muted">Diamond Blade Warehouse</div></div>`;
+  if(st.optOn&&st.opts.length){
+    $('quote').innerHTML=top+`<table><tr><th>Qty</th><th>Item</th><th class="r">Each</th><th class="r">Total</th></tr>`+
+      st.opts.map((o,i)=>{ const x=optTotals(o); return `<tr class="opth"><td colspan="4">Option ${LET[i]}: ${esc(o.q)} each</td></tr>`+
+        x.rows.map(r=>`<tr><td>${esc(r.q)}</td><td>${esc(itemName(r))}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?`<div class="muted">${esc(codeOf(r.l))}</div>`:''}</td><td class="r">${priceCell(r,false)}</td><td class="r">${priceCell(r,true)}</td></tr>`).join('')+
+        `<tr><td colspan="2">Subtotal${st.frMode!=='tbd'||!taxPending()?' · freight '+esc(frLabel(x))+' · '+esc(txLabel(x))+' tax':''}</td><td class="r" colspan="2"><b>${money(x.grand)}</b></td></tr>`; }).join('')+
+      `${(st.frMode==='tbd'||taxPending())?`<tr><td colspan="4" class="muted" style="border-bottom:none">Totals shown before ${[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join(' and ')}.</td></tr>`:''}</table>`+sign;
+    return;
+  }
   $('quote').innerHTML=`
     <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
       <div><h2>DIAMOND BLADE WAREHOUSE</h2><div class="muted">${t.pkg?'Package Deal':'Quote'}</div></div>
@@ -605,7 +672,14 @@ $('mu').addEventListener('input',e=>{st.mu=+e.target.value;save();renderLines();
 $('sh-county').addEventListener('change',e=>{st.shCounty=e.target.value;save();renderShip();renderTotals();});
 $('sh-mke').addEventListener('change',e=>{st.shMke=e.target.checked;save();renderShip();renderTotals();});
 $('tx-fr').addEventListener('change',e=>{st.txFr=e.target.checked;save();renderTotals();});
-document.querySelectorAll('[data-mu]').forEach(b=>b.addEventListener('click',()=>{st.mu=+b.dataset.mu;save();renderLines();renderTotals();}));
+$('mub').addEventListener('click',e=>{ const m=e.target.dataset.mu; if(!m)return; st.mu=+m; save(); renderLines(); renderTotals(); });
+$('opt-on').addEventListener('change',e=>{ st.optOn=e.target.checked; if(!Array.isArray(st.opts)||!st.opts.length)st.opts=defOpts(); save(); renderTotals(); });
+$('opt-reset').addEventListener('click',()=>{ st.opts=defOpts(); save(); renderTotals(); });
+$('opt-add').addEventListener('click',()=>{ if(st.opts.length>=LET.length)return; const last=st.opts[st.opts.length-1]||{q:0,m:2.0}; st.opts.push({q:(+last.q||0)+24,m:Math.max(1.3,Math.round(((+last.m||2)-0.1)*10)/10)}); save(); renderTotals(); });
+$('opt-list').addEventListener('click',e=>{ const row=e.target.closest('.opt'); if(!row)return; const i=+row.dataset.o;
+  if(e.target.dataset.om){ st.opts[i].m=+e.target.dataset.om; save(); renderTotals(); }
+  if(e.target.dataset.odel!=null){ st.opts.splice(i,1); if(!st.opts.length)st.optOn=false; save(); renderTotals(); } });
+$('opt-list').addEventListener('change',e=>{ if(e.target.dataset.of!=='q')return; const i=+e.target.closest('.opt').dataset.o; st.opts[i].q=Math.max(1,parseInt(e.target.value)||1); save(); renderTotals(); });
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{showTab(b.dataset.tab);save();}));
 $('add').addEventListener('click',()=>{st.lines.push(newLine());save();renderLines();renderTotals();
   const ins=$('lines').querySelectorAll('[data-f=item]'); ins[ins.length-1].focus();});
