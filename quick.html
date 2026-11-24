@@ -164,6 +164,27 @@ details[open] summary:before{content:'▾ '}
 #bar .a{font-size:23px;font-weight:900;color:#f5a623;line-height:1.05}
 #bar .b{font-size:11px;color:#8892a4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #bar button{padding:13px 13px;font-size:15px}
+#pv{position:fixed;inset:0;z-index:90;background:rgba(5,8,14,.92);display:flex;flex-direction:column;align-items:center;padding:12px;overflow:auto}
+#pv .acts{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%;max-width:760px;background:#0b0e14;border:2px solid #f5a623;border-radius:12px;padding:10px;margin-bottom:10px}
+#pv .acts button{flex:1 1 150px;padding:14px 10px;font-size:15px}
+#pv .acts .x{flex:0 0 auto;background:#3a1a1a;color:#ff8a8a}
+#pv .paper{background:#fff;color:#111;width:100%;max-width:760px;border-radius:10px;padding:20px;font-size:13px}
+#pv .paper h2{font-size:20px;letter-spacing:1px}
+#pv .paper table{width:100%;border-collapse:collapse;margin:14px 0}
+#pv .paper th{background:#111;color:#f5a623;text-align:left;padding:7px 8px;font-size:11px;text-transform:uppercase;letter-spacing:1px}
+#pv .paper td{padding:7px 8px;border-bottom:1px solid #ddd;vertical-align:top}
+#pv .paper .r{text-align:right;white-space:nowrap}
+#pv .paper .m{color:#666;font-size:12px}
+#pv .paper .free{color:#1a7a3a;font-weight:800}
+#pv .paper s{color:#999;font-size:12px;display:block}
+#pv .paper .grand td{font-weight:900;font-size:16px;border-top:2px solid #111;border-bottom:none}
+#pv .paper .save td{color:#1a7a3a;font-weight:800;border-bottom:none}
+#pv .paper .pitch{margin-top:5px;padding:5px 8px;background:#fff4dc;border-left:4px solid #f5a623;border-radius:4px;font-size:12px;color:#5a3d00}
+#pv .paper .pitch.on{background:#e7f6ec;border-left-color:#1a7a3a;color:#1a5a2a;font-weight:700}
+#pv .paper table{table-layout:fixed}#pv .paper th:nth-child(1){width:12%}#pv .paper th:nth-child(3),#pv .paper th:nth-child(4){width:23%}#pv .paper td{overflow-wrap:anywhere}
+@media(max-width:520px){#pv .paper{padding:12px;font-size:12px}#pv .paper td,#pv .paper th{padding:6px 4px}#pv .paper h2{font-size:17px}}
+#pv .tip{color:#8892a4;font-size:12px;margin-top:10px;text-align:center;max-width:760px}
+#toast.err{background:#3a1a1a;color:#ffb3b3;border-color:#e05555}
 #toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#1f3a24;color:#9fe0b0;border:1px solid #4caf7d;border-radius:20px;padding:10px 18px;font-weight:800;font-size:14px;z-index:60;max-width:90vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.5)}
 #zoom{position:fixed;inset:0;z-index:100;background:rgba(5,8,14,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
 #zoom img{max-width:min(92vw,520px);max-height:70vh;background:#fff;border-radius:14px;padding:10px}
@@ -181,7 +202,7 @@ details[open] summary:before{content:'▾ '}
 #quote .save td{color:#1a7a3a;font-weight:800;border-bottom:none}
 #quote .pitch{margin-top:5px;padding:5px 8px;background:#fff4dc;border-left:4px solid #f5a623;border-radius:4px;font-size:12px;color:#5a3d00}
 #quote .pitch.on{background:#e7f6ec;border-left-color:#1a7a3a;color:#1a5a2a;font-weight:700}
-@media print{body{background:#fff}header,#mubar,.wrap,#bar,#toast,#zoom{display:none!important}#quote{display:block;padding:0}#quote *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+@media print{body{background:#fff}header,#mubar,.wrap,#bar,#toast,#zoom,#pv{display:none!important}#quote{display:block;padding:0}#quote *{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
@@ -268,6 +289,14 @@ details[open] summary:before{content:'▾ '}
 <div id="toast" hidden></div>
 <div id="zoom" hidden><img alt=""><div></div></div>
 <div id="quote"></div>
+<div id="pv" hidden><div class="acts">
+  <button type="button" class="gold" id="pv-dl">⬇️ Download PDF</button>
+  <button type="button" id="pv-share">📤 Share PDF</button>
+  <button type="button" id="pv-print">🖨️ Print</button>
+  <button type="button" id="pv-copy">📋 Copy text</button>
+  <button type="button" class="x" id="pv-x">✕ Close</button></div>
+  <div class="paper" id="pv-paper"></div>
+  <div class="tip">Download saves a real PDF file. Share sends it by text, email or AirDrop (phones). Print works on a computer.</div></div>
 
 <script>
 'use strict';
@@ -588,19 +617,62 @@ function renderQuote(){ const t=calc(), R=REPS[st.rep]||{name:'Diamond Blade War
     <tr><td colspan="4" class="m" style="border-bottom:none">Freight and sales tax added at invoice.</td></tr></table>
     ${st.notes?`<div style="white-space:pre-wrap;margin-bottom:12px">${esc(st.notes)}</div>`:''}
     <div style="margin-top:14px"><b>${esc(R.sign||R.name)}</b>${R.email?`<div class="m">${esc(R.email)}</div>`:''}<div class="m">Diamond Blade Warehouse</div></div>`; }
-function guarded(fn){ const b=blocker(); if(b){ alert(b); return; } fn(); }
+function guarded(fn){ const b=blocker(); if(b){ toast('⚠️ '+b,true); return; } fn(); }
 $('copy').addEventListener('click',()=>guarded(async()=>{ const txt=quoteText(); try{ await navigator.clipboard.writeText(txt); toast('📋 Quote copied. Paste it in a text or email.'); }catch(e){ prompt('Copy this quote:',txt); } }));
-$('pdf').addEventListener('click',()=>guarded(()=>{ renderQuote(); window.print(); }));
+// PDF: always open an on-page preview (some in-app browsers ignore window.print), with a real PDF file to download or share
+$('pdf').addEventListener('click',()=>guarded(()=>{ renderQuote(); $('pv-paper').innerHTML=$('quote').innerHTML; $('pv').hidden=false; $('pv').scrollTop=0;
+  $('pv-share').hidden=!(navigator.canShare&&navigator.share); loadPdfLib(); }));
+$('pv-x').addEventListener('click',()=>{ $('pv').hidden=true; });
+$('pv-print').addEventListener('click',()=>{ try{ window.print(); }catch(e){ toast('Printing is blocked here. Use Download PDF.',true); } });
+$('pv-copy').addEventListener('click',async()=>{ const txt=quoteText(); try{ await navigator.clipboard.writeText(txt); toast('📋 Quote copied'); }catch(e){ prompt('Copy this quote:',txt); } });
+let pdfLib=null;
+function loadPdfLib(){ if(pdfLib)return pdfLib; pdfLib=new Promise((res,rej)=>{ if(window.jspdf)return res(window.jspdf); const sc=document.createElement('script'); sc.src='vendor/jspdf.umd.min.js'; sc.onload=()=>res(window.jspdf); sc.onerror=()=>{ pdfLib=null; rej(new Error('PDF maker did not load')); }; document.head.appendChild(sc); }); return pdfLib; }
+const plain=s=>String(s==null?'':s).replace(/[^\x20-\x7E -ÿ]/g,'').replace(/\s+/g,' ').trim();
+const pdfName=()=>('DBW Quote '+(st.co||st.name||'')+' '+st.date).replace(/[^\w\- ]+/g,'').replace(/\s+/g,' ').trim()+'.pdf';
+async function makePdf(){ const {jsPDF}=await loadPdfLib(); const t=calc(), R=REPS[st.rep]||{name:'Diamond Blade Warehouse',email:''};
+  const d=new jsPDF({unit:'pt',format:'letter'}), W=612, M=40; let y=50;
+  const need=h=>{ if(y+h>750){ d.addPage(); y=50; } };
+  d.setFont('helvetica','bold'); d.setFontSize(18); d.text('DIAMOND BLADE WAREHOUSE',M,y);
+  d.setFont('helvetica','normal'); d.setFontSize(10); d.text('Date: '+st.date,W-M,y,{align:'right'}); y+=16;
+  d.setTextColor(100); d.text(t.pkg?'Package Deal':'Quote',M,y); if(st.num)d.text('Customer #: '+plain(st.num),W-M,y,{align:'right'}); d.setTextColor(0); y+=20;
+  if(st.co||st.name){ d.setFont('helvetica','bold'); d.text('Prepared for:',M,y); d.setFont('helvetica','normal'); y+=13; [st.co,st.name].filter(Boolean).forEach(x=>{ d.text(plain(x),M,y); y+=13; }); y+=6; }
+  const cx=[M,M+44,W-M-150,W-M]; d.setFillColor(17,17,17); d.rect(M,y,W-2*M,20,'F'); d.setTextColor(245,166,35); d.setFont('helvetica','bold'); d.setFontSize(9);
+  d.text('QTY',cx[0]+6,y+13); d.text('ITEM',cx[1],y+13); d.text('EACH',cx[2]+60,y+13,{align:'right'}); d.text('TOTAL',cx[3]-6,y+13,{align:'right'}); d.setTextColor(0); y+=30;
+  const row=(q,name,code,each,tot,extra)=>{ d.setFont('helvetica','normal'); d.setFontSize(10); const lines=d.splitTextToSize(plain(name),cx[2]-cx[1]-10);
+    const h=lines.length*12+(code?11:0)+(extra||[]).length*12+8; need(h);
+    d.text(String(q),cx[0]+6,y); d.text(lines,cx[1],y); d.text(each,cx[2]+60,y,{align:'right'}); d.text(tot,cx[3]-6,y,{align:'right'});
+    let yy=y+lines.length*12; if(code){ d.setFontSize(8.5); d.setTextColor(110); d.text(plain(code),cx[1],yy); d.setTextColor(0); yy+=11; }
+    (extra||[]).forEach(([txt,col])=>{ d.setFontSize(9); d.setTextColor(...col); d.text(d.splitTextToSize(plain(txt),cx[3]-cx[1]-6)[0],cx[1],yy); d.setTextColor(0); yy+=12; });
+    y=yy+2; d.setDrawColor(221); d.line(M,y,W-M,y); y+=14; };
+  t.rows.forEach(r=>{ const x=pitch24(r.l,r.q,r.unit,t), ex=[];
+    if(x){ if(x.cur.min>1)ex.push([x.cur.name+' special price applied',[26,90,42]]); x.next.forEach(m=>ex.push(['Buy '+m.min+', pay '+money(m.price)+' each (save '+money(m.save)+' each). Add '+m.more+' more'+(x.grp?' '+x.grp+' special blades (mix & match)':' of this blade')+'.',[179,92,0]])); }
+    row(r.q,r.l.desc||r.l.item,r.l.item?codeOf(r.l):'',money(r.unit),money(r.ext),ex); });
+  t.eqRows.forEach(r=>row(r.q,r.l.desc||r.l.item,r.l.item&&!r.l.promo&&norm(r.l.item)!==AMEX.code?codeOf(r.l):'',r.free?'FREE':money(r.unit),r.free?'FREE':money(r.ext),[...(r.reg>r.unit?[['Regular '+money(r.reg)+' each',[150,150,150]]]:[]),...(r.free?[['Included with this package',[26,122,58]]]:[])]));
+  need(60); d.setDrawColor(17); d.setLineWidth(1.5); d.line(M,y-8,W-M,y-8); d.setLineWidth(.5);
+  d.setFont('helvetica','bold'); d.setFontSize(14); d.text('TOTAL',M,y+8); d.text(money(t.deal),W-M-6,y+8,{align:'right'}); y+=26;
+  if(t.eqSave>0){ d.setFontSize(11); d.setTextColor(26,122,58); d.text('You save on the equipment',M,y); d.text(money(t.eqSave),W-M-6,y,{align:'right'}); d.setTextColor(0); y+=18; }
+  d.setFont('helvetica','normal'); d.setFontSize(9); d.setTextColor(100); d.text('Freight and sales tax added at invoice.',M,y); d.setTextColor(0); y+=20;
+  if(st.notes){ const nl=d.splitTextToSize(plain(st.notes),W-2*M); need(nl.length*12+10); d.setFontSize(10); d.text(nl,M,y); y+=nl.length*12+10; }
+  need(50); d.setFont('helvetica','bold'); d.setFontSize(11); d.text(plain(R.sign||R.name),M,y); y+=13; d.setFont('helvetica','normal'); d.setFontSize(9); d.setTextColor(100);
+  if(R.email){ d.text(R.email,M,y); y+=12; } d.text('Diamond Blade Warehouse',M,y);
+  return d; }
+$('pv-dl').addEventListener('click',async()=>{ try{ const d=await makePdf(); d.save(pdfName()); toast('⬇️ PDF saved: '+pdfName()); }catch(e){ toast('PDF maker did not load. Use Print or Copy text.',true); } });
+$('pv-share').addEventListener('click',async()=>{ try{ const d=await makePdf(); const f=new File([d.output('blob')],pdfName(),{type:'application/pdf'});
+  if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:pdfName()}); else { d.save(pdfName()); toast('⬇️ PDF saved (sharing not available here)'); } }
+  catch(e){ if(e&&e.name!=='AbortError')toast('Could not share. Use Download PDF.',true); } });
 
 // ── Rep, customer, reset ──
 $('rep').innerHTML='<option value="">Pick your name</option>'+Object.entries(REPS).map(([k,v])=>`<option value="${k}">${esc(v.name)} (${k})</option>`).join('');
 $('rep').addEventListener('change',e=>{ st.rep=e.target.value; save(); renderAll(); });
 $('who').addEventListener('click',()=>{ $('rep-card').hidden=false; $('rep').focus(); });
 [['co','co'],['cname','name'],['cnum','num'],['notes','notes']].forEach(([id,f])=>$(id).addEventListener('input',e=>{ st[f]=e.target.value; save(); }));
-$('reset-top').addEventListener('click',()=>$('reset').click());
-$('reset').addEventListener('click',()=>{ if(!st.lines.some(l=>isBlade(l)||isEq(l))&&!st.co&&!st.name||confirm('Start a new quote? This clears the blades, saw, promos and customer (your name, markup and switches stay).')){
-  st=Object.assign(blank(),{rep:st.rep,mu:st.mu,acct:st.acct,qSaw:st.qSaw,qMulti:st.qMulti,eqCat:st.eqCat}); save(); $('q').value=''; renderAll(); toast('New quote'); } });
-function toast(m){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,1900); }
+// New quote: tap once, then tap again within 4 seconds to clear (no pop-up, which some browsers mute)
+function doReset(){ st=Object.assign(blank(),{rep:st.rep,mu:st.mu,acct:st.acct,qSaw:st.qSaw,qMulti:st.qMulti,eqCat:st.eqCat}); save(); $('q').value=''; renderAll(); toast('✓ New quote'); }
+function armReset(btn,label){ const empty=!st.lines.some(l=>isBlade(l)||isEq(l))&&!st.co&&!st.name; if(empty||btn.dataset.armed){ clearTimeout(btn._t); delete btn.dataset.armed; btn.textContent=label; doReset(); return; }
+  btn.dataset.armed='1'; btn.textContent='Tap again to clear'; toast('Tap New quote again to clear this quote'); clearTimeout(btn._t); btn._t=setTimeout(()=>{ delete btn.dataset.armed; btn.textContent=label; },4000); }
+$('reset-top').addEventListener('click',e=>armReset(e.currentTarget,'↺ New quote'));
+$('reset').addEventListener('click',e=>armReset(e.currentTarget,'↺ New quote'));
+function toast(m,err){ const t=$('toast'); t.textContent=m; t.classList.toggle('err',!!err); t.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>t.hidden=true,err?4500:1900); }
 document.addEventListener('click',e=>{ const z=e.target.closest('[data-zoom]'); if(z&&!z.closest('#res')){ $('zoom').querySelector('img').src=z.getAttribute('src'); $('zoom').querySelector('div').textContent=z.dataset.zoom; $('zoom').hidden=false; return; } if(e.target.closest('#zoom'))$('zoom').hidden=true; });
 
 function renderAll(){ const R=REPS[st.rep]; $('who').textContent=R?R.name+' ('+st.rep+') · change':'Pick your name below'; $('rep').value=st.rep; $('rep-card').hidden=!!R;
