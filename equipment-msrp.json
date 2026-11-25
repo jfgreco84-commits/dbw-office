@@ -1,0 +1,702 @@
+{
+ "checked": "2026-11-25",
+ "items": {
+  "50SQ2-2.4S": {
+   "msrp": 1480,
+   "note": "Zoro and Power Equipment Direct $1,480; Contractors Direct and Ferguson $1,658.",
+   "sources": [
+    "https://zoro.com/tsurumi-12-hp-2-stainless-steel-dewatering-pump-12-hp-115v-50sq2-24s-61-115v/i/G1665260",
+    "https://powerequipmentdirect.com/Tsurumi-Pump-50SQ2.4S/p92969.html",
+    "https://www.contractorsdirect.com/products/tsurumi-pump-50sq224s-water-pump"
+   ]
+  },
+  "50TM2.4S": {
+   "msrp": 1452,
+   "note": "Heyden and Pumpbiz $1,452; PED/Contractors Direct $1,383; Zoro seen at $1,394 and $1,624 in different snapshots. Median used.",
+   "sources": [
+    "https://heydensupply.com/product/tsurumi-pump-50tm2-4s-corrosion-resistant-titanium-submersible-pump-for-saltwater-applications-230v",
+    "https://pumpbiz.com/1-2-hp-submersible-titanium-pump-50tm2-4s",
+    "https://www.powerequipmentdirect.com/Tsurumi-Pump-50TM24S-Water-Pump/p7033.html"
+   ]
+  },
+  "50TM2.75S": {
+   "msrp": 1543,
+   "note": "Heyden $1,543 (115V and 230V); PED $1,313 for 230V. Only two dealers found.",
+   "sources": [
+    "https://heydensupply.com/product/tsurumi-pump-50tm2-75s-titanium-saltwater-115v",
+    "https://powerequipmentdirect.com/Tsurumi-Pump-50TM275S-230V-Water-Pump/p70246.html"
+   ]
+  },
+  "50TMA2.4S": {
+   "msrp": 1723,
+   "note": "Heyden $1,723, Zoro $1,763; PED shown at $1,441-$1,614 in different snapshots.",
+   "sources": [
+    "https://heydensupply.com/?p=59742",
+    "https://www.zoro.com/tsurumi-2-12-hp-titanium-submersible-pump-with-float-50tma24s-63-auto-115v/i/G7157333/",
+    "https://powerequipmentdirect.com/Tsurumi-Pump-50TMA2.4S/p7034.html"
+   ]
+  },
+  "50TMA2.75S": {
+   "msrp": 1910,
+   "note": "Heyden and Pumpbiz both $1,910.",
+   "sources": [
+    "https://heydensupply.com/product/tsurumi-pump-50tma2-75s-auto-corrosion-resistant-titanium-submersible-pump-for-saltwater-applications-115v",
+    "https://pumpbiz.com/1-hp-saltwater-pump-50tma2-75s"
+   ]
+  },
+  "50UT2.4S": {
+   "msrp": 394,
+   "note": "Contractors Direct and Americ Machinery both $394.",
+   "sources": [
+    "https://www.contractorsdirect.com/products/tsurumi-utz-electric-trash-pumps",
+    "https://m.fastline.com/construction-equipment/listing-detail/tsurumi-pump-50ut24s-americ-machinery-corporation-vallejo-california/b2fe0033-dc2c-4964-b82c-a96175045b9a"
+   ]
+  },
+  "50UT2.75S": {
+   "msrp": 564,
+   "note": "Zoro $564, Americ Machinery $575.",
+   "sources": [
+    "https://zoro.com/tsurumi-1-hp-2-sump-pump-1-hp-vortex-impeller-110v-50ut275s-61-110v/i/G1665148",
+    "https://m.fastline.com/construction-equipment/listing-detail/tsurumi-pump-50ut275s-americ-machinery-corporation-vallejo-california/67d68a20-1f02-4e73-86ce-0c9cbbf62a28"
+   ]
+  },
+  "50UTZ2.4S": {
+   "msrp": 462,
+   "note": "Americ Machinery $462, Zoro $412. Only two US dealers found.",
+   "sources": [
+    "https://m.fastline.com/construction-equipment/listing-detail/tsurumi-pump-50utz24s-americ-machinery-corporation-vallejo-california/b6cb875f-ffe5-421b-98f6-6f0e157c1b24",
+    "https://zoro.com/tsurumi-12-hp-2-sump-pump-12-hp-vortex-impeller-auto-auto-110v-50utz24s-61-auto-110v/i/G1665139"
+   ]
+  },
+  "50UTZ2.75S": {
+   "msrp": 669,
+   "note": "Americ Machinery $669; Pro Grade Equipment (Machinery Trader) $702. Zoro has the listing but no price was visible.",
+   "sources": [
+    "https://m.fastline.com/construction-equipment/listing-detail/tsurumi-pump-50utz275s-americ-machinery-corporation-vallejo-california/cc9cde33-ab12-4e04-9b1d-87bf133f84b2",
+    "https://machinerytrader.asia/ja/listing/for-sale/234715839/2024-tsurumi-50utz2-dot-75s-pumps"
+   ]
+  },
+  "966845303": {
+   "msrp": 15579,
+   "note": "Soff-Cut 2000 (X-2000) 10\". $15,579 at Toolup, Contractors Direct, Cougar; Blades Direct $15,422. Amazon $13,919 (low), Diamond Tool Store/Tool Locker $18,144 (high).",
+   "sources": [
+    "https://toolup.com/products/husqvarna-966845303-soff-cut-2000-early-entry-concrete-saw-with-vacuum-port-9-hp-gas",
+    "https://www.contractorsdirect.com/products/husqvarna-2000-green-concrete-saw",
+    "https://cougarsalesrental.com/products/husqvarna-soff-cut%C2%AE-2000"
+   ]
+  },
+  "966845505": {
+   "msrp": 17719,
+   "note": "Soff-Cut 4000 (X-4000) self-propelled, Kohler 20.5hp. $17,719 at Ace Cutting, Cougar, Blades ASAP; Construction Complete $18,853; Diamond Tool Store/Superior $20,634 (high).",
+   "sources": [
+    "https://acecutting.com/products/soff-cut-4000-husqvarna-concrete-saw",
+    "https://cougarsalesrental.com/products/husqvarna-soff-cut%C2%AE-4000",
+    "https://bladesasap.com/products/husqvarna-x4000-soff-cut-early-entry-saw-kohler-engine-20-5-hp-2-75-inch-cutting-depth.html"
+   ]
+  },
+  "A45GRC10": {
+   "msrp": 99,
+   "note": "9527PB is a discontinued/international (M14 spindle) model with no current US new listings; priced its current US equivalent, Makita 9557PB 4-1/2in paddle switch grinder. Zoro $99, Power Tool Store $99, Home Depot $109 reg ($89 sale), Toolu",
+   "sources": [
+    "https://zoro.com/makita-paddle-switch-4-12-angle-grinder-mp9557pb/i/G301978098",
+    "https://thepowertoolstore.com/products/makita-9557pb",
+    "https://www.homedepot.com/p/100594819"
+   ]
+  },
+  "A9GRC10": {
+   "msrp": 249,
+   "note": "Model chosen: Milwaukee 6088-30 (15A 7/9in, trigger lock-on). 6089-30 is shown discontinued at Zoro. Home Depot $249, Zoro $249, AmericanMuscle $279.99, Fleet Farm/Hanes $299; mainstream typical $249.",
+   "sources": [
+    "https://www.homedepot.com/p/Milwaukee-15-Amp-7-9-in-Large-Angle-Grinder-with-Trigger-Lock-On-Switch-6088-30/203410166",
+    "https://zoro.com/milwaukee-tool-angle-grinder-79-wheel-diameter-15-amp-120v-lock-on-6088-30/i/G2516525",
+    "https://www.americanmuscle.com/milwaukee-tool-uam-7-inch-9-inch-large-angle-grinder-lock-on-15-amp-mlw6088-30.html"
+   ]
+  },
+  "AGR7C10": {
+   "msrp": 239,
+   "note": "Model chosen: Makita GA7061 (US 15A, 8,500 RPM, SJS II). GA7021 is 6,600 RPM (~$199) so does not match the 8,500 RPM spec; GA7061R is a non-US variant. Zoro, Toolup, Acme, Power Tool Store all $239.",
+   "sources": [
+    "https://zoro.com/makita-angle-grinder-7-150-a-trigger-ga7061/i/G201863265",
+    "https://toolup.com/products/makita-ga7061-7-sjs%E2%84%A2ii-angle-grinder-with-no-lock-on-switch",
+    "https://acmetools.com/makita-7-in-sjsii-angle-grinder-with-no-lock-on-switch-ga7061/088381809870.html"
+   ]
+  },
+  "CCE0911-20": {
+   "msrp": 3164,
+   "note": "Exact model found: Diamond Products Core Cut CCE0911H-20 (p/n 5801613), Honda GX390 11.7hp, 20\" guard. White Cap $3,132, CoreCutParts $3,164, EMI $3,224. Walmart $3,844 (OOS), Patriot sale $2,595 (outlier). NOT the CC1311HXL-20 (that one is",
+   "sources": [
+    "https://www.corecutparts.com/5801613-diamond-products-cce0911h-20-117hp-honda-gx390-gas-walk-behind-saw-w20-guard.html",
+    "https://www.emisupply.com/dia-5801613-diamond-cce0911h-20-11-7hp-honda-gx390-gas-walk-behind-saw-w-20-guard",
+    "https://www.whitecap.com/en-us/product/cce0911h20-11hp-honda-20quot-guard-walk-behind-saw-diamond-products-22430396"
+   ]
+  },
+  "DCS692X2": {
+   "msrp": 1099,
+   "note": "kit with 2x 9.0Ah FLEXVOLT + charger; Home Depot $1,099, Power Tool Store $1,099, ToolUp $1,099 list / $949 sale",
+   "sources": [
+    "https://www.homedepot.com/p/DEWALT-FLEXVOLT-60V-MAX-Cordless-9-in-Cutoff-Saw-and-2-FLEXVOLT-9-0Ah-Batteries-DCS692X2/320466144",
+    "https://thepowertoolstore.com/products/dewalt-dcs692x2",
+    "https://toolup.com/products/dewalt-dcs692x2-60v-max-brushless-cordless-9-in-cut-off-saw-kit"
+   ]
+  },
+  "DSH700": {
+   "msrp": 1519,
+   "note": "DSH 700-X 14in; Home Depot $1,519 (includes SP diamond blade), SupplyStop $1,489; Hilti.com hides price behind login",
+   "sources": [
+    "https://www.homedepot.com/p/Hilti-DSH-700-X-14-in-Hand-Held-Concrete-Gas-Saw-with-SP-Diamond-Blade-3800357/321729299",
+    "https://www.supplystop.com/products/2265864-dsh-700-x-gas-cut-off-saw"
+   ]
+  },
+  "EPT3-100HA": {
+   "msrp": 3387,
+   "note": "PED $2,966; Pollard and Zoro $3,322; Pumpbiz $3,387; Zoro via eBay $3,472; GoVets $3,548. Median used.",
+   "sources": [
+    "https://pumpbiz.com/gas-engine-trash-pump-4-ept3-100ha",
+    "https://www.pollardwater.com/product/_/R-7256143",
+    "https://powerequipmentdirect.com/Tsurumi-Pump-EPT3-100HA/p16085.html"
+   ]
+  },
+  "EPT3-50HA": {
+   "msrp": 1688,
+   "note": "Range $1,435 (Zoro, Contractors Direct) to $1,961 (other Zoro listing); Pumpbiz $1,688 and DK Hardware $1,722 sit in the middle.",
+   "sources": [
+    "https://pumpbiz.com/gas-engine-trash-pump-ept3-50ha",
+    "https://zoro.com/tsurumi-2-55-hp-honda-powered-trash-pump-ept3-50ha/i/G6884656",
+    "https://dkhardware.com/tsurumi-pump-ept3-50ha-trash-pump-55-hp-2-in-outlet-90-ft-max-head-190-gpm-iron-stainless-steel-product-6633142.html"
+   ]
+  },
+  "EPT3-80HA": {
+   "msrp": 2117,
+   "note": "Lewis and Zoro $2,117; 1TopTools $1,836; Shell Lumber $2,222; RP Lumber $2,281.",
+   "sources": [
+    "https://www.lewiscontractorsales.com/tsurumi-ept3-80ha-3-gas-trash-water-pump-honda-gx240-engine.html",
+    "https://zoro.com/tsurumi-pump-trash-pump-8-hp-3-in-outlet-96-ft-max-head-360-gpm-ironstainless-steel-ept3-80ha/i/G108349022"
+   ]
+  },
+  "FS309-14": {
+   "msrp": 2449,
+   "note": "Husqvarna FS 309 14\" 8.5hp. Diamond Tool Store $2,449, Power Tool Store $2,469, Esch $2,332, Lewis $2,265. Blade and water tank not included.",
+   "sources": [
+    "https://diamondtoolstore.com/husqvarna-fs-309-walk-behind-saw",
+    "https://thepowertoolstore.com/products/husqvarna-construction-967678301",
+    "https://www.eschsupply.com/Husqvarna-FS-309-Walk-Behind-Saw"
+   ]
+  },
+  "FS400": {
+   "msrp": 2849,
+   "note": "Husqvarna FS 400 LV 20\" 11.7hp Honda (967796502). Contractors Direct $2,849, Power Tool Store $2,879; some listings $2,567-2,625; list ~$3,315.",
+   "sources": [
+    "https://www.contractorsdirect.com/Husqvarna-FS400-Concrete-Saw",
+    "https://thepowertoolstore.com/products/husqvarna-construction-967796502",
+    "https://toolup.com/products/husqvarna-967796502-fs-400-lv"
+   ]
+  },
+  "GS-100": {
+   "msrp": 3200,
+   "note": "Gorilla GS-100 8\" Honda GX200 5.5hp. Kuhlman $3,200, Diamond Tool Store $3,273, Metropolitan Materials $3,000.",
+   "sources": [
+    "https://shop.kuhlman-corp.com/gorilla-gs-100-early-entry-walk-behind-saw/p3574/",
+    "https://www.diamondtoolstore.com/products/gs-100-early-entry-joint-saw",
+    "https://metropolitanmaterials.com/products/gorilla-early-entry-saw-honda-gx200"
+   ]
+  },
+  "HS2.4S": {
+   "msrp": 373,
+   "note": "Home Depot, Big Frog and Heyden $373; Zoro $343.",
+   "sources": [
+    "https://www.homedepot.com/p/TSURUMI-PUMP-2-in-1-2-HP-Submersible-Trash-Pump-HS2-4S-62/300375246",
+    "https://www.bigfrogsupply.com/products/tsurumi-hs2-4s-62-115v-manual-electric-submersible-pump",
+    "https://zoro.com/tsurumi-2-in-12-hp-submersible-trash-pump-hs24s-62-115v/i/G5297187"
+   ]
+  },
+  "HS3.75S": {
+   "msrp": 667,
+   "note": "Americ and Grit Outdoors $667; Zoro $613; Hanes $760.",
+   "sources": [
+    "https://m.fastline.com/construction-equipment/listing-detail/tsurumi-pump-hs375s-americ-machinery-corporation-vallejo-california/9d71aea6-754e-44fc-a0ea-c64e23e23932",
+    "https://gritroutdoors.com/tsurumi-pump-manual-electric-trash-pump-hs375s",
+    "https://zoro.com/tsurumi-3-1-hp-submersible-trash-pump-hs375s-62-115v/i/G5297241"
+   ]
+  },
+  "HS3.75SL": {
+   "msrp": 711,
+   "note": "Webb's, Americ and Ferguson $711; Core & Main $634; PED $672; Zoro $757.",
+   "sources": [
+    "https://webbsonline.com/Item/tsurumi-hs3.75sl-manual-electric-submersible-trash-pump",
+    "https://www.fergusonhome.com/tsurumi-pump-hs3-75sl-230v/s2113562",
+    "https://zoro.com/tsurumi-3-in-high-volume-electric-submersible-trash-pump-hs375sl-62-115v/i/G212218511"
+   ]
+  },
+  "HSD2.55S": {
+   "msrp": 792,
+   "note": "USA Tool Depot and Americ $754; Pumpbiz $792; Zoro $832.",
+   "sources": [
+    "https://pumpbiz.com/catalog/product/view/id/12017/category/3104/",
+    "https://zoro.com/tsurumi-2-34-hp-heavy-duty-submersible-trash-pump-hsd255s-63-115v/i/G5297223",
+    "https://usatooldepot.com/products/tsurumi-pump-hsd2-55s-2-3-4hp-heavy-duty-submersible-trash-pump"
+   ]
+  },
+  "HSE2.4S": {
+   "msrp": 527,
+   "note": "PED $470; 1TopTools $519; Grit Outdoors $527; Zoro $562.",
+   "sources": [
+    "https://gritroutdoors.com/tsurumi-pump-2in-1-2hp-with-automatic-relay-trash-pump-hse2-4s",
+    "https://www.1toptools.com/products/tsurumi-hse2-4s-automatic-electric-submersible-trash-pump-2-inch-discharge-1-2-hp-115v-heavy-duty-dewatering-tool-with-agitator",
+    "https://zoro.com/tsurumi-2-in-automatic-electric-submersible-trash-pump-w-auto-relay-hse24s-62-115v/i/G112218512"
+   ]
+  },
+  "HSZ2.4S": {
+   "msrp": 426,
+   "note": "Zoro $392; Americ $426; Newegg $453. Median used.",
+   "sources": [
+    "https://m.fastline.com/construction-equipment/listing-detail/tsurumi-pump-hsz24s-americ-machinery-corporation-vallejo-california/433ba759-0d8b-4526-9a72-84de01690194",
+    "https://zoro.com/tsurumi-2-12-hp-submersible-trash-pump-with-ball-float-attached-hsz24s-62-auto-115v/i/G5376506",
+    "https://www.newegg.com/p/2YV-003B-00006"
+   ]
+  },
+  "HSZ3.75S": {
+   "msrp": 693,
+   "note": "PED $693 and USA Tool Depot (new, eBay) $693; Pumpbiz $618 sale ($727 regular).",
+   "sources": [
+    "https://www.powerequipmentdirect.com/Tsurumi-Pump-HSZ375S-Water-Pump/p7029.html",
+    "https://www.ebay.com/p/21027480543",
+    "https://pumpbiz.com/tsurumi-submersible-sand-pump-automatic-hsz3-75s"
+   ]
+  },
+  "HSZ3.75SL": {
+   "msrp": 768,
+   "note": "PED $685; Ferguson $768; Zoro $819. Median used.",
+   "sources": [
+    "https://www.fergusonhome.com/tsurumi-pump-hsz3-75sl/s2113566",
+    "https://powerequipmentdirect.com/Tsurumi-Pump-HSZ375SL-Water-Pump/p109383.html",
+    "https://zoro.com/tsurumi-3-in-high-volume-automatic-electric-submersible-trash-pump-w-ball-float-hsz375sl-62-115v/i/G312218510"
+   ]
+  },
+  "ICS-680ES": {
+   "msrp": 1332,
+   "note": "ICS 680ES-GC powerhead only (576155). CESSCO $1,290, Jim & Slim's $1,332, Ace Cutting $1,411 (sold out), ICS Saw Parts $1,624; ICS 2025 MSRP $1,640; Diamond Tool Store $1,870 (backordered).",
+   "sources": [
+    "https://www.jimslimstools.com/Products/ICS-576155-680ES-Gas-Saw-Powerhead-Only__ICS-576155.aspx",
+    "https://www.cessco.com/576155.html",
+    "https://acecutting.com/products/ics-680es-powerhead-gas-concrete-chainsaw"
+   ]
+  },
+  "ICS-695F4": {
+   "msrp": 2427,
+   "note": "ICS 695F4 / 695XL-F4 powerhead only (575826). Ace Cutting $2,426, Saw King $2,427, Cutter Pro $2,544; Danse $1,868 (sold out, low); Diamond Tool Store $3,180 (backordered).",
+   "sources": [
+    "https://acecutting.com/products/ics-695f4-gas-powerhead-concrete-chainsaw",
+    "https://sawking.com/shop/ics_chainsaw_concrete/ics-695pg-gas-concrete-chainsaw/",
+    "https://cutterprosales.com/shop/ics-products/powerheads/695/ics-695xl-f4-powerhead"
+   ]
+  },
+  "ICS-695XL": {
+   "msrp": 2257,
+   "note": "ICS 695XL-GC powerhead only, 3/8\" pitch (581192). Wylaco $2,257 (list $2,780), Ace Cutting $2,257, CESSCO $2,544, Diamond Tool Store $3,180 (backordered). Range $2,257-2,544; could reasonably use ~$2,544.",
+   "sources": [
+    "https://www.wylaco.com/product/ics-gas-powerhead-695xl-gc",
+    "https://acceptance.reach.dog/shop/ace-cutting/products/ics-695gc-gas-powerhead-concrete-chainsaw",
+    "https://www.cessco.com/695xl-gc-power-head-gas.html"
+   ]
+  },
+  "ICS890F4-566112": {
+   "msrp": 4500,
+   "note": "ICS 890F4 12 GPM powerhead, 1' whips. Core & Main $4,500, Cutter Pro $4,232, Wylaco $4,619, CESSCO $3,690 (special order); ICS 2025 MSRP $4,688.",
+   "sources": [
+    "https://supply.coreandmain.com/ICS-890F4-Hydraulic-Powerhead-12GPM-45LM-30CM-Hose-Whips",
+    "https://cutterprosales.com/shop/ics-products/powerheads/890/ics-890f4-hydraulic-powerhead-12gpm45lpm-1ft30cm-hose-whips",
+    "https://www.wylaco.com/product/ics-hydraulic-powerhead-566112"
+   ]
+  },
+  "K3600-RINGSAW": {
+   "msrp": 4857,
+   "note": "K 3600 MK II 968424101, saw only (no blade, no hydraulic power pack); Jim & Slim's $4,856.89, Contractors Direct $4,621.91, BladesDirect $5,132, Concrete Tools Direct $5,175 sale, Esch $4,549 (out of stock); wide spread, picked median",
+   "sources": [
+    "https://www.jimslimstools.com/Products/Husqvarna-K3600MII-14in-Hydraulic-Ring-Saw__968424101.aspx",
+    "https://contractorsdirect.com/Husqvarna-K3600-Concrete-Ring-Saw",
+    "https://bladesdirect.net/products/k3600-mk-ii-hydraulic-ring-saw-power-cutter-husqvarna"
+   ]
+  },
+  "K4000": {
+   "msrp": 1149,
+   "note": "14in wet 120V 967084001; Husqvarna US $1,149, Zoro $1,128.99, ToolUp $1,048.99, Global Industrial $1,275",
+   "sources": [
+    "https://zoro.com/kbmt/husqvarna-k4000-wet",
+    "https://toolup.com/products/husqvarna-k4000-14-electric-cut-off-saw-wet",
+    "https://www.globalindustrial.com/p/14inch-round-cutter-967084001"
+   ]
+  },
+  "K4000-CUTNBREAK": {
+   "msrp": 2549,
+   "note": "967083301; Husqvarna US $2,549, Acetool $2,579, Power Tool Store and BladesDirect $2,419, Metropolitan $2,349",
+   "sources": [
+    "https://acetool.com/Husqvarna-967083301-p/hus-967083301.htm",
+    "https://thepowertoolstore.com/products/husqvarna-construction-967083301",
+    "https://bladesdirect.net/products/k4000-cut-n-break-electric-husqvarna-deep-cutting-power-cutter"
+   ]
+  },
+  "K535I-PKG": {
+   "msrp": 1189,
+   "note": "9in kit 967795903 with BLi200 battery + QC330 charger; Husqvarna US $1,189, ToolUp $1,189, Acetool $1,106, Contractors Direct $1,057",
+   "sources": [
+    "https://toolup.com/products/husqvarna-967795903-k535i-battery-powered-9-power-cutter-kit",
+    "https://acetool.com/products/husqvarna-967795903-k-535i-xp-9-in-power-cutter-kit",
+    "https://contractorsdirect.com/husqvarna-k535i-power-cutter-kit"
+   ]
+  },
+  "K540I": {
+   "msrp": 899,
+   "note": "tool only (no battery/charger) 970664002; Husqvarna $899, Zoro $903.99, Global Industrial $888.89; ToolUp $951, RCPW $976",
+   "sources": [
+    "https://www.husqvarna.com/us/power-cutters/k540i",
+    "https://zoro.com/husqvarna-k-540i-battery-power-cutter-105in-blade-wet-970664002/i/G511782768",
+    "https://www.globalindustrial.com/p/10inch-power-cutter-970664002"
+   ]
+  },
+  "K760-CUTNBREAK": {
+   "msrp": 2739,
+   "note": "967195701; ToolUp $2,739, Power Tool Store $2,739, Acetool $2,729, BladesDirect $2,668",
+   "sources": [
+    "https://toolup.com/products/husqvarna-967195701-k760-cut-n-break",
+    "https://thepowertoolstore.com/products/husqvarna-construction-967195701",
+    "https://acetool.com/products/husqvarna-967195701-k760-cut-n-break-gas-saw"
+   ]
+  },
+  "K770-12": {
+   "msrp": 1199,
+   "note": "12in 967808501; Husqvarna $1,199, ToolUp $1,193, Walmart $1,259, Power Tool Store $1,269, Acetool $1,102 (Ace $1,533.99, Backtrack $1,789 high)",
+   "sources": [
+    "https://toolup.com/products/husqvarna-967808501-k770-12-inch-gas-power-cutter",
+    "https://www.walmart.com/ip/458416136",
+    "https://thepowertoolstore.com/products/husqvarna-construction-970850302"
+   ]
+  },
+  "K770-14": {
+   "msrp": 1329,
+   "note": "14in 967682101; Acetool $1,329, ToolUp $1,259, Atlas $1,503.99, Husqvarna.com from $1,514, Core&Main $1,192.69; picked median",
+   "sources": [
+    "https://acetool.com/Husqvarna-967682101-p/hus-967682101.htm",
+    "https://toolup.com/products/husqvarna-967682101-k770-14-power-cutter",
+    "https://atlas-machinery.com/husqvarna/husq-967682101"
+   ]
+  },
+  "K770-CART": {
+   "msrp": 1149,
+   "note": "Husqvarna KV 7 cart w/ water tank (587768401). $1,149 at Power Tool Store, Jim & Slim's, Acetool; Blades Direct $1,150. Outliers: Concrete Tools Direct $1,075 (sold out), Jendco $1,231.",
+   "sources": [
+    "https://thepowertoolstore.com/products/husqvarna-construction-587768401",
+    "https://www.jimslimstools.com/Products/Husqvarna-KV7-K770-or-K760-Cutting-Cart-with-Water-Tank__587768401.aspx",
+    "https://acetool.com/Husqvarna-587768401-p/hus-587768401.htm"
+   ]
+  },
+  "K970-17RINGSAW": {
+   "msrp": 5399,
+   "note": "17in K 970 III Ring 970608201, blade not included; Power Tool Store $5,399, Husqvarna US $5,449. Only two sources found",
+   "sources": [
+    "https://thepowertoolstore.com/products/husqvarna-construction-970608201",
+    "https://www2.husqvarnacp.com/us/machines/power-cutters/k-970-ring/970608201"
+   ]
+  },
+  "K970-RINGSAW": {
+   "msrp": 5059,
+   "note": "14in 967272301, blade not included; ToolUp $5,059, BladesDirect $5,059, Husqvarna US $5,149, Core&Main $4,957.62, Esch $4,882",
+   "sources": [
+    "https://toolup.com/products/husqvarna-967272301-k970iii-14-ring-saw",
+    "https://bladesdirect.net/products/husqvarna-k-970-iii-ring-14-967272301",
+    "https://www.eschsupply.com/Husqvarna-K970-Ring-Saw"
+   ]
+  },
+  "K970A-14": {
+   "msrp": 1849,
+   "note": "14in K 970 III 967348001; Husqvarna US $1,849, Acetool $1,879, Core&Main $2,039",
+   "sources": [
+    "https://www.husqvarna.com/us/products/power-cutters/k970/967348001/",
+    "https://acetool.com/products/husqvarna-967348001-k-970-14-power-cutters",
+    "https://supply.coreandmain.com/Husqvarna-K970-14-Power-cutter"
+   ]
+  },
+  "K970A-16": {
+   "msrp": 2059,
+   "note": "16in 967348101; ToolUp $2,059, Power Tool Store $2,059, Acetool $1,979, Core&Main $1,826.69 (out of stock)",
+   "sources": [
+    "https://toolup.com/products/husqvarna-967348101-k970-iii-16",
+    "https://thepowertoolstore.com/products/husqvarna-construction-967348101",
+    "https://acetool.com/products/husqvarna-967348101-k-970-power-cutter"
+   ]
+  },
+  "K970CHAINSAW": {
+   "msrp": 2645,
+   "note": "Husqvarna K 970 Chain III powerhead, bar & chain not included (967660501). Contractors Direct $2,579, Delta Diamond $2,629, Diamond Tool Store $2,645 sale; regular price $2,939 (DTS, Tool Locker, Runyon).",
+   "sources": [
+    "https://www.diamondtoolstore.com/products/husqvarna-k-970-chain-saw",
+    "https://deltadiamond.com/products/husqvarna-k-970-diamond-chain-saw",
+    "https://www.contractorsdirect.com/products/husqvarna-k970-concrete-chain-saw"
+   ]
+  },
+  "LB-1500": {
+   "msrp": 2177,
+   "note": "Pollard $2,064-$2,085; HTS $2,177; Pumpbiz $2,236; Zoro $2,262. Median used.",
+   "sources": [
+    "https://hydrotechnologysystems.supply/products/tsurumi-lb-1500-3-manual-electric-submersible-dewatering-pump-115v",
+    "https://pumpbiz.com/lb-tsurumi-pump-3-lb-1500",
+    "https://zoro.com/tsurumi-2-hp-3-plug-in-utility-pump-115v-no-switch-included-lb-1500-60-115v/i/G6409602"
+   ]
+  },
+  "LB-480": {
+   "msrp": 450,
+   "note": "Home Depot and Pollard $450; Zoro $471; Tractor Supply $550.",
+   "sources": [
+    "https://www.homedepot.com/p/TSURUMI-PUMP-2-IN-2-3-HP-Submersible-Pump-LB-480-62/300380814",
+    "https://www.pollardwater.com/product/tsurumi-pump-lb-series-23-hp-110v-submersible-pump-tlb480/_/R-7882174",
+    "https://www.zoro.com/tsurumi-23-hp-2-plug-in-utility-pump-115v-no-switch-included-lb-480-62-115v/i/G5297171"
+   ]
+  },
+  "LB-480A": {
+   "msrp": 597,
+   "note": "Core & Main, Wharton Hardware, Americ and a US eBay dealer are all at $597.",
+   "sources": [
+    "https://supply.coreandmain.com/Tsurumi-2-NPTM-2-3HP-Submersible-Dewatering-Pump-Automatic-115VAC-LB-480A",
+    "https://reach.dog/shop/wharton-hardware-and-supply/products/tsurumi-lb-480a-automatic-operation-portable-dewatering-pump-2-3hp-115v-2-discharge"
+   ]
+  },
+  "LB-800": {
+   "msrp": 743,
+   "note": "Range $632 to $833 (Hanes, Concrete Tools Direct); Core & Main $708; Foards $743.",
+   "sources": [
+    "https://www.foards.com/collections/all/products/lb-800",
+    "https://supply.coreandmain.com/Tsurumi-2NPTM-1HP-Submersible-Dewatering-Pump-Manual-115VAC-LB-800",
+    "https://www.hanessupply.com/tsurumi-pump-lb-800"
+   ]
+  },
+  "LB-800A": {
+   "msrp": 930,
+   "note": "Walmart and PED $930; 1TopTools $830; Pumpbiz and Danse $976.",
+   "sources": [
+    "https://www.walmart.com/ip/Tsurumi-Electric-Submersible-Pump/523211422",
+    "https://powerequipmentdirect.com/Tsurumi-Pump-LB800A/p85537.html"
+   ]
+  },
+  "LSC1.4S": {
+   "msrp": 521,
+   "note": "Big Frog and Contractors Direct $521; 123ponds $465; Zoro $657.",
+   "sources": [
+    "https://www.bigfrogsupply.com/collections/pumps/products/tsurumi-lsc1-4s-61-115v-submersible-residue-dewatering-pump",
+    "https://www.contractorsdirect.com/products/tsurumi-pump-residue-drainage-pump",
+    "https://www.zoro.com/tsurumi-23-hp-34-residue-pump-115v-lsc14s-61-115v/i/G1665190/"
+   ]
+  },
+  "LSR2.4S": {
+   "msrp": 534,
+   "note": "USA Tool Depot, Webb's, 1TopTools and 123ponds $534; Zoro $524; Pumpbiz $530; PED $476.",
+   "sources": [
+    "https://usatooldepot.com/products/tsurumi-pump-lsr2-4s-2-2-3hp-low-level-high-volume-submersible-pump",
+    "https://webbsonline.com/Item/tsurumi-lsr-cleanout-pump",
+    "https://zoro.com/tsurumi-23-hp-2-plug-in-utility-pump-115v-float-lsr24s-61-115v/i/G5297214"
+   ]
+  },
+  "NK2-15": {
+   "msrp": 2092,
+   "note": "Contractors Direct, Lewis and Pumpbiz $2,092; 1TopTools $1,779; Danse $1,665 (sold out).",
+   "sources": [
+    "https://www.contractorsdirect.com/products/tsurumi-pump-nk-series-pumps",
+    "https://www.lewiscontractorsales.com/tsurumi-submersible-pump-3-inch-discharge-dual-voltage-110-gpm.html",
+    "https://pumpbiz.com/nk-dewatering-pump-hd-hh-nk2-15"
+   ]
+  },
+  "NK3-22L(HIGHVOLUME)": {
+   "msrp": 2676,
+   "note": "Zoro $2,676 (220V); USA Tool Depot $2,939. Only two US prices found.",
+   "sources": [
+    "https://zoro.com/tsurumi-3-hp-3-plug-in-utility-pump-220v-nk3-22l-220v/i/G6978027",
+    "https://usatooldepot.com/products/tsurumi-pump-nk3-22l-3-3hp-heavy-duty-low-head-high-volume-submersible-dewatering-pump"
+   ]
+  },
+  "NK4-22": {
+   "msrp": 2415,
+   "note": "Zoro $2,274; HTS $2,415; Americ $2,425; Pumpbiz $2,548; GoVets $3,250 (outlier).",
+   "sources": [
+    "https://hydrotechnologysystems.supply/products/tsurumi-nk4-22-3-manual-electric-submersible-dewatering-pump",
+    "https://m.fastline.com/construction-equipment/listing-detail/tsurumi-pump-nk4-22-americ-machinery-corporation-vallejo-california/5b9c08f7-59aa-4de2-abdc-e1b41a669d97",
+    "https://zoro.com/tsurumi-3-hp-3-manual-electric-submersible-pump-220v-no-switch-included-nk4-22-220v/i/G7015294"
+   ]
+  },
+  "SKIL714MAG": {
+   "msrp": 199,
+   "note": "HD77M is discontinued (only used/eBay ~$119-129). Priced its current successor SKILSAW SPT77WM-22 7-1/4in magnesium worm drive: Home Depot $199, Ace $199.99.",
+   "sources": [
+    "https://www.homedepot.com/p/SKILSAW-15-Amp-Corded-Electric-7-1-4-in-Magnesium-Worm-Drive-Circular-Saw-with-24-Tooth-Carbide-Tipped-Diablo-Blade-SPT77WM-22/204955639",
+    "https://www.acehardware.com/p/2021009",
+    "https://www.skil.com/magnesium-wormdrive-saw-spt77wm-22"
+   ]
+  },
+  "STIHL-GS461": {
+   "msrp": 2820,
+   "note": "STIHL GS 461 Rock Boss complete w/ bar & diamond chain. STIHL USA $2,819.99 (GBE chain; $2,849.99 GGM chain), Goff's and FC Power $2,819.99, Ohio Power Tool $2,859.99. US listings are 16\" bar; no 14\" US configuration found.",
+   "sources": [
+    "https://www.stihlusa.com/en/p/concrete-cutters-gs-461-gasoline-concrete-cutter-1027298",
+    "https://shop.goffsequipment.com/stihl-chainsaws-stihl-gs-461-16-rock-boss-chainsaw-detail.htm?productid=-10517068",
+    "https://fcpowerequipment.com/products/stihl-gs46116"
+   ]
+  },
+  "TD6-200": {
+   "msrp": 2671,
+   "note": "PED, Ferguson and Lewis $2,671; Contractors Direct about $2,160.",
+   "sources": [
+    "https://www.powerequipmentdirect.com/Tsurumi-Pump-TD6-200/p125340.html",
+    "https://www.fergusonhome.com/tsurumi-pump-td6-200/s2113583",
+    "https://www.lewiscontractorsales.com/tsurumi-td6-200-2-gas-diaphragm-pump-honda-gx120-engine.html"
+   ]
+  },
+  "TD6-300": {
+   "msrp": 2400,
+   "note": "HTS $2,400; 1TopTools $2,152 sale ($2,405 regular); Lewis listing about $2,814.",
+   "sources": [
+    "https://hydrotechnologysystems.supply/products/tsurumi-td6-300-3-diaphragm-pump-honda-gx120",
+    "https://www.1toptools.com/products/copy-of-tsurumi-td6-300-3-diaphragm-pump"
+   ]
+  },
+  "TE2-100HA": {
+   "msrp": 1785,
+   "note": "Zoro $1,785; Machinery Trader dealer $2,163 (call for pricing); GoVets $2,182. The value used is Zoro, the mainstream dealer, but the true typical price could be closer to $2,100.",
+   "sources": [
+    "https://zoro.com/tsurumi-4-8-hp-honda-powered-centrifugal-dewatering-pump-te2-100ha/i/G6753126",
+    "https://govets.com/tsurumi-226-cxg-20lr10.html",
+    "https://machinerytrader.eu/listing/for-sale/234716531/2024-tsurumi-te2-100ha-pumps"
+   ]
+  },
+  "TE3-50HA": {
+   "msrp": 706,
+   "note": "PED and Zoro $630; Jim & Slim's $706; Russo $741; Shell $851; Atlas $989. Median used.",
+   "sources": [
+    "https://www.jimslimstools.com/Products/Tsurumi-TE3-50HA-2in-Centrifugal-Pump-with-Honda__TAI-TE3-spc-50HA.aspx",
+    "https://powerequipmentdirect.com/Tsurumi-Pump-TE3-50HA-Water-Pump/p16088.html",
+    "https://zoro.com/tsurumi-2-4-hp-honda-powered-centrifugal-dewatering-pump-te3-50ha/i/G6493593"
+   ]
+  },
+  "TE3-80HA": {
+   "msrp": 867,
+   "note": "PED, Ferguson, Newegg and Lewis $867; Zoro $760.",
+   "sources": [
+    "https://www.powerequipmentdirect.com/Tsurumi-Pump-TE3-80HA-Water-Pump/p16089.html",
+    "https://www.fergusonhome.com/tsurumi-pump-te3-80ha/s2113588",
+    "https://www.newegg.com/p/2YV-003B-00012"
+   ]
+  },
+  "THP-4070HA": {
+   "msrp": 1105,
+   "note": "Contractors Direct $1,044; Pumpbiz $1,105 sale ($1,228 regular); Zoro $1,204.",
+   "sources": [
+    "https://pumpbiz.com/manufacturer/tsurumi?hp_dd=1908",
+    "https://contractorsdirect.com/products/tsurumi-pump-thp-4070ha-pump",
+    "https://www.zoro.com/tsurumi-gas-engine-pump-high-pressure-100-psi-55-hp-cast-iron-15-npt-inlet-thp-4070ha/i/G1665242/"
+   ]
+  },
+  "TS410": {
+   "msrp": 1450,
+   "note": "12in; Ace, Sohars, Koenig $1,449.99 (Sun South $1,279.99, Gap Power $1,349)",
+   "sources": [
+    "https://www.acehardware.com/p/2000354",
+    "https://www.sohars.com/stihl-ts-410-cutquik-cut-off-saw-w-12-wheel",
+    "https://marketplace.koenigequipment.com/products/ts-410-stihl-cutquik\u00ae"
+   ]
+  },
+  "TS420": {
+   "msrp": 1450,
+   "note": "14in, saw only; Ace $1,449.99, American Forestry $1,449.99, American Power Equip $1,479.99 (DB Supply $1,249.99 low outlier)",
+   "sources": [
+    "https://www.acehardware.com/p/2000355",
+    "https://americanforestry.com/products/stihl-ts-420-cutquik-cut-off-saw-9000rpm-14",
+    "https://americanpowerequip.com/products/stihl-ts420-commercial-construction-cutoff-saw-ts420"
+   ]
+  },
+  "TS420CART": {
+   "msrp": 601,
+   "note": "FW 20 Cutquik cart 4224 710 1403 ($436 typical: Esch, Foards, Russo, Hillyridge; Ace ~$440) PLUS required TS 410/420/500i quick-mount kit 4250 790 0702 ($165 Esch; Atlas $195). Cart alone = $436. Water tank extra. Ohio Power Tool lists newe",
+   "sources": [
+    "https://www.eschsupply.com/Stihl-Cutquik-FW-20-Cart-for-TS420-500i-700-800",
+    "https://www.foards.com/products/4224-710-1403",
+    "https://russopower.com/products/stihl-fw-20-cutquikr-cart"
+   ]
+  },
+  "TS500-14": {
+   "msrp": 2100,
+   "note": "14in; two clusters: $2,099.99 at Ace, Ohio Power Tool, Koenig, A&I, OMB, Greenway vs $1,719.99 at North40, Martin's, Esch, Craig Taylor (likely older list or promo). Used $2,099.99 cluster",
+   "sources": [
+    "https://www.acehardware.com/p/2000357",
+    "https://www.ohiopowertool.com/stihl-ts-500i",
+    "https://marketplace.koenigequipment.com/products/ts-500i-stihl-cutquik\u00ae"
+   ]
+  },
+  "TS700CART": {
+   "msrp": 613,
+   "note": "Same FW 20 cart 4224 710 1403 ($436) PLUS TS 700/800 mounting kit 4224 790 0705 ($177 Foards/Esch; $165 Russo). Cart alone = $436. Water tank extra.",
+   "sources": [
+    "https://www.eschsupply.com/Stihl-Cutquik-FW-20-Cart-for-TS420-500i-700-800",
+    "https://www.foards.com/products/4224-710-1403",
+    "https://www.foards.com/products/4224-790-0705"
+   ]
+  },
+  "TS710I": {
+   "msrp": 2250,
+   "note": "14in; STIHL USA list, Ace and Sohars all $2,249.99 (Martin's sale $2,039.99)",
+   "sources": [
+    "https://www.acehardware.com/p/2044083",
+    "https://www.sohars.com/stihl-ts-710i-cutquik-cut-off-saw-w-14-wheel"
+   ]
+  },
+  "TS910I": {
+   "msrp": 2450,
+   "note": "16in; Ace, Esch Supply, Koenig $2,449.99",
+   "sources": [
+    "https://www.acehardware.com/p/2044086",
+    "https://www.eschsupply.com/product/42671",
+    "https://marketplace.koenigequipment.com/products/ts-910i-stihl-cutquik\u00ae"
+   ]
+  },
+  "TSA230-9": {
+   "msrp": 580,
+   "note": "TOOL ONLY, battery and charger NOT included; Ace $579.99, Koenig $579.99 (Arlington $449.99 low)",
+   "sources": [
+    "https://www.acehardware.com/p/2000359",
+    "https://marketplace.koenigequipment.com/products/tsa-230-unit-only"
+   ]
+  },
+  "VS45GRIND": {
+   "msrp": 219,
+   "note": "Model chosen: Makita 9564CV (13A, 2,800-10,500 RPM, current US variable-speed 4-1/2in). GA4541C not found in US listings. Home Depot $209-229, Toolup $229, Acetool $209, Shell Lumber $209; typical midpoint $219.",
+   "sources": [
+    "https://www.homedepot.com/p/202517734",
+    "https://toolup.com/products/makita-9564cv-4-1-2-angle-grinder-variable-speed-13-amp-2-800-10-500-rpm-1",
+    "https://acetool.com/products/makita-9564cv-4-1-2-sjs-angle-grinder"
+   ]
+  },
+  "X150-PROWLER": {
+   "msrp": 3119,
+   "note": "Soff-Cut 150 / X150 (966844820). $3,119 at Tools Direct USA, Contigo, Blades Direct; Esch $3,095; Global Industrial $3,435. Reference/regular $3,712; Husqvarna site showed $4,851 (list, not charged).",
+   "sources": [
+    "https://stores.toolsdirectusa.com/soff-cut-150-early-entry-saw/",
+    "https://contigotool.com/products/husqvarna-966844820-soff-cut-150-gas-concrete-saw-with-gx160-honda-engine/",
+    "https://bladesdirect.net/products/husqvarna-soff-cut-concrete-saw"
+   ]
+  },
+  "XEC01PT1": {
+   "msrp": 1099,
+   "note": "9in kit with 4x 5.0Ah batteries + charger; Home Depot $1,099, Power Tool Store $1,099, Acetool $999. NOTE: XEC01PT1 is 18Vx2 (36V) LXT, not 80V XGT",
+   "sources": [
+    "https://homedepot.com/p/p/314942336",
+    "https://thepowertoolstore.com/collections/power-tools/products/makita-xec01pt1",
+    "https://acetool.com/products/makita-xec01pt1-18v-x2-36v-9-in-power-cutter-kit"
+   ]
+  },
+  "XEC01Z": {
+   "msrp": 719,
+   "note": "tool only; Acetool, ToolUp, MyToolStore $719; CPO $682.99; Zoro $834.71; Home Depot $891.10",
+   "sources": [
+    "https://www.acetool.com/products/makita-xec01z-18v-9-in-power-cutter-aft",
+    "https://toolup.com/products/makita-xec01z-x2-36v-lxta%C2%AE-lithium-ion-brushless-cordless-9-power-cutter",
+    "https://www.cpopowertools.com/makita-xec01z-18v-x2--36v--lxt-brushless-lithium-ion-9-in.-cordless-power-cutter-with-aft-electric-brake--tool-only-/mktnxec01z.html"
+   ]
+  }
+ },
+ "note": "Equipment MSRP = the price each item is commonly found for new at US dealers online (researched Nov 25 2026). Shown crossed out on package-deal quotes. Items without a credible price (2+ US dealers) are left out: no crossed-out price, no savings claim."
+}

@@ -348,7 +348,9 @@ const up2=n=>Math.ceil(n*100-1e-6)/100;   // round UP to the cent so a package n
 const norm=c=>String(c||'').toUpperCase().replace(/[\s\/]/g,'');
 
 // ── Catalog: price list wins; ShipSheet history (rep.html) adds sold counts and covers the rest ──
-let CAT={}, PL={items:{}}, PLKEYS={}, SEL=null, SUGIDX=[], PIC={};
+let CAT={}, PL={items:{}}, PLKEYS={}, SEL=null, SUGIDX=[], PIC={}, MSRP={};
+// Equipment MSRP: the price it is commonly found for online (equipment-msrp.json). 0 = none on file.
+const msrpOf=code=>{ const m=MSRP[norm(String(code||'').split('#')[0])]; return m&&m.msrp>0?m.msrp:0; };
 function lookup(code){ if(!code)return null; if(norm(code)===AMEX.code)return {p:{code:AMEX.code,desc:AMEX.desc,cost:AMEX.cost,tab:'GIFT CARDS',mode:'cent'},h:null,key:AMEX.code};
   const k=PL.items[code]?code:norm(code); let p=PL.items[k]||null; if(!p&&PL.items[k+'20'])p=PL.items[k+'20'];
   let viaSize=null;
@@ -410,6 +412,7 @@ async function loadCatalog(){
   }catch(e){ PL={items:{}}; msg.push('Price list not loaded'); }
   try{ CAT=buildCatalog(extractOrders(await (await fetch('rep.html',{cache:'no-cache'})).text())); }catch(e){ CAT={}; }
   try{ SEL=await (await fetch('quote-selector.json',{cache:'no-cache'})).json(); }catch(e){ SEL=null; }
+  try{ MSRP=(await (await fetch('equipment-msrp.json',{cache:'no-cache'})).json()).items||{}; }catch(e){ MSRP={}; }
   // Blade photos (from dbwwisco.com, copied into quote-img/): item # -> [photo, family name]
   PIC={}; if(SEL)SEL.families.forEach(f=>{ if(f.i)f.v.forEach(v=>{ const k=norm(v[0]); if(!PIC[k])PIC[k]=[f.i,f.n]; }); });
   try{ TAX=await (await fetch('quote-tax.json',{cache:'no-cache'})).json();
@@ -466,8 +469,9 @@ function calc(opt){
     else if(has(l.price))unit=r2(parseFloat(l.price));
     else if(pkg){ unit=c>0?Math.max(0,up2(c*factor)):0; pk=true; }
     else { const Lk=lookup(l.item); unit=c>0?sheetPrice(c,mu,Lk&&Lk.p&&Lk.p.mode):0; }
-    // regular price of package equipment = what it sells for on its own at this markup (AMEX = face value)
-    let reg=0; if(l.kind==='equip'&&c>0){ const Lk=lookup(l.item); reg=l.item===AMEX.code?AMEX.face:sheetPrice(c,+st.mu||TARGET,Lk&&Lk.p&&Lk.p.mode); }  // same regular price in every option
+    // MSRP shown crossed out on package equipment = what it is commonly found for online (equipment-msrp.json, researched);
+    // none on file = no crossed-out price and no 'you save' claim (Froggy, Nov 25 2026). AMEX = face value.
+    let reg=0; if(l.kind==='equip'&&c>0)reg=l.item===AMEX.code?AMEX.face:msrpOf(l.item);
     return {l,q,unit,ext:r2(unit*q),free,pk,reg}; });
   const sell=rows.reduce((t,r)=>t+r.ext,0), cogs=L.reduce((t,l)=>t+cost(l),0);
   const eqSave=rows.reduce((t,r)=>t+(r.reg>r.unit?(r.reg-r.unit)*r.q:0),0);
@@ -658,7 +662,7 @@ function quoteText(t){
     const body=st.opts.flatMap((o,i)=>{ const x=optTotals(o); return ['',`OPTION ${LET[i]}: ${o.q} each`,...x.rows.map(r=>`  ${r.q} x ${itemName(r)}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}`),`  Subtotal ${money(x.sell)} | Freight: ${frLabel(x)} | ${txName()}: ${txLabel(x)} | TOTAL ${money(x.grand)}`]; });
     return [...head,...body,'',st.notes||'','',R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
   }
-  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (regular '+money(r.reg)+' each)':''}${pitchText(pitch24(r,t))}`);
+  const lines=t.rows.map(r=>`${r.q} x ${itemName(r)}${r.l.desc&&r.l.item&&r.l.item!==AMEX.code?' ('+codeOf(r.l)+')':''}: ${r.free?'FREE with this package':money(r.unit)+' each = '+money(r.ext)}${r.reg>r.unit?' (MSRP '+money(r.reg)+' each)':''}${pitchText(pitch24(r,t))}`);
   return [`DIAMOND BLADE WAREHOUSE - ${t.pkg?'PACKAGE DEAL':'QUOTE'}`,`Date: ${st.date}`,st.co?`For: ${st.co}${st.name?' / '+st.name:''}${st.num?' (#'+st.num+')':''}`:'',shipTo().length?`Ship to: ${shipTo().join(', ')}`:'',``,...lines,``,`Subtotal: ${money(t.sell)}`,`Freight / shipping: ${frLabel(t)}`,`${txName()}: ${txLabel(t)}`,`TOTAL: ${money(t.grand)}${(st.frMode==='tbd'||taxPending())?' plus '+[st.frMode==='tbd'?'freight':'',taxPending()?'tax':''].filter(Boolean).join(' and ')+' as noted':''}`,t.eqSave>0?`You save ${money(t.eqSave)} on the equipment`:'',st.notes?`\n${st.notes}`:'',``,R.sign||R.name,R.email].filter((x,i,a)=>x!==''||a[i-1]!=='').join('\n').trim();
 }
 function renderQuote(t){
