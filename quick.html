@@ -401,7 +401,7 @@ function calc(mu){ mu=mu||(+st.mu||TARGET);
   const pkg=E_.length>0, carry=(B+E)*mu-eqSale, factor=pkg?(B>0?carry/B:0):mu;
   const rows=B_.map(l=>{ const q=+l.qty, unit=has(l.price)?r2(parseFloat(l.price)):(c(l)>0?(pkg?Math.max(0,up2(c(l)*factor)):sheetPrice(c(l),mu,modeOf(l))):0); return {l,q,c:c(l),unit,ext:r2(unit*q)}; });
   const eqRows=E_.map(l=>{ const q=+l.qty, paid=has(l.price)&&parseFloat(l.price)>0, unit=paid?r2(parseFloat(l.price)):0;
-    const reg=l.promo?0:(norm(l.item)===AMEX.code?AMEX.face:msrpOf(l.item));   // MSRP = commonly found online (equipment-msrp.json) return {l,q,c:c(l),unit,ext:r2(unit*q),free:!paid,reg}; });
+    const reg=l.promo?0:(norm(l.item)===AMEX.code?AMEX.face:msrpOf(l.item));   /* MSRP = commonly found online (equipment-msrp.json) */ return {l,q,c:c(l),unit,ext:r2(unit*q),free:!paid,reg}; });
   const deal=[...rows,...eqRows].reduce((t,r)=>t+r.ext,0), cogs=B+Fx+E, qty=rows.reduce((t,r)=>t+r.q,0);
   const tmu=cogs>0?deal/cogs:0, rate=commRate(Math.min(mu,tmu+1e-9),st.acct);
   const eqSave=eqRows.reduce((t,r)=>t+(r.reg>r.unit?(r.reg-r.unit)*r.q:0),0);
